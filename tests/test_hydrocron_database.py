@@ -45,7 +45,7 @@ def test_query(hydrocron_dynamo_table):
         constants.TEST_SHAPEFILE_PATH,
         obscure_data=False,
         columns=constants.REACH_DATA_COLUMNS)
-    
+
     for item_attrs in items:
         # write to the table
         hydrocron_dynamo_table.add_data(**item_attrs)
@@ -63,7 +63,7 @@ def test_delete_item(hydrocron_dynamo_table):
         constants.TEST_SHAPEFILE_PATH,
         obscure_data=False,
         columns=constants.REACH_DATA_COLUMNS)
-    
+
     for item_attrs in items:
         # write to the table
         hydrocron_dynamo_table.add_data(**item_attrs)

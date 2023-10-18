@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Generator
 from shapely import Polygon, Point
 from utils import constants
-from hydrocronapi import hydrocron
+from hydrocron_api import hydrocron
 
 
 logger = logging.getLogger()

@@ -29,7 +29,7 @@ docker compose up
 To run the server, please execute the following from the root directory:
 
 ```
-HYDROCRON_ENV=dev python -m hydrocronapi
+HYDROCRON_ENV=dev python -m hydrocron_api
 ```
 
 and open your browser to here:
@@ -50,8 +50,8 @@ To run the server on a Docker container, please execute the following from the r
 
 ```bash
 # building the image
-docker build -t hydrocronapi .
+docker build -t hydrocron_api .
 
 # starting up a container
-docker run -p 8080:8080 hydrocronapi
+docker run -p 8080:8080 hydrocron_api
 ```
