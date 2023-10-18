@@ -7,10 +7,10 @@ from datetime import datetime
 from typing import Generator
 
 from boto3.resources.base import ServiceResource
-from hydrocron_db.hydrocron_database import HydrocronDB
 from boto3.dynamodb.conditions import Key  # noqa: E501 # pylint: disable=C0412
 
 from utils import constants
+
 
 class DynamoDataRepository:
     """
