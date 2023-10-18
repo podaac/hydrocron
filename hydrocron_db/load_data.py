@@ -8,7 +8,9 @@ import argparse
 import boto3
 import earthaccess
 from botocore.exceptions import ClientError
-from hydrocron_db.io.swot_constants import reach_columns, node_columns
+
+from utils import constants
+
 from hydrocron_db.hydrocron_database import HydrocronTable
 from hydrocron_db.io import swot_reach_node_shp
 
@@ -90,21 +92,23 @@ def load_data(hydrocron_table, granule_path, obscure_data):
         If true, scramble the data values during load to prevent
         release of real data. Used during beta testing.
     """
-    if hydrocron_table.table_name == "hydrocron-swot-reach-table":
+    if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
         if 'Reach' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(granule_path,
-                                                       obscure_data,
-                                                       reach_columns)
+            items = swot_reach_node_shp.read_shapefile(
+                granule_path,
+                obscure_data,
+                constants.REACH_DATA_COLUMNS)
 
             for item_attrs in items:
                 # write to the table
                 hydrocron_table.add_data(**item_attrs)
 
-    elif hydrocron_table.table_name == "hydrocron-swot-node-table":
+    elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
         if 'Node' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(granule_path,
-                                                       obscure_data,
-                                                       node_columns)
+            items = swot_reach_node_shp.read_shapefile(
+                granule_path,
+                obscure_data,
+                constants.NODE_DATA_COLUMNS)
 
             for item_attrs in items:
                 # write to the table
@@ -129,10 +133,10 @@ def run(args=None):
     obscure_data = args.obscure
 
     match table_name:
-        case "hydrocron-swot-reach-table":
-            collection_shortname = "SWOT_L2_HR_RIVERSP_1.0"
-        case "hydrocron-swot-node-table":
-            collection_shortname = "SWOT_L2_HR_RIVERSP_1.0"
+        case constants.SWOT_REACH_TABLE_NAME:
+            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+        case constants.SWOT_NODE_TABLE_NAME:
+            collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
         case _:
             logging.warning(
                 "Hydrocron table '%s' does not exist.", table_name)

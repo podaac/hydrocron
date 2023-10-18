@@ -7,6 +7,8 @@ import logging
 import time
 from datetime import datetime
 from typing import Generator
+
+from utils import constants
 from hydrocronapi import hydrocron
 
 logger = logging.getLogger()
@@ -94,7 +96,7 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
         for t in results:
             # TODO: Coordinate to filter in the database instance:
             # if t['reach_id'] == feature_id and t['time'] > start_time and t['time'] < end_time and t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
-            if t['reach_id'] == feature_id and t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
+            if t['reach_id'] == feature_id and t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
                 feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
                 feature['geometry']['coordinates'] = []
                 feature_type = ''
@@ -116,11 +118,12 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
                     if feature_type == 'Point':
                         feature['geometry']['coordinates'] = [float(x), float(y)]
                 i += 1
-                feature['properties']['time'] = datetime.fromtimestamp(float(t['time']) + 946710000).strftime(
-                    "%Y-%m-%d %H:%M:%S")
-                feature['properties']['reach_id'] = float(t['reach_id'])
-                feature['properties']['wse'] = float(t['wse'])
-                feature['properties']['slope'] = float(t['slope'])
+                feature['properties']['time'] = datetime.fromtimestamp(
+                    float(t[constants.FIELDNAME_TIME]) + 946710000).strftime(
+                        "%Y-%m-%d %H:%M:%S")
+                feature['properties']['reach_id'] = float(t[constants.FIELDNAME_REACH_ID])
+                feature['properties']['wse'] = float(t[constants.FIELDNAME_WSE])
+                feature['properties']['slope'] = float(t[constants.FIELDNAME_SLOPE])
                 data['features'].append(feature)
 
         data['hits'] = i
@@ -157,15 +160,15 @@ def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa
         csv = fields + '\n'
         fields_set = fields.split(", ")
         for t in results:
-            if t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
-                if 'reach_id' in fields_set:
-                    csv += t['reach_id']
+            if t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
+                if constants.FIELDNAME_REACH_ID in fields_set:
+                    csv += t[constants.FIELDNAME_REACH_ID]
                     csv += ','
-                if 'time_str' in fields_set:
-                    csv += t['time_str']
+                if constants.FIELDNAME_TIME_STR in fields_set:
+                    csv += t[constants.FIELDNAME_TIME_STR]
                     csv += ','
-                if 'wse' in fields_set:
-                    csv += str(t['wse'])
+                if constants.FIELDNAME_WSE in fields_set:
+                    csv += str(t[constants.FIELDNAME_WSE])
                     csv += ','
                 if 'geometry' in fields_set:
                     csv += t['geometry'].replace('; ', ', ')

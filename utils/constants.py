@@ -1,9 +1,62 @@
 """
-Constants used for SWOT data loading
+Constants used throughout API and DB modules
 
 """
+import os.path
 
-reach_columns = [
+# ----------------- #
+# TESTING CONSTANTS #
+# ----------------- #
+TEST_SHAPEFILE_PATH = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    '..', 'tests', 'data',
+    'SWOT_L2_HR_RiverSP_Reach_548_011_NA_20230610T193337_20230610T193344_PIA1_01.zip'  # noqa E501
+))
+
+TEST_FILENAME = (
+    "SWOT_L2_HR_RiverSP_Reach_548_011_NA_"
+    "20230610T193337_20230610T193344_PIA1_01.zip")
+
+TEST_ITEM_DICT = {
+    "reach_id": "71224100223",
+    "time": "739741183.129",
+    "time_str": "2023-06-10T19:39:43Z",
+    "wse": "286.2983",
+    "cycle_id": "548"
+}
+
+DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
+API_TEST_TABLE_NAME = "hydrocron-swot-reach-table"
+TEST_PARTITION_KEY_NAME = 'reach_id'
+TEST_SORT_KEY_NAME = 'range_start_time'
+TEST_REACH_ID_VALUE = '71224100223'
+TEST_TIME_VALUE = '2023-06-10T19:33:37Z'
+TEST_WSE_VALUE = '286.2983'
+
+# ------------ #
+# PROD CONSTANTS #
+# ------------ #
+SWOT_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
+SWOT_NODE_TABLE_NAME = "hydrocron-swot-node-table"
+
+SWOT_REACH_COLLECTION_NAME = "SWOT_L2_HR_RIVERSP_1.0"
+SWOT_NODE_COLLECTION_NAME = "SWOT_L2_HR_RIVERSP_1.0"
+
+SWOT_REACH_PARTITION_KEY = "reach_id"
+SWOT_NODE_PARTITION_KEY = "node_id"
+SWOT_REACH_SORT_KEY = ""
+SWOT_NODE_SORT_KEY = ""
+
+FIELDNAME_REACH_ID = 'reach_id'
+FIELDNAME_TIME = 'time'
+FIELDNAME_TIME_STR = 'time_str'
+FIELDNAME_WSE = 'wse'
+FIELDNAME_SLOPE = 'slope'
+FIELDNAME_P_LON = 'p_lon'
+FIELDNAME_P_LAT = 'p_lat'
+
+
+REACH_DATA_COLUMNS = [
     'wse', 'wse_u', 'wse_r_u', 'wse_c', 'wse_c_u',
     'slope', 'slope_u', 'slope_r_u', 'slope2', 'slope2_u', 'slope2_r_u',
     'width', 'width_u', 'width_c', 'width_c_u',
@@ -32,7 +85,7 @@ reach_columns = [
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c'
 ]
 
-node_columns = [
+NODE_DATA_COLUMNS = [
     'wse', 'wse_u', 'wse_r_u',
     'width', 'width_u',
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u', 'area_wse',

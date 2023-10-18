@@ -6,18 +6,11 @@ import boto3
 import pytest
 
 from pytest_dynamodb import factories
+from utils import constants
 
 from hydrocron_db.hydrocron_database import HydrocronTable
-from hydrocron_db.io import swot_reach_node_shp, swot_constants
+from hydrocron_db.io import swot_reach_node_shp
 
-DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
-API_TEST_TABLE_NAME = "hydrocron-swot-reach-table"
-
-TEST_SHAPEFILE_PATH = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    'data',
-    'SWOT_L2_HR_RiverSP_Reach_548_011_NA_20230610T193337_20230610T193344_PIA1_01.zip'  # noqa
-)
 
 dynamo_test_proc = factories.dynamodb_proc(
     dynamodb_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -41,7 +34,7 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
     )
 
     dynamo_db.create_table(
-        TableName=API_TEST_TABLE_NAME,
+        TableName=constants.API_TEST_TABLE_NAME,
         AttributeDefinitions=[
             {'AttributeName': 'reach_id', 'AttributeType': 'S'},
             {'AttributeName': 'range_start_time', 'AttributeType': 'S'}
@@ -63,12 +56,12 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         }
     )
 
-    hydro_table = HydrocronTable(dynamo_db, API_TEST_TABLE_NAME)
+    hydro_table = HydrocronTable(dynamo_db, constants.API_TEST_TABLE_NAME)
 
     items = swot_reach_node_shp.read_shapefile(
-            TEST_SHAPEFILE_PATH,
+            constants.TEST_SHAPEFILE_PATH,
             obscure_data=False,
-            columns=swot_constants.reach_columns)
+            columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
         # write to the table
@@ -85,7 +78,7 @@ def hydrocron_dynamo_table(dynamo_db_resource):
     Create table for testing
     """
     dynamo_db_resource.create_table(
-        TableName=DB_TEST_TABLE_NAME,
+        TableName=constants.DB_TEST_TABLE_NAME,
         AttributeDefinitions=[
             {'AttributeName': 'reach_id', 'AttributeType': 'S'},
             {'AttributeName': 'range_start_time', 'AttributeType': 'S'}
@@ -107,12 +100,13 @@ def hydrocron_dynamo_table(dynamo_db_resource):
         }
     )
 
-    hydro_table = HydrocronTable(dynamo_db_resource, DB_TEST_TABLE_NAME)
+    hydro_table = HydrocronTable(dynamo_db_resource,
+                                 constants.DB_TEST_TABLE_NAME)
 
     items = swot_reach_node_shp.read_shapefile(
-            TEST_SHAPEFILE_PATH,
+            constants.TEST_SHAPEFILE_PATH,
             obscure_data=False,
-            columns=swot_constants.reach_columns)
+            columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
         # write to the table

@@ -9,6 +9,7 @@ from typing import Generator
 from boto3.resources.base import ServiceResource
 from boto3.dynamodb.conditions import Key  # noqa: E501 # pylint: disable=C0412
 
+from utils import constants
 
 class DynamoDataRepository:
     """
@@ -27,12 +28,13 @@ class DynamoDataRepository:
         @param end_time:
         @return:
         """
-        table_name = 'hydrocron-swot-reach-table'
+        table_name = constants.SWOT_REACH_TABLE_NAME
 
         hydrocron_table = self._dynamo_instance.Table(table_name)
         hydrocron_table.load()
 
-        items = hydrocron_table.query(KeyConditionExpression=Key('reach_id').eq(feature_id))
+        items = hydrocron_table.query(KeyConditionExpression=Key(
+            constants.SWOT_REACH_PARTITION_KEY).eq(feature_id))
         return items
 
     def get_node_series_by_feature_id(self, feature_id, start_time, end_time):  # noqa: E501 # pylint: disable=W0613
@@ -43,10 +45,11 @@ class DynamoDataRepository:
         @param end_time:
         @return:
         """
-        table_name = 'hydrocron-swot-node-table'
+        table_name = constants.SWOT_NODE_TABLE_NAME
 
         hydrocron_table = self._dynamo_instance.Table(table_name)
         hydrocron_table.load()
 
-        items = hydrocron_table.query(KeyConditionExpression=Key('node_id').eq(feature_id))
+        items = hydrocron_table.query(KeyConditionExpression=Key(
+            constants.SWOT_NODE_PARTITION_KEY).eq(feature_id))
         return items
