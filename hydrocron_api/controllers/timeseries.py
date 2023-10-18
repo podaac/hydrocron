@@ -13,7 +13,7 @@ from hydrocron_api import hydrocron
 logger = logging.getLogger()
 
 
-def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501 # pylint: disable=R0913
+def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
     """Get Timeseries for a particular Reach, Node, or LakeID
 
     Get Timeseries for a particular Reach, Node, or LakeID # noqa: E501
@@ -57,7 +57,7 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
     return data
 
 
-def format_json(results: Generator, feature_id, start_time, end_time, exact, dataTime):  # noqa: E501 # pylint: disable=W0613, R0913
+def format_json(results: Generator, feature_id, start_time, end_time, exact, dataTime):  # noqa: E501 # pylint: disable=W0613
     """
 
     Parameters
@@ -93,7 +93,7 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
         # TODO: process type of feature_id (i.e. reach_id or node_id)
 
         for t in results:
-            # TODO: Coordinate to filter in the database instance: # pylint: disable=W0511
+            # TODO: Coordinate to filter in the database instance:
             # if t['reach_id'] == feature_id and t['time'] > start_time and t['time'] < end_time and t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
             if t['reach_id'] == feature_id and t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
                 feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
