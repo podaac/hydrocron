@@ -126,7 +126,7 @@ def run(args=None):
     table_name = args.table_name
     start_date = args.start
     end_date = args.end
-    obscure_data = args.simulate
+    obscure_data = args.obscure
 
     match table_name:
         case "hydrocron-swot-reach-table":

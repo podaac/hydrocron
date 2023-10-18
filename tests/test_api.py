@@ -3,7 +3,7 @@ import pytest
 
 from tests import BaseTestCase
 
-
+    
 @pytest.mark.usefixtures("hydrocron_dynamo_instance")
 class TestDefaultController(BaseTestCase):
     """DefaultController integration test stubs"""

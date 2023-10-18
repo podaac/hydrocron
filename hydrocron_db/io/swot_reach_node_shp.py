@@ -36,10 +36,10 @@ def read_shapefile(filepath, obscure_data, columns):
 
     if obscure_data:
         shp_file[columns] = np.where(
-            (np.rint(shp_file[columns]) != -999) and
-            (np.rint(shp_file[columns]) != -99999999) and
+            (np.rint(shp_file[columns]) != -999) &
+            (np.rint(shp_file[columns]) != -99999999) &
             (np.rint(shp_file[columns]) != -999999999999),
-            np.random.default_rng.integers(low=0, high=10)*shp_file[columns],
+            np.random.default_rng().integers(low=0, high=10)*shp_file[columns],
             shp_file[columns])
 
     shp_file = shp_file.astype(str)

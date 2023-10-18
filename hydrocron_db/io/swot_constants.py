@@ -27,7 +27,7 @@ reach_columns = [
     'dschg_q_b', 'dschg_gq_b',
     'reach_q', 'reach_q_b',
     'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f', 'n_good_nod',
-    'obs_frac_n', 'xovr_cal_q', 'geoid_hght', 'geoid_slope',
+    'obs_frac_n', 'xovr_cal_q', 'geoid_hght', 'geoid_slop',
     'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c'
 ]
