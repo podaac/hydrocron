@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "hydrocronapi"
+name = "hydrocron_api"
 version = "1.0.0a6"
 description = "OpenAPI access to Time Series data for SWOT features"
 authors = ["PO.DAAC <podaac@jpl.nasa.gov>"]
@@ -10,7 +10,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 exclude = ['contrib', 'docs', 'tests']
-packages = [ {include = "hydrocronapi"} ]
+packages = [ {include = "hydrocron_api"} ]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -33,7 +33,7 @@ pylint = "^2.15.8"
 flake8 = "^6.0.0"
 
 [tool.poetry.scripts]
-hydrocronapi = "hydrocronapi.__main__:__main__"
+hydrocron_api = "hydrocron_api.__main__:__main__"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

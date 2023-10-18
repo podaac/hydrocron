@@ -97,8 +97,8 @@ jobs:
         run: poetry install
       - name: Lint
         run: |
-          poetry run pylint hydrocronapi
-          poetry run flake8 hydrocronapi
+          poetry run pylint hydrocron_api
+          poetry run flake8 hydrocron_api
 
 
       ## Set environment variables
@@ -158,5 +158,6 @@ jobs:
 
       - name: Test with pytest
         run: |
+          poetry run pytest tests/test_api.py -k 'test_gettimeseries_get'
           poetry run pytest tests/test_hydrocron_database.py
           poetry run pytest tests/test_io_swot_reach_node_shp.py
