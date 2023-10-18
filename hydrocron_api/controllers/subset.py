@@ -2,13 +2,14 @@
 Hydrocron API subset controller
 """
 # pylint: disable=C0103
+# flake8: noqa: E501
 import json
 import logging
 import time
 from datetime import datetime
 from typing import Generator
 from shapely import Polygon, Point
-from hydrocronapi import hydrocron
+from hydrocron_api import hydrocron
 
 
 logger = logging.getLogger()

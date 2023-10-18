@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 6 - Pylint and Flake8 configured
+    - Issue 6 - Github Actions
     - Issue 8 - Hydrocron API implementation with mysql local database
     - Issue 23 - Added github actions with Snyk, pylint, flake8
 ### Changed 

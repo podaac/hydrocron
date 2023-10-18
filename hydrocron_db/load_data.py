@@ -4,6 +4,7 @@ the appropriate DynamoDB table
 """
 import logging
 import argparse
+import sys
 
 import boto3
 import earthaccess
@@ -159,4 +160,4 @@ if __name__ == "__main__":
         run()
     except Exception as e:  # pylint: disable=broad-except
         logging.exception("Uncaught exception occurred during execution.")
-        exit(hash(e))
+        sys.exit(hash(e))
