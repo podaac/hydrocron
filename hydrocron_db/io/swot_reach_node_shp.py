@@ -5,9 +5,10 @@ import os.path
 import json
 from datetime import datetime
 import geopandas as gpd
+import numpy as np
 
 
-def read_shapefile(filepath):
+def read_shapefile(filepath, obscure_data, columns):
     """
     Reads a SWOT River Reach shapefile packaged as a zip
 
@@ -15,6 +16,11 @@ def read_shapefile(filepath):
     ----------
     filename :  string
         The full path to the file to read
+    obscure_data : boolean
+        If true, obscure the data values to avoid exposing real data.
+        Used during beta testing.
+    columns : list
+        The shapefile attributes to obscure if obscure_data=True
 
     Returns
     -------
@@ -28,6 +34,14 @@ def read_shapefile(filepath):
     else:
         shp_file = gpd.read_file('zip://' + filepath)
 
+    if obscure_data:
+        shp_file[columns] = np.where(
+            (np.rint(shp_file[columns]) != -999) &
+            (np.rint(shp_file[columns]) != -99999999) &
+            (np.rint(shp_file[columns]) != -999999999999),
+            np.random.default_rng().integers(low=0, high=10)*shp_file[columns],
+            shp_file[columns])
+
     shp_file = shp_file.astype(str)
 
     filename = os.path.basename(filepath)
@@ -36,6 +50,7 @@ def read_shapefile(filepath):
     items = []
 
     for _index, row in shp_file.iterrows():
+
         shp_attrs = json.loads(
             row.to_json(default_handler=str))
 
@@ -67,8 +82,12 @@ def parse_from_filename(filename):
         'cycle_id': filename_components[5],
         'pass_id': filename_components[6],
         'continent_id': filename_components[7],
-        'range_start_time': datetime.strptime(filename_components[8], '%Y%m%dT%H%M%S').strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'range_end_time': datetime.strptime(filename_components[9], '%Y%m%dT%H%M%S').strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'range_start_time': datetime.strptime(
+            filename_components[8],
+            '%Y%m%dT%H%M%S').strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'range_end_time': datetime.strptime(
+            filename_components[9],
+            '%Y%m%dT%H%M%S').strftime('%Y-%m-%dT%H:%M:%SZ'),
         'crid': filename_components[10]
     }
 

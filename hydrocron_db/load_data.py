@@ -8,6 +8,7 @@ import argparse
 import boto3
 import earthaccess
 from botocore.exceptions import ClientError
+from hydrocron_db.io.swot_constants import reach_columns, node_columns
 from hydrocron_db.hydrocron_database import HydrocronTable
 from hydrocron_db.io import swot_reach_node_shp
 
@@ -18,12 +19,22 @@ def parse_args():
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-t", "--table-name", dest='table_name', required=True,
+    parser.add_argument("-t", "--table-name",
+                        dest='table_name',
+                        required=True,
                         help="The name of the database table to add data")
-    parser.add_argument("-sd", "--start_date", dest="start", required=False,
+    parser.add_argument("-sd", "--start_date",
+                        dest="start",
+                        required=False,
                         help="The ISO date time after which data should be retrieved. For Example, --start-date 2023-01-01T00:00:00Z")  # noqa E501
-    parser.add_argument("-ed", "--end-date", required=False, dest="end",
+    parser.add_argument("-ed", "--end-date",
+                        required=False,
+                        dest="end",
                         help="The ISO date time before which data should be retrieved. For Example, --end-date 2023-02-14T00:00:00Z")  # noqa E501
+    parser.add_argument("-obscure", "--obscure_data",
+                        dest="obscure",
+                        required=False,
+                        help="Boolean to control whether real data is obscured on database loading. Default is False")  # noqa E501
 
     return parser.parse_args()
 
@@ -67,7 +78,7 @@ def find_new_granules(collection_shortname, start_date, end_date):
     return granule_paths
 
 
-def load_data(hydrocron_table, granule_path):
+def load_data(hydrocron_table, granule_path, obscure_data):
     """
     Create table and load data
 
@@ -75,11 +86,15 @@ def load_data(hydrocron_table, granule_path):
         The table to load data into
     granules : list of strings
         The list of S3 paths of granules to load data from
+    obscure_data : boolean
+        If true, scramble the data values during load to prevent
+        release of real data. Used during beta testing.
     """
-    print(granule_path)
     if hydrocron_table.table_name == "hydrocron-swot-reach-table":
         if 'Reach' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(granule_path)
+            items = swot_reach_node_shp.read_shapefile(granule_path,
+                                                       obscure_data,
+                                                       reach_columns)
 
             for item_attrs in items:
                 # write to the table
@@ -87,7 +102,9 @@ def load_data(hydrocron_table, granule_path):
 
     elif hydrocron_table.table_name == "hydrocron-swot-node-table":
         if 'Node' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(granule_path)
+            items = swot_reach_node_shp.read_shapefile(granule_path,
+                                                       obscure_data,
+                                                       node_columns)
 
             for item_attrs in items:
                 # write to the table
@@ -109,6 +126,7 @@ def run(args=None):
     table_name = args.table_name
     start_date = args.start
     end_date = args.end
+    obscure_data = args.obscure
 
     match table_name:
         case "hydrocron-swot-reach-table":
@@ -121,7 +139,8 @@ def run(args=None):
 
     dynamo_resource = setup_connection()
     try:
-        table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
+        table = HydrocronTable(dyn_resource=dynamo_resource,
+                               table_name=table_name)
     except ClientError as err:
         if err.response['Error']['Code'] == 'ResourceNotFoundException':
             logging.info("Table '%s' does not exist.", table_name)
@@ -132,7 +151,7 @@ def run(args=None):
         end_date)
 
     for granule in new_granules:
-        load_data(table, granule[0])
+        load_data(table, granule[0], obscure_data)
 
 
 if __name__ == "__main__":
