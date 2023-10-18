@@ -1,0 +1,163 @@
+# This is the main build pipeline that verifies and publishes the software
+name: Build
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events
+  push:
+    branches: [ develop, release/**, main, feature/**, issue/**, dependabot/** ]
+    tags-ignore:
+      - '*'
+    paths-ignore:
+      - 'pyproject.toml'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  POETRY_VERSION: "1.3.1"
+  PYTHON_VERSION: "3.10"
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # First job in the workflow installs and verifies the software
+  build:
+    name: Build, Test, Verify, Publish
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    steps:
+      - uses: getsentry/action-github-app-token@v2
+        name: podaac cicd token
+        id: podaac-cicd
+        with:
+          app_id: ${{ secrets.CICD_APP_ID }}
+          private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+          token: ${{ steps.podaac-cicd.outputs.token }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+
+      - name: Install bumpver & poetry
+        run: pip3 install bumpver poetry poetry-plugin-bundle
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Get version
+        id: get-version
+        run: |
+          echo "current_version=$(poetry version | awk '{print $2}')" >> $GITHUB_OUTPUT
+          echo "pyproject_name=$(poetry version | awk '{print $1}')" >> $GITHUB_ENV
+      - name: Bump pre-alpha version
+        # If triggered by push to a feature branch
+        if: |
+          startsWith(github.ref, 'refs/heads/feature') ||
+          startsWith(github.ref, 'refs/heads/issue')     ||
+          startsWith(github.ref, 'refs/heads/dependabot')
+        run: |
+          new_ver="${{ steps.get-version.outputs.current_version }}+$(git rev-parse --short ${GITHUB_SHA})"
+          poetry version $new_ver
+          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
+      - name: Bump alpha version
+        # If triggered by push to the develop branch
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        run: |
+          poetry version prerelease
+          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
+          echo "venue=sit" >> $GITHUB_ENV
+      - name: Bump rc version
+        # If triggered by push to a release branch
+        if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
+        env:
+          # True if the version already has a 'rc' pre-release identifier
+          BUMP_RC: ${{ contains(steps.get-version.outputs.current_version, 'rc') }}
+        run: |
+          if [ "$BUMP_RC" = true ]; then
+            poetry version prerelease
+          else
+            poetry version ${GITHUB_REF#refs/heads/release/}-rc.1
+          fi
+          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
+          echo "venue=uat" >> $GITHUB_ENV
+      - name: Release version
+        # If triggered by push to the main branch
+        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
+        env:
+          CURRENT_VERSION: ${{ steps.get-version.outputs.current_version }}
+        # Remove -rc.* from end of version string
+        # The ${string%%substring} syntax below deletes the longest match of $substring from back of $string.
+        run: |
+          poetry version ${CURRENT_VERSION%%-rc.*}
+          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
+          echo "venue=ops" >> $GITHUB_ENV
+      - name: Install hydrocron
+        run: poetry install
+      - name: Lint
+        run: |
+          poetry run pylint hydrocronapi
+          poetry run flake8 hydrocronapi
+
+
+      ## Set environment variables
+      - name: Configure Initial YAML file and environment variables
+        run: |
+          echo "THE_VERSION=${{ env.software_version }}" >> $GITHUB_ENV;
+          echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV;
+          GITHUB_REF_READABLE="${GITHUB_REF//\//-}"
+          echo "GITHUB_REF_READABLE=${GITHUB_REF_READABLE}" >> $GITHUB_ENV
+          echo "THE_ENV=sit" >> $GITHUB_ENV
+          echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
+
+      - name: Run Snyk as a blocking step
+        uses: snyk/actions/python-3.9@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: >
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --project-name=${{ github.repository }}
+            --severity-threshold=high
+            --fail-on=all
+      - name: Run Snyk on Python
+        uses: snyk/actions/python-3.9@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: >
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --project-name=${{ github.repository }}
+      - name: Commit Version Bump
+        # If building develop, a release branch, or main then we commit the version bump back to the repo
+        if: |
+          github.ref == 'refs/heads/develop' ||
+          github.ref == 'refs/heads/main'    ||
+          startsWith(github.ref, 'refs/heads/release')
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git commit -am "/version ${{ env.software_version }}"
+          git push
+      - name: Push Tag
+        if: |
+          github.ref == 'refs/heads/develop' ||
+          github.ref == 'refs/heads/main'    ||
+          startsWith(github.ref, 'refs/heads/release')
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag -a "${{ env.software_version }}" -m "Version ${{ env.software_version }}"
+          git push origin "${{ env.software_version }}"
+      - name: Build Python Artifact
+        run: |
+          poetry build
+
+      - name: Test with pytest
+        run: |
+          poetry run pytest tests/test_api.py -k 'test_gettimeseries_get'
+          poetry run pytest tests/test_api.py -k 'test_hydrocron_database'
+          poetry run pytest tests/test_api.py -k 'test_io_swot_reach_node_shp'
