@@ -8,7 +8,7 @@ def main():
     """
     Main function to run flask app in port 8080
     """
-    from hydrocron_api import hydrocron  # noqa: E501 # pylint: disable=import-outside-toplevel
+    from hydrocronapi import hydrocron  # noqa: E501 # pylint: disable=import-outside-toplevel
     hydrocron.flask_app.run(port=8080)
 
 

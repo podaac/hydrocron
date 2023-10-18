@@ -7,7 +7,7 @@ import logging
 import time
 from datetime import datetime
 from typing import Generator
-from hydrocron_api import hydrocron
+from hydrocronapi import hydrocron
 
 logger = logging.getLogger()
 
