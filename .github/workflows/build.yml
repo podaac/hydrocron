@@ -159,5 +159,5 @@ jobs:
       - name: Test with pytest
         run: |
           poetry run pytest tests/test_api.py -k 'test_gettimeseries_get'
-          poetry run pytest tests/test_api.py -k 'test_hydrocron_database'
-          poetry run pytest tests/test_api.py -k 'test_io_swot_reach_node_shp'
+          poetry run pytest tests/test_hydrocron_database.py
+          poetry run pytest tests/test_io_swot_reach_node_shp.py
