@@ -2,6 +2,7 @@
 Hydrocron API subset controller
 """
 # pylint: disable=C0103
+# flake8: noqa: E501
 import json
 import logging
 import time

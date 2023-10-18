@@ -1,6 +1,7 @@
 """
 Hydrocron API context module
 """
+# flake8: noqa: E501
 import os
 import sys
 from types import ModuleType
