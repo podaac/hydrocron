@@ -12,9 +12,9 @@ from hydrocron_db.io import swot_reach_node_shp
 
 
 def test_parse_from_filename():
-    '''
+    """
     Tests parsing cycle, pass, and time ranges from filename
-    '''
+    """
     filename_attrs = swot_reach_node_shp.parse_from_filename(
         constants.TEST_FILENAME)
 
@@ -27,9 +27,9 @@ def test_parse_from_filename():
 
 
 def test_read_shapefile():
-    '''
+    """
     Tests reading attributes from the shapefile
-    '''
+    """
     items = swot_reach_node_shp.read_shapefile(
         constants.TEST_SHAPEFILE_PATH,
         obscure_data=False,
@@ -41,9 +41,9 @@ def test_read_shapefile():
 
 
 def test_read_shapefile_obscured():
-    '''
+    """
     Tests reading attributes from the shapefile with real values obscured
-    '''
+    """
     items = swot_reach_node_shp.read_shapefile(
         constants.TEST_SHAPEFILE_PATH,
         obscure_data=True,
@@ -51,5 +51,5 @@ def test_read_shapefile_obscured():
 
     assert len(items) == 687
     for key, val in constants.TEST_ITEM_DICT.items():
-        if key == 'wse':
+        if key == constants.FIELDNAME_WSE:
             assert val != items[2][key]
