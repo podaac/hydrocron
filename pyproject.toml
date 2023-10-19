@@ -12,7 +12,8 @@ classifiers = [
 exclude = ['contrib', 'docs', 'tests']
 packages = [
     {include = "hydrocron_api"},
-    {include = "hydrocron_db"}
+    {include = "hydrocron_db"},
+    {include = "utils"}
 ]
 
 [tool.poetry.dependencies]

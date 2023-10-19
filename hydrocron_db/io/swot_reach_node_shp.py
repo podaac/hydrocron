@@ -14,7 +14,7 @@ def read_shapefile(filepath, obscure_data, columns):
 
     Parameters
     ----------
-    filename :  string
+    filepath :  string
         The full path to the file to read
     obscure_data : boolean
         If true, obscure the data values to avoid exposing real data.

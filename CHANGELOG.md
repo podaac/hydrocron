@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 12 - Move all constants to separate constants file
     - Issue 6 - Pylint and Flake8 configured
     - Issue 6 - Github Actions
     - Issue 8 - Hydrocron API implementation with mysql local database
