@@ -10,7 +10,7 @@ on:
     paths-ignore:
       - 'pyproject.toml'
 
-  # Allows you to run this workflow manually from the Actions tab
+  #  Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
@@ -191,3 +191,31 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+
+      # Setup Terraform to Deploy
+
+      - name: Configure AWS Credentials as Environment Variables
+        run: echo "AWS_ACCESS_KEY_ID=${{ secrets[format('AWS_ACCESS_KEY_ID_SERVICES_{0}', env.TARGET_ENV_UPPERCASE)] }}" >> $GITHUB_ENV |
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets[format('AWS_SECRET_ACCESS_KEY_SERVICES_{0}', env.TARGET_ENV_UPPERCASE)] }}" >> $GITHUB_ENV
+
+      - name: Validate AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-session-name: GitHubActions
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets[format('AWS_ACCESS_KEY_ID_SERVICES_{0}', env.TARGET_ENV_UPPERCASE)] }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets[format('AWS_SECRET_ACCESS_KEY_SERVICES_{0}', env.TARGET_ENV_UPPERCASE)] }}
+      - run: aws sts get-caller-identity
+
+
+      - name: Validate Terraform
+        run: terraform validate -no-color
+
+      - name: Deploy to venue
+        id: terraform-deploy
+        working-directory: terraform
+        env:
+          AWS_DEFAULT_REGION: us-west-2
+        run: |
+          ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue "sit" --lambda_container_image_uri ${{ env.REGISTRY }}/${{ github.repository }}/${{env.PYPROJECT_NAME}}:sit
