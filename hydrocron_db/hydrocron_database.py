@@ -8,23 +8,6 @@ from boto3.dynamodb.conditions import Key
 logger = logging.getLogger(__name__)
 
 
-class DynamoKeys:  # pylint: disable=R0903
-    """
-    Represents the partition and sort keys for a dynamoDB table
-    """
-
-    def __init__(
-            self,
-            partition_key,
-            partition_key_type,
-            sort_key,
-            sort_key_type):
-        self.partition_key = partition_key
-        self.partition_key_type = partition_key_type
-        self.sort_key = sort_key
-        self.sort_key_type = sort_key_type
-
-
 class HydrocronTable:
     """
     Class representing a Hydrocron DynamoDB table
@@ -38,9 +21,10 @@ class HydrocronTable:
         dyn_resource : boto3.session.resource('dynamodb')
             A Boto3 DynamoDB resource.
         table_name : string
-            The name of the table to create.
+            The name of the table.
         """
         self.dyn_resource = dyn_resource
+        self.table_name = table_name
 
         if self.exists(table_name):
             self.table = self.dyn_resource.Table(table_name)
