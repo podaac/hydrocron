@@ -28,6 +28,7 @@ To load river nodes into the database, run the load data script directly in a te
 
 After the initial load, run the same commands as above to load new data, changing only the --start_date parameter to the date of the last load, and --end_date parameter to the present date. This will be done manually a limited number of times before integration with data ingest to the collection is ready.
 
+If parameters are unchanged, previously loaded data will be replaced with the values from the granules in CMR.
 ## Reporting issues
 
 If you encounter issues or error when loading data, please open an issue on the Hydrocron repository here: [https://github.com/podaac/hydrocron](https://github.com/podaac/hydrocron)
