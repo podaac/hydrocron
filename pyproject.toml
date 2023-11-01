@@ -34,6 +34,10 @@ pylint = "^2.15.8"
 flake8 = "^6.0.0"
 pytest-cov = "^4.1.0"
 
+
+[tool.poetry.group.docs.dependencies]
+jupyter-book = "^0.15.1"
+
 [tool.poetry.scripts]
 hydrocron_api = "hydrocron.api.__main__:__main__"
 hydrocron_load = 'hydrocron.db.load_data:main'
