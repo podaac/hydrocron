@@ -8,7 +8,8 @@ import pytest
 from pytest_dynamodb import factories
 
 from hydrocron_db.hydrocron_database import HydrocronTable
-from hydrocron_db.io import swot_reach_node_shp, swot_constants
+from hydrocron_db.io import swot_reach_node_shp
+from utils import constants
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 API_TEST_TABLE_NAME = "hydrocron-swot-reach-table"
@@ -68,7 +69,7 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
     items = swot_reach_node_shp.read_shapefile(
             TEST_SHAPEFILE_PATH,
             obscure_data=False,
-            columns=swot_constants.reach_columns)
+            columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
         # write to the table
@@ -112,7 +113,7 @@ def hydrocron_dynamo_table(dynamo_db_resource):
     items = swot_reach_node_shp.read_shapefile(
             TEST_SHAPEFILE_PATH,
             obscure_data=False,
-            columns=swot_constants.reach_columns)
+            columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
         # write to the table

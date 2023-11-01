@@ -55,3 +55,7 @@ docker build -t hydrocron_api .
 # starting up a container
 docker run -p 8080:8080 hydrocron_api
 ```
+
+## Loading the Database from CMR
+
+Instructions for loading the database with data from CMR instead of the single test granule, are described in hydrocron_db/LOAD_DATA_README.md
