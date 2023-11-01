@@ -158,7 +158,7 @@ jobs:
         if: |
           github.ref == 'test'
         run: |
-          pytest tests/test_api.py -k 'test_gettimeseries_get'
+          poetry run pytest tests/
           
 
       # Setup docker to build and push images
