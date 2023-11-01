@@ -22,18 +22,18 @@ def parse_args():
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-t", "--table-name",
+    parser.add_argument("-t", "--table_name",
                         dest='table_name',
                         required=True,
                         help="The name of the database table to add data")
     parser.add_argument("-sd", "--start_date",
                         dest="start",
                         required=False,
-                        help="The ISO date time after which data should be retrieved. For Example, --start-date 2023-01-01T00:00:00Z")  # noqa E501
-    parser.add_argument("-ed", "--end-date",
+                        help="The ISO date time after which data should be retrieved. For Example, --start-date 2023-01-01T00:00:00")  # noqa E501
+    parser.add_argument("-ed", "--end_date",
                         required=False,
                         dest="end",
-                        help="The ISO date time before which data should be retrieved. For Example, --end-date 2023-02-14T00:00:00Z")  # noqa E501
+                        help="The ISO date time before which data should be retrieved. For Example, --end-date 2023-02-14T00:00:00")  # noqa E501
     parser.add_argument("-obscure", "--obscure_data",
                         dest="obscure",
                         required=False,
@@ -120,7 +120,7 @@ def load_data(hydrocron_table, granule_path, obscure_data):
               + hydrocron_table.table_name)
 
 
-def run(args=None):
+def main(args=None):
     """
     Main function to manage loading data into Hydrocron
 
@@ -138,14 +138,15 @@ def run(args=None):
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
         case constants.SWOT_NODE_TABLE_NAME:
             collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
+        case constants.DB_TEST_TABLE_NAME:
+            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
         case _:
             logging.warning(
                 "Hydrocron table '%s' does not exist.", table_name)
 
     dynamo_resource = setup_connection()
     try:
-        table = HydrocronTable(dyn_resource=dynamo_resource,
-                               table_name=table_name)
+        table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
     except ClientError as err:
         if err.response['Error']['Code'] == 'ResourceNotFoundException':
             logging.info("Table '%s' does not exist.", table_name)
@@ -161,7 +162,7 @@ def run(args=None):
 
 if __name__ == "__main__":
     try:
-        run()
+        main()
     except Exception as e:  # pylint: disable=broad-except
         logging.exception("Uncaught exception occurred during execution.")
         sys.exit(hash(e))

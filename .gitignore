@@ -167,3 +167,5 @@ cython_debug/
 # .tfstate files
 *.tfstate
 *.tfstate.*
+.vscode/launch.json
+.vscode/
