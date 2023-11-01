@@ -178,7 +178,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=semver,pattern={{version}},value=${{ env.THE_VERSION }}
-            type=raw,value=${{ env.THE_ENV }}
+            type=raw,value=${{ env.THE_VERSION }}
       - name: Build and push Docker image
         #if: ${{ startsWith(github.ref, 'test') }}
         #if: |
