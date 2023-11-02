@@ -155,15 +155,12 @@ jobs:
         run: |
           poetry build
       - name: Test with pytest
-        if: |
-          github.ref == 'test'
         run: |
           poetry run pytest tests/
           
 
       # Setup docker to build and push images
       - name: Log in to the Container registry
-        #if: ${{ startsWith(github.ref, 'test') }}
         uses: docker/login-action@v1
         with:
           registry: ${{ env.REGISTRY }}
@@ -171,7 +168,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        #if: ${{ startsWith(github.ref, 'test') }}
         id: meta
         uses: docker/metadata-action@v4
         with:
@@ -180,7 +176,6 @@ jobs:
             type=semver,pattern={{version}},value=${{ env.THE_VERSION }}
             type=raw,value=${{ env.THE_VERSION }}
       - name: Build and push Docker image
-        #if: ${{ startsWith(github.ref, 'test') }}
         #if: |
         #  github.ref == 'refs/heads/develop' ||
         #  github.ref == 'refs/heads/main'    ||
