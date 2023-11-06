@@ -8,9 +8,8 @@ import time
 from datetime import datetime
 from typing import Generator
 from shapely import Polygon, Point
-from utils import constants
-from hydrocron_api import hydrocron
-
+from hydrocron.utils import constants
+from hydrocron.api import hydrocron
 
 logger = logging.getLogger()
 
@@ -121,8 +120,10 @@ def format_subset_json(results: Generator, polygon, exact, dataTime):  # noqa: E
                             feature['properties']['wse'] = float(t[constants.FIELDNAME_WSE])
 
                     if feature_type == 'Point':
-                        feature['geometry']['coordinates'] = [float(t[constants.FIELDNAME_P_LON]), float(t[constants.FIELDNAME_P_LAT])]
-                        feature['properties']['time'] = datetime.fromtimestamp(float(t[constants.FIELDNAME_TIME]) + 946710000).strftime(
+                        feature['geometry']['coordinates'] = [float(t[constants.FIELDNAME_P_LON]), float(t[
+                                                                                                             constants.FIELDNAME_P_LAT])]
+                        feature['properties']['time'] = datetime.fromtimestamp(float(t[
+                                                                                         constants.FIELDNAME_TIME]) + 946710000).strftime(
                             "%Y-%m-%d %H:%M:%S")
                         feature['properties']['reach_id'] = float(t[constants.FIELDNAME_REACH_ID])
                         feature['properties']['wse'] = float(t[constants.FIELDNAME_REACH_ID])

@@ -1,16 +1,33 @@
-FROM node:10
-LABEL org.opencontainers.image.source="https://github.com/podaac/hydrocron-api"
-RUN npm install forever -g
+# Define global args
+ARG FUNCTION_DIR="/function"
 
-ENV project_dir /project
-ENV app_dir ${project_dir}/app
-ENV config_dir ${project_dir}/config
+FROM public.ecr.aws/lambda/python:3.10 as build_image
+# Include global arg in this stage of the build
+ARG FUNCTION_DIR
+ENV BUILD_DIR=/hydrocron
 
-RUN mkdir ${project_dir} ${app_dir} ${config_dir}
-WORKDIR ${app_dir}
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-COPY package*.json ./
-RUN npm install
-COPY . .
+WORKDIR $BUILD_DIR
+COPY ./hydrocron ./hydrocron
 
-CMD ${app_dir}/docker/docker-start-command
+COPY poetry.lock pyproject.toml README.md ./
+RUN ~/.local/bin/poetry lock --no-update
+RUN mkdir -p "${FUNCTION_DIR}" && \
+    ~/.local/bin/poetry install --only main --sync && \
+    cp -r $(~/.local/bin/poetry env list --full-path | awk '{print $1}')/lib/python*/site-packages/* ${FUNCTION_DIR} && \
+    cp -r ./hydrocron ${FUNCTION_DIR} && \
+    touch ${FUNCTION_DIR}/hydrocron/__init__.py
+
+COPY docker/docker-entrypoint.sh ${FUNCTION_DIR}/bin/docker-entrypoint.sh
+RUN chmod 755 ${FUNCTION_DIR}/bin/docker-entrypoint.sh
+
+FROM public.ecr.aws/lambda/python:3.10
+# Include global arg in this stage of the build
+ARG FUNCTION_DIR
+WORKDIR ${FUNCTION_DIR}
+
+COPY --from=build_image ${FUNCTION_DIR} ${LAMBDA_TASK_ROOT}
+ENV PATH="${PATH}:${LAMBDA_TASK_ROOT}/bin"
+
+CMD [ "hydrocron.api.controllers.timeseries.lambda_handler" ]

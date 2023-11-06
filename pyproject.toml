@@ -11,9 +11,7 @@ classifiers = [
 ]
 exclude = ['contrib', 'docs', 'tests']
 packages = [
-    {include = "hydrocron_api"},
-    {include = "hydrocron_db"},
-    {include = "utils"}
+    {include = "hydrocron"}
 ]
 
 [tool.poetry.dependencies]
@@ -36,8 +34,8 @@ pylint = "^2.15.8"
 flake8 = "^6.0.0"
 
 [tool.poetry.scripts]
-hydrocron_api = "hydrocron_api.__main__:__main__"
-hydrocron_load = 'hydrocron_db.load_data:main'
+hydrocron_api = "hydrocron.api.__main__:__main__"
+hydrocron_load = 'hydrocron.db.load_data:main'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

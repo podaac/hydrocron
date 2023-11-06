@@ -9,7 +9,7 @@ import os.path
 # ----------------- #
 TEST_SHAPEFILE_PATH = os.path.abspath(os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
-    '..', 'tests', 'data',
+    '../..', 'tests', 'data',
     'SWOT_L2_HR_RiverSP_Reach_548_011_NA_20230610T193337_20230610T193344_PIA1_01.zip'  # noqa E501
 ))
 

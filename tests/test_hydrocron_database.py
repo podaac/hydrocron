@@ -9,9 +9,9 @@ Requires a local install of DynamoDB to be running.
 See https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html # noqa
 
 """
-from utils import constants
+from hydrocron.utils import constants
 
-from hydrocron_db.io import swot_reach_node_shp
+from hydrocron.db.io import swot_reach_node_shp
 
 
 def test_table_exists(hydrocron_dynamo_table):

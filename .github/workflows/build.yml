@@ -97,8 +97,8 @@ jobs:
         run: poetry install
       - name: Lint
         run: |
-          poetry run pylint hydrocron_api
-          poetry run flake8 hydrocron_api
+          poetry run pylint hydrocron
+          poetry run flake8 hydrocron
           
 
       ## Set environment variables
