@@ -7,9 +7,9 @@ import pytest
 
 from pytest_dynamodb import factories
 
-from hydrocron_db.hydrocron_database import HydrocronTable
-from hydrocron_db.io import swot_reach_node_shp
-from utils import constants
+from hydrocron.db import HydrocronTable
+from hydrocron.db.io import swot_reach_node_shp
+from hydrocron.utils import constants
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 API_TEST_TABLE_NAME = "hydrocron-swot-reach-table"

@@ -6,9 +6,9 @@ Test unpacking a swot reach or node shapefile.
 
 Unit tests for unpacking swot reach and node shapefiles.
 """
-from utils import constants
+from hydrocron.utils import constants
 
-from hydrocron_db.io import swot_reach_node_shp
+from hydrocron.db.io import swot_reach_node_shp
 
 
 def test_parse_from_filename():

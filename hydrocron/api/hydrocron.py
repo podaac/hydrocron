@@ -10,7 +10,7 @@ from typing import Callable
 import boto3
 import connexion
 
-from hydrocron_api.data_access.db import DynamoDataRepository
+from hydrocron.api.data_access.db import DynamoDataRepository
 
 
 class Context(ModuleType):

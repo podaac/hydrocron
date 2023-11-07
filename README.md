@@ -8,52 +8,65 @@ as CSV and geoJSON.
 ## Requirements
 Python 3.10+
 
-## Usage
-Before starting the server you must first start a local database instance. The easiest method is to use docker. 
-First, make sure you have installed Docker and AWS CLI. To configure AWS local variables:
+## Running Locally with Docker 
 
-```
-aws configure
-    AWS Access Key ID: a
-    AWS Secret Acces Key: a
-    Default region name: us-west-2
-    Default output format: None
-```
+1. Build or pull the hydrocron docker image
+2. Run docker compose to launch dynamodb local and hydrocron local
+3. Load test data into dynamodb local
+4. Execute sample requests
 
-Next step is to run docker compose up:
+### 1. Build or Pull Hydrocron Docker
 
+Build the docker container:
+```bash
+docker build . -f docker/Dockerfile -t hydrocron:latest
 ```
-docker compose up
-```
-
-To run the server, please execute the following from the root directory:
-
-```
-HYDROCRON_ENV=dev python -m hydrocron_api
+Pull a pre-built image from https://github.com/podaac/hydrocron/pkgs/container/hydrocron:
+```bash
+docker pull ghcr.io/podaac/hydrocron:latest
 ```
 
-and open your browser to here:
+### 2. Run Docker Compose
 
-```
-http://localhost:8080/hydrocron/HydroAPI/1.0.0/ui/
-```
-
-Your Swagger definition lives here:
-
-```
-http://localhost:8080/hydrocron/HydroAPI/1.0.0/swagger.json
+Launch dynamodb local on port 8000 and hyrdrocron on port 9000
+```bash
+docker-compose up
 ```
 
-## Running with Docker 
+### 3. Load Test Data
 
-To run the server on a Docker container, please execute the following from the root directory:
+If you have not setup a python environment yet, use poetry to first initialize the virtual environment.
 
 ```bash
-# building the image
-docker build -t hydrocron_api .
+poetry install
+```
 
-# starting up a container
-docker run -p 8080:8080 hydrocron_api
+This will load the data in `test/data` into the local dynamo db instance.
+```bash
+python tests/load_data_local.py
+```
+
+**NOTE** - By default data will be removed when the container is stopped. There are some commented lines in `docker-compose.yml`
+that can be used to allow the data to persist across container restarts if desired.
+
+### 4. Execute Sample Requests
+
+The docker container is running a lambda container image. By posting data to port 9000, the lambda handler will be invoked
+and will return results from the loaded test data. For example:
+
+```bash
+curl --location 'http://localhost:9000/2015-03-31/functions/function/invocations' \
+--header 'Content-Type: application/json' \
+--data '{
+    "body":{
+        "feature": "Reach",
+        "reach_id": "71224100223",
+        "start_time": "2022-08-04T00:00:00+00:00",
+        "end_time": "2022-08-23T00:00:00+00:00",
+        "output": "csv",
+        "fields": "feature_id,time_str,wse"
+    }
+}'
 ```
 
 ## Loading the Database from CMR

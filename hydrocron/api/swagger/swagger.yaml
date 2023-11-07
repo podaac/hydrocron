@@ -108,7 +108,7 @@ paths:
                 type: array
                 items:
                   type: string
-      x-openapi-router-controller: hydrocron_api.controllers.timeseries
+      x-openapi-router-controller: hydrocron.api.controllers.timeseries
   /timeseriesSubset:
     get:
       summary: Subset by time series for a given spatial region
@@ -208,5 +208,5 @@ paths:
                 type: array
                 items:
                   type: string
-      x-openapi-router-controller: hydrocron_api.controllers.subset
+      x-openapi-router-controller: hydrocron.api.controllers.subset
 

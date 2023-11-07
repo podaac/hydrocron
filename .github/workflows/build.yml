@@ -97,8 +97,10 @@ jobs:
         run: poetry install
       - name: Lint
         run: |
-          poetry run pylint hydrocron_api hydrocron_db
-          poetry run flake8 hydrocron_api hydrocron_db
+          poetry run pylint hydrocron
+          poetry run flake8 hydrocron
+          
+
       ## Set environment variables
       - name: Configure Initial YAML file and environment variables
         run: |
@@ -108,7 +110,6 @@ jobs:
           echo "GITHUB_REF_READABLE=${GITHUB_REF_READABLE}" >> $GITHUB_ENV
           echo "THE_ENV=sit" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
-
       - name: Run Snyk as a blocking step
         uses: snyk/actions/python-3.9@master
         env:
@@ -153,7 +154,40 @@ jobs:
       - name: Build Python Artifact
         run: |
           poetry build
-
       - name: Test with pytest
         run: |
           poetry run pytest tests/
+          
+
+      # Setup docker to build and push images
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ env.THE_VERSION }}
+            type=raw,value=${{ env.THE_VERSION }}
+      - name: Build and push Docker image
+        #if: |
+        #  github.ref == 'refs/heads/develop' ||
+        #  github.ref == 'refs/heads/main'    ||
+        #  startsWith(github.ref, 'refs/heads/release') ||
+        #  github.event.head_commit.message == '/deploy sit' ||
+        #  github.event.head_commit.message == '/deploy uat'
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          pull: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
