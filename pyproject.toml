@@ -22,7 +22,7 @@ pymysql = "^1.1.0"
 geopandas = "^0.13.2"
 earthaccess = "^0.5.3"
 shapely = "^2.0.1"
-connexion = {version = "^2.14.2", extras = ["swagger-ui"]}
+connexion = {version = "^3", extras = ["swagger-ui", "flask"]}
 cryptography = "^41.0.2"
 python-dotenv = "^1.0.0"
 
