@@ -4,16 +4,17 @@ the appropriate DynamoDB table
 """
 import logging
 import argparse
+import os
 import sys
 
 import boto3
 import earthaccess
 from botocore.exceptions import ClientError
 
-from utils import constants
+from hydrocron.utils import constants
 
-from hydrocron_db.hydrocron_database import HydrocronTable
-from hydrocron_db.io import swot_reach_node_shp
+from hydrocron.db import HydrocronTable
+from hydrocron.db.io import swot_reach_node_shp
 
 
 def parse_args():
@@ -51,7 +52,11 @@ def setup_connection():
     dynamo_instance : HydrocronDB
     """
     session = boto3.session.Session()
-    dyndb_resource = session.resource('dynamodb')
+
+    if endpoint_url := os.getenv('HYDROCRON_dynamodb_endpoint_url'):
+        dyndb_resource = session.resource('dynamodb', endpoint_url=endpoint_url)
+    else:
+        dyndb_resource = session.resource('dynamodb')
 
     return dyndb_resource
 

@@ -34,13 +34,14 @@ def read_shapefile(filepath, obscure_data, columns):
     else:
         shp_file = gpd.read_file('zip://' + filepath)
 
+    numeric_columns = shp_file[columns].select_dtypes(include=[np.number]).columns
     if obscure_data:
-        shp_file[columns] = np.where(
-            (np.rint(shp_file[columns]) != -999) &
-            (np.rint(shp_file[columns]) != -99999999) &
-            (np.rint(shp_file[columns]) != -999999999999),
-            np.random.default_rng().integers(low=0, high=10)*shp_file[columns],
-            shp_file[columns])
+        shp_file[numeric_columns] = np.where(
+            (np.rint(shp_file[numeric_columns]) != -999) &
+            (np.rint(shp_file[numeric_columns]) != -99999999) &
+            (np.rint(shp_file[numeric_columns]) != -999999999999),
+            np.random.default_rng().integers(low=0, high=10)*shp_file[numeric_columns],
+            shp_file[numeric_columns])
 
     shp_file = shp_file.astype(str)
 

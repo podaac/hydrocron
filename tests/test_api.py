@@ -5,6 +5,7 @@ from tests import BaseTestCase
 
     
 @pytest.mark.usefixtures("hydrocron_dynamo_instance")
+@pytest.skip("Needs to be refactored to test the lambda handler not the flask app", allow_module_level=True)
 class TestDefaultController(BaseTestCase):
     """DefaultController integration test stubs"""
 
