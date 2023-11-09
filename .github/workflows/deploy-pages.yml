@@ -21,6 +21,10 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  POETRY_VERSION: "1.3.1"
+  PYTHON_VERSION: "3.10"
+
 jobs:
   deploy:
     environment:
@@ -28,22 +32,29 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        
-      # Install dependencies
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+      - uses: getsentry/action-github-app-token@v2
+        name: podaac cicd token
+        id: podaac-cicd
         with:
-          python-version: 3.11
-      - name: Install jupyter-book
-        run: |
-          pip install jupyter-book
+          app_id: ${{ secrets.CICD_APP_ID }}
+          private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
+          token: ${{ steps.podaac-cicd.outputs.token }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: ${{ env.POETRY_VERSION }}
 
       # Build the book
       - name: Build the book
         run: |
-          jupyter-book build docs/
+          poetry lock --no-update 
+          poetry run jupyter-book build docs/
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
