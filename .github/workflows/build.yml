@@ -248,7 +248,8 @@ jobs:
         if: |
           github.ref == 'refs/heads/develop' ||
           github.ref == 'refs/heads/main'    ||
-          startsWith(github.ref, 'refs/heads/release')
+          startsWith(github.ref, 'refs/heads/release') ||
+          github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v3
         with:
           context: .
