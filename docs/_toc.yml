@@ -1,0 +1,30 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+defaults:
+  titlesonly: true
+root: intro
+parts:
+- caption: GETTING STARTED
+  chapters:
+  - file: overview
+  - file: examples
+- caption: API ENDPOINTS
+  chapters:
+  - file: timeseries
+- caption: IMPORTANT USAGE NOTES
+  chapters:
+  - file: time
+- caption: RESOURCES
+  chapters:
+  - url: https://github.com/podaac/hydrocron
+    title: GitHub Repository
+  - url: https://podaac.jpl.nasa.gov/SWOT
+    title: SWOT Mission Page
+  - url: https://www.swordexplorer.com/
+    title: SWOT River Database (SWORD) Explorer
+  - url: https://podaac.jpl.nasa.gov
+    title: PO.DAAC Website
+  - url: https://podaac.github.io/tutorials/
+    title: PO.DAAC Cookbook
