@@ -53,7 +53,7 @@ jobs:
       # Build the book
       - name: Build the book
         run: |
-          poetry lock --no-update 
+          poetry install --only docs
           poetry run jupyter-book build docs/
 
       - name: Setup Pages
