@@ -228,6 +228,9 @@ jobs:
       THE_VERSION: ${{ needs.build.outputs.version }}
       PYPROJECT_NAME: ${{ needs.build.outputs.pyproject_name }}
     steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository }}
       # Setup docker to build and push images
       - name: Log in to the Container registry
         uses: docker/login-action@v3
