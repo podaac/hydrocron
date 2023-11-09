@@ -266,7 +266,7 @@ jobs:
     name: Deploy
     needs: [ build, docker ]
     runs-on: ubuntu-latest
-    environment: needs.build.outputs.deploy_env
+    environment: ${{ needs.build.outputs.deploy_env }}
     env:
       THE_VERSION: ${{ needs.build.outputs.version }}
       CONTAINER_IMAGE_URI: ${{ needs.docker.outputs.container_image_uri }}
