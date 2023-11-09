@@ -1,11 +1,11 @@
 # timeseries
 
-Get time series data from SWOT observations for reaches, nodes, and/or lakes
+Get time series data from SWOT observations for reaches and nodes
 
 ## Parameters
 
 feature : string  
-    Data requested for Reach or Node or Lake
+    Type of feature being requested. Either "Reach" or "Node"
 
 feature_id : string  
     ID of the feature to retrieve in format CBBTTTSNNNNNN (i.e. 74297700000000)  
