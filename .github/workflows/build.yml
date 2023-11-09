@@ -230,7 +230,7 @@ jobs:
     steps:
       # Setup docker to build and push images
       - name: Log in to the Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -257,6 +257,10 @@ jobs:
           pull: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - name: Set output
+        id: set-outputs
+        run: |
+          echo "container_image_uri=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy
