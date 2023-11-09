@@ -170,3 +170,4 @@ cython_debug/
 .vscode/launch.json
 .vscode/
 /docker/dynamodb/shared-local-instance.db
+/terraform/tfplan

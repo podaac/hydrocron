@@ -18,7 +18,7 @@ class Context(ModuleType):
     Hydrocron API context class
     """
     APP_NAME = 'hydrocron'
-    SSM_PATH = f'/service/{APP_NAME}'
+    SSM_PATH = f'/service/{APP_NAME}/'
 
     def __init__(self, name: str):
         super().__init__(name)
