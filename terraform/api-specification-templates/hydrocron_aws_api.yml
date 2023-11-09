@@ -1,0 +1,165 @@
+openapi: 3.0.0
+info:
+  title: "Hydrocron"
+  description: "Get time series data from SWOT observations for reaches and nodes"
+  version: ${software_version}
+servers:
+- url: https://virtserver.swaggerhub.com/hydrocron/${api_version}
+  description: "Get time series data from SWOT observations for reaches and nodes"
+paths:
+  /timeseries:
+    get:
+      summary: "Get Timeseries for a particular Reach, Node, or LakeID"
+      description: "Get Timeseries for a particular Reach, Node, or LakeID"
+      operationId: gettimeseries_get
+      parameters:
+      - name: feature
+        in: query
+        description: Type of feature being requested
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum: [ "Reach", "Node"]
+        example: Reach
+      - name: feature_id
+        in: query
+        description: ID of the feature to retrieve in format CBBTTTSNNNNNN (i.e. 74297700000000)
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+        example: 71224100223
+      - name: start_time
+        in: query
+        description: Start time of the timeseries
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          format: date-time
+        example: 2022-08-04T00:00:00Z
+      - name: end_time
+        in: query
+        description: End time of the timeseries
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          format: date-time
+        example: 2022-08-23T00:00:00Z
+      - name: output
+        in: query
+        description: Format of the data returned
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum: [ "csv", "geojson"]
+          default: geojson
+        example: geojson
+      - name: fields
+        in: query
+        description: Format of the data returned
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: feature_id, time_str, wse, geometry
+        example: feature_id, time_str, wse, geometry
+      responses:
+        "200":
+          description: OK
+          content:
+            text/csv:
+              schema:
+                type: array
+                items:
+                  type: string
+        "400":
+          description: "400 error. The specified URL is invalid (does not exist)."
+          content:
+            text/csv:
+              schema:
+                type: array
+                items:
+                  type: string
+        "404":
+          description: "404 error. An entry with the specified region was not found."
+          content:
+            text/csv:
+              schema:
+                type: array
+                items:
+                  type: string
+        "413":
+          description: "413 error. Your query has returned is too large."
+          content:
+            text/csv:
+              schema:
+                type: array
+                items:
+                  type: string
+      x-openapi-router-controller: hydrocron_api.controllers.timeseries
+
+      x-amazon-apigateway-integration:
+        uri: ${hydrocron_api_lambda_arn_timeseries}
+        responses:
+          default:
+            statusCode: "200"
+            responseTemplates:
+              application/json: |
+                #set($inputRoot = $input.path('$'))
+                #if($inputRoot.toString().contains('206 PARTIAL CONTENT'))
+                  #set($context.responseOverride.status = 206)
+                #end
+                $input.json('$')
+          ^400.*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: |-
+                {
+                  "error" : "$input.path('$.errorMessage')"
+                }
+          ^404.*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: |-
+                {
+                  "error" : "$input.path('$.errorMessage')"
+                }
+          ^413.*:
+            statusCode: "413"
+            responseTemplates:
+              application/json: |-
+                {
+                  "error" : "$input.path('$.errorMessage')"
+                }
+          ^[^1-5].*:
+            statusCode: "500"
+            responseTemplates:
+              application/json: |-
+                {
+                  "error" : "$input.path('$.errorMessage')"
+                }
+        requestTemplates:
+          application/json: |-
+            {
+              "body": {
+                "exact":"$input.params('exact')",
+                "region": "$input.params('region')",
+                "page_number": "$input.params('page_number')" ,
+                "page_size": "$input.params('page_size')" ,
+                "polygon_format": "$input.params('polygon_format')"
+              }
+            }
+        passthroughBehavior: when_no_templates
+        httpMethod: POST
+        contentHandling: CONVERT_TO_TEXT
+        type: aws
