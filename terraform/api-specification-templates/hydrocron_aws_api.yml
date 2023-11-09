@@ -1,13 +1,11 @@
 openapi: 3.0.0
 info:
-  title: "Get time series data from SWOT observations for reaches, nodes, and/or lakes"
-  description: "Get time series data from SWOT observations for reaches, nodes, and/or\
-    \ lakes"
-  version: 1.0.0
+  title: "Hydrocron"
+  description: "Get time series data from SWOT observations for reaches and nodes"
+  version: ${software_version}
 servers:
-- url: https://virtserver.swaggerhub.com/hydrocron/HydroAPI/1.0.0
-  description: "Get time series data from SWOT observations for reaches, nodes, and/or\
-    \ lakes"
+- url: https://virtserver.swaggerhub.com/hydrocron/${api_version}
+  description: "Get time series data from SWOT observations for reaches and nodes"
 paths:
   /timeseries:
     get:
@@ -17,13 +15,13 @@ paths:
       parameters:
       - name: feature
         in: query
-        description: Data requested for Reach or Node or Lake
+        description: Type of feature being requested
         required: false
         style: form
         explode: true
         schema:
           type: string
-          enum: [ "Reach", "Lake", "Node"]
+          enum: [ "Reach", "Node"]
         example: Reach
       - name: feature_id
         in: query

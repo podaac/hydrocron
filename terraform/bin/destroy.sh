@@ -45,8 +45,8 @@ current_workspace=$(terraform workspace show)
 
 if [ $current_workspace == ${ticket} ]; then
   # Terraform initialization
-  terraform init -reconfigure -input=false -backend-config="bucket=podaac-services-${tf_venue}-terraform" -backend-config="profile=ngap-service-${tf_venue}"
-  terraform destroy -auto-approve -var-file=tfvars/"${tf_venue}".tfvars -var="credentials=~/.aws/credentials" -var="profile=ngap-service-${tf_venue}" -var="app_version=${app_version}"
+  terraform init -reconfigure -input=false -backend-config="bucket=podaac-services-${tf_venue}-terraform"
+  terraform destroy -auto-approve -var-file=tfvars/"${tf_venue}".tfvars -var="app_version=${app_version}" -var="lambda_container_image_uri"=${lambda_container_image_uri}
   terraform workspace select default
   terraform workspace delete ${ticket}
 else

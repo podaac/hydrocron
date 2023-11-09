@@ -1,43 +1,36 @@
 
-# Deploying the HYDROCRON
+# Deploying HYDROCRON
 
+Hydrocron is an API Gateway REST API which can be deployed to AWS via terraform.
 
-## Dependencies
-There are a handful of dependencies needed to deploy the entire Hydrocron
+## Requirements
 
-* Terraform - deployment technology.  >= Terraform v0.12.7
-* AWS CLI - Amazon Web Service command line interface. >= aws-cli/1.11.120
-* python3 environment - tested with python 3.7, needed for packaging the lambda functions.
+In order to deploy the application you will need:
 
-## Soft dependencies
-These are dependencies for deploying the entire Hydrocron that exist outside of this build.
-
-* access key for NGAP environment
-* Terraform variables defined below
-
-## Terraform Variables
-
-| variable        | Defined In   | Example                                                 | Description |
-| --------------- | ------------ | ------------------------------------------------------- | ----------- |
-| stage           | tf_vars      | sit                                                     | staging environment to which we are deploying |
-| app_name        | tf_vars      | HYDROCRON                                                     | Name of the application being deployed - same for all environments|
-| credentials     | command line | ~/.aws/credentials                                      | AWS credential file to use for authentication |
-| profile         | command line | ngap-services-sit                                       | AWS Profile to use for authentication |
-| docker_tag      | command line | podaac/podaac-cloud/podaac-hydrocron:1.0.0-alpha.3            | Name of docker image and tag as returned from `docker/build-docker.sh`. |
-| vpc_id          | tf_vars      | vpc-04d8fc64e8ce5cca8                                   | VPC Id for use. This is predefined by NGAP. |
-| private_subnets | tf_vars      | ["subnet-0d15606f25bd4047b","subnet-0adee3417fedb7f05"] | private subnets for use within VPC. This is defined by NGAP |
-
+- Docker
+- Terraform
+- AWS credentials
 
 ## Building the lambda images
-The lambda code needs to be built into a deployable image and uploaded to ECR before running terraform. Normally CI/CD handles this task but if you are trying to run terraform locally it needs to be done manually.
+The lambda code needs to be built into a deployable image and uploaded to 
+ECR before running terraform. Normally CI/CD handles this task but if you 
+are trying to run terraform locally it needs to be done manually.
 
-Follow the instructions in the [docker README](../docker/README.md) to build the image
-
-
-## Build and deploy the application
-We use a pre-built docker container to do the deployment (Please do not use local terraform!)
-
-## Destroying the Application
-Similarly, use the pre-built docker container to do the destroy (Please do not use local terraform!)
+Follow the instructions in the [README](../README.md) to build the image
 
 
+## Deploying via Terraform
+
+```bash
+export tf_venue=sit
+export aws_profile=ngap-service-${tf_venue}
+
+docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}/.aws/:/usr/local/.aws -v $(pwd):/hydrocron -w /hydrocron/terraform -e AWS_SHARED_CREDENTIALS_FILE=/usr/local/.aws/credentials -e AWS_CONFIG_FILE=/usr/local/.aws/config -e AWS_PROFILE=${aws_profile} -e tf_venue=${tf_venue} -e TF_VAR_stage=${tf_venue} -e TF_VAR_region=us-west-2 -e TF_INPUT=false --entrypoint=/bin/sh hashicorp/terraform:1.3.7
+
+export app_version=1.0.0a9
+export lambda_container_image_uri=hydrocron:1.0.0a9
+
+terraform init -reconfigure -input=false -backend-config="bucket=podaac-services-${tf_venue}-terraform"
+terraform plan -input=false -var-file=tfvars/"${tf_venue}".tfvars -var="app_version=${app_version}" -var="lambda_container_image_uri"=${lambda_container_image_uri} -out="tfplan"
+terraform apply -input=false -auto-approve tfplan
+```

@@ -48,7 +48,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 TF_IN_AUTOMATION=true
 
 # Terraform initialization
-terraform init -reconfigure -input=false -backend-config="bucket=podaac-services-${tf_venue}-terraform" -backend-config="profile=ngap-service-${tf_venue}"
+terraform init -reconfigure -input=false -backend-config="bucket=podaac-services-${tf_venue}-terraform"
 
 if [[ "${ticket}" ]]; then
   set +e
@@ -59,7 +59,7 @@ else
   terraform workspace select default
 fi
 
-terraform plan -input=false -var-file=tfvars/"${tf_venue}".tfvars -var="credentials=~/.aws/credentials" -var="profile=ngap-service-${tf_venue}" -var="app_version=${app_version}" -var="lambda_container_image_uri"=${lambda_container_image_uri} -out="tfplan"
+terraform plan -input=false -var-file=tfvars/"${tf_venue}".tfvars -var="app_version=${app_version}" -var="lambda_container_image_uri"=${lambda_container_image_uri} -out="tfplan"
 
 # Apply the plan that was created
 terraform apply -input=false -auto-approve tfplan
