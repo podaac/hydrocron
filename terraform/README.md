@@ -3,15 +3,39 @@
 
 Hydrocron is an API Gateway REST API which can be deployed to AWS via terraform.
 
-## Requirements
+## Using GitHub Actions (Preferred)
+
+The `Build` GitHub action is setup to allow deployments via workflow dispatch to 
+the SIT environment from branches that match the following patterns:
+
+- develop
+- feature/*
+- issue/*
+- issues/*
+
+If your work is being done on a feature or issue branch, the easiest way to deploy is
+to use the [workflow dispatch](https://github.com/podaac/hydrocron/actions/workflows/build.yml) 
+option and specify the `SIT` environment. Contact project members if access is required. 
+
+## Using Local Terraform
+
+> [!IMPORTANT]  
+> If deploying manually from a development laptop, make sure the version
+of terraform installed locally matches the version used by CICD (see `TERRAFORM_VERSION`
+in [build.yml](../.github/workflows/build.yml))
+
+_TODO: Instructions for deploying to LocalStack?_
+
+### Requirements
 
 In order to deploy the application you will need:
 
 - Docker
-- Terraform
+- Terraform 
+  - **Make sure version matches `TERRAFORM_VERSION` in [build.yml](../.github/workflows/build.yml)!**
 - AWS credentials
 
-## Building the lambda images
+### Building the lambda images
 The lambda code needs to be built into a deployable image and uploaded to 
 ECR before running terraform. Normally CI/CD handles this task but if you 
 are trying to run terraform locally it needs to be done manually.
@@ -19,17 +43,20 @@ are trying to run terraform locally it needs to be done manually.
 Follow the instructions in the [README](../README.md) to build the image
 
 
-## Deploying via Terraform
+### Deploying via Terraform
 
 ```bash
 export tf_venue=sit
-export aws_profile=ngap-service-${tf_venue}
-
-docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}/.aws/:/usr/local/.aws -v $(pwd):/hydrocron -w /hydrocron/terraform -e AWS_SHARED_CREDENTIALS_FILE=/usr/local/.aws/credentials -e AWS_CONFIG_FILE=/usr/local/.aws/config -e AWS_PROFILE=${aws_profile} -e tf_venue=${tf_venue} -e TF_VAR_stage=${tf_venue} -e TF_VAR_region=us-west-2 -e TF_INPUT=false --entrypoint=/bin/sh hashicorp/terraform:1.3.7
-
+# Needs to point to a valid AWS credential profile. This is an example
+export AWS_DEFAULT_PROFILE=ngap-service-${tf_venue}
+# Should match the current build version of the software
 export app_version=1.0.0a9
+# If using a local docker image, needs to match a tag present on your laptop. 
+# Additionally, if using local image, comment out the docker pull command in the null_resource.upload_ecr_image otherwise the apply will fail 
+# If using an image from ghcr.io, should use the full uri that can be used with docker pull
 export lambda_container_image_uri=hydrocron:1.0.0a9
 
+# The backend configuration here is a podaac convention 
 terraform init -reconfigure -input=false -backend-config="bucket=podaac-services-${tf_venue}-terraform"
 terraform plan -input=false -var-file=tfvars/"${tf_venue}".tfvars -var="app_version=${app_version}" -var="lambda_container_image_uri"=${lambda_container_image_uri} -out="tfplan"
 terraform apply -input=false -auto-approve tfplan
