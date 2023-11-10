@@ -26,6 +26,12 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     end_date = event['body']['end_date']
     obscure_data = event['body']['obscure_data']
 
+    edl_user = event['body']['edl_username']
+    edl_password = event['body']['edl_password']
+
+    os.environ['EARTHDATA_USERNAME'] = edl_user
+    os.environ['EARTHDATA_PASSWORD'] = edl_password
+    
     match table_name:
         case constants.SWOT_REACH_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
@@ -51,32 +57,6 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     for granule in new_granules:
         load_data(table, granule[0], obscure_data)
-
-
-def parse_args():
-    """
-    Argument parser
-    """
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-t", "--table_name",
-                        dest='table_name',
-                        required=True,
-                        help="The name of the database table to add data")
-    parser.add_argument("-sd", "--start_date",
-                        dest="start",
-                        required=False,
-                        help="The ISO date time after which data should be retrieved. For Example, --start-date 2023-01-01T00:00:00")  # noqa E501
-    parser.add_argument("-ed", "--end_date",
-                        required=False,
-                        dest="end",
-                        help="The ISO date time before which data should be retrieved. For Example, --end-date 2023-02-14T00:00:00")  # noqa E501
-    parser.add_argument("-obscure", "--obscure_data",
-                        dest="obscure",
-                        required=False,
-                        help="Boolean to control whether real data is obscured on database loading. Default is False")  # noqa E501
-
-    return parser.parse_args()
 
 
 def setup_connection():
