@@ -5,7 +5,6 @@ the appropriate DynamoDB table
 import logging
 import argparse
 import os
-import sys
 
 import boto3
 import earthaccess
@@ -15,6 +14,43 @@ from hydrocron.utils import constants
 
 from hydrocron.db import HydrocronTable
 from hydrocron.db.io import swot_reach_node_shp
+
+
+def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
+    """
+    Lambda entrypoint for loading the database
+    """
+
+    table_name = event['body']['table_name']
+    start_date = event['body']['start_date']
+    end_date = event['body']['end_date']
+    obscure_data = event['body']['obscure_data']
+
+    match table_name:
+        case constants.SWOT_REACH_TABLE_NAME:
+            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+        case constants.SWOT_NODE_TABLE_NAME:
+            collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
+        case constants.DB_TEST_TABLE_NAME:
+            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+        case _:
+            logging.warning(
+                "Hydrocron table '%s' does not exist.", table_name)
+
+    dynamo_resource = setup_connection()
+    try:
+        table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
+    except ClientError as err:
+        if err.response['Error']['Code'] == 'ResourceNotFoundException':
+            logging.info("Table '%s' does not exist.", table_name)
+
+    new_granules = find_new_granules(
+        collection_shortname,
+        start_date,
+        end_date)
+
+    for granule in new_granules:
+        load_data(table, granule[0], obscure_data)
 
 
 def parse_args():
@@ -123,51 +159,3 @@ def load_data(hydrocron_table, granule_path, obscure_data):
     else:
         print('Items cannot be parsed, file reader not implemented for table '
               + hydrocron_table.table_name)
-
-
-def main(args=None):
-    """
-    Main function to manage loading data into Hydrocron
-
-    """
-    if args is None:
-        args = parse_args()
-
-    table_name = args.table_name
-    start_date = args.start
-    end_date = args.end
-    obscure_data = args.obscure
-
-    match table_name:
-        case constants.SWOT_REACH_TABLE_NAME:
-            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
-        case constants.SWOT_NODE_TABLE_NAME:
-            collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
-        case constants.DB_TEST_TABLE_NAME:
-            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
-        case _:
-            logging.warning(
-                "Hydrocron table '%s' does not exist.", table_name)
-
-    dynamo_resource = setup_connection()
-    try:
-        table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
-    except ClientError as err:
-        if err.response['Error']['Code'] == 'ResourceNotFoundException':
-            logging.info("Table '%s' does not exist.", table_name)
-
-    new_granules = find_new_granules(
-        collection_shortname,
-        start_date,
-        end_date)
-
-    for granule in new_granules:
-        load_data(table, granule[0], obscure_data)
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:  # pylint: disable=broad-except
-        logging.exception("Uncaught exception occurred during execution.")
-        sys.exit(hash(e))
