@@ -14,6 +14,7 @@ locals {
   ecr_image_name                   = "${local.environment}-${element(local.ecr_image_name_and_tag, 0)}"
   ecr_image_tag                    = element(local.ecr_image_name_and_tag, 1)
   timeseries_function_name         = "${local.aws_resource_prefix}-timeseries-lambda"
+  load_data_function_name          = "${local.aws_resource_prefix}-load_data-lambda"
 }
 
 resource aws_ecr_repository "lambda-image-repo" {
@@ -74,4 +75,18 @@ resource "aws_lambda_permission" "allow_hydrocron-timeseries" {
   # The "/*/*/*" portion grants access from any method on any resource
   # within the API Gateway REST API.
   source_arn = "${aws_api_gateway_rest_api.hydrocron-api-gateway.execution_arn}/*/*/*"
+}
+
+
+resource "aws_lambda_function" "hydrocron_lambda_load_data" {
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.lambda-image-repo.repository_url}:${data.aws_ecr_image.lambda_image.image_tag}"
+  image_config {
+    command = ["hydrocron.db.load_data.lambda_handler"]
+  }
+  function_name = local.load_data_function_name
+  role          = aws_iam_role.hydrocron-lambda-load-data-role.arn
+  timeout       = 30
+
+  tags = var.default_tags
 }
