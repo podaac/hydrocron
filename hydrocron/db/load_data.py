@@ -3,7 +3,6 @@ This module searches for new granules and loads data into
 the appropriate DynamoDB table
 """
 import logging
-import argparse
 import os
 
 import boto3
@@ -31,7 +30,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     os.environ['EARTHDATA_USERNAME'] = edl_user
     os.environ['EARTHDATA_PASSWORD'] = edl_password
-    
+
     match table_name:
         case constants.SWOT_REACH_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
