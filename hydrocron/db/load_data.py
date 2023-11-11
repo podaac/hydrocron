@@ -54,8 +54,8 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         start_date,
         end_date)
 
-    for g in new_granules:
-        load_data(table, g[0], obscure_data)
+    for gran in new_granules:
+        load_data(table, gran[0], obscure_data)
 
 
 def setup_connection():
