@@ -8,6 +8,8 @@ import os
 import boto3
 import earthaccess
 from botocore.exceptions import ClientError
+import requests
+import s3fs
 
 from hydrocron.utils import constants
 
@@ -90,7 +92,7 @@ def find_new_granules(collection_shortname, start_date, end_date):
     results : list of Granule objects
         List of S3 paths to the granules that have not yet been ingested
     """
-    auth = earthaccess.login()
+    auth = earthaccess.login(persist=True)
 
     cmr_search = earthaccess.DataGranules(auth). \
         short_name(collection_shortname).temporal(start_date, end_date)
@@ -98,6 +100,33 @@ def find_new_granules(collection_shortname, start_date, end_date):
     results = cmr_search.get()
 
     return results
+
+
+def get_granule_s3_obj(filepath):
+    """
+    Open the granule as an s3 file object using teh s3fs library
+
+    Parameters
+    ----------
+    filepath : string
+        The path to the granule in s3
+    """
+    s3_cred_endpoint = {
+        'podaac': 'https://archive.podaac.earthdata.nasa.gov/s3credentials'}
+
+    def get_temp_creds(provider):
+        return requests.get(s3_cred_endpoint[provider], timeout=60).json()
+
+    temp_creds_req = get_temp_creds('podaac')
+
+    fs_s3 = s3fs.S3FileSystem(anon=False,
+                              key=temp_creds_req['accessKeyId'],
+                              secret=temp_creds_req['secretAccessKey'],
+                              token=temp_creds_req['sessionToken'])
+
+    s3_file_obj = fs_s3.open(filepath, mode='rb')
+
+    return s3_file_obj
 
 
 def load_data(hydrocron_table, granule, obscure_data):
@@ -113,7 +142,8 @@ def load_data(hydrocron_table, granule, obscure_data):
         release of real data. Used during beta testing.
     """
     granule_path = granule.data_links(access='direct')
-    s3obj = earthaccess.open(granule)
+
+    s3obj = get_granule_s3_obj(granule_path)
 
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
         if 'Reach' in granule_path:
