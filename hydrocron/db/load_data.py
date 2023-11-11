@@ -31,7 +31,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     creds = {}
     creds['accessKeyId'] = event['body']['accessKeyId']
-    creds['secretAccessKeycret'] = event['body']['secretAccessKey']
+    creds['secretAccessKey'] = event['body']['secretAccessKey']
     creds['sessionToken'] = event['body']['sessionToken']
 
     os.environ['EARTHDATA_USERNAME'] = edl_user
