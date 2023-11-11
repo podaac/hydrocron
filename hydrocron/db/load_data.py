@@ -54,8 +54,8 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         start_date,
         end_date)
 
-    for granule in new_granules:
-        load_data(table, granule[0], obscure_data)
+    for g in new_granules:
+        load_data(table, g[0], obscure_data)
 
 
 def setup_connection():
@@ -97,26 +97,31 @@ def find_new_granules(collection_shortname, start_date, end_date):
 
     results = cmr_search.get()
 
-    granule_paths = [g.data_links(access='direct') for g in results]
-    return granule_paths
+    granules = earthaccess.open(results)
+
+    # granule_paths = [g.data_links(access='direct') for g in results]
+
+    return granules
 
 
-def load_data(hydrocron_table, granule_path, obscure_data):
+def load_data(hydrocron_table, granule, obscure_data):
     """
     Create table and load data
 
     hydrocron_table : HydrocronTable
         The table to load data into
-    granules : list of strings
-        The list of S3 paths of granules to load data from
+    granule : list of strings
+        Granules to load data from
     obscure_data : boolean
         If true, scramble the data values during load to prevent
         release of real data. Used during beta testing.
     """
+    granule_path = granule.data_links(access="direct")[0]
+
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
         if 'Reach' in granule_path:
             items = swot_reach_node_shp.read_shapefile(
-                granule_path,
+                granule,
                 obscure_data,
                 constants.REACH_DATA_COLUMNS)
 
