@@ -23,4 +23,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated 
 ### Removed
 ### Fixed
+    - Issue 33 - Obscure data sometimes fails when 1 is chosen multiplier in randomization
 ### Security
