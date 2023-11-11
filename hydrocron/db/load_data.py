@@ -99,8 +99,6 @@ def find_new_granules(collection_shortname, start_date, end_date):
 
     granules = earthaccess.open(results)
 
-    # granule_paths = [g.data_links(access='direct') for g in results]
-
     return granules
 
 
@@ -116,29 +114,29 @@ def load_data(hydrocron_table, granule, obscure_data):
         If true, scramble the data values during load to prevent
         release of real data. Used during beta testing.
     """
-    granule_path = granule.data_links(access="direct")[0]
+    # granule_path = granule.data_links(access="direct")[0]
 
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
-        if 'Reach' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(
-                granule,
-                obscure_data,
-                constants.REACH_DATA_COLUMNS)
+        # if 'Reach' in granule_path:
+        items = swot_reach_node_shp.read_shapefile(
+            granule,
+            obscure_data,
+            constants.REACH_DATA_COLUMNS)
 
-            for item_attrs in items:
-                # write to the table
-                hydrocron_table.add_data(**item_attrs)
+        for item_attrs in items:
+            # write to the table
+            hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
-        if 'Node' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(
-                granule_path,
-                obscure_data,
-                constants.NODE_DATA_COLUMNS)
+        # if 'Node' in granule_path:
+        items = swot_reach_node_shp.read_shapefile(
+            granule,
+            obscure_data,
+            constants.NODE_DATA_COLUMNS)
 
-            for item_attrs in items:
-                # write to the table
-                hydrocron_table.add_data(**item_attrs)
+        for item_attrs in items:
+            # write to the table
+            hydrocron_table.add_data(**item_attrs)
 
     else:
         print('Items cannot be parsed, file reader not implemented for table '
