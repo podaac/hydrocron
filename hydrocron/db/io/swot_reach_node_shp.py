@@ -42,7 +42,7 @@ def read_shapefile(filepath, obscure_data, columns, s3_obj=None):
             (np.rint(shp_file[numeric_columns]) != -999) &
             (np.rint(shp_file[numeric_columns]) != -99999999) &
             (np.rint(shp_file[numeric_columns]) != -999999999999),
-            np.random.default_rng().integers(low=0, high=10)*shp_file[numeric_columns],
+            np.random.default_rng().integers(low=2, high=10)*shp_file[numeric_columns],
             shp_file[numeric_columns])
 
     shp_file = shp_file.astype(str)
