@@ -8,7 +8,6 @@ import os
 import boto3
 import earthaccess
 from botocore.exceptions import ClientError
-import requests
 import s3fs
 
 from hydrocron.utils import constants
@@ -29,6 +28,11 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     edl_user = event['body']['edl_username']
     edl_password = event['body']['edl_password']
+
+    creds = {}
+    creds['accessKeyId'] = event['body']['accessKeyId']
+    creds['secretAccessKeycret'] = event['body']['secretAccessKey']
+    creds['sessionToken'] = event['body']['sessionToken']
 
     os.environ['EARTHDATA_USERNAME'] = edl_user
     os.environ['EARTHDATA_PASSWORD'] = edl_password
@@ -57,7 +61,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         end_date)
 
     for granule in new_granules:
-        load_data(table, granule, obscure_data)
+        load_data(table, granule, obscure_data, creds)
 
 
 def setup_connection():
@@ -102,7 +106,7 @@ def find_new_granules(collection_shortname, start_date, end_date):
     return results
 
 
-def get_granule_s3_obj(filepath):
+def get_granule_s3_obj(filepath, creds):
     """
     Open the granule as an s3 file object using teh s3fs library
 
@@ -111,25 +115,18 @@ def get_granule_s3_obj(filepath):
     filepath : string
         The path to the granule in s3
     """
-    s3_cred_endpoint = {
-        'podaac': 'https://archive.podaac.earthdata.nasa.gov/s3credentials'}
-
-    def get_temp_creds(provider):
-        return requests.get(s3_cred_endpoint[provider], timeout=60).json()
-
-    temp_creds_req = get_temp_creds('podaac')
 
     fs_s3 = s3fs.S3FileSystem(anon=False,
-                              key=temp_creds_req['accessKeyId'],
-                              secret=temp_creds_req['secretAccessKey'],
-                              token=temp_creds_req['sessionToken'])
+                              key=creds['accessKeyId'],
+                              secret=creds['secretAccessKey'],
+                              token=creds['sessionToken'])
 
     s3_file_obj = fs_s3.open(filepath, mode='rb')
 
     return s3_file_obj
 
 
-def load_data(hydrocron_table, granule, obscure_data):
+def load_data(hydrocron_table, granule, obscure_data, creds):
     """
     Create table and load data
 
@@ -143,7 +140,7 @@ def load_data(hydrocron_table, granule, obscure_data):
     """
     granule_path = granule.data_links(access='direct')
 
-    s3obj = get_granule_s3_obj(granule_path)
+    s3obj = get_granule_s3_obj(granule_path, creds)
 
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
         if 'Reach' in granule_path:
