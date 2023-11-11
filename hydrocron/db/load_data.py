@@ -138,7 +138,7 @@ def load_data(hydrocron_table, granule, obscure_data, creds):
         If true, scramble the data values during load to prevent
         release of real data. Used during beta testing.
     """
-    granule_path = granule.data_links(access='direct')
+    granule_path = granule.data_links(access='direct')[0]
 
     s3obj = get_granule_s3_obj(granule_path, creds)
 
