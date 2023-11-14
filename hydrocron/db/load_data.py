@@ -113,15 +113,13 @@ def load_data(hydrocron_table, granule, obscure_data):
         release of real data. Used during beta testing.
     """
     granule_path = granule.data_links(access='direct')[0]
-    s3obj = earthaccess.open(granule)
 
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
         if 'Reach' in granule_path:
             items = swot_reach_node_shp.read_shapefile(
                 granule_path,
                 obscure_data,
-                constants.REACH_DATA_COLUMNS,
-                s3_obj=s3obj)
+                constants.REACH_DATA_COLUMNS)
 
             for item_attrs in items:
                 # write to the table
@@ -132,8 +130,7 @@ def load_data(hydrocron_table, granule, obscure_data):
             items = swot_reach_node_shp.read_shapefile(
                 granule_path,
                 obscure_data,
-                constants.NODE_DATA_COLUMNS,
-                s3_obj=s3obj)
+                constants.NODE_DATA_COLUMNS)
 
             for item_attrs in items:
                 # write to the table

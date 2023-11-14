@@ -8,7 +8,7 @@ import geopandas as gpd
 import numpy as np
 
 
-def read_shapefile(filepath, obscure_data, columns, s3_obj=None):
+def read_shapefile(filepath, obscure_data, columns):
     """
     Reads a SWOT River Reach shapefile packaged as a zip
 
@@ -21,8 +21,6 @@ def read_shapefile(filepath, obscure_data, columns, s3_obj=None):
         Used during beta testing.
     columns : list
         The shapefile attributes to obscure if obscure_data=True
-    s3_obj : the s3 granule object to open
-        Optional - the the s3 object to open
 
     Returns
     -------
@@ -31,8 +29,8 @@ def read_shapefile(filepath, obscure_data, columns, s3_obj=None):
         to the database table
     """
 
-    if s3_obj is not None:
-        shp_file = gpd.read_file('zip+' + s3_obj)
+    if filepath.startswith('s3'):
+        shp_file = gpd.read_file('zip+' + filepath)
     else:
         shp_file = gpd.read_file('zip://' + filepath)
 
