@@ -8,15 +8,19 @@ import os
 import boto3
 import earthaccess
 from botocore.exceptions import ClientError
-import s3fs
-
-from hydrocron.utils import constants
 
 from hydrocron.db import HydrocronTable
 from hydrocron.db.io import swot_reach_node_shp
+from hydrocron.utils import constants
 
 
-def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
+class MissingTable(Exception):
+    """
+    Exception thrown if expected table is missing
+    """
+
+
+def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     """
     Lambda entrypoint for loading the database
     """
@@ -26,17 +30,6 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     end_date = event['body']['end_date']
     obscure_data = event['body']['obscure_data']
 
-    edl_user = event['body']['edl_username']
-    edl_password = event['body']['edl_password']
-
-    creds = {}
-    creds['accessKeyId'] = event['body']['accessKeyId']
-    creds['secretAccessKey'] = event['body']['secretAccessKey']
-    creds['sessionToken'] = event['body']['sessionToken']
-
-    os.environ['EARTHDATA_USERNAME'] = edl_user
-    os.environ['EARTHDATA_PASSWORD'] = edl_password
-
     match table_name:
         case constants.SWOT_REACH_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
@@ -45,15 +38,15 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         case constants.DB_TEST_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
         case _:
-            logging.warning(
-                "Hydrocron table '%s' does not exist.", table_name)
+            raise MissingTable(f"Hydrocron table '{table_name}' does not exist.")
 
     dynamo_resource = setup_connection()
     try:
         table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
     except ClientError as err:
         if err.response['Error']['Code'] == 'ResourceNotFoundException':
-            logging.info("Table '%s' does not exist.", table_name)
+            raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from err
+        raise err
 
     new_granules = find_new_granules(
         collection_shortname,
@@ -61,7 +54,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         end_date)
 
     for granule in new_granules:
-        load_data(table, granule, obscure_data, creds)
+        load_data(table, granule, obscure_data)
 
 
 def setup_connection():
@@ -90,43 +83,24 @@ def find_new_granules(collection_shortname, start_date, end_date):
     ----------
     collection_shortname : string
         The shortname of the collection to search
+    start_date
+    end_date
 
     Returns
     -------
     results : list of Granule objects
         List of S3 paths to the granules that have not yet been ingested
     """
-    auth = earthaccess.login(persist=True)
+    auth = earthaccess.login()
 
-    cmr_search = earthaccess.DataGranules(auth). \
-        short_name(collection_shortname).temporal(start_date, end_date)
+    cmr_search = earthaccess.DataGranules(auth).short_name(collection_shortname).temporal(start_date, end_date)
 
     results = cmr_search.get()
 
     return results
 
 
-def get_granule_s3_obj(filepath, creds):
-    """
-    Open the granule as an s3 file object using teh s3fs library
-
-    Parameters
-    ----------
-    filepath : string
-        The path to the granule in s3
-    """
-
-    fs_s3 = s3fs.S3FileSystem(anon=False,
-                              key=creds['accessKeyId'],
-                              secret=creds['secretAccessKey'],
-                              token=creds['sessionToken'])
-
-    s3_file_obj = fs_s3.open(filepath, mode='rb')
-
-    return s3_file_obj
-
-
-def load_data(hydrocron_table, granule, obscure_data, creds):
+def load_data(hydrocron_table, granule, obscure_data):
     """
     Create table and load data
 
@@ -139,8 +113,7 @@ def load_data(hydrocron_table, granule, obscure_data, creds):
         release of real data. Used during beta testing.
     """
     granule_path = granule.data_links(access='direct')[0]
-
-    s3obj = get_granule_s3_obj(granule_path, creds)
+    s3obj = earthaccess.open(granule)
 
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
         if 'Reach' in granule_path:
@@ -167,5 +140,4 @@ def load_data(hydrocron_table, granule, obscure_data, creds):
                 hydrocron_table.add_data(**item_attrs)
 
     else:
-        print('Items cannot be parsed, file reader not implemented for table '
-              + hydrocron_table.table_name)
+        logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
