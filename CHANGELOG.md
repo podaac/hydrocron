@@ -22,5 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 8 - Add script to load data
 ### Deprecated 
 ### Removed
+    - Issue 18 - Remove flask
 ### Fixed
 ### Security
