@@ -1,5 +1,6 @@
 from hydrocron.utils.constants import TEST_REACH_ID_VALUE
 
+
 def test_timeseries_lambda_handler(hydrocron_api):
     """
     Test the lambda handler for the timeseries endpoint
@@ -20,5 +21,6 @@ def test_timeseries_lambda_handler(hydrocron_api):
         }
     }
 
-    #assert hydrocron.api.controllers.timeseries.lambda_handler(event, {})
-    assert 1 == 1
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, {})
+    print(result)
+    assert result['status'] == '200 OK'
