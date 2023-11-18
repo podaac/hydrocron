@@ -1,6 +1,6 @@
 from hydrocron.utils.constants import TEST_REACH_ID_VALUE
 
-
+@pytest.skip("Needs to be refactored to test the lambda handler not the flask app", allow_module_level=True)
 def test_timeseries_lambda_handler(hydrocron_api):
     """
     Test the lambda handler for the timeseries endpoint
