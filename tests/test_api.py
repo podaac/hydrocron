@@ -1,13 +1,13 @@
 from hydrocron.utils.constants import TEST_REACH_ID_VALUE
-#
-#
+
+
 def test_timeseries_lambda_handler(hydrocron_api):
-    """ .
+    """
     Test the lambda handler for the timeseries endpoint
     Parameters
     ----------
     hydrocron_api: Fixture ensuring the database is configured for the api
-    """ #
+    """
     import hydrocron.api.controllers.timeseries
     # TODO: Implement test
     event = {
