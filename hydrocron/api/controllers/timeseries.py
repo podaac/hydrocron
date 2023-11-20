@@ -185,6 +185,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
 
     logger.info("INFO: Hydrocron Timeseries Lambda starts")
+    logger.info("PRINT: Hydrocron Timeseries Lambda starts")
     feature = event['queryStringParameters']['feature']
     feature_id = event['queryStringParameters']['reach_id']
     start_time = event['queryStringParameters']['start_time']
