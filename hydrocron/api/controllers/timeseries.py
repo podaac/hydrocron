@@ -3,6 +3,7 @@ Hydrocron API timeseries controller
 """
 # pylint: disable=R0801
 # pylint: disable=C0103
+# pylint: disable=E1101
 import logging
 import time
 import datetime
