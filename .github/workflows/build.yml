@@ -223,7 +223,7 @@ jobs:
       packages: write
     needs: build
     outputs:
-      container_image_uri: ${{ steps.set-outputs.outputs.73254700251 }}
+      container_image_uri: ${{ steps.set-outputs.outputs.container_image_uri }}
     env:
       THE_VERSION: ${{ needs.build.outputs.version }}
       PYPROJECT_NAME: ${{ needs.build.outputs.pyproject_name }}
