@@ -12,6 +12,7 @@ from hydrocron.api import hydrocron
 from hydrocron.utils import constants
 
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
