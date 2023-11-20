@@ -190,8 +190,13 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     output = event['body']['output']
     fields = event['body']['fields']
 
+    timestamp_start = datetime.datetime.now()
+    logger.info(f" : INFO: Timestamp start {timestamp_start}")
     results = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
+    timestamp_end = datetime.datetime.now()
+    logger.info(f" : INFO: Timestamp end {timestamp_end}")
+    logger.info(f" : INFO: Elapsed {(timestamp_end - timestamp_start).seconds} seconds")
     data = {}
 
     status = "200 OK"
