@@ -3,10 +3,9 @@ Hydrocron API timeseries controller
 """
 # pylint: disable=R0801
 # pylint: disable=C0103
-# pylint: disable=E1101
 import logging
 import time
-import datetime
+from datetime import datetime
 from typing import Generator
 from hydrocron.api import hydrocron
 
@@ -184,6 +183,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     This function queries the database for relevant results
     """
 
+    logger.info("INFO: Hydrocron Timeseries Lambda starts")
     feature = event['queryStringParameters']['feature']
     feature_id = event['queryStringParameters']['reach_id']
     start_time = event['queryStringParameters']['start_time']
