@@ -31,8 +31,7 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
 
     if filepath.startswith('s3'):
         bucket_name, key = filepath.replace("s3://", "").split("/", 1)
-        zip_file = os.path.basename(filepath)
-        lambda_temp_file = '/tmp/' + zip_file
+        lambda_temp_file = '/tmp/' + os.path.basename(filepath)
 
         s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
 
