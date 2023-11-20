@@ -217,7 +217,7 @@ jobs:
           tag: ${{ env.software_version }}
           
   docker:
-    name: Build & Publish Docker  Image
+    name: Build & Publish Docker Image
     runs-on: ubuntu-latest
     permissions:
       packages: write
