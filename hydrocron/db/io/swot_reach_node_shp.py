@@ -28,10 +28,11 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
         A list containing json dictionaries of each item attributes to add
         to the database table
     """
+    filename = os.path.basename(filepath)
 
     if filepath.startswith('s3'):
         bucket_name, key = filepath.replace("s3://", "").split("/", 1)
-        lambda_temp_file = '/tmp/' + os.path.basename(filepath)
+        lambda_temp_file = '/tmp/' + filename
 
         s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
 
@@ -50,7 +51,6 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
 
     shp_file = shp_file.astype(str)
 
-    filename = os.path.basename(filepath)
     filename_attrs = parse_from_filename(filename)
 
     items = []
