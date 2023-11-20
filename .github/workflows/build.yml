@@ -114,7 +114,7 @@ jobs:
           echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
       - name: No version bump
-        # If triggered by workflow dispatch, no version bump
+        # If triggered by workflow dispatch,  no version bump
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
