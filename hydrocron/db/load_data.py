@@ -40,7 +40,8 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         case _:
             raise MissingTable(f"Hydrocron table '{table_name}' does not exist.")
 
-    dynamo_resource = setup_connection()
+    dynamo_resource, s3_resource = setup_connection()
+
     try:
         table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
     except ClientError as err:
@@ -54,25 +55,28 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         end_date)
 
     for granule in new_granules:
-        load_data(table, granule, obscure_data)
+        load_data(table, granule, obscure_data, s3_resource)
 
 
 def setup_connection():
     """
-    Set up DynamoDB connection
+    Set up DynamoDB and S3 resource connections
 
     Returns
     -------
-    dynamo_instance : HydrocronDB
+    dynamo_resource : HydrocronDB
+    s3_resource : S3 resource
     """
     session = boto3.session.Session()
 
     if endpoint_url := os.getenv('HYDROCRON_dynamodb_endpoint_url'):
         dyndb_resource = session.resource('dynamodb', endpoint_url=endpoint_url)
+        s3_resource = None
     else:
         dyndb_resource = session.resource('dynamodb')
+        s3_resource = session.resource('s3')
 
-    return dyndb_resource
+    return dyndb_resource, s3_resource
 
 
 def find_new_granules(collection_shortname, start_date, end_date):
@@ -100,7 +104,7 @@ def find_new_granules(collection_shortname, start_date, end_date):
     return results
 
 
-def load_data(hydrocron_table, granule, obscure_data):
+def load_data(hydrocron_table, granule, obscure_data, s3_resource=None):
     """
     Create table and load data
 
@@ -119,7 +123,8 @@ def load_data(hydrocron_table, granule, obscure_data):
             items = swot_reach_node_shp.read_shapefile(
                 granule_path,
                 obscure_data,
-                constants.REACH_DATA_COLUMNS)
+                constants.REACH_DATA_COLUMNS,
+                s3_resource=s3_resource)
 
             for item_attrs in items:
                 # write to the table
@@ -130,7 +135,8 @@ def load_data(hydrocron_table, granule, obscure_data):
             items = swot_reach_node_shp.read_shapefile(
                 granule_path,
                 obscure_data,
-                constants.NODE_DATA_COLUMNS)
+                constants.NODE_DATA_COLUMNS,
+                s3_resource=s3_resource)
 
             for item_attrs in items:
                 # write to the table

@@ -8,7 +8,7 @@ import geopandas as gpd
 import numpy as np
 
 
-def read_shapefile(filepath, obscure_data, columns):
+def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
     """
     Reads a SWOT River Reach shapefile packaged as a zip
 
@@ -30,7 +30,13 @@ def read_shapefile(filepath, obscure_data, columns):
     """
 
     if filepath.startswith('s3'):
-        shp_file = gpd.read_file('zip+' + filepath)
+        bucket_name, key = filepath.replace("s3://", "").split("/", 1)
+        zip_file = os.path.basename(filepath)
+        lambda_temp_file = '/tmp/' + zip_file
+
+        s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
+
+        shp_file = gpd.read_file('zip://' + lambda_temp_file)
     else:
         shp_file = gpd.read_file('zip://' + filepath)
 
