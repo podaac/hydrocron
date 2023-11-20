@@ -185,7 +185,6 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
 
     logger.info("INFO: Hydrocron Timeseries Lambda starts")
-    logger.info("PRINT: Hydrocron Timeseries Lambda starts")
     feature = event['queryStringParameters']['feature']
     feature_id = event['queryStringParameters']['reach_id']
     start_time = event['queryStringParameters']['start_time']
@@ -194,11 +193,11 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     fields = event['queryStringParameters']['fields']
 
     timestamp_start = datetime.now()
-    logger.info("INFO: Timestamp start %s", timestamp_start)
+    logger.info("INFO: Timestamp start %s", datetime.strptime(timestamp_start, "%Y-%m-%d %H:%M:%S"))
     results = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
     timestamp_end = datetime.now()
-    logger.info("INFO: Timestamp end %s", timestamp_end)
+    logger.info("INFO: Timestamp end %s", datetime.strptime(timestamp_end, "%Y-%m-%d %H:%M:%S"))
     logger.info("INFO: Elapsed %s seconds", (timestamp_end - timestamp_start).seconds)
     data = {}
 
