@@ -9,7 +9,7 @@ def test_timeseries_lambda_handler(hydrocron_api):
     hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
-    # TODO: Implement test
+
     event = {
         "body": {
             "feature": "Reach",
@@ -17,10 +17,11 @@ def test_timeseries_lambda_handler(hydrocron_api):
             "start_time": "2022-08-04T00:00:00+00:00",
             "end_time": "2022-08-23T00:00:00+00:00",
             "output": "csv",
-            "fields": "feature_id,time_str,wse"
+            "fields": "reach_id,time_str,wse"
         }
     }
 
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, {})
     print(result)
-    assert result['status'] == '200 OK'
+    assert result['status'] == '200 OK' and result['results'] == ('reach_id,time_str,wse\n71224100223,'
+                                                                  '2023-06-10T19:39:43Z,286.2983,\n')
