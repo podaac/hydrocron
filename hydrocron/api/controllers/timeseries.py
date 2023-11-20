@@ -193,12 +193,15 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     fields = event['queryStringParameters']['fields']
 
     timestamp_start = datetime.now()
-    logger.info("INFO: Timestamp start %s", datetime.strptime(timestamp_start, "%Y-%m-%d %H:%M:%S"))
+    logger.info("INFO: Timestamp start: %s", datetime.strptime(timestamp_start, "%Y-%m-%d %H:%M:%S"))
+    logger.info("INFO: Feature: %s", feature)
+    logger.info("INFO: Feature ID: %s", feature_id)
+
     results = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
     timestamp_end = datetime.now()
-    logger.info("INFO: Timestamp end %s", datetime.strptime(timestamp_end, "%Y-%m-%d %H:%M:%S"))
-    logger.info("INFO: Elapsed %s seconds", (timestamp_end - timestamp_start).seconds)
+    logger.info("INFO: Timestamp end: %s", datetime.strptime(timestamp_end, "%Y-%m-%d %H:%M:%S"))
+    logger.info("INFO: Seconds elapsed: %s", (timestamp_end - timestamp_start).seconds)
     data = {}
 
     status = "200 OK"
