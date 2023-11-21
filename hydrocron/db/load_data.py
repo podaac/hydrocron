@@ -112,18 +112,20 @@ def setup_connection():
 
     creds = retrieve_credentials()
 
-    session = boto3.session.Session(
+    dyn_session = boto3.session.Session()
+
+    s3_session = boto3.session.Session(
         aws_access_key_id=creds['accessKeyId'],
         aws_secret_access_key=creds['secretAccessKey'],
         aws_session_token=creds['sessionToken'],
         region_name='us-west-2')
 
     if endpoint_url := os.getenv('HYDROCRON_dynamodb_endpoint_url'):
-        dyndb_resource = session.resource('dynamodb', endpoint_url=endpoint_url)
+        dyndb_resource = dyn_session.resource('dynamodb', endpoint_url=endpoint_url)
         s3_resource = None
     else:
-        dyndb_resource = session.resource('dynamodb')
-        s3_resource = session.resource('s3')
+        dyndb_resource = dyn_session.resource('dynamodb')
+        s3_resource = s3_session.resource('s3')
 
     return dyndb_resource, s3_resource
 
