@@ -183,12 +183,12 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     This function queries the database for relevant results
     """
 
-    feature = event['body']['feature']
-    feature_id = event['body']['reach_id']
-    start_time = event['body']['start_time']
-    end_time = event['body']['end_time']
-    output = event['body']['output']
-    fields = event['body']['fields']
+    feature = event['queryStringParameters']['feature']
+    feature_id = event['queryStringParameters']['reach_id']
+    start_time = event['queryStringParameters']['start_time']
+    end_time = event['queryStringParameters']['end_time']
+    output = event['queryStringParameters']['output']
+    fields = event['queryStringParameters']['fields']
 
     results = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
