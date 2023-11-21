@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 41 - Update API documentation with query response examples
     - Issue 27 - Create lambda function to execute database loading
     - Issue 9 - Create API Usage Documentation
     - Issue 4 - User guide for how to run database load script manually
@@ -16,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 23 - Added github actions with Snyk, pylint, flake8
     - Issue 7 - Added actions to build.yml to upload docker container to registry
     - Issue 7 - Fixed poetry.lock to account for new vulnerability detected in Synk, given that we are going to remove flask
-### Changed 
+### Changed
     - Issue 8 - Hydrocron API implementation with dynamodb local database
     - Issue 8 - Rearrange database code
     - Issue 8 - Rearrange tests
