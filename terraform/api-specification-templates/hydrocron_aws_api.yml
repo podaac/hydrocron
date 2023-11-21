@@ -150,14 +150,17 @@ paths:
                 }
         requestTemplates:
           application/json: |-
+            #set($allParams = $input.params())
             {
-              "body": {
-                "exact":"$input.params('exact')",
-                "region": "$input.params('region')",
-                "page_number": "$input.params('page_number')" ,
-                "page_size": "$input.params('page_size')" ,
-                "polygon_format": "$input.params('polygon_format')"
-              }
+            "body" : {
+            #foreach($type in $allParams.keySet())
+                #set($params = $allParams.get($type))
+                #foreach($paramName in $params.keySet())
+                "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                    #if($foreach.hasNext),#end
+                #end
+            #end
+            }
             }
         passthroughBehavior: when_no_templates
         httpMethod: POST
