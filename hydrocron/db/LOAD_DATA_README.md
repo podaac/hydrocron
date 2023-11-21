@@ -6,7 +6,7 @@ The main data loading function is hydrocron_db/load_data.py.  This runs as a lam
 
 ## Earthdata Login
 
-The current version uses both the earthaccess python library to handle EDL for the initial CMR query, and the S3FS package fo attempt to open the data files in cloud. Configure the EDL credentials to use in the parameters when invoking the lambda function.
+The current version uses the earthaccess python library to handle EDL for the initial CMR query.
 
 ## Invoke the lambda in the AWS Console for initial data loading
 
@@ -14,19 +14,14 @@ Version 1 of Hydrocron uses two database tables, one for SWOT river reaches and 
 
 To load river reaches into the database, find the svc-hydrocron-(env)-load_data-lambda lambda function in the AWS Console.
 
-Under Test, enter the following event JSON, entering your EDL credentials and access key/tokens generated from the [PODAAC S3 credentials endpoint](https://archive.podaac.earthdata.nasa.gov/s3credentials)
+Under Test, enter the following event JSON:
 
     {
         "body": {
         "table_name": "hydrocron-swot-reach-table",
         "start_date": "2023-10-24T00:00:00",
         "end_date": "2023-10-25T23:59:59",
-        "obscure_data": "True",
-        "edl_username": "",
-        "edl_password": "",
-        "accessKeyId": "",
-        "secretAccessKey": "",
-        "sessionToken": ""
+        "obscure_data": "True"
         }
     }
 

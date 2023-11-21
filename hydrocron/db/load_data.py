@@ -4,6 +4,7 @@ the appropriate DynamoDB table
 """
 import logging
 import os
+import requests
 
 import boto3
 import earthaccess
@@ -57,6 +58,14 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     for granule in new_granules:
         load_data(table, granule, obscure_data, s3_resource)
 
+def get_temp_creds():
+    """
+    Get temporary AWS credentials
+    """
+    s3_cred_endpoint = 'https://archive.podaac.earthdata.nasa.gov/s3credentials'
+    temp_creds_url = s3_cred_endpoint
+    return requests.get(temp_creds_url).json()
+
 
 def setup_connection():
     """
@@ -67,7 +76,14 @@ def setup_connection():
     dynamo_resource : HydrocronDB
     s3_resource : S3 resource
     """
-    session = boto3.session.Session()
+
+    creds = get_temp_creds()
+
+    session = boto3.session.Session(
+        aws_access_key_id=creds['accessKeyId'],
+        aws_secret_access_key=creds['secretAccessKey'],
+        aws_session_token=creds['sessionToken'],
+        region_name='us-west-2')
 
     if endpoint_url := os.getenv('HYDROCRON_dynamodb_endpoint_url'):
         dyndb_resource = session.resource('dynamodb', endpoint_url=endpoint_url)
