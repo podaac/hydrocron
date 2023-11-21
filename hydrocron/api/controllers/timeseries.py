@@ -156,6 +156,12 @@ def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa
         data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
 
     else:
+        data['status'] = "200 OK"
+        data['time'] = str(dataTime) + " ms."
+        # data['search on'] = {"feature_id": feature_id}
+        data['type'] = "FeatureCollection"
+        data['features'] = []
+        i = 0
         # csv = "feature_id, time_str, wse, geometry\n"
         csv = fields + '\n'
         fields_set = fields.split(", ")[0]
@@ -175,7 +181,10 @@ def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa
                     csv += ','
                 csv += '\n'
 
-    return csv
+        data['csv'].append(csv)
+        data['hits'] = i
+
+    return data
 
 
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
