@@ -29,11 +29,10 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
         to the database table
     """
     filename = os.path.basename(filepath)
+    lambda_temp_file = '/tmp/' + filename
 
     if filepath.startswith('s3'):
         bucket_name, key = filepath.replace("s3://", "").split("/", 1)
-        lambda_temp_file = '/tmp/' + filename
-
         s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
 
         shp_file = gpd.read_file('zip://' + lambda_temp_file)
