@@ -96,7 +96,8 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
         for t in results:
             # TODO: Coordinate to filter in the database instance:
             # if t['reach_id'] == feature_id and t['time'] > start_time and t['time'] < end_time and t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
-            if t['reach_id'] == feature_id and t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
+            if t['reach_id'] == feature_id and t[
+                constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
                 feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
                 feature['geometry']['coordinates'] = []
                 feature_type = ''
@@ -120,7 +121,7 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
                 i += 1
                 feature['properties']['time'] = datetime.fromtimestamp(
                     float(t[constants.FIELDNAME_TIME]) + 946710000).strftime(
-                        "%Y-%m-%d %H:%M:%S")
+                    "%Y-%m-%d %H:%M:%S")
                 feature['properties']['reach_id'] = float(t[constants.FIELDNAME_REACH_ID])
                 feature['properties']['wse'] = float(t[constants.FIELDNAME_WSE])
                 feature['properties']['slope'] = float(t[constants.FIELDNAME_SLOPE])
@@ -192,21 +193,6 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     results = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
-    data = {}
-
-    status = "200 OK"
-
-    data['status'] = status
-    data['time'] = str(10) + " ms."
-    data['hits'] = 10
-
-    data['search on'] = {
-        "parameter": "identifier",
-        "exact": "exact",
-        "page_number": 0,
-        "page_size": 20
-    }
-
-    data['results'] = results
+    data = {'status': "200 OK", 'results': results}
 
     return data
