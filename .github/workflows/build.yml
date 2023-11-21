@@ -248,6 +248,11 @@ jobs:
             type=pep440,pattern={{version}},value=${{ env.THE_VERSION }}
             type=raw,value=${{ needs.build.outputs.deploy_env }}
       - name: Build and push Docker image
+        if: |
+          github.ref == 'refs/heads/develop' ||
+          github.ref == 'refs/heads/main'    ||
+          startsWith(github.ref, 'refs/heads/release') ||
+          github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -269,6 +274,11 @@ jobs:
     env:
       THE_VERSION: ${{ needs.build.outputs.version }}
       CONTAINER_IMAGE_URI: ${{ needs.docker.outputs.container_image_uri }}
+    if: |
+      github.ref == 'refs/heads/develop' ||
+      github.ref == 'refs/heads/main'    ||
+      startsWith(github.ref, 'refs/heads/release') ||
+      github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v3
         with:
