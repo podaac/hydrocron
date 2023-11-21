@@ -102,7 +102,6 @@ def setup_s3connection():
     Returns
     -------
     s3_resource : S3 resource
-    
     """
 
     creds = retrieve_credentials()
