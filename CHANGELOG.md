@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 27 - Create lambda function to execute database loading
     - Issue 9 - Create API Usage Documentation
     - Issue 4 - User guide for how to run database load script manually
     - Issue 12 - Move all constants to separate constants file

@@ -19,6 +19,14 @@ data "aws_vpc" "default" {
   }
 }
 
+data "aws_ssm_parameter" "edl_username" {
+  name = "urs_podaaccloud_user"
+}
+data "aws_ssm_parameter" "edl_password" {
+  name = "urs_podaaccloud_pass"
+  with_decryption = true
+}
+
 locals {
   environment = var.stage
   account_id  = data.aws_caller_identity.current.account_id

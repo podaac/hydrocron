@@ -48,14 +48,14 @@ data "aws_iam_policy_document" "dynamo-write-policy" {
 data "aws_iam_policy_document" "ssm-read-policy" {
 
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = [
       "ssm:DescribeParameters"
     ]
     resources = ["arn:aws:ssm:${data.aws_region.current.id}:${local.account_id}:parameter/service/${var.app_name}/*"]
   }
   statement {
-    effect  = "Allow"
+    effect = "Allow"
 
     actions = [
       "ssm:GetParameter",
@@ -66,6 +66,24 @@ data "aws_iam_policy_document" "ssm-read-policy" {
     resources = ["arn:aws:ssm:${data.aws_region.current.id}:${local.account_id}:parameter/service/${var.app_name}/*"]
   }
 
+}
+
+data "aws_iam_policy_document" "s3-read-policy" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "s3:Get*",
+      "s3:List*",
+      "s3:Describe*",
+      "s3-object-lambda:Get*",
+      "s3-object-lambda:List*"
+    ]
+
+    resources = [
+      "arn:aws:s3:::podaac-*",
+      "arn:aws:s3:::podaac-*/*"
+    ]
+  }
 }
 
 data "aws_iam_policy_document" "assume_role_lambda" {
@@ -126,15 +144,33 @@ resource "aws_iam_role" "hydrocron-lambda-execution-role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-  managed_policy_arns = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 
   inline_policy {
-    name = "HydrocronDynamoRead"
+    name   = "HydrocronDynamoRead"
     policy = data.aws_iam_policy_document.dynamo-read-policy.json
   }
   inline_policy {
-    name = "HydrocronSSMRead"
+    name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
+  }
+}
+
+
+resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
+  name = "${local.aws_resource_prefix}-lambda-load-data-role"
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+
+  inline_policy {
+    name   = "HydrocronDynamoWrite"
+    policy = data.aws_iam_policy_document.dynamo-write-policy.json
+  }
+  inline_policy {
+    name = "HydrocronS3Read"
+    policy = data.aws_iam_policy_document.s3-read-policy.json
   }
 }
 
