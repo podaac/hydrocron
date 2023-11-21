@@ -4,7 +4,9 @@ the appropriate DynamoDB table
 """
 import logging
 import os
+import base64
 import requests
+import json
 
 import boto3
 import earthaccess
@@ -58,13 +60,44 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     for granule in new_granules:
         load_data(table, granule, obscure_data, s3_resource)
 
-def get_temp_creds():
+
+def retrieve_credentials():
+    """Makes the Oauth calls to authenticate with EDS and return a set of s3
+    same-region, read-only credntials.
     """
-    Get temporary AWS credentials
-    """
-    s3_cred_endpoint = 'https://archive.podaac.earthdata.nasa.gov/s3credentials'
-    temp_creds_url = s3_cred_endpoint
-    return requests.get(temp_creds_url).json()
+    login_resp = requests.get(
+        constants.S3_CREDS_ENDPOINT,
+        allow_redirects=False,
+        timeout=5
+    )
+    login_resp.raise_for_status()
+
+    auth = f"{os.environ['EARTHDATA_USERNAME']}:{os.environ['EARTHDATA_PASSWORD']}"
+    encoded_auth = base64.b64encode(auth.encode('ascii'))
+
+    auth_redirect = requests.post(
+        login_resp.headers['location'],
+        data={"credentials": encoded_auth},
+        headers={"Origin": constants.S3_CREDS_ENDPOINT},
+        allow_redirects=False,
+        timeout=5
+    )
+    auth_redirect.raise_for_status()
+
+    final = requests.get(
+        auth_redirect.headers['location'],
+        allow_redirects=False,
+        timeout=5
+    )
+
+    results = requests.get(
+        constants.S3_CREDS_ENDPOINT,
+        cookies={'accessToken': final.cookies['accessToken']},
+        timeout=5
+    )
+    results.raise_for_status()
+
+    return json.loads(results.content)
 
 
 def setup_connection():
@@ -77,7 +110,7 @@ def setup_connection():
     s3_resource : S3 resource
     """
 
-    creds = get_temp_creds()
+    creds = retrieve_credentials()
 
     session = boto3.session.Session(
         aws_access_key_id=creds['accessKeyId'],
