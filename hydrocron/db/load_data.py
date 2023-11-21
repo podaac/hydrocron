@@ -43,22 +43,17 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         case _:
             raise MissingTable(f"Hydrocron table '{table_name}' does not exist.")
 
-    dynamo_resource, s3_resource = setup_connection()
-
-    try:
-        table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
-    except ClientError as err:
-        if err.response['Error']['Code'] == 'ResourceNotFoundException':
-            raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from err
-        raise err
-
     new_granules = find_new_granules(
         collection_shortname,
         start_date,
         end_date)
 
     for granule in new_granules:
-        load_data(table, granule, obscure_data, s3_resource)
+        s3_resource = setup_s3connection()
+        items = read_data(granule, obscure_data, s3_resource)
+
+        dynamo_resource = setup_dynamoconnection()
+        load_data(dynamo_resource, table_name, items)
 
 
 def retrieve_credentials():
@@ -100,19 +95,17 @@ def retrieve_credentials():
     return json.loads(results.content)
 
 
-def setup_connection():
+def setup_s3connection():
     """
-    Set up DynamoDB and S3 resource connections
+    Set up S3 resource connections
 
     Returns
     -------
-    dynamo_resource : HydrocronDB
     s3_resource : S3 resource
+    
     """
 
     creds = retrieve_credentials()
-
-    dyn_session = boto3.session.Session()
 
     s3_session = boto3.session.Session(
         aws_access_key_id=creds['accessKeyId'],
@@ -120,14 +113,29 @@ def setup_connection():
         aws_session_token=creds['sessionToken'],
         region_name='us-west-2')
 
+    s3_resource = s3_session.resource('s3')
+
+    return s3_resource
+
+
+def setup_dynamoconnection():
+    """
+    Set up DynamoDB resource connections
+
+    Returns
+    -------
+    dynamo_resource : HydrocronDB
+
+    """
+
+    dyn_session = boto3.session.Session()
+
     if endpoint_url := os.getenv('HYDROCRON_dynamodb_endpoint_url'):
         dyndb_resource = dyn_session.resource('dynamodb', endpoint_url=endpoint_url)
-        s3_resource = None
     else:
         dyndb_resource = dyn_session.resource('dynamodb')
-        s3_resource = s3_session.resource('s3')
 
-    return dyndb_resource, s3_resource
+    return dyndb_resource
 
 
 def find_new_granules(collection_shortname, start_date, end_date):
@@ -155,43 +163,71 @@ def find_new_granules(collection_shortname, start_date, end_date):
     return results
 
 
-def load_data(hydrocron_table, granule, obscure_data, s3_resource=None):
+def read_data(granule, obscure_data, s3_resource=None):
     """
-    Create table and load data
+    Read data from shapefiles
 
-    hydrocron_table : HydrocronTable
-        The table to load data into
-    granules : Granule object
-        The list of S3 paths of granules to load data from
+    Parameters
+    ----------
+    granule : Granule
+        the granule to unpack
     obscure_data : boolean
-        If true, scramble the data values during load to prevent
-        release of real data. Used during beta testing.
+        whether to obscure the data on load
+    s3_resource : boto3 session resource
+
+    Returns
+    -------
+    items : the unpacked granule data
     """
     granule_path = granule.data_links(access='direct')[0]
 
-    if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
-        if 'Reach' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(
-                granule_path,
-                obscure_data,
-                constants.REACH_DATA_COLUMNS,
-                s3_resource=s3_resource)
+    if 'Reach' in granule_path:
+        items = swot_reach_node_shp.read_shapefile(
+            granule_path,
+            obscure_data,
+            constants.REACH_DATA_COLUMNS,
+            s3_resource=s3_resource)
 
-            for item_attrs in items:
-                # write to the table
-                hydrocron_table.add_data(**item_attrs)
+    if 'Node' in granule_path:
+        items = swot_reach_node_shp.read_shapefile(
+            granule_path,
+            obscure_data,
+            constants.NODE_DATA_COLUMNS,
+            s3_resource=s3_resource)
+
+    return items
+
+
+def load_data(dynamo_resource, table_name, items):
+    """
+    Load data into dynamo DB
+
+    Parameters
+    ----------
+    hydrocron_table : HydrocronTable
+        The table to load data into
+    items : Dictionary
+        The unpacked granule to load
+    """
+
+    try:
+        hydrocron_table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
+    except ClientError as err:
+        if err.response['Error']['Code'] == 'ResourceNotFoundException':
+            raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from err
+        raise err
+
+    if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
+
+        for item_attrs in items:
+            # write to the table
+            hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
-        if 'Node' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(
-                granule_path,
-                obscure_data,
-                constants.NODE_DATA_COLUMNS,
-                s3_resource=s3_resource)
 
-            for item_attrs in items:
-                # write to the table
-                hydrocron_table.add_data(**item_attrs)
+        for item_attrs in items:
+            # write to the table
+            hydrocron_table.add_data(**item_attrs)
 
     else:
         logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
