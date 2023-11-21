@@ -79,7 +79,7 @@ jobs:
           echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
       - name: Bump alpha version
-        # If triggered by push to the develop  branch
+        # If triggered by push to the develop branch
         if: ${{ github.ref == 'refs/heads/develop' }}
         id: alpha
         run: |
