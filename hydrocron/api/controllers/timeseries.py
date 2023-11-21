@@ -158,7 +158,7 @@ def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa
     else:
         # csv = "feature_id, time_str, wse, geometry\n"
         csv = fields + '\n'
-        fields_set = fields.split(", ")
+        fields_set = fields.split(", ")[0]
         for t in results:
             if t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
                 if constants.FIELDNAME_REACH_ID in fields_set:
