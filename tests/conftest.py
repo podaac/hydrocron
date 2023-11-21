@@ -2,14 +2,15 @@
 conftest file to set up local dynamodb connection
 """
 import os.path
+
 import boto3
 import pytest
-
 from pytest_dynamodb import factories
 
 from hydrocron.db import HydrocronTable
 from hydrocron.db.io import swot_reach_node_shp
 from hydrocron.utils import constants
+from hydrocron.utils.constants import SWOT_REACH_TABLE_NAME
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 API_TEST_TABLE_NAME = "hydrocron-swot-reach-table"
@@ -42,11 +43,11 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
     )
 
     dynamo_db.create_table(
-        TableName=API_TEST_TABLE_NAME,
+        TableName=SWOT_REACH_TABLE_NAME,
         AttributeDefinitions=[
             {'AttributeName': 'reach_id', 'AttributeType': 'S'},
             {'AttributeName': 'range_start_time', 'AttributeType': 'S'}
-            ],
+        ],
         KeySchema=[
             {
                 'AttributeName': 'reach_id',
@@ -56,7 +57,7 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
                 'AttributeName': 'range_start_time',
                 'KeyType': 'RANGE'
             }
-            ],
+        ],
         BillingMode='PROVISIONED',
         ProvisionedThroughput={
             'ReadCapacityUnits': 10,
@@ -64,21 +65,26 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         }
     )
 
-    hydro_table = HydrocronTable(dynamo_db, API_TEST_TABLE_NAME)
+    hydro_table = HydrocronTable(dynamo_db, SWOT_REACH_TABLE_NAME)
 
     items = swot_reach_node_shp.read_shapefile(
-            TEST_SHAPEFILE_PATH,
-            obscure_data=False,
-            columns=constants.REACH_DATA_COLUMNS)
+        TEST_SHAPEFILE_PATH,
+        obscure_data=False,
+        columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
         # write to the table
         hydro_table.add_data(**item_attrs)
 
-    request.cls.dynamo_db = dynamo_db
+    try:
+        request.cls.dynamo_db = dynamo_db
+    except AttributeError:
+        pass
+
     yield dynamo_db
     for table in dynamo_db.tables.all():  # pylint:disable=no-member
         table.delete()
+
 
 @pytest.fixture()
 def hydrocron_dynamo_table(dynamo_db_resource):
@@ -90,7 +96,7 @@ def hydrocron_dynamo_table(dynamo_db_resource):
         AttributeDefinitions=[
             {'AttributeName': 'reach_id', 'AttributeType': 'S'},
             {'AttributeName': 'range_start_time', 'AttributeType': 'S'}
-            ],
+        ],
         KeySchema=[
             {
                 'AttributeName': 'reach_id',
@@ -100,7 +106,7 @@ def hydrocron_dynamo_table(dynamo_db_resource):
                 'AttributeName': 'range_start_time',
                 'KeyType': 'RANGE'
             }
-            ],
+        ],
         BillingMode='PROVISIONED',
         ProvisionedThroughput={
             'ReadCapacityUnits': 10,
@@ -111,12 +117,23 @@ def hydrocron_dynamo_table(dynamo_db_resource):
     hydro_table = HydrocronTable(dynamo_db_resource, DB_TEST_TABLE_NAME)
 
     items = swot_reach_node_shp.read_shapefile(
-            TEST_SHAPEFILE_PATH,
-            obscure_data=False,
-            columns=constants.REACH_DATA_COLUMNS)
+        TEST_SHAPEFILE_PATH,
+        obscure_data=False,
+        columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
         # write to the table
         hydro_table.add_data(**item_attrs)
 
     return hydro_table
+
+
+@pytest.fixture()
+def hydrocron_api(hydrocron_dynamo_instance, dynamo_test_proc):
+    os.environ['HYDROCRON_ENV'] = 'test'
+    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"
+    import hydrocron.api.hydrocron  # noqa: E501 # pylint: disable=import-outside-toplevel
+    from hydrocron.api.data_access.db import \
+        DynamoDataRepository  # noqa: E501 # pylint: disable=import-outside-toplevel
+
+    hydrocron.api.hydrocron.construct_repository = lambda: DynamoDataRepository(hydrocron_dynamo_instance)
