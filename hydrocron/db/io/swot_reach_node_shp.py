@@ -63,6 +63,9 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
         item_attrs = shp_attrs | filename_attrs
         items.append(item_attrs)
 
+    if os.path.exists(lambda_temp_file):
+        os.remove(lambda_temp_file)
+
     return items
 
 
