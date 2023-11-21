@@ -55,6 +55,7 @@ FIELDNAME_SLOPE = 'slope'
 FIELDNAME_P_LON = 'p_lon'
 FIELDNAME_P_LAT = 'p_lat'
 
+S3_CREDS_ENDPOINT = "https://archive.swot.podaac.earthdata.nasa.gov/s3credentials"
 
 REACH_DATA_COLUMNS = [
     'wse', 'wse_u', 'wse_r_u', 'wse_c', 'wse_c_u',

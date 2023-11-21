@@ -3,60 +3,136 @@ This module searches for new granules and loads data into
 the appropriate DynamoDB table
 """
 import logging
-import argparse
 import os
-import sys
+import base64
+import json
+import requests
 
 import boto3
 import earthaccess
 from botocore.exceptions import ClientError
 
-from hydrocron.utils import constants
-
 from hydrocron.db import HydrocronTable
 from hydrocron.db.io import swot_reach_node_shp
+from hydrocron.utils import constants
 
 
-def parse_args():
+class MissingTable(Exception):
     """
-    Argument parser
+    Exception thrown if expected table is missing
     """
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("-t", "--table_name",
-                        dest='table_name',
-                        required=True,
-                        help="The name of the database table to add data")
-    parser.add_argument("-sd", "--start_date",
-                        dest="start",
-                        required=False,
-                        help="The ISO date time after which data should be retrieved. For Example, --start-date 2023-01-01T00:00:00")  # noqa E501
-    parser.add_argument("-ed", "--end_date",
-                        required=False,
-                        dest="end",
-                        help="The ISO date time before which data should be retrieved. For Example, --end-date 2023-02-14T00:00:00")  # noqa E501
-    parser.add_argument("-obscure", "--obscure_data",
-                        dest="obscure",
-                        required=False,
-                        help="Boolean to control whether real data is obscured on database loading. Default is False")  # noqa E501
-
-    return parser.parse_args()
 
 
-def setup_connection():
+def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     """
-    Set up DynamoDB connection
+    Lambda entrypoint for loading the database
+    """
+
+    table_name = event['body']['table_name']
+    start_date = event['body']['start_date']
+    end_date = event['body']['end_date']
+    obscure_data = event['body']['obscure_data']
+
+    match table_name:
+        case constants.SWOT_REACH_TABLE_NAME:
+            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+        case constants.SWOT_NODE_TABLE_NAME:
+            collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
+        case constants.DB_TEST_TABLE_NAME:
+            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+        case _:
+            raise MissingTable(f"Hydrocron table '{table_name}' does not exist.")
+
+    new_granules = find_new_granules(
+        collection_shortname,
+        start_date,
+        end_date)
+
+    for granule in new_granules:
+        s3_resource = setup_s3connection()
+        items = read_data(granule, obscure_data, s3_resource)
+
+        dynamo_resource = setup_dynamoconnection()
+        load_data(dynamo_resource, table_name, items)
+
+
+def retrieve_credentials():
+    """Makes the Oauth calls to authenticate with EDS and return a set of s3
+    same-region, read-only credntials.
+    """
+    login_resp = requests.get(
+        constants.S3_CREDS_ENDPOINT,
+        allow_redirects=False,
+        timeout=5
+    )
+    login_resp.raise_for_status()
+
+    auth = f"{os.environ['EARTHDATA_USERNAME']}:{os.environ['EARTHDATA_PASSWORD']}"
+    encoded_auth = base64.b64encode(auth.encode('ascii'))
+
+    auth_redirect = requests.post(
+        login_resp.headers['location'],
+        data={"credentials": encoded_auth},
+        headers={"Origin": constants.S3_CREDS_ENDPOINT},
+        allow_redirects=False,
+        timeout=5
+    )
+    auth_redirect.raise_for_status()
+
+    final = requests.get(
+        auth_redirect.headers['location'],
+        allow_redirects=False,
+        timeout=5
+    )
+
+    results = requests.get(
+        constants.S3_CREDS_ENDPOINT,
+        cookies={'accessToken': final.cookies['accessToken']},
+        timeout=5
+    )
+    results.raise_for_status()
+
+    return json.loads(results.content)
+
+
+def setup_s3connection():
+    """
+    Set up S3 resource connections
 
     Returns
     -------
-    dynamo_instance : HydrocronDB
+    s3_resource : S3 resource
     """
-    session = boto3.session.Session()
+
+    creds = retrieve_credentials()
+
+    s3_session = boto3.session.Session(
+        aws_access_key_id=creds['accessKeyId'],
+        aws_secret_access_key=creds['secretAccessKey'],
+        aws_session_token=creds['sessionToken'],
+        region_name='us-west-2')
+
+    s3_resource = s3_session.resource('s3')
+
+    return s3_resource
+
+
+def setup_dynamoconnection():
+    """
+    Set up DynamoDB resource connections
+
+    Returns
+    -------
+    dynamo_resource : HydrocronDB
+
+    """
+
+    dyn_session = boto3.session.Session()
 
     if endpoint_url := os.getenv('HYDROCRON_dynamodb_endpoint_url'):
-        dyndb_resource = session.resource('dynamodb', endpoint_url=endpoint_url)
+        dyndb_resource = dyn_session.resource('dynamodb', endpoint_url=endpoint_url)
     else:
-        dyndb_resource = session.resource('dynamodb')
+        dyndb_resource = dyn_session.resource('dynamodb')
 
     return dyndb_resource
 
@@ -69,105 +145,88 @@ def find_new_granules(collection_shortname, start_date, end_date):
     ----------
     collection_shortname : string
         The shortname of the collection to search
+    start_date
+    end_date
 
     Returns
     -------
-    granule_paths : list of strings
+    results : list of Granule objects
         List of S3 paths to the granules that have not yet been ingested
     """
     auth = earthaccess.login()
 
-    cmr_search = earthaccess.DataGranules(auth). \
-        short_name(collection_shortname).temporal(start_date, end_date)
+    cmr_search = earthaccess.DataGranules(auth).short_name(collection_shortname).temporal(start_date, end_date)
 
     results = cmr_search.get()
 
-    granule_paths = [g.data_links(access='direct') for g in results]
-    return granule_paths
+    return results
 
 
-def load_data(hydrocron_table, granule_path, obscure_data):
+def read_data(granule, obscure_data, s3_resource=None):
     """
-    Create table and load data
+    Read data from shapefiles
 
+    Parameters
+    ----------
+    granule : Granule
+        the granule to unpack
+    obscure_data : boolean
+        whether to obscure the data on load
+    s3_resource : boto3 session resource
+
+    Returns
+    -------
+    items : the unpacked granule data
+    """
+    granule_path = granule.data_links(access='direct')[0]
+
+    if 'Reach' in granule_path:
+        items = swot_reach_node_shp.read_shapefile(
+            granule_path,
+            obscure_data,
+            constants.REACH_DATA_COLUMNS,
+            s3_resource=s3_resource)
+
+    if 'Node' in granule_path:
+        items = swot_reach_node_shp.read_shapefile(
+            granule_path,
+            obscure_data,
+            constants.NODE_DATA_COLUMNS,
+            s3_resource=s3_resource)
+
+    return items
+
+
+def load_data(dynamo_resource, table_name, items):
+    """
+    Load data into dynamo DB
+
+    Parameters
+    ----------
     hydrocron_table : HydrocronTable
         The table to load data into
-    granules : list of strings
-        The list of S3 paths of granules to load data from
-    obscure_data : boolean
-        If true, scramble the data values during load to prevent
-        release of real data. Used during beta testing.
+    items : Dictionary
+        The unpacked granule to load
     """
-    if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
-        if 'Reach' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(
-                granule_path,
-                obscure_data,
-                constants.REACH_DATA_COLUMNS)
 
-            for item_attrs in items:
-                # write to the table
-                hydrocron_table.add_data(**item_attrs)
-
-    elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
-        if 'Node' in granule_path:
-            items = swot_reach_node_shp.read_shapefile(
-                granule_path,
-                obscure_data,
-                constants.NODE_DATA_COLUMNS)
-
-            for item_attrs in items:
-                # write to the table
-                hydrocron_table.add_data(**item_attrs)
-
-    else:
-        print('Items cannot be parsed, file reader not implemented for table '
-              + hydrocron_table.table_name)
-
-
-def main(args=None):
-    """
-    Main function to manage loading data into Hydrocron
-
-    """
-    if args is None:
-        args = parse_args()
-
-    table_name = args.table_name
-    start_date = args.start
-    end_date = args.end
-    obscure_data = args.obscure
-
-    match table_name:
-        case constants.SWOT_REACH_TABLE_NAME:
-            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
-        case constants.SWOT_NODE_TABLE_NAME:
-            collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
-        case constants.DB_TEST_TABLE_NAME:
-            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
-        case _:
-            logging.warning(
-                "Hydrocron table '%s' does not exist.", table_name)
-
-    dynamo_resource = setup_connection()
     try:
-        table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
+        hydrocron_table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
     except ClientError as err:
         if err.response['Error']['Code'] == 'ResourceNotFoundException':
-            logging.info("Table '%s' does not exist.", table_name)
+            raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from err
+        raise err
 
-    new_granules = find_new_granules(
-        collection_shortname,
-        start_date,
-        end_date)
+    if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
 
-    for granule in new_granules:
-        load_data(table, granule[0], obscure_data)
+        for item_attrs in items:
+            # write to the table
+            hydrocron_table.add_data(**item_attrs)
 
+    elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
 
-if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:  # pylint: disable=broad-except
-        logging.exception("Uncaught exception occurred during execution.")
-        sys.exit(hash(e))
+        for item_attrs in items:
+            # write to the table
+            hydrocron_table.add_data(**item_attrs)
+
+    else:
+        logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
