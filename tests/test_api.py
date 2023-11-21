@@ -11,7 +11,7 @@ def test_timeseries_lambda_handler(hydrocron_api):
     import hydrocron.api.controllers.timeseries
 
     event = {
-        "queryStringParameters": {
+        "body": {
             "feature": "Reach",
             "reach_id": "71224100223",
             "start_time": "2022-08-04T00:00:00+00:00",
