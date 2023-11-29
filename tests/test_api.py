@@ -3,9 +3,6 @@ Tests for API queries
 """
 
 
-import hydrocron.api.controllers.timeseries
-
-
 def test_timeseries_lambda_handler(hydrocron_api):
     """
     Test the lambda handler for the timeseries endpoint
@@ -13,6 +10,8 @@ def test_timeseries_lambda_handler(hydrocron_api):
     ----------
     hydrocron_api: Fixture ensuring the database is configured for the api
     """
+
+    import hydrocron.api.controllers.timeseries
 
     event = {
         "body": {
