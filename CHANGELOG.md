@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 27 - Create lambda function to execute database loading
     - Issue 9 - Create API Usage Documentation
     - Issue 4 - User guide for how to run database load script manually
     - Issue 12 - Move all constants to separate constants file
@@ -22,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 8 - Add script to load data
 ### Deprecated 
 ### Removed
+    - Issue 18 - Remove Flask
 ### Fixed
+    - Issue 36 - Request mapping template was not transforming request parameters correctly resulting in 500 internal server errors
     - Issue 33 - Obscure data sometimes fails when 1 is chosen multiplier in randomization
 ### Security

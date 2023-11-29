@@ -86,7 +86,14 @@ resource "aws_lambda_function" "hydrocron_lambda_load_data" {
   }
   function_name = local.load_data_function_name
   role          = aws_iam_role.hydrocron-lambda-load-data-role.arn
-  timeout       = 120
+  timeout       = 600
+  memory_size   = 512
 
   tags = var.default_tags
+  environment {
+    variables = {
+      EARTHDATA_USERNAME = data.aws_ssm_parameter.edl_username.value
+      EARTHDATA_PASSWORD = data.aws_ssm_parameter.edl_password.value
+    }
+  }
 }

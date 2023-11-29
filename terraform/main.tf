@@ -4,6 +4,10 @@ provider "aws" {
   ignore_tags {
     key_prefixes = ["gsfc-ngap"]
   }
+
+  default_tags {
+    tags = local.default_tags
+  }
 }
 
 data "aws_caller_identity" "current" {}
@@ -13,6 +17,14 @@ data "aws_vpc" "default" {
   tags = {
     "Name" : "Application VPC"
   }
+}
+
+data "aws_ssm_parameter" "edl_username" {
+  name = "urs_podaaccloud_user"
+}
+data "aws_ssm_parameter" "edl_password" {
+  name = "urs_podaaccloud_pass"
+  with_decryption = true
 }
 
 locals {
