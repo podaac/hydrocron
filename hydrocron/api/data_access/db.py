@@ -34,8 +34,10 @@ class DynamoDataRepository:
         hydrocron_table = self._dynamo_instance.Table(table_name)
         hydrocron_table.load()
 
-        items = hydrocron_table.query(KeyConditionExpression=Key(
-            constants.SWOT_REACH_PARTITION_KEY).eq(feature_id))
+        items = hydrocron_table.query(KeyConditionExpression=(
+            Key(constants.SWOT_REACH_PARTITION_KEY).eq(feature_id) & 
+            Key(constants.SWOT_REACH_SORT_KEY).between(start_time, end_time))
+        )
         return items
 
     def get_node_series_by_feature_id(self, feature_id, start_time, end_time):  # noqa: E501 # pylint: disable=W0613
@@ -51,6 +53,8 @@ class DynamoDataRepository:
         hydrocron_table = self._dynamo_instance.Table(table_name)
         hydrocron_table.load()
 
-        items = hydrocron_table.query(KeyConditionExpression=Key(
-            constants.SWOT_NODE_PARTITION_KEY).eq(feature_id))
+        items = hydrocron_table.query(KeyConditionExpression=(
+            Key(constants.SWOT_NODE_PARTITION_KEY).eq(feature_id) & 
+            Key(constants.SWOT_NODE_SORT_KEY).between(start_time, end_time))
+        )
         return items
