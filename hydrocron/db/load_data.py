@@ -48,8 +48,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         start_date,
         end_date)
 
-    lambda_session = boto3.session.Session()
-    lambda_resource = lambda_session.resource('lambda')
+    lambda_client = boto3.client('lambda')
 
     for granule in new_granules:
         granule_path = granule.data_links(access='direct')[0]
@@ -59,7 +58,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
                   + obscure_data + '","table_name": "'
                   + table_name + '"}}')
 
-        lambda_resource.invoke(
+        lambda_client.invoke(
             FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
             InvocationType='Event',
             Payload=event2)
