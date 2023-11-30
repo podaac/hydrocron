@@ -159,6 +159,7 @@ def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa
         data['time'] = str(dataTime) + " ms."
         data['type'] = "cvs"
         data['features'] = []
+        data['csv'] = []
         i = 0
         csv = fields + '\n'
         fields_set = fields.split(", ")[0]
