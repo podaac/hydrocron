@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 from typing import Generator
 from hydrocron.api import hydrocron
+from hydrocron.utils import constants
 
 logger = logging.getLogger()
 
@@ -49,18 +50,19 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
     data = ""
     if output == 'geojson':
-        data = format_json(results, feature_id, round((end - start) * 1000, 3), fields)
+        data = format_json(feature.lower(), results, feature_id, round((end - start) * 1000, 3), fields)
     if output == 'csv':
-        data = format_csv(results, feature_id, round((end - start) * 1000, 3), fields)
+        data = format_csv(feature.lower(), results, feature_id, round((end - start) * 1000, 3), fields)
 
     return data
 
 
-def format_json(results: Generator, feature_id, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
+def format_json(feature_lower, results: Generator, feature_id, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
     """
 
     Parameters
     ----------
+    feature_lower
     results
     swot_id
     exact
@@ -83,7 +85,6 @@ def format_json(results: Generator, feature_id, dataTime, fields):  # noqa: E501
     else:
         data['status'] = "200 OK"
         data['time'] = str(dataTime) + " ms."
-        # data['search on'] = {"feature_id": feature_id}
         data['type'] = "FeatureCollection"
         data['features'] = []
         i = 0
@@ -117,8 +118,17 @@ def format_json(results: Generator, feature_id, dataTime, fields):  # noqa: E501
                         feature['geometry']['coordinates'].append([float(x), float(y)])
                     if feature_type == 'Point':
                         feature['geometry']['coordinates'] = [float(x), float(y)]
+            columns = []
+            if feature_lower == 'reach':
+                columns = constants.REACH_DATA_COLUMNS
+            if feature_lower == 'node':
+                columns = constants.NODE_DATA_COLUMNS
+            columns.append('reach_id')
+            columns.append('time')
+            columns.append('time_str')
             for j in fields_set:
-                feature['properties'][j] = t[j]
+                if j in columns:
+                    feature['properties'][j] = t[j]
             data['features'].append(feature)
             i += 1
 
@@ -127,11 +137,12 @@ def format_json(results: Generator, feature_id, dataTime, fields):  # noqa: E501
     return data
 
 
-def format_csv(results: Generator, feature_id, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
+def format_csv(feature_lower, results: Generator, feature_id, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
     """
 
     Parameters
     ----------
+    feature_lower
     results
     feature_id
     exact
@@ -165,9 +176,18 @@ def format_csv(results: Generator, feature_id, dataTime, fields):  # noqa: E501 
                 csv += t['geometry'].replace('; ', ', ')
                 csv += ','
             else:
+                columns = []
+                if feature_lower == 'reach':
+                    columns = constants.REACH_DATA_COLUMNS
+                if feature_lower == 'node':
+                    columns = constants.NODE_DATA_COLUMNS
+                columns.append('reach_id')
+                columns.append('time')
+                columns.append('time_str')
                 for j in fields_set:
-                    csv += t[j]
-                    csv += ','
+                    if j in columns:
+                        csv += t[j]
+                        csv += ','
             csv += '\n'
         data['hits'] = i
     return csv
