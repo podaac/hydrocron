@@ -44,7 +44,17 @@ data "aws_iam_policy_document" "dynamo-write-policy" {
   }
 
 }
+data "aws_iam_policy_document" "lambda-invoke-policy" {
 
+  statement {
+    effect  = "Allow"
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+    resources = ["arn:aws:lambda:${data.aws_region.current.id}:${local.account_id}:function:hydrocron_lambda_load_granule"]
+  }
+
+}
 data "aws_iam_policy_document" "ssm-read-policy" {
 
   statement {
@@ -171,6 +181,10 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
   inline_policy {
     name = "HydrocronS3Read"
     policy = data.aws_iam_policy_document.s3-read-policy.json
+  }
+  inline_policy {
+    name = "HydrocronLambdaInvoke"
+    policy = data.aws_iam_policy_document.lambda-invoke-policy.json
   }
 }
 
