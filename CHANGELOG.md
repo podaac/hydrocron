@@ -25,4 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
     - Issue 18 - Remove Flask
 ### Fixed
+    - Issue 38 - Fix bug: specification does not match actual returned content (csv)
 ### Security
