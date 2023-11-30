@@ -48,12 +48,36 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         start_date,
         end_date)
 
-    for granule in new_granules:
-        s3_resource = setup_s3connection()
-        items = read_data(granule, obscure_data, s3_resource)
+    lambda_session = boto3.session.Session()
+    lambda_resource = lambda_session.resource('lambda')
 
-        dynamo_resource = setup_dynamoconnection()
-        load_data(dynamo_resource, table_name, items)
+    for granule in new_granules:
+        granule_path = granule.data_links(access='direct')[0]
+
+        event2 = ('{"body": {"granule_path": "'
+                  + granule_path + '","obscure_data": "'
+                  + obscure_data + '","table_name": "'
+                  + table_name + '"}}')
+
+        lambda_resource.invoke(
+            FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+            InvocationType='Event',
+            Payload=event2)
+
+
+def granule_handler(event, _):
+    """
+    Second Lambda entrypoint for loading individual granules
+    """
+    granule_path = event['body']['granule_path']
+    obscure_data = event['body']['obscure_data']
+    table_name = event['body']['table_name']
+
+    s3_resource = setup_s3connection()
+    items = read_data(granule_path, obscure_data, s3_resource)
+
+    dynamo_resource = setup_dynamoconnection()
+    load_data(dynamo_resource, table_name, items)
 
 
 def retrieve_credentials():
