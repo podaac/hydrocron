@@ -25,4 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
     - Issue 18 - Remove Flask
 ### Fixed
+    - Issue 45 - Fixed columns filtering bug
 ### Security
