@@ -28,4 +28,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 52 - Remove partial_f from data columns to obscure
 ### Fixed
     - Issue 36 - Request mapping template was not transforming request parameters correctly resulting in 500 internal server errors
+    - Issue 33 - Obscure data sometimes fails when 1 is chosen multiplier in randomization
 ### Security

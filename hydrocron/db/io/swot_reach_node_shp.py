@@ -21,6 +21,8 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
         Used during beta testing.
     columns : list
         The shapefile attributes to obscure if obscure_data=True
+    s3_obj : the s3 granule object to open
+        Optional - the the s3 object to open
 
     Returns
     -------
@@ -45,7 +47,7 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
             (np.rint(shp_file[numeric_columns]) != -999) &
             (np.rint(shp_file[numeric_columns]) != -99999999) &
             (np.rint(shp_file[numeric_columns]) != -999999999999),
-            np.random.default_rng().integers(low=0, high=10)*shp_file[numeric_columns],
+            np.random.default_rng().integers(low=2, high=10)*shp_file[numeric_columns],
             shp_file[numeric_columns])
 
     shp_file = shp_file.astype(str)
