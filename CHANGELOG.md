@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 41 - Update API documentation with query response examples
     - Issue 27 - Create lambda function to execute database loading
     - Issue 9 - Create API Usage Documentation
     - Issue 4 - User guide for how to run database load script manually
@@ -16,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 23 - Added github actions with Snyk, pylint, flake8
     - Issue 7 - Added actions to build.yml to upload docker container to registry
     - Issue 7 - Fixed poetry.lock to account for new vulnerability detected in Synk, given that we are going to remove flask
-### Changed 
+### Changed
     - Issue 8 - Hydrocron API implementation with dynamodb local database
     - Issue 8 - Rearrange database code
     - Issue 8 - Rearrange tests
@@ -24,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated 
 ### Removed
     - Issue 18 - Remove Flask
+    - Issue 52 - Remove partial_f from data columns to obscure
 ### Fixed
+    - Issue 42 - Change database query to use time range
+    - Issue 36 - Request mapping template was not transforming request parameters correctly resulting in 500 internal server errors
+    - Issue 33 - Obscure data sometimes fails when 1 is chosen multiplier in randomization
     - Issue 38 - Fix bug: specification does not match actual returned content (csv)
 ### Security
