@@ -29,4 +29,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
     - Issue 42 - Change database query to use time range
     - Issue 36 - Request mapping template was not transforming request parameters correctly resulting in 500 internal server errors
+    - Issue 33 - Obscure data sometimes fails when 1 is chosen multiplier in randomization
 ### Security
