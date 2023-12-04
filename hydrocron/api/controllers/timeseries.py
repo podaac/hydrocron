@@ -5,7 +5,6 @@ Hydrocron API timeseries controller
 # pylint: disable=C0103
 import logging
 import time
-from datetime import datetime
 from typing import Generator
 from hydrocron.api import hydrocron
 
