@@ -99,7 +99,7 @@ NODE_DATA_COLUMNS = [
 ]
 
 REACH_ALL_COLUMNS = [
-    'reach_id','time','time_tai','time_str','p_lat','p_lon','river_name',
+    'reach_id', 'time', 'time_tai', 'time_str', 'p_lat', 'p_lon', 'river_name',
     'wse', 'wse_u', 'wse_r_u', 'wse_c', 'wse_c_u',
     'slope', 'slope_u', 'slope_r_u', 'slope2', 'slope2_u', 'slope2_r_u',
     'width', 'width_u', 'width_c', 'width_c_u',
