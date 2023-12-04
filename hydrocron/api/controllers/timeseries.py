@@ -116,9 +116,9 @@ def format_json(feature_lower, results: Generator, feature_id, dataTime, fields)
                         feature['geometry']['coordinates'] = [float(x), float(y)]
             columns = []
             if feature_lower == 'reach':
-                columns = constants.REACH_DATA_COLUMNS
+                columns = constants.REACH_ALL_COLUMNS
             if feature_lower == 'node':
-                columns = constants.NODE_DATA_COLUMNS
+                columns = constants.NODE_ALL_COLUMNS
             columns.append('reach_id')
             columns.append('time')
             columns.append('time_str')
@@ -174,9 +174,9 @@ def format_csv(feature_lower, results: Generator, feature_id, dataTime, fields):
             else:
                 columns = []
                 if feature_lower == 'reach':
-                    columns = constants.REACH_DATA_COLUMNS
+                    columns = constants.REACH_ALL_COLUMNS
                 if feature_lower == 'node':
-                    columns = constants.NODE_DATA_COLUMNS
+                    columns = constants.NODE_ALL_COLUMNS
                 columns.append('reach_id')
                 columns.append('time')
                 columns.append('time_str')
