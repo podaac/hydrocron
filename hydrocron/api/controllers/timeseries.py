@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 from typing import Generator
 from hydrocron.api import hydrocron
+
 from hydrocron.utils import constants
 
 logger = logging.getLogger()
@@ -33,11 +34,6 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
     :rtype: None
     """
-
-    start_time = start_time.replace("T", " ")[0:19]
-    end_time = end_time.replace("T", " ")[0:19]
-    start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
-    end_time = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
 
     start = time.time()
     if feature.lower() == 'reach':
@@ -207,13 +203,6 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     results = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
-    data = {}
-
-    status = "200 OK"
-
-    data['status'] = status
-    data['time'] = str(10) + " ms."
-    data['hits'] = 10
-    data['results'] = results
+    data = {'status': "200 OK", 'results': results}
 
     return data

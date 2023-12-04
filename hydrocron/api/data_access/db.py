@@ -3,7 +3,6 @@ Database module
 """
 
 import logging
-from datetime import datetime
 from typing import Generator
 
 from boto3.resources.base import ServiceResource
@@ -21,7 +20,7 @@ class DynamoDataRepository:
         self._dynamo_instance = dynamo_resource
         self._logger = logging.getLogger('hydrocron.api.data_access.db.DynamoDataRepository')
 
-    def get_reach_series_by_feature_id(self, feature_id: str, start_time: datetime, end_time: datetime) -> Generator:  # noqa: E501 # pylint: disable=W0613
+    def get_reach_series_by_feature_id(self, feature_id: str, start_time: str, end_time: str) -> Generator:  # noqa: E501 # pylint: disable=W0613
         """
 
         @param feature_id:
@@ -34,8 +33,10 @@ class DynamoDataRepository:
         hydrocron_table = self._dynamo_instance.Table(table_name)
         hydrocron_table.load()
 
-        items = hydrocron_table.query(KeyConditionExpression=Key(
-            constants.SWOT_REACH_PARTITION_KEY).eq(feature_id))
+        items = hydrocron_table.query(KeyConditionExpression=(
+            Key(constants.SWOT_REACH_PARTITION_KEY).eq(feature_id) &
+            Key(constants.SWOT_REACH_SORT_KEY).between(start_time, end_time))
+        )
         return items
 
     def get_node_series_by_feature_id(self, feature_id, start_time, end_time):  # noqa: E501 # pylint: disable=W0613
@@ -51,6 +52,8 @@ class DynamoDataRepository:
         hydrocron_table = self._dynamo_instance.Table(table_name)
         hydrocron_table.load()
 
-        items = hydrocron_table.query(KeyConditionExpression=Key(
-            constants.SWOT_NODE_PARTITION_KEY).eq(feature_id))
+        items = hydrocron_table.query(KeyConditionExpression=(
+            Key(constants.SWOT_NODE_PARTITION_KEY).eq(feature_id) &
+            Key(constants.SWOT_NODE_SORT_KEY).between(start_time, end_time))
+        )
         return items

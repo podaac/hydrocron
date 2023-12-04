@@ -1,3 +1,6 @@
+"""
+Tests for API queries
+"""
 import json
 
 
@@ -14,8 +17,8 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
         "body": {
             "feature": "Reach",
             "reach_id": "71224100223",
-            "start_time": "2022-08-04T00:00:00+00:00",
-            "end_time": "2022-08-23T00:00:00+00:00",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "fields": "reach_id,time_str,wse,geometry"
         }
@@ -107,14 +110,15 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
     ----------
     hydrocron_api: Fixture ensuring the database is configured for the api
     """
+
     import hydrocron.api.controllers.timeseries
 
     event = {
         "body": {
             "feature": "Reach",
             "reach_id": "71224100223",
-            "start_time": "2022-08-04T00:00:00+00:00",
-            "end_time": "2022-08-23T00:00:00+00:00",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
             "output": "csv",
             "fields": "reach_id,time_str,wse"
         }
