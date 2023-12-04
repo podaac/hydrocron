@@ -80,7 +80,7 @@ REACH_DATA_COLUMNS = [
     'dschg_gi', 'dschg_gi_u', 'dschg_gisf', 'dschg_gi_q',
     'dschg_q_b', 'dschg_gq_b',
     'reach_q', 'reach_q_b',
-    'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f', 'n_good_nod',
+    'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'n_good_nod',
     'obs_frac_n', 'xovr_cal_q', 'geoid_hght', 'geoid_slop',
     'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c'
@@ -92,7 +92,7 @@ NODE_DATA_COLUMNS = [
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u', 'area_wse',
     'layovr_val', 'node_dist', 'xtrk_dist',
     'flow_angle', 'node_q', 'node_q_b',
-    'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f', 'n_good_pix',
+    'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'n_good_pix',
     'xovr_cal_q', 'rdr_sig0', 'rdr_sig0_u', 'rdr_pol',
     'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c'
