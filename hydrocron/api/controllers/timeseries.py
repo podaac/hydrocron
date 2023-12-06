@@ -26,33 +26,31 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
     :type start_time: str
     :param end_time: End time of the timeseries
     :type end_time: str
-    :param cycleavg: Perform cycle average on the time series
-    :type cycleavg: bool
     :param output: Format of the data returned
+    :type output: str
+    :param fields: List of requested columns
     :type output: str
 
     :rtype: None
     """
 
-    start = time.time()
     if feature.lower() == 'reach':
         results = hydrocron.data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
     elif feature.lower() == 'node':
         results = hydrocron.data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
     else:
         return {}
-    end = time.time()
 
     data = ""
     if output == 'geojson':
-        data = format_json(feature.lower(), results, feature_id, round((end - start) * 1000, 3), fields)
+        data, hits = format_json(feature.lower(), results, feature_id, fields)
     if output == 'csv':
-        data = format_csv(feature.lower(), results, feature_id, round((end - start) * 1000, 3), fields)
+        data, hits = format_csv(feature.lower(), results, feature_id, fields)
 
-    return data
+    return data, hits
 
 
-def format_json(feature_lower, results: Generator, feature_id, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
+def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
     """
 
     Parameters
@@ -60,8 +58,7 @@ def format_json(feature_lower, results: Generator, feature_id, dataTime, fields)
     feature_lower
     results
     swot_id
-    exact
-    time
+    fields
 
     Returns
     -------
@@ -78,12 +75,11 @@ def format_json(feature_lower, results: Generator, feature_id, dataTime, fields)
         data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
 
     else:
-        data['status'] = "200 OK"
-        data['time'] = str(dataTime) + " ms."
         data['type'] = "FeatureCollection"
         data['features'] = []
         i = 0
         fields_set = fields.split(",")
+
         # st = float(time.mktime(start_time.timetuple()) - 946710000)
         # et = float(time.mktime(end_time.timetuple()) - 946710000)
         # TODO: process type of feature_id (i.e. reach_id or node_id)
@@ -127,12 +123,10 @@ def format_json(feature_lower, results: Generator, feature_id, dataTime, fields)
             data['features'].append(feature)
             i += 1
 
-        data['hits'] = i
-
-    return data
+    return data, i
 
 
-def format_csv(feature_lower, results: Generator, feature_id, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
+def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
     """
 
     Parameters
@@ -140,8 +134,7 @@ def format_csv(feature_lower, results: Generator, feature_id, dataTime, fields):
     feature_lower
     results
     feature_id
-    exact
-    time
+    fields
 
     Returns
     -------
@@ -158,9 +151,6 @@ def format_csv(feature_lower, results: Generator, feature_id, dataTime, fields):
         data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
 
     else:
-        data['status'] = "200 OK"
-        data['time'] = str(dataTime) + " ms."
-        # data['search on'] = {"feature_id": feature_id}
         data['type'] = "FeatureCollection"
         data['features'] = []
         i = 0
@@ -185,8 +175,7 @@ def format_csv(feature_lower, results: Generator, feature_id, dataTime, fields):
                         csv += t[j]
                         csv += ','
             csv += '\n'
-        data['hits'] = i
-    return csv
+    return csv, i
 
 
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
@@ -201,8 +190,11 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     output = event['body']['output']
     fields = event['body']['fields']
 
-    results = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
-
-    data = {'status': "200 OK", 'results': results}
+    start = time.time()
+    results, hits = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
+    end = time.time()
+    elapsed_time = round((end - start) * 1000, 3)
+    data = {'status': "200 OK", 'time': elapsed_time, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
+    data['results'][event['body']['output']] = results
 
     return data

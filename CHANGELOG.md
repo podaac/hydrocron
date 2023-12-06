@@ -32,4 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 33 - Obscure data sometimes fails when 1 is chosen multiplier in randomization
     - Issue 45 - Fixed columns filtering bug
     - Issue 38 - Fix bug: specification does not match actual returned content (csv)
+    - Issue 45 - Fixed columns filtering bug
+    - Issue 54 - Fixed output format
 ### Security
