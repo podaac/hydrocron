@@ -160,13 +160,14 @@ def format_csv(feature_lower, results: Generator, feature_id, dataTime, fields):
     else:
         data['status'] = "200 OK"
         data['time'] = str(dataTime) + " ms."
-        # data['search on'] = {"feature_id": feature_id}
-        data['type'] = "FeatureCollection"
+        data['type'] = "csv"
         data['features'] = []
+        data['csv'] = []
         i = 0
         csv = fields + '\n'
         fields_set = fields.split(",")
         for t in results:
+            i += 1
             if 'geometry' in fields_set:
                 csv += t['geometry'].replace('; ', ', ')
                 csv += ','
