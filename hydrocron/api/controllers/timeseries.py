@@ -152,13 +152,14 @@ def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa
     else:
         data['status'] = "200 OK"
         data['time'] = str(dataTime) + " ms."
-        data['type'] = "cvs"
+        data['type'] = "csv"
         data['features'] = []
         data['csv'] = []
         i = 0
         csv = fields + '\n'
         fields_set = fields.split(", ")[0]
         for t in results:
+            i += 1
             if t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
                 if constants.FIELDNAME_REACH_ID in fields_set:
                     csv += t[constants.FIELDNAME_REACH_ID]
