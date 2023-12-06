@@ -5,7 +5,6 @@ Hydrocron API timeseries controller
 # pylint: disable=C0103
 import logging
 import time
-from datetime import datetime
 from typing import Generator
 from hydrocron.api import hydrocron
 
@@ -46,18 +45,19 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
     data = ""
     if output == 'geojson':
-        data = format_json(results, feature_id, start_time, end_time, True, round((end - start) * 1000, 3))
+        data = format_json(feature.lower(), results, feature_id, round((end - start) * 1000, 3), fields)
     if output == 'csv':
-        data = format_csv(results, feature_id, True, round((end - start) * 1000, 3), fields)
+        data = format_csv(feature.lower(), results, feature_id, round((end - start) * 1000, 3), fields)
 
     return data
 
 
-def format_json(results: Generator, feature_id, start_time, end_time, exact, dataTime):  # noqa: E501 # pylint: disable=W0613
+def format_json(feature_lower, results: Generator, feature_id, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
     """
 
     Parameters
     ----------
+    feature_lower
     results
     swot_id
     exact
@@ -83,6 +83,7 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
         data['type'] = "FeatureCollection"
         data['features'] = []
         i = 0
+        fields_set = fields.split(",")
         # st = float(time.mktime(start_time.timetuple()) - 946710000)
         # et = float(time.mktime(end_time.timetuple()) - 946710000)
         # TODO: process type of feature_id (i.e. reach_id or node_id)
@@ -90,8 +91,9 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
         for t in results:
             # TODO: Coordinate to filter in the database instance:
             # if t['reach_id'] == feature_id and t['time'] > start_time and t['time'] < end_time and t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
-            if t['reach_id'] == feature_id and t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
-                feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
+            # if t['reach_id'] == feature_id and t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
+            feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
+            if 'geometry' in fields_set:
                 feature['geometry']['coordinates'] = []
                 feature_type = ''
                 if 'POINT' in t['geometry']:
@@ -111,25 +113,31 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
                         feature['geometry']['coordinates'].append([float(x), float(y)])
                     if feature_type == 'Point':
                         feature['geometry']['coordinates'] = [float(x), float(y)]
-                i += 1
-                feature['properties']['time'] = datetime.fromtimestamp(
-                    float(t[constants.FIELDNAME_TIME]) + 946710000).strftime(
-                    "%Y-%m-%d %H:%M:%S")
-                feature['properties']['reach_id'] = float(t[constants.FIELDNAME_REACH_ID])
-                feature['properties']['wse'] = float(t[constants.FIELDNAME_WSE])
-                feature['properties']['slope'] = float(t[constants.FIELDNAME_SLOPE])
-                data['features'].append(feature)
+            columns = []
+            if feature_lower == 'reach':
+                columns = constants.REACH_ALL_COLUMNS
+            if feature_lower == 'node':
+                columns = constants.NODE_ALL_COLUMNS
+            columns.append('reach_id')
+            columns.append('time')
+            columns.append('time_str')
+            for j in fields_set:
+                if j in columns:
+                    feature['properties'][j] = t[j]
+            data['features'].append(feature)
+            i += 1
 
         data['hits'] = i
 
     return data
 
 
-def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
+def format_csv(feature_lower, results: Generator, feature_id, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
     """
 
     Parameters
     ----------
+    feature_lower
     results
     feature_id
     exact
@@ -152,33 +160,33 @@ def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa
     else:
         data['status'] = "200 OK"
         data['time'] = str(dataTime) + " ms."
-        data['type'] = "csv"
+        # data['search on'] = {"feature_id": feature_id}
+        data['type'] = "FeatureCollection"
         data['features'] = []
-        data['csv'] = []
         i = 0
         csv = fields + '\n'
-        fields_set = fields.split(", ")[0]
+        fields_set = fields.split(",")
         for t in results:
             i += 1
-            if t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
-                if constants.FIELDNAME_REACH_ID in fields_set:
-                    csv += t[constants.FIELDNAME_REACH_ID]
-                    csv += ','
-                if constants.FIELDNAME_TIME_STR in fields_set:
-                    csv += t[constants.FIELDNAME_TIME_STR]
-                    csv += ','
-                if constants.FIELDNAME_WSE in fields_set:
-                    csv += str(t[constants.FIELDNAME_WSE])
-                    csv += ','
-                if 'geometry' in fields_set:
-                    csv += t['geometry'].replace('; ', ', ')
-                    csv += ','
-                csv += '\n'
-
-        data['csv'].append(csv)
+            if 'geometry' in fields_set:
+                csv += t['geometry'].replace('; ', ', ')
+                csv += ','
+            else:
+                columns = []
+                if feature_lower == 'reach':
+                    columns = constants.REACH_ALL_COLUMNS
+                if feature_lower == 'node':
+                    columns = constants.NODE_ALL_COLUMNS
+                columns.append('reach_id')
+                columns.append('time')
+                columns.append('time_str')
+                for j in fields_set:
+                    if j in columns:
+                        csv += t[j]
+                        csv += ','
+            csv += '\n'
         data['hits'] = i
-
-    return data
+    return csv
 
 
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
