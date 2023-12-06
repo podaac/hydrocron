@@ -27,40 +27,37 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
     :type start_time: str
     :param end_time: End time of the timeseries
     :type end_time: str
-    :param cycleavg: Perform cycle average on the time series
-    :type cycleavg: bool
     :param output: Format of the data returned
+    :type output: str
+    :param fields: List of requested columns
     :type output: str
 
     :rtype: None
     """
 
-    start = time.time()
     if feature.lower() == 'reach':
         results = hydrocron.data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
     elif feature.lower() == 'node':
         results = hydrocron.data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
     else:
         return {}
-    end = time.time()
 
     data = ""
     if output == 'geojson':
-        data = format_json(results, feature_id, start_time, end_time, True, round((end - start) * 1000, 3))
+        data, hits = format_json(results, feature_id)
     if output == 'csv':
-        data = format_csv(results, feature_id, True, round((end - start) * 1000, 3), fields)
+        data, hits = format_csv(results, feature_id, fields)
 
-    return data
+    return data, hits
 
 
-def format_json(results: Generator, feature_id, start_time, end_time, exact, dataTime):  # noqa: E501 # pylint: disable=W0613
+def format_json(results: Generator, feature_id):  # noqa: E501 # pylint: disable=W0613
     """
 
     Parameters
     ----------
     results
     swot_id
-    exact
     time
 
     Returns
@@ -78,9 +75,8 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
         data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
 
     else:
-        data['status'] = "200 OK"
-        data['time'] = str(dataTime) + " ms."
         data['type'] = "FeatureCollection"
+        data['csv'] = []
         data['features'] = []
         i = 0
         # st = float(time.mktime(start_time.timetuple()) - 946710000)
@@ -120,12 +116,10 @@ def format_json(results: Generator, feature_id, start_time, end_time, exact, dat
                 feature['properties']['slope'] = float(t[constants.FIELDNAME_SLOPE])
                 data['features'].append(feature)
 
-        data['hits'] = i
-
-    return data
+    return data, i
 
 
-def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa: E501 # pylint: disable=W0613
+def format_csv(results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
     """
 
     Parameters
@@ -150,11 +144,6 @@ def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa
         data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
 
     else:
-        data['status'] = "200 OK"
-        data['time'] = str(dataTime) + " ms."
-        data['type'] = "csv"
-        data['features'] = []
-        data['csv'] = []
         i = 0
         csv = fields + '\n'
         fields_set = fields.split(", ")[0]
@@ -174,11 +163,9 @@ def format_csv(results: Generator, feature_id, exact, dataTime, fields):  # noqa
                     csv += t['geometry'].replace('; ', ', ')
                     csv += ','
                 csv += '\n'
+        data = csv
 
-        data['csv'].append(csv)
-        data['hits'] = i
-
-    return data
+    return data, i
 
 
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
@@ -193,8 +180,11 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     output = event['body']['output']
     fields = event['body']['fields']
 
-    results = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
-
-    data = {'status': "200 OK", 'results': results}
+    start = time.time()
+    results, hits = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
+    end = time.time()
+    elapsed_time = round((end - start) * 1000, 3)
+    data = {'status': "200 OK", 'time': elapsed_time, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
+    data['results'][event['body']['output']] = results
 
     return data
