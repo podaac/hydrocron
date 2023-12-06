@@ -160,9 +160,9 @@ def format_csv(feature_lower, results: Generator, feature_id, dataTime, fields):
     else:
         data['status'] = "200 OK"
         data['time'] = str(dataTime) + " ms."
-        data['type'] = "csv"
+        # data['search on'] = {"feature_id": feature_id}
+        data['type'] = "FeatureCollection"
         data['features'] = []
-        data['csv'] = []
         i = 0
         csv = fields + '\n'
         fields_set = fields.split(",")
