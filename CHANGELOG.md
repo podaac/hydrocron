@@ -34,4 +34,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 38 - Fix bug: specification does not match actual returned content (csv)
     - Issue 45 - Fixed columns filtering bug
     - Issue 54 - Fixed output format
+    - Issue 55 - Fixed cvs with geometry bug
 ### Security

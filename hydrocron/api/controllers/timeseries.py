@@ -50,7 +50,7 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
     return data, hits
 
 
-def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
+def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613,R0912
     """
 
     Parameters
@@ -89,37 +89,35 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
             # if t['reach_id'] == feature_id and t['time'] > start_time and t['time'] < end_time and t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
             # if t['reach_id'] == feature_id and t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
             feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
-            if 'geometry' in fields_set:
-                feature['geometry']['coordinates'] = []
-                feature_type = ''
-                if 'POINT' in t['geometry']:
-                    geometry = t['geometry'].replace('POINT (', '').replace(')', '')
-                    geometry = geometry.replace('"', '')
-                    geometry = geometry.replace("'", "")
-                    feature_type = 'Point'
-                if 'LINESTRING' in t['geometry']:
-                    geometry = t['geometry'].replace('LINESTRING (', '').replace(')', '')
-                    geometry = geometry.replace('"', '')
-                    geometry = geometry.replace("'", "")
-                    feature_type = 'LineString'
-                feature['geometry']['type'] = feature_type
-                for p in geometry.split(", "):
-                    (x, y) = p.split(" ")
-                    if feature_type == 'LineString':
-                        feature['geometry']['coordinates'].append([float(x), float(y)])
-                    if feature_type == 'Point':
-                        feature['geometry']['coordinates'] = [float(x), float(y)]
             columns = []
             if feature_lower == 'reach':
                 columns = constants.REACH_ALL_COLUMNS
             if feature_lower == 'node':
                 columns = constants.NODE_ALL_COLUMNS
-            columns.append('reach_id')
-            columns.append('time')
-            columns.append('time_str')
             for j in fields_set:
                 if j in columns:
-                    feature['properties'][j] = t[j]
+                    if j == 'geometry':
+                        feature['geometry']['coordinates'] = []
+                        feature_type = ''
+                        if 'POINT' in t['geometry']:
+                            geometry = t['geometry'].replace('POINT (', '').replace(')', '')
+                            geometry = geometry.replace('"', '')
+                            geometry = geometry.replace("'", "")
+                            feature_type = 'Point'
+                        if 'LINESTRING' in t['geometry']:
+                            geometry = t['geometry'].replace('LINESTRING (', '').replace(')', '')
+                            geometry = geometry.replace('"', '')
+                            geometry = geometry.replace("'", "")
+                            feature_type = 'LineString'
+                        feature['geometry']['type'] = feature_type
+                        for p in geometry.split(", "):
+                            (x, y) = p.split(" ")
+                            if feature_type == 'LineString':
+                                feature['geometry']['coordinates'].append([float(x), float(y)])
+                            if feature_type == 'Point':
+                                feature['geometry']['coordinates'] = [float(x), float(y)]
+                    else:
+                        feature['properties'][j] = t[j]
             data['features'].append(feature)
             i += 1
 
@@ -157,24 +155,20 @@ def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: 
         csv = fields + '\n'
         fields_set = fields.split(",")
         for t in results:
-            i += 1
-            if 'geometry' in fields_set:
-                csv += t['geometry'].replace('; ', ', ')
-                csv += ','
-            else:
-                columns = []
-                if feature_lower == 'reach':
-                    columns = constants.REACH_ALL_COLUMNS
-                if feature_lower == 'node':
-                    columns = constants.NODE_ALL_COLUMNS
-                columns.append('reach_id')
-                columns.append('time')
-                columns.append('time_str')
-                for j in fields_set:
-                    if j in columns:
+            columns = []
+            if feature_lower == 'reach':
+                columns = constants.REACH_ALL_COLUMNS
+            if feature_lower == 'node':
+                columns = constants.NODE_ALL_COLUMNS
+            for j in fields_set:
+                if j in columns:
+                    if j == 'geometry':
+                        csv += t['geometry'].replace('; ', ', ')
+                    else:
                         csv += t[j]
-                        csv += ','
+                    csv += ','
             csv += '\n'
+            i += 1
     return csv, i
 
 
