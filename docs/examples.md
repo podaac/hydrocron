@@ -1,6 +1,6 @@
 # Examples
 
-## Get time series CSV for river reach
+## Get time series GeoJSON for river reach
 
 Search for a single river reach by reach ID.
 
