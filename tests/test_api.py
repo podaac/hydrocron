@@ -16,7 +16,7 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
     event = {
         "body": {
             "feature": "Reach",
-            "reach_id": "71224100223",
+            "feature_id": "71224100223",
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
@@ -139,7 +139,7 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
     event = {
         "body": {
             "feature": "Reach",
-            "reach_id": "71224100223",
+            "feature_id": "71224100223",
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv",

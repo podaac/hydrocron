@@ -178,7 +178,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
 
     feature = event['body']['feature']
-    feature_id = event['body']['reach_id']
+    feature_id = event['body']['feature_id']
     start_time = event['body']['start_time']
     end_time = event['body']['end_time']
     output = event['body']['output']
