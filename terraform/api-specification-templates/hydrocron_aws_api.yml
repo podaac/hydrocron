@@ -151,18 +151,15 @@ paths:
                 }
         requestTemplates:
           application/json: |-
-            #set($allParams = $input.params())
+            #set($queryParams = $input.params().querystring)
             {
-            "body" : {
-            #foreach($type in $allParams.keySet())
-                #set($params = $allParams.get($type))
-                #foreach($paramName in $params.keySet())
-                "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
-                    #if($foreach.hasNext),#end
-                #end
-            #end
-            }
-            }
+            "body" :
+            {
+              #foreach($paramName in $queryParams.keySet())
+              "$paramName": "$util.escapeJavaScript($queryParams.get($paramName))"
+                #if($foreach.hasNext),#end
+              #end
+            }}
         passthroughBehavior: when_no_templates
         httpMethod: POST
         contentHandling: CONVERT_TO_TEXT
