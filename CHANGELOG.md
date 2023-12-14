@@ -36,4 +36,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 54 - Fixed output format
     - Issue 55 - Fixed cvs with geometry bug
     - Issue 62 - Fix mismatch in specification and api 
+    - Issue 64 - Fix bug by parsing just the request query params
 ### Security

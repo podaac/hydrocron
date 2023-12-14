@@ -14,7 +14,7 @@ resource "aws_api_gateway_rest_api" "hydrocron-api-gateway" {
       software_version                    = var.app_version
     })
   parameters = {
-    "basepath" = "split"
+    "basepath" = "ignore"
   }
 
   endpoint_configuration {
