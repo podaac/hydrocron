@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+### Changed
+### Deprecated 
+### Removed
+### Fixed
+### Security
+
+## [1.0.0]
+
+### Added
     - Issue 41 - Update API documentation with query response examples
     - Issue 27 - Create lambda function to execute database loading
     - Issue 9 - Create API Usage Documentation
