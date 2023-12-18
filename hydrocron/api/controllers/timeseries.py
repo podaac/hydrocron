@@ -13,7 +13,7 @@ from hydrocron.utils import constants
 logger = logging.getLogger()
 
 
-def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
+def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
     """Get Timeseries for a particular Reach, Node, or LakeID
 
     Get Timeseries for a particular Reach, Node, or LakeID # noqa: E501
@@ -39,9 +39,9 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
     elif feature.lower() == 'node':
         results = hydrocron.data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
     else:
-        return {}
+        return {}, 0
 
-    data = ""
+    data = {}
     hits = 0
     if output == 'geojson':
         data, hits = format_json(feature.lower(), results, feature_id, fields)
@@ -58,7 +58,7 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
     ----------
     feature_lower
     results
-    swot_id
+    feature_id
     fields
 
     Returns
@@ -135,6 +135,8 @@ def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: 
     results = results['Items']
 
     data = {}
+    i = 0
+    csv = fields + '\n'
 
     if results is None:
         data['error'] = f"404: Results with the specified Feature ID {feature_id} were not found."
@@ -144,8 +146,6 @@ def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: 
     else:
         data['type'] = "FeatureCollection"
         data['features'] = []
-        i = 0
-        csv = fields + '\n'
         fields_set = fields.split(",")
         for t in results:
             columns = []
@@ -165,7 +165,7 @@ def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: 
     return csv, i
 
 
-def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
+def lambda_handler(event):  # noqa: E501 # pylint: disable=W0613
     """
     This function queries the database for relevant results
     """
@@ -178,7 +178,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     fields = event['body']['fields']
 
     start = time.time()
-    results, hits = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
+    results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
     end = time.time()
     elapsed_time = round((end - start) * 1000, 3)
     data = {'status': "200 OK", 'time': elapsed_time, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}

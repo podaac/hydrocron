@@ -13,7 +13,7 @@ paths:
     get:
       summary: "Get Timeseries for a particular Reach, Node, or LakeID"
       description: "Get Timeseries for a particular Reach, Node, or LakeID"
-      operationId: gettimeseries_get
+      operationId: timeseries_get
       parameters:
       - name: feature
         in: query
