@@ -34,15 +34,16 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     :rtype: None
     """
 
+    data = {}
+    hits = 0
+
     if feature.lower() == 'reach':
         results = hydrocron.data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
     elif feature.lower() == 'node':
         results = hydrocron.data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
     else:
-        return {}, 0
+        return data, hits
 
-    data = {}
-    hits = 0
     if output == 'geojson':
         data, hits = format_json(feature.lower(), results, feature_id, fields)
     if output == 'csv':
