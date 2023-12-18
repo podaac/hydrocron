@@ -64,7 +64,6 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
     -------
 
     """
-    # Fetch all results
     results = results['Items']
 
     data = {}
@@ -80,14 +79,7 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
         i = 0
         fields_set = fields.split(",")
 
-        # st = float(time.mktime(start_time.timetuple()) - 946710000)
-        # et = float(time.mktime(end_time.timetuple()) - 946710000)
-        # TODO: process type of feature_id (i.e. reach_id or node_id)
-
         for t in results:
-            # TODO: Coordinate to filter in the database instance:
-            # if t['reach_id'] == feature_id and t['time'] > start_time and t['time'] < end_time and t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
-            # if t['reach_id'] == feature_id and t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
             feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
             columns = []
             if feature_lower == 'reach':
@@ -138,7 +130,6 @@ def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: 
     -------
 
     """
-    # Fetch all results
     results = results['Items']
 
     data = {}
