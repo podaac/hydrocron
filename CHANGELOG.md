@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
     - Issue 18 - Remove Flask
     - Issue 52 - Remove partial_f from data columns to obscure
+    - Issue 39 - Clean up code, removed comments and unused parameters
 ### Fixed
     - Issue 42 - Change database query to use time range
     - Issue 36 - Request mapping template was not transforming request parameters correctly resulting in 500 internal server errors

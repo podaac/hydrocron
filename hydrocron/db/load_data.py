@@ -219,13 +219,11 @@ def load_data(dynamo_resource, table_name, items):
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
 
         for item_attrs in items:
-            # write to the table
             hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
 
         for item_attrs in items:
-            # write to the table
             hydrocron_table.add_data(**item_attrs)
 
     else:

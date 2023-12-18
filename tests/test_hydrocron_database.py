@@ -31,7 +31,6 @@ def test_add_data(hydrocron_dynamo_table):
         columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
-        # write to the table
         hydrocron_dynamo_table.add_data(**item_attrs)
 
     assert hydrocron_dynamo_table.table.item_count == 687
@@ -47,7 +46,6 @@ def test_query(hydrocron_dynamo_table):
         columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
-        # write to the table
         hydrocron_dynamo_table.add_data(**item_attrs)
 
     items = hydrocron_dynamo_table.run_query(
@@ -65,7 +63,6 @@ def test_delete_item(hydrocron_dynamo_table):
         columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
-        # write to the table
         hydrocron_dynamo_table.add_data(**item_attrs)
 
     hydrocron_dynamo_table.delete_item(

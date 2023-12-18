@@ -42,6 +42,7 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
         return {}
 
     data = ""
+    hits = 0
     if output == 'geojson':
         data, hits = format_json(feature.lower(), results, feature_id, fields)
     if output == 'csv':
@@ -67,6 +68,7 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
     results = results['Items']
 
     data = {}
+    i = 0
 
     if results is None:
         data['error'] = f"404: Results with the specified Feature ID {feature_id} were not found."
@@ -76,7 +78,6 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
     else:
         data['type'] = "FeatureCollection"
         data['features'] = []
-        i = 0
         fields_set = fields.split(",")
 
         for t in results:
@@ -91,6 +92,7 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
                     if j == 'geometry':
                         feature['geometry']['coordinates'] = []
                         feature_type = ''
+                        geometry = ''
                         if 'POINT' in t['geometry']:
                             geometry = t['geometry'].replace('POINT (', '').replace(')', '')
                             geometry = geometry.replace('"', '')
