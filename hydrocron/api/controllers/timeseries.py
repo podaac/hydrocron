@@ -29,9 +29,9 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     :param output: Format of the data returned
     :type output: str
     :param fields: List of requested columns
-    :type output: str
+    :type fields: dict
 
-    :rtype: None
+    :rtype: Dict, integer
     """
 
     data = {}
@@ -53,19 +53,20 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
 
 
 def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613,R0912
+    """ Format the results to the file format that the user selects (geojson)
+
+    :param feature_lower: Lowercase version of the type of feature
+    :type feature_lower: str
+    :param results: We pass the result of the query
+    :type results: dict
+    :param feature_id: ID of the requested feature
+    :type feature_id: str
+    :param fields: List of requested columns
+    :type fields: dict
+
+    :rtype: dict, integer
     """
 
-    Parameters
-    ----------
-    feature_lower
-    results
-    feature_id
-    fields
-
-    Returns
-    -------
-
-    """
     results = results['Items']
 
     data = {}
@@ -120,19 +121,20 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
 
 
 def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
+    """ Format the results to the file format that the user selects (csv)
+
+    :param feature_lower: Lowercase version of the type of feature
+    :type feature_lower: str
+    :param results: We pass the result of the query
+    :type results: dict
+    :param feature_id: ID of the requested feature
+    :type feature_id: str
+    :param fields: List of requested columns
+    :type fields: dict
+
+    :rtype: dict, integer
     """
 
-    Parameters
-    ----------
-    feature_lower
-    results
-    feature_id
-    fields
-
-    Returns
-    -------
-
-    """
     results = results['Items']
 
     data = {}
@@ -166,7 +168,7 @@ def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: 
     return csv, i
 
 
-def lambda_handler(event):  # noqa: E501 # pylint: disable=W0613
+def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     """
     This function queries the database for relevant results
     """

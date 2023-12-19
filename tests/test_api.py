@@ -24,7 +24,7 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
         }
     }
 
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event)
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, _)
     print(result['results']['geojson'])
     assert result['status'] == '200 OK' and \
            result['results']['geojson'] == {'type': 'FeatureCollection', 'features': [
@@ -241,7 +241,7 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
         }
     }
 
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event)
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, _)
     assert result['status'] == '200 OK'
     assert result['results']['csv'] == ('reach_id,time_str,wse,geometry\n' \
                                         '71224100223,2023-06-10T19:39:43Z,286.2983,LINESTRING (-95.564991 50.223686, ' \
