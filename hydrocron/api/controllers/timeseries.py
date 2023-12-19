@@ -58,7 +58,7 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
     :param feature_lower: Lowercase version of the type of feature
     :type feature_lower: str
     :param results: We pass the result of the query
-    :type results: dict
+    :type results: Generator
     :param feature_id: ID of the requested feature
     :type feature_id: str
     :param fields: List of requested columns
@@ -126,7 +126,7 @@ def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: 
     :param feature_lower: Lowercase version of the type of feature
     :type feature_lower: str
     :param results: We pass the result of the query
-    :type results: dict
+    :type results: Generator
     :param feature_id: ID of the requested feature
     :type feature_id: str
     :param fields: List of requested columns
