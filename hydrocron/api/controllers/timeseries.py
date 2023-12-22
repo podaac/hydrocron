@@ -5,7 +5,6 @@ Hydrocron API timeseries controller
 # pylint: disable=C0103
 import logging
 import time
-from typing import Generator
 from hydrocron.api import hydrocron
 
 from hydrocron.utils import constants
@@ -52,13 +51,13 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     return data, hits
 
 
-def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613,R0912
+def format_json(feature_lower, results, feature_id, fields):  # noqa: E501 # pylint: disable=W0613,R0912
     """ Format the results to the file format that the user selects (geojson)
 
     :param feature_lower: Lowercase version of the type of feature
     :type feature_lower: str
     :param results: We pass the result of the query
-    :type results: Generator
+    :type results: dict
     :param feature_id: ID of the requested feature
     :type feature_id: str
     :param fields: List of requested columns
@@ -120,13 +119,13 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
     return data, i
 
 
-def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
+def format_csv(feature_lower, results, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
     """ Format the results to the file format that the user selects (csv)
 
     :param feature_lower: Lowercase version of the type of feature
     :type feature_lower: str
     :param results: We pass the result of the query
-    :type results: Generator
+    :type results: dict
     :param feature_id: ID of the requested feature
     :type feature_id: str
     :param fields: List of requested columns
@@ -168,7 +167,7 @@ def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: 
     return csv, i
 
 
-def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
+def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
     This function queries the database for relevant results
     """
