@@ -176,7 +176,7 @@ def find_new_granules(collection_shortname, start_date, end_date):
     results : list of Granule objects
         List of S3 paths to the granules that have not yet been ingested
     """
-    auth = earthaccess.login()
+    auth = earthaccess.login(persist=True)
 
     cmr_search = earthaccess.DataGranules(auth).short_name(collection_shortname).temporal(start_date, end_date)
 

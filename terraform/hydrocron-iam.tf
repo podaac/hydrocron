@@ -138,12 +138,6 @@ data "aws_iam_policy_document" "apigw-resource-policy" {
 
     actions   = ["execute-api:Invoke"]
     resources = [aws_api_gateway_rest_api.hydrocron-api-gateway.execution_arn]
-
-    condition {
-      test     = "StringNotEquals"
-      values   = ["Amazon CloudFront"]
-      variable = "aws:UserAgent"
-    }
   }
 }
 
