@@ -51,7 +51,10 @@ data "aws_iam_policy_document" "lambda-invoke-policy" {
     actions = [
       "lambda:InvokeFunction"
     ]
-    resources = ["arn:aws:lambda:${data.aws_region.current.id}:${local.account_id}:function:hydrocron_lambda_load_granule"]
+    resources = [
+      "arn:aws:lambda:${data.aws_region.current.id}:${local.account_id}:function:hydrocron_lambda_load_granule",
+      "arn:aws:lambda:${data.aws_region.current.id}:${local.account_id}:function:hydrocron_lambda_load_data"
+      ]
   }
 
 }
