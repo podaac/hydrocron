@@ -185,14 +185,14 @@ def find_new_granules(collection_shortname, start_date, end_date):
     return results
 
 
-def read_data(granule, obscure_data, s3_resource=None):
+def read_data(granule_path, obscure_data, s3_resource=None):
     """
     Read data from shapefiles
 
     Parameters
     ----------
-    granule : Granule
-        the granule to unpack
+    granule_path : string
+        the S3 url to the granule to unpack
     obscure_data : boolean
         whether to obscure the data on load
     s3_resource : boto3 session resource
@@ -201,7 +201,7 @@ def read_data(granule, obscure_data, s3_resource=None):
     -------
     items : the unpacked granule data
     """
-    granule_path = granule.data_links(access='direct')[0]
+    # granule_path = granule.data_links(access='direct')[0]
 
     if 'Reach' in granule_path:
         items = swot_reach_node_shp.read_shapefile(
