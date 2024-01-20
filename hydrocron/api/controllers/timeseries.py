@@ -5,7 +5,6 @@ Hydrocron API timeseries controller
 # pylint: disable=C0103
 import logging
 import time
-from typing import Generator
 from hydrocron.api import hydrocron
 
 from hydrocron.utils import constants
@@ -13,7 +12,7 @@ from hydrocron.utils import constants
 logger = logging.getLogger()
 
 
-def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
+def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
     """Get Timeseries for a particular Reach, Node, or LakeID
 
     Get Timeseries for a particular Reach, Node, or LakeID # noqa: E501
@@ -29,19 +28,21 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
     :param output: Format of the data returned
     :type output: str
     :param fields: List of requested columns
-    :type output: str
+    :type fields: dict
 
-    :rtype: None
+    :rtype: Dict, integer
     """
+
+    data = {}
+    hits = 0
 
     if feature.lower() == 'reach':
         results = hydrocron.data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
     elif feature.lower() == 'node':
         results = hydrocron.data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
     else:
-        return {}
+        return data, hits
 
-    data = ""
     if output == 'geojson':
         data, hits = format_json(feature.lower(), results, feature_id, fields)
     if output == 'csv':
@@ -50,24 +51,25 @@ def gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
     return data, hits
 
 
-def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613,R0912
+def format_json(feature_lower, results, feature_id, fields):  # noqa: E501 # pylint: disable=W0613,R0912
+    """ Format the results to the file format that the user selects (geojson)
+
+    :param feature_lower: Lowercase version of the type of feature
+    :type feature_lower: str
+    :param results: We pass the result of the query
+    :type results: dict
+    :param feature_id: ID of the requested feature
+    :type feature_id: str
+    :param fields: List of requested columns
+    :type fields: dict
+
+    :rtype: dict, integer
     """
 
-    Parameters
-    ----------
-    feature_lower
-    results
-    swot_id
-    fields
-
-    Returns
-    -------
-
-    """
-    # Fetch all results
     results = results['Items']
 
     data = {}
+    i = 0
 
     if results is None:
         data['error'] = f"404: Results with the specified Feature ID {feature_id} were not found."
@@ -77,17 +79,9 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
     else:
         data['type'] = "FeatureCollection"
         data['features'] = []
-        i = 0
         fields_set = fields.split(",")
 
-        # st = float(time.mktime(start_time.timetuple()) - 946710000)
-        # et = float(time.mktime(end_time.timetuple()) - 946710000)
-        # TODO: process type of feature_id (i.e. reach_id or node_id)
-
         for t in results:
-            # TODO: Coordinate to filter in the database instance:
-            # if t['reach_id'] == feature_id and t['time'] > start_time and t['time'] < end_time and t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
-            # if t['reach_id'] == feature_id and t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
             feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
             columns = []
             if feature_lower == 'reach':
@@ -99,6 +93,7 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
                     if j == 'geometry':
                         feature['geometry']['coordinates'] = []
                         feature_type = ''
+                        geometry = ''
                         if 'POINT' in t['geometry']:
                             geometry = t['geometry'].replace('POINT (', '').replace(')', '')
                             geometry = geometry.replace('"', '')
@@ -124,24 +119,26 @@ def format_json(feature_lower, results: Generator, feature_id, fields):  # noqa:
     return data, i
 
 
-def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
+def format_csv(feature_lower, results, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
+    """ Format the results to the file format that the user selects (csv)
+
+    :param feature_lower: Lowercase version of the type of feature
+    :type feature_lower: str
+    :param results: We pass the result of the query
+    :type results: dict
+    :param feature_id: ID of the requested feature
+    :type feature_id: str
+    :param fields: List of requested columns
+    :type fields: dict
+
+    :rtype: dict, integer
     """
 
-    Parameters
-    ----------
-    feature_lower
-    results
-    feature_id
-    fields
-
-    Returns
-    -------
-
-    """
-    # Fetch all results
     results = results['Items']
 
     data = {}
+    i = 0
+    csv = fields + '\n'
 
     if results is None:
         data['error'] = f"404: Results with the specified Feature ID {feature_id} were not found."
@@ -151,8 +148,6 @@ def format_csv(feature_lower, results: Generator, feature_id, fields):  # noqa: 
     else:
         data['type'] = "FeatureCollection"
         data['features'] = []
-        i = 0
-        csv = fields + '\n'
         fields_set = fields.split(",")
         for t in results:
             columns = []
@@ -185,7 +180,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     fields = event['body']['fields']
 
     start = time.time()
-    results, hits = gettimeseries_get(feature, feature_id, start_time, end_time, output, fields)
+    results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
     end = time.time()
     elapsed_time = round((end - start) * 1000, 3)
     data = {'status': "200 OK", 'time': elapsed_time, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}

@@ -79,7 +79,6 @@ class Context(ModuleType):
         return DynamoDataRepository(dyndb_resource)
 
 
-# Silence the linters
 get_param: Callable[[str], str]
 data_repository: DynamoDataRepository
 
