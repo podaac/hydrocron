@@ -108,7 +108,7 @@ resource "aws_lambda_function" "hydrocron_lambda_load_granule" {
     command = ["hydrocron.db.load_data.granule_handler"]
   }
   function_name = local.load_granule_function_name
-  role          = aws_iam_role.hydrocron-lambda-load-data-role.arn
+  role          = aws_iam_role.hydrocron-lambda-load-granule-role.arn
   timeout       = 600
   memory_size   = 512
 

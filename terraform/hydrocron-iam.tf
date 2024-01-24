@@ -165,7 +165,20 @@ resource "aws_iam_role" "hydrocron-lambda-execution-role" {
 
 
 resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
-  name = "${local.lambda_load_data_role}"
+  name = "${local.aws_resource_prefix}-lambda-load-data-role"
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+
+  inline_policy {
+    name = "HydrocronLambdaInvoke"
+    policy = data.aws_iam_policy_document.lambda-invoke-policy.json
+  }
+}
+
+resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
+  name = "${local.aws_resource_prefix}-lambda-load-granule-role"
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
@@ -179,10 +192,4 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
     name = "HydrocronS3Read"
     policy = data.aws_iam_policy_document.s3-read-policy.json
   }
-  inline_policy {
-    name = "HydrocronLambdaInvoke"
-    policy = data.aws_iam_policy_document.lambda-invoke-policy.json
-  }
 }
-
-
