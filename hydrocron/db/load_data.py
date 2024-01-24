@@ -14,6 +14,7 @@ from botocore.exceptions import ClientError
 
 from hydrocron.db import HydrocronTable
 from hydrocron.db.io import swot_reach_node_shp
+from hydrocron.utils import connection
 from hydrocron.utils import constants
 
 
@@ -52,7 +53,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         s3_resource = setup_s3connection()
         items = read_data(granule, obscure_data, s3_resource)
 
-        dynamo_resource = setup_dynamoconnection()
+        dynamo_resource = connection.dynamodb_resource
         load_data(dynamo_resource, table_name, items)
 
 
@@ -115,26 +116,6 @@ def setup_s3connection():
     s3_resource = s3_session.resource('s3')
 
     return s3_resource
-
-
-def setup_dynamoconnection():
-    """
-    Set up DynamoDB resource connections
-
-    Returns
-    -------
-    dynamo_resource : HydrocronDB
-
-    """
-
-    dyn_session = boto3.session.Session()
-
-    if endpoint_url := os.getenv('HYDROCRON_dynamodb_endpoint_url'):
-        dyndb_resource = dyn_session.resource('dynamodb', endpoint_url=endpoint_url)
-    else:
-        dyndb_resource = dyn_session.resource('dynamodb')
-
-    return dyndb_resource
 
 
 def find_new_granules(collection_shortname, start_date, end_date):
