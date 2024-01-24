@@ -53,7 +53,8 @@ data "aws_iam_policy_document" "lambda-invoke-policy" {
     ]
     resources = [
       # "arn:aws:lambda:${data.aws_region.current.id}:${local.account_id}:*",
-      aws_lambda_function.hydrocron_lambda_load_granule.invoke_arn
+      # aws_lambda_function.hydrocron_lambda_load_granule.invoke_arn
+      lamdba_granule_invoke_arn
       ]
   }
 
@@ -142,6 +143,11 @@ data "aws_iam_policy_document" "apigw-resource-policy" {
     actions   = ["execute-api:Invoke"]
     resources = [aws_api_gateway_rest_api.hydrocron-api-gateway.execution_arn]
   }
+}
+
+# local var for invoke arn to avoid circular dependency
+locals {
+  lamdba_granule_invoke_arn = aws_lambda_function.hydrocron_lambda_load_granule.invoke_arn
 }
 
 # IAM Roles
