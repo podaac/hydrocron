@@ -201,7 +201,7 @@ def read_data(granule_path, obscure_data, s3_resource=None):
     -------
     items : the unpacked granule data
     """
-    # granule_path = granule.data_links(access='direct')[0]
+    items = {}
 
     if 'Reach' in granule_path:
         items = swot_reach_node_shp.read_shapefile(
@@ -226,8 +226,10 @@ def load_data(dynamo_resource, table_name, items):
 
     Parameters
     ----------
-    hydrocron_table : HydrocronTable
-        The table to load data into
+    dynamo_resource : Resource
+        Dynamo resource
+    table_name : String
+        The name of the table
     items : Dictionary
         The unpacked granule to load
     """
@@ -242,13 +244,11 @@ def load_data(dynamo_resource, table_name, items):
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
 
         for item_attrs in items:
-            # write to the table
             hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
 
         for item_attrs in items:
-            # write to the table
             hydrocron_table.add_data(**item_attrs)
 
     else:

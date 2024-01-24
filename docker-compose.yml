@@ -56,5 +56,4 @@ services:
       AWS_SECRET_ACCESS_KEY: fakeSecretAccessKey
       AWS_DEFAULT_REGION: us-west-2
 networks:
-  # The presence of these objects is sufficient to define them
   hydrocron: {}
