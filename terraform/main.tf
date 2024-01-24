@@ -40,4 +40,6 @@ locals {
     Environment = var.stage
     Version     = var.app_version
   } : var.default_tags
+
+  lambda_load_data_role = "${local.aws_resource_prefix}-lambda-load-data-role"
 }

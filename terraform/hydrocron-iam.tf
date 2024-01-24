@@ -165,7 +165,7 @@ resource "aws_iam_role" "hydrocron-lambda-execution-role" {
 
 
 resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
-  name = "${local.aws_resource_prefix}-lambda-load-data-role"
+  name = "${local.lambda_load_data_role}"
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json

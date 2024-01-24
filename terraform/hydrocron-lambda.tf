@@ -16,7 +16,6 @@ locals {
   timeseries_function_name         = "${local.aws_resource_prefix}-timeseries-lambda"
   load_data_function_name          = "${local.aws_resource_prefix}-load_data-lambda"
   load_granule_function_name       = "${local.aws_resource_prefix}-load_granule-lambda"
-  load_data_role                   = aws_iam_role.hydrocron-lambda-load-data-role
 }
 
 resource aws_ecr_repository "lambda-image-repo" {
@@ -87,8 +86,7 @@ resource "aws_lambda_function" "hydrocron_lambda_load_data" {
     command = ["hydrocron.db.load_data.lambda_handler"]
   }
   function_name = local.load_data_function_name
-  # role          = aws_iam_role.hydrocron-lambda-load-data-role.arn
-  role          = local.load_data_role.arn
+  role          = aws_iam_role.hydrocron-lambda-load-data-role.arn
   timeout       = 600
   memory_size   = 512
 
@@ -110,8 +108,7 @@ resource "aws_lambda_function" "hydrocron_lambda_load_granule" {
     command = ["hydrocron.db.load_data.granule_handler"]
   }
   function_name = local.load_granule_function_name
-  #role          = aws_iam_role.hydrocron-lambda-load-data-role.arn
-  role          = local.load_data_role.arn
+  role          = aws_iam_role.hydrocron-lambda-load-data-role.arn
   timeout       = 600
   memory_size   = 512
 
