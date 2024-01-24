@@ -16,7 +16,7 @@ locals {
   timeseries_function_name         = "${local.aws_resource_prefix}-timeseries-lambda"
   load_data_function_name          = "${local.aws_resource_prefix}-load_data-lambda"
   load_granule_function_name       = "${local.aws_resource_prefix}-load_granule-lambda"
-  load_data_role                   = "${local.aws_resource_prefix}-lambda-load-data-role"
+  load_data_role                   = aws_iam_role.hydrocron-lambda-load-data-role
 }
 
 resource aws_ecr_repository "lambda-image-repo" {
