@@ -3,6 +3,8 @@ Hydrocron Connection class.
 """
 
 # Standard imports
+import base64
+import json
 import os
 from types import ModuleType
 import sys
@@ -11,6 +13,10 @@ import sys
 import boto3
 from boto3.resources.base import ServiceResource
 import botocore
+import requests
+
+# Local imports
+from hydrocron.utils import constants
 
 
 class Connection(ModuleType):
@@ -26,6 +32,7 @@ class Connection(ModuleType):
         self.env = os.getenv('HYDROCRON_ENV', 'prod')
         self._dynamodb_resource = None
         self._dynamodb_endpoint = self._get_dynamodb_endpoint()
+        self._s3_resource = None
 
     def _get_dynamodb_endpoint(self):
         """Return dynamodb endpoint URL."""
@@ -46,7 +53,7 @@ class Connection(ModuleType):
 
     @property
     def dynamodb_resource(self) -> ServiceResource:
-        """Return DyanoDB session resource."""
+        """Return DynamoDB session resource."""
 
         session = boto3.session.Session()
         if not self._dynamodb_resource:
@@ -55,6 +62,62 @@ class Connection(ModuleType):
             else:
                 self._dynamodb_resouce = session.resource('dynamodb')
         return self._dynamodb_resouce
+
+    @property
+    def s3_resource(self) -> ServiceResource:
+        """Return S3 session resource."""
+
+        creds = self.retrieve_credentials()
+
+        s3_session = boto3.session.Session(
+            aws_access_key_id=creds['accessKeyId'],
+            aws_secret_access_key=creds['secretAccessKey'],
+            aws_session_token=creds['sessionToken'],
+            region_name='us-west-2')
+
+        s3_resource = s3_session.resource('s3')
+
+        return s3_resource
+
+    @staticmethod
+    def retrieve_credentials():
+        """Makes the Oauth calls to authenticate with EDS and return a set of s3
+        same-region, read-only credntials.
+        """
+
+        login_resp = requests.get(
+            constants.S3_CREDS_ENDPOINT,
+            allow_redirects=False,
+            timeout=5
+        )
+        login_resp.raise_for_status()
+
+        auth = f"{os.environ['EARTHDATA_USERNAME']}:{os.environ['EARTHDATA_PASSWORD']}"
+        encoded_auth = base64.b64encode(auth.encode('ascii'))
+
+        auth_redirect = requests.post(
+            login_resp.headers['location'],
+            data={"credentials": encoded_auth},
+            headers={"Origin": constants.S3_CREDS_ENDPOINT},
+            allow_redirects=False,
+            timeout=5
+        )
+        auth_redirect.raise_for_status()
+
+        final = requests.get(
+            auth_redirect.headers['location'],
+            allow_redirects=False,
+            timeout=5
+        )
+
+        results = requests.get(
+            constants.S3_CREDS_ENDPOINT,
+            cookies={'accessToken': final.cookies['accessToken']},
+            timeout=5
+        )
+        results.raise_for_status()
+
+        return json.loads(results.content)
 
 
 sys.modules[__name__] = Connection(__name__)

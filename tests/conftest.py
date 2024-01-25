@@ -137,3 +137,15 @@ def hydrocron_api(hydrocron_dynamo_instance, dynamo_test_proc):
         DynamoDataRepository  # noqa: E501 # pylint: disable=import-outside-toplevel
 
     hydrocron.api.hydrocron.construct_repository = lambda: DynamoDataRepository(hydrocron_dynamo_instance)
+
+
+@pytest.fixture()
+def s3_connection():
+
+    import hydrocron.utils.connection  # noqa: E501 # pylint: disable=import-outside-toplevel
+
+    hydrocron.utils.connection.retrieve_credentials = lambda: {
+        "accessKeyId": "testkey",
+        "secretAccessKey": "testsecret",
+        "sessionToken": "testtoken"
+    }

@@ -2,30 +2,23 @@
 Class to test Connection class which handles access to AWS service resources.
 """
 
-# Standard imports
-import unittest
-
 # Local imports
+import os
 from hydrocron.utils.constants import DB_TEST_TABLE_NAME
 
 
-class TestConnection(unittest.TestCase):
-    """Test Connection class."""
+def test_dynamodb_resource():
+    """Test retrieval of DynamoDB resource."""
 
-    # def setUp(self):
-    #     """ Set environment variables."""
+    # Import module
+    from hydrocron.utils import connection
 
-    #     # Set environment variables
-    #     os.environ['HYDROCRON_ENV'] = 'LOCAL'
-    #     os.environ['HYDROCRON_dynamodb_endpoint_url'] = 'http://localhost:8000'
-    #     os.environ['AWS_ACCESS_KEY_ID'] = 'AKIAW5KWYZA4HRSZUDXY'
-    #     os.environ['AWS_SECRET_ACCESS_KEY'] = '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'
-    #     os.environ['AWS_DEFAULT_REGION'] = 'us-west-2'
+    assert connection.dynamodb_resource.Table(DB_TEST_TABLE_NAME).name == "hydrocron-swot-test-table"
 
-    def test_dynamodb_resource(self):
-        """Test retrieval of DynamoDB resource."""
 
-        # Import module
-        from hydrocron.utils import connection
+def test_s3_resource(s3_connection):
+    """Test retrieval of DynamoDB resource."""
 
-        assert connection.dynamodb_resource.Table(DB_TEST_TABLE_NAME).name == "hydrocron-swot-test-table"
+    # Import module
+    from hydrocron.utils import connection
+    assert type(connection.s3_resource).__name__ == "s3.ServiceResource"

@@ -3,12 +3,7 @@ This module searches for new granules and loads data into
 the appropriate DynamoDB table
 """
 import logging
-import os
-import base64
-import json
-import requests
 
-import boto3
 import earthaccess
 from botocore.exceptions import ClientError
 
@@ -49,73 +44,11 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         start_date,
         end_date)
 
+    s3_resource = connection.s3_resource
+    dynamo_resource = connection.dynamodb_resource
     for granule in new_granules:
-        s3_resource = setup_s3connection()
         items = read_data(granule, obscure_data, s3_resource)
-
-        dynamo_resource = connection.dynamodb_resource
         load_data(dynamo_resource, table_name, items)
-
-
-def retrieve_credentials():
-    """Makes the Oauth calls to authenticate with EDS and return a set of s3
-    same-region, read-only credntials.
-    """
-    login_resp = requests.get(
-        constants.S3_CREDS_ENDPOINT,
-        allow_redirects=False,
-        timeout=5
-    )
-    login_resp.raise_for_status()
-
-    auth = f"{os.environ['EARTHDATA_USERNAME']}:{os.environ['EARTHDATA_PASSWORD']}"
-    encoded_auth = base64.b64encode(auth.encode('ascii'))
-
-    auth_redirect = requests.post(
-        login_resp.headers['location'],
-        data={"credentials": encoded_auth},
-        headers={"Origin": constants.S3_CREDS_ENDPOINT},
-        allow_redirects=False,
-        timeout=5
-    )
-    auth_redirect.raise_for_status()
-
-    final = requests.get(
-        auth_redirect.headers['location'],
-        allow_redirects=False,
-        timeout=5
-    )
-
-    results = requests.get(
-        constants.S3_CREDS_ENDPOINT,
-        cookies={'accessToken': final.cookies['accessToken']},
-        timeout=5
-    )
-    results.raise_for_status()
-
-    return json.loads(results.content)
-
-
-def setup_s3connection():
-    """
-    Set up S3 resource connections
-
-    Returns
-    -------
-    s3_resource : S3 resource
-    """
-
-    creds = retrieve_credentials()
-
-    s3_session = boto3.session.Session(
-        aws_access_key_id=creds['accessKeyId'],
-        aws_secret_access_key=creds['secretAccessKey'],
-        aws_session_token=creds['sessionToken'],
-        region_name='us-west-2')
-
-    s3_resource = s3_session.resource('s3')
-
-    return s3_resource
 
 
 def find_new_granules(collection_shortname, start_date, end_date):
