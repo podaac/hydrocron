@@ -182,8 +182,10 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     start = time.time()
     results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
     end = time.time()
-    elapsed_time = round((end - start) * 1000, 3)
-    data = {'status': "200 OK", 'time': elapsed_time, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
+    elapsed = round((end - start) * 1000, 3)
+    print({"start": start, "end": end, "elapsed": elapsed})
+
+    data = {'status': "200 OK", 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
     data['results'][event['body']['output']] = results
 
     return data
