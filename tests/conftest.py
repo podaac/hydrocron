@@ -73,7 +73,6 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
-        # write to the table
         hydro_table.add_data(**item_attrs)
 
     try:
@@ -122,7 +121,6 @@ def hydrocron_dynamo_table(dynamo_db_resource):
         columns=constants.REACH_DATA_COLUMNS)
 
     for item_attrs in items:
-        # write to the table
         hydro_table.add_data(**item_attrs)
 
     return hydro_table

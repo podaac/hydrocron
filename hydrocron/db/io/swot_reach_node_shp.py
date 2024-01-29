@@ -21,8 +21,8 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
         Used during beta testing.
     columns : list
         The shapefile attributes to obscure if obscure_data=True
-    s3_obj : the s3 granule object to open
-        Optional - the the s3 object to open
+    s3_resource : the s3 granule object to open
+        Optional - the s3 object to open
 
     Returns
     -------
