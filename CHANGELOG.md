@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
     - Issue 39 - Clean up code, removed comments and unused parameters
 ### Fixed
+    - Issue 44 - Load data lambda only loads the first granule found in the time range
 ### Security
 
 ## [1.0.0]

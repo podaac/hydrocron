@@ -44,7 +44,20 @@ data "aws_iam_policy_document" "dynamo-write-policy" {
   }
 
 }
+data "aws_iam_policy_document" "lambda-invoke-policy" {
 
+  statement {
+    effect  = "Allow"
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+    resources = [
+      # "arn:aws:lambda:${data.aws_region.current.id}:${local.account_id}:*",
+      aws_lambda_function.hydrocron_lambda_load_granule.arn
+      ]
+  }
+
+}
 data "aws_iam_policy_document" "ssm-read-policy" {
 
   statement {
@@ -159,6 +172,19 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
   managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 
   inline_policy {
+    name = "HydrocronLambdaInvoke"
+    policy = data.aws_iam_policy_document.lambda-invoke-policy.json
+  }
+}
+
+resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
+  name = "${local.aws_resource_prefix}-lambda-load-granule-role"
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+
+  inline_policy {
     name   = "HydrocronDynamoWrite"
     policy = data.aws_iam_policy_document.dynamo-write-policy.json
   }
@@ -167,5 +193,3 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
     policy = data.aws_iam_policy_document.s3-read-policy.json
   }
 }
-
-
