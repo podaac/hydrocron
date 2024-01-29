@@ -10,9 +10,8 @@ from hydrocron.utils.constants import DB_TEST_TABLE_NAME
 def test_dynamodb_resource():
     """Test retrieval of DynamoDB resource."""
 
-    # Import module
+    os.environ['AWS_DEFAULT_REGION'] = 'us-west-2'
     from hydrocron.utils import connection
-
     assert connection.dynamodb_resource.Table(DB_TEST_TABLE_NAME).name == "hydrocron-swot-test-table"
 
 

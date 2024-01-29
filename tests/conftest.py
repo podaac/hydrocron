@@ -143,7 +143,6 @@ def hydrocron_api(hydrocron_dynamo_instance, dynamo_test_proc):
 def s3_connection():
 
     import hydrocron.utils.connection  # noqa: E501 # pylint: disable=import-outside-toplevel
-
     hydrocron.utils.connection.retrieve_credentials = lambda: {
         "accessKeyId": "testkey",
         "secretAccessKey": "testsecret",
