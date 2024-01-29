@@ -2,12 +2,8 @@
 Hydrocron API context module
 """
 # flake8: noqa: E501
-import os
 import sys
 from types import ModuleType
-from typing import Callable
-
-import boto3
 
 from hydrocron.api.data_access.db import DynamoDataRepository
 from hydrocron.utils import connection

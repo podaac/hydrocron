@@ -58,26 +58,26 @@ class Connection(ModuleType):
         session = boto3.session.Session()
         if not self._dynamodb_resource:
             if self._dynamodb_endpoint:
-                self._dynamodb_resouce = session.resource('dynamodb', endpoint_url=self._dynamodb_endpoint)
+                self._dynamodb_resource = session.resource('dynamodb', endpoint_url=self._dynamodb_endpoint)
             else:
-                self._dynamodb_resouce = session.resource('dynamodb')
-        return self._dynamodb_resouce
+                self._dynamodb_resource = session.resource('dynamodb')
+        return self._dynamodb_resource
 
     @property
     def s3_resource(self) -> ServiceResource:
         """Return S3 session resource."""
 
-        creds = self.retrieve_credentials()
+        if not self._s3_resource:
+            creds = self.retrieve_credentials()
+            s3_session = boto3.session.Session(
+                aws_access_key_id=creds['accessKeyId'],
+                aws_secret_access_key=creds['secretAccessKey'],
+                aws_session_token=creds['sessionToken'],
+                region_name='us-west-2')
 
-        s3_session = boto3.session.Session(
-            aws_access_key_id=creds['accessKeyId'],
-            aws_secret_access_key=creds['secretAccessKey'],
-            aws_session_token=creds['sessionToken'],
-            region_name='us-west-2')
+            self._s3_resource = s3_session.resource('s3')
 
-        s3_resource = s3_session.resource('s3')
-
-        return s3_resource
+        return self._s3_resource
 
     @staticmethod
     def retrieve_credentials():
@@ -119,5 +119,8 @@ class Connection(ModuleType):
 
         return json.loads(results.content)
 
+
+dynamodb_resource: ServiceResource
+s3_resource: ServiceResource
 
 sys.modules[__name__] = Connection(__name__)
