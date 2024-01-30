@@ -44,11 +44,35 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         start_date,
         end_date)
 
-    s3_resource = connection.s3_resource
-    dynamo_resource = connection.dynamodb_resource
+    lambda_client = boto3.client('lambda')
+
     for granule in new_granules:
-        items = read_data(granule, obscure_data, s3_resource)
-        load_data(dynamo_resource, table_name, items)
+        granule_path = granule.data_links(access='direct')[0]
+
+        event2 = ('{"body": {"granule_path": "'
+                  + granule_path + '","obscure_data": "'
+                  + obscure_data + '","table_name": "'
+                  + table_name + '"}}')
+
+        lambda_client.invoke(
+            FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+            InvocationType='Event',
+            Payload=event2)
+
+
+def granule_handler(event, _):
+    """
+    Second Lambda entrypoint for loading individual granules
+    """
+    granule_path = event['body']['granule_path']
+    obscure_data = event['body']['obscure_data']
+    table_name = event['body']['table_name']
+
+    s3_resource = setup_s3connection()
+    items = read_data(granule_path, obscure_data, s3_resource)
+
+    dynamo_resource = setup_dynamoconnection()
+    load_data(dynamo_resource, table_name, items)
 
 
 def find_new_granules(collection_shortname, start_date, end_date):
@@ -76,14 +100,14 @@ def find_new_granules(collection_shortname, start_date, end_date):
     return results
 
 
-def read_data(granule, obscure_data, s3_resource=None):
+def read_data(granule_path, obscure_data, s3_resource=None):
     """
     Read data from shapefiles
 
     Parameters
     ----------
-    granule : Granule
-        the granule to unpack
+    granule_path : string
+        the S3 url to the granule to unpack
     obscure_data : boolean
         whether to obscure the data on load
     s3_resource : boto3 session resource
@@ -93,7 +117,6 @@ def read_data(granule, obscure_data, s3_resource=None):
     items : the unpacked granule data
     """
     items = {}
-    granule_path = granule.data_links(access='direct')[0]
 
     if 'Reach' in granule_path:
         items = swot_reach_node_shp.read_shapefile(
