@@ -181,22 +181,22 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     output = event['body']['output']
     fields = event['body']['fields']
 
-    any_empty = False
+    missing_params = []
     if feature.isEmpty():
-        any_empty = True
+        missing_params.append('Feature')
     if feature_id.isEmpty():
-        any_empty = True
+        missing_params.append('Feature ID')
     if start_time.isEmpty():
-        any_empty = True
+        missing_params.append('Start time')
     if end_time.isEmpty():
-        any_empty = True
+        missing_params.append('End time')
     if output.isEmpty():
-        any_empty = True
+        missing_params.append('Output')
     if fields.isEmpty():
-        any_empty = True
+        missing_params.append('Fields')
 
-    if any_empty:
-        error_code = '400: All required parameters are missing.'
+    if missing_params:
+        error_code = f'400: These required parameters are missing: {missing_params}'
 
     start = time.time()
     results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
