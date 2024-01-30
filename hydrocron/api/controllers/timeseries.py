@@ -201,7 +201,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     start = time.time()
     results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
-    if type(results) is dict and results['error'] != '':
+    if isinstance(results, dict) and results['error'] != '':
         error_code = results['error']
 
     end = time.time()
