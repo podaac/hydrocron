@@ -3,7 +3,9 @@ This module searches for new granules and loads data into
 the appropriate DynamoDB table
 """
 import logging
+import os
 
+import boto3
 import earthaccess
 from botocore.exceptions import ClientError
 
@@ -68,10 +70,10 @@ def granule_handler(event, _):
     obscure_data = event['body']['obscure_data']
     table_name = event['body']['table_name']
 
-    s3_resource = setup_s3connection()
+    s3_resource = connection.s3_resource
     items = read_data(granule_path, obscure_data, s3_resource)
 
-    dynamo_resource = setup_dynamoconnection()
+    dynamo_resource = connection.dynamodb_resource
     load_data(dynamo_resource, table_name, items)
 
 
