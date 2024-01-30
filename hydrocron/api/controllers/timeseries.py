@@ -172,6 +172,8 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     This function queries the database for relevant results
     """
 
+    error_code = '200 OK'
+
     feature = event['body']['feature']
     feature_id = event['body']['feature_id']
     start_time = event['body']['start_time']
@@ -179,13 +181,33 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     output = event['body']['output']
     fields = event['body']['fields']
 
+    any_empty = False
+    if feature == '':
+        any_empty = True
+    if feature_id == '':
+        any_empty = True
+    if start_time == '':
+        any_empty = True
+    if end_time == '':
+        any_empty = True
+    if output == '':
+        any_empty = True
+    if fields == '':
+        any_empty = True
+
+    if any_empty:
+        error_code = f'400: All required parameters are missing.'
+
     start = time.time()
     results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
+    if results['Error'] == '':
+        results['Error'] = error_code
+
     end = time.time()
     elapsed = round((end - start) * 1000, 3)
     print({"start": start, "end": end, "elapsed": elapsed})
 
-    data = {'status': "200 OK", 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
+    data = {'status': results['Error'], 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
     data['results'][event['body']['output']] = results
 
     return data
