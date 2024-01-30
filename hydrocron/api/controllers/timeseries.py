@@ -71,8 +71,9 @@ def format_json(feature_lower, results, feature_id, fields):  # noqa: E501 # pyl
     data = {}
     i = 0
 
+    data['error'] = '200 OK'
     if results is None:
-        data['error'] = f"404: Results with the specified Feature ID {feature_id} were not found."
+        data['error'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
     elif len(results) > 5750000:
         data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
 
@@ -141,7 +142,7 @@ def format_csv(feature_lower, results, feature_id, fields):  # noqa: E501 # pyli
     csv = fields + '\n'
 
     if results is None:
-        data['error'] = f"404: Results with the specified Feature ID {feature_id} were not found."
+        data['error'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
     elif len(results) > 5750000:
         data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
 
@@ -182,17 +183,17 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     fields = event['body']['fields']
 
     missing_params = []
-    if feature.isEmpty():
+    if feature == '':
         missing_params.append('Feature')
-    if feature_id.isEmpty():
+    if feature_id == '':
         missing_params.append('Feature ID')
-    if start_time.isEmpty():
+    if start_time == '':
         missing_params.append('Start time')
-    if end_time.isEmpty():
+    if end_time == '':
         missing_params.append('End time')
-    if output.isEmpty():
+    if output == '':
         missing_params.append('Output')
-    if fields.isEmpty():
+    if fields == '':
         missing_params.append('Fields')
 
     if missing_params:
@@ -200,14 +201,14 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     start = time.time()
     results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
-    if results['Error'] == '':
-        results['Error'] = error_code
+    if type(results) is dict and results['error'] != '':
+        error_code = results['error']
 
     end = time.time()
     elapsed = round((end - start) * 1000, 3)
     print({"start": start, "end": end, "elapsed": elapsed})
 
-    data = {'status': results['Error'], 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
+    data = {'status': error_code, 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
     data['results'][event['body']['output']] = results
 
     return data
