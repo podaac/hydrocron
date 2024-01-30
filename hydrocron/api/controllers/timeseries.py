@@ -182,17 +182,17 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     fields = event['body']['fields']
 
     any_empty = False
-    if feature == '':
+    if feature.isEmpty():
         any_empty = True
-    if feature_id == '':
+    if feature_id.isEmpty():
         any_empty = True
-    if start_time == '':
+    if start_time.isEmpty():
         any_empty = True
-    if end_time == '':
+    if end_time.isEmpty():
         any_empty = True
-    if output == '':
+    if output.isEmpty():
         any_empty = True
-    if fields == '':
+    if fields.isEmpty():
         any_empty = True
 
     if any_empty:
