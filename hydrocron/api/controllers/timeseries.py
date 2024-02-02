@@ -3,6 +3,7 @@ Hydrocron API timeseries controller
 """
 # pylint: disable=R0801
 # pylint: disable=C0103
+import datetime
 import logging
 import time
 from hydrocron.api import hydrocron
@@ -168,19 +169,40 @@ def format_csv(feature_lower, results, feature_id, fields):  # noqa: E501 # pyli
     return csv, i
 
 
-def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
+def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
     """
-    This function queries the database for relevant results
+    Determine if all parameters are present and in the correct format. Return 400
+    Bad Request if any errors are found alongside 0 hits.
     """
 
-    error_code = '200 OK'
+    data = {'error': '200 OK'}
 
-    feature = event['body']['feature']
-    feature_id = event['body']['feature_id']
-    start_time = event['body']['start_time']
-    end_time = event['body']['end_time']
-    output = event['body']['output']
-    fields = event['body']['fields']
+    missing_params = check_missing(feature, feature_id, start_time, end_time, output, fields)
+    if missing_params:
+        data['error'] = f'400: These required parameters are missing: {missing_params}'
+
+    elif feature not in ('Node', 'Reach'):
+        data['error'] = f'400: feature parameter should be Reach or Node, not: {feature}'
+
+    elif not feature_id.isdigit():
+        data['error'] = f'400: feature_id cannot contain letters: {feature_id}'
+
+    elif not is_date_valid(start_time) or not is_date_valid(end_time):
+        data['error'] = '400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SS+00:00'
+
+    elif output not in ('csv', 'geojson'):
+        data['error'] = f'400: output parameter should be csv or geojson, not: {output}'
+
+    elif not is_fields_valid(feature, fields):
+        data['error'] = '400: fields parameter should contain valid SWOT fields'
+
+    return data, 0
+
+
+def check_missing(feature, feature_id, start_time, end_time, output, fields):
+    """
+    Check to see if any parameters are missing.
+    """
 
     missing_params = []
     if feature == '':
@@ -196,19 +218,61 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     if fields == '':
         missing_params.append('Fields')
 
-    if missing_params:
-        error_code = f'400: These required parameters are missing: {missing_params}'
+    return missing_params
+
+
+def is_date_valid(query_date):
+    """
+    Check if the query date conforms to the correct format.
+    """
+
+    try:
+        datetime.datetime.strptime(query_date, "%Y-%m-%dT%H:%M:%S%z")
+        return True
+    except ValueError:
+        return False
+
+
+def is_fields_valid(feature, fields):
+    """
+    Check if fields are present in either the reach or node list of columns
+    """
+
+    fields = fields.split(',')
+    fields.remove("feature_id")
+    if feature == 'Reach':
+        columns = constants.REACH_ALL_COLUMNS
+    elif feature == 'Node':
+        columns = constants.NODE_ALL_COLUMNS
+    else:
+        columns = []
+    return all(field in columns for field in fields)
+
+
+def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
+    """
+    This function queries the database for relevant results
+    """
+
+    feature = event['body']['feature']
+    feature_id = event['body']['feature_id']
+    start_time = event['body']['start_time']
+    end_time = event['body']['end_time']
+    output = event['body']['output']
+    fields = event['body']['fields']
 
     start = time.time()
-    results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
-    if isinstance(results, dict) and results['error'] != '':
-        error_code = results['error']
+
+    results, hits = validate_parameters(feature, feature_id, start_time, end_time, output, fields)
+
+    if results['error'] == '200 OK':
+        results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
     end = time.time()
     elapsed = round((end - start) * 1000, 3)
-    print({"start": start, "end": end, "elapsed": elapsed})
 
-    data = {'status': error_code, 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
-    data['results'][event['body']['output']] = results
+    data = {'status': results['error'], 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
+    if results['error'] == '200 OK':
+        data['results'][event['body']['output']] = results
 
     return data
