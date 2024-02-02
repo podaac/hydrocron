@@ -249,6 +249,16 @@ def is_fields_valid(feature, fields):
     return all(field in columns for field in fields)
 
 
+def sanitize_time(start_time, end_time):
+    """
+    Return formatted string to handle cases where request includes non-padded numbers
+    """
+
+    start_time = datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
+    end_time = datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
+    return start_time, end_time
+
+
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
     This function queries the database for relevant results
@@ -266,6 +276,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     results, hits = validate_parameters(feature, feature_id, start_time, end_time, output, fields)
 
     if results['error'] == '200 OK':
+        start_time, end_time = sanitize_time(start_time, end_time)
         results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
     end = time.time()
