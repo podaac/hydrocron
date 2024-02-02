@@ -77,12 +77,11 @@ def format_json(feature_lower, results, feature_id, fields):  # noqa: E501 # pyl
         data['error'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
     elif len(results) > 5750000:
         data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
-
     else:
-        data['type'] = "FeatureCollection"
-        data['features'] = []
+        data['response'] = {}
+        data['response']['type'] = "FeatureCollection"
+        data['response']['features'] = []
         fields_set = fields.split(",")
-
         for t in results:
             feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
             columns = []
@@ -115,9 +114,8 @@ def format_json(feature_lower, results, feature_id, fields):  # noqa: E501 # pyl
                                 feature['geometry']['coordinates'] = [float(x), float(y)]
                     else:
                         feature['properties'][j] = t[j]
-            data['features'].append(feature)
+            data['response']['features'].append(feature)
             i += 1
-
     return data, i
 
 
@@ -142,14 +140,13 @@ def format_csv(feature_lower, results, feature_id, fields):  # noqa: E501 # pyli
     i = 0
     csv = fields + '\n'
 
+    data['error'] = '200 OK'
     if results is None:
         data['error'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
     elif len(results) > 5750000:
         data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
-
     else:
-        data['type'] = "FeatureCollection"
-        data['features'] = []
+        data['response'] = ""
         fields_set = fields.split(",")
         for t in results:
             columns = []
@@ -163,10 +160,12 @@ def format_csv(feature_lower, results, feature_id, fields):  # noqa: E501 # pyli
                         csv += t['geometry'].replace('; ', ', ')
                     else:
                         csv += t[j]
-                    csv += ','
+                    if j != fields_set[-1]:
+                        csv += ','
             csv += '\n'
             i += 1
-    return csv, i
+        data['response'] = csv
+    return data, i
 
 
 def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
@@ -239,7 +238,6 @@ def is_fields_valid(feature, fields):
     """
 
     fields = fields.split(',')
-    fields.remove("feature_id")
     if feature == 'Reach':
         columns = constants.REACH_ALL_COLUMNS
     elif feature == 'Node':
@@ -284,6 +282,6 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     data = {'status': results['error'], 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
     if results['error'] == '200 OK':
-        data['results'][event['body']['output']] = results
+        data['results'][event['body']['output']] = results['response']
 
     return data
