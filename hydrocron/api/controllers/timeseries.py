@@ -262,6 +262,8 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     This function queries the database for relevant results
     """
 
+    print(f"Event - {event}")
+
     feature = event['body']['feature']
     feature_id = event['body']['feature_id']
     start_time = event['body']['start_time']
