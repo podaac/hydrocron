@@ -175,12 +175,7 @@ def validate_parameters(feature, feature_id, start_time, end_time, output, field
     """
 
     data = {'error': '200 OK'}
-
-    missing_params = check_missing(feature, feature_id, start_time, end_time, output, fields)
-    if missing_params:
-        data['error'] = f'400: These required parameters are missing: {missing_params}'
-
-    elif feature not in ('Node', 'Reach'):
+    if feature not in ('Node', 'Reach'):
         data['error'] = f'400: feature parameter should be Reach or Node, not: {feature}'
 
     elif not feature_id.isdigit():
@@ -196,28 +191,6 @@ def validate_parameters(feature, feature_id, start_time, end_time, output, field
         data['error'] = '400: fields parameter should contain valid SWOT fields'
 
     return data, 0
-
-
-def check_missing(feature, feature_id, start_time, end_time, output, fields):
-    """
-    Check to see if any parameters are missing.
-    """
-
-    missing_params = []
-    if feature == '':
-        missing_params.append('Feature')
-    if feature_id == '':
-        missing_params.append('Feature ID')
-    if start_time == '':
-        missing_params.append('Start time')
-    if end_time == '':
-        missing_params.append('End time')
-    if output == '':
-        missing_params.append('Output')
-    if fields == '':
-        missing_params.append('Fields')
-
-    return missing_params
 
 
 def is_date_valid(query_date):
@@ -262,22 +235,28 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     This function queries the database for relevant results
     """
 
+    start = time.time()
     print(f"Event - {event}")
 
-    feature = event['body']['feature']
-    feature_id = event['body']['feature_id']
-    start_time = event['body']['start_time']
-    end_time = event['body']['end_time']
-    output = event['body']['output']
-    fields = event['body']['fields']
+    results = {}
+    try:
+        feature = event['body']['feature']
+        feature_id = event['body']['feature_id']
+        start_time = event['body']['start_time']
+        end_time = event['body']['end_time']
+        output = event['body']['output']
+        fields = event['body']['fields']
 
-    start = time.time()
+        results, hits = validate_parameters(feature, feature_id, start_time, end_time, output, fields)
 
-    results, hits = validate_parameters(feature, feature_id, start_time, end_time, output, fields)
+        if results['error'] == '200 OK':
+            start_time, end_time = sanitize_time(start_time, end_time)
+            results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
-    if results['error'] == '200 OK':
-        start_time, end_time = sanitize_time(start_time, end_time)
-        results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
+    except KeyError as e:
+        missing_parameter = str(e).rsplit(' ', maxsplit=1)[-1]
+        results['error'] = f'400: This required parameter is missing: {missing_parameter}'
+        hits = 0
 
     end = time.time()
     elapsed = round((end - start) * 1000, 3)

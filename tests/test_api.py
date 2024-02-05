@@ -338,20 +338,23 @@ def test_timeseries_lambda_handler_missing(hydrocron_api):
     """
     import hydrocron.api.controllers.timeseries
 
+    event = {"body": {}}
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    assert result['status'] == "400: This required parameter is missing: 'feature'"
+
     event = {
         "body": {
-            "feature": "",
-            "feature_id": "",
+            "feature": "Reach",
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
-            "output": "",
+            "output": "geojson",
             "fields": "reach_id,time_str,wse,geometry"
         }
     }
-
     context = "_"
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    assert result['status'] == "400: These required parameters are missing: ['Feature', 'Feature ID', 'Output']"
+    assert result['status'] == "400: This required parameter is missing: 'feature_id'"
 
 
 def test_timeseries_lambda_handler_feature(hydrocron_api):
