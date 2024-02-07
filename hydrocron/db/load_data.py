@@ -71,9 +71,13 @@ def granule_handler(event, _):
     granule_path = event['body']['granule_path']
     obscure_data = event['body']['obscure_data']
     table_name = event['body']['table_name']
+    load_test_reach = event['body']['load_test_reach']
 
-    s3_resource = setup_s3connection()
-    items = read_data(granule_path, obscure_data, s3_resource)
+    if load_test_reach:
+        items = swot_reach_node_shp.load_test_reach()
+    else:
+        s3_resource = setup_s3connection()
+        items = read_data(granule_path, obscure_data, s3_resource)
 
     dynamo_resource = setup_dynamoconnection()
     load_data(dynamo_resource, table_name, items)
