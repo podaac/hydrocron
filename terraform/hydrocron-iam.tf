@@ -175,6 +175,10 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
     name = "HydrocronLambdaInvoke"
     policy = data.aws_iam_policy_document.lambda-invoke-policy.json
   }
+  inline_policy {
+    name   = "HydrocronSSMRead"
+    policy = data.aws_iam_policy_document.ssm-read-policy.json
+  }
 }
 
 resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
@@ -191,5 +195,9 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   inline_policy {
     name = "HydrocronS3Read"
     policy = data.aws_iam_policy_document.s3-read-policy.json
+  }
+  inline_policy {
+    name   = "HydrocronSSMRead"
+    policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
 }

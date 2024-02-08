@@ -6,8 +6,9 @@ Hydrocron API timeseries controller
 import datetime
 import logging
 import time
-from hydrocron.api import hydrocron
 
+from hydrocron.api.data_access.db import DynamoDataRepository
+from hydrocron.utils import connection
 from hydrocron.utils import constants
 
 logger = logging.getLogger()
@@ -37,10 +38,11 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     data = {}
     hits = 0
 
+    data_repository = DynamoDataRepository(connection.dynamodb_resource)
     if feature.lower() == 'reach':
-        results = hydrocron.data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
+        results = data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
     elif feature.lower() == 'node':
-        results = hydrocron.data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
+        results = data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
     else:
         return data, hits
 
