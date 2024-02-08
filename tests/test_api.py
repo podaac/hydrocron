@@ -1,7 +1,10 @@
 """
 Tests for API queries
 """
-import json
+
+import pytest
+
+from hydrocron.api.controllers.timeseries import RequestMalformed
 
 
 def test_timeseries_lambda_handler_geojson(hydrocron_api):
@@ -340,8 +343,9 @@ def test_timeseries_lambda_handler_missing(hydrocron_api):
 
     event = {"body": {}}
     context = "_"
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    assert result['status'] == "400: This required parameter is missing: 'feature'"
+    with pytest.raises(RequestMalformed) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: This required parameter is missing: 'feature'" in str(e.value)
 
     event = {
         "body": {
@@ -353,8 +357,9 @@ def test_timeseries_lambda_handler_missing(hydrocron_api):
         }
     }
     context = "_"
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    assert result['status'] == "400: This required parameter is missing: 'feature_id'"
+    with pytest.raises(RequestMalformed) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: This required parameter is missing: 'feature_id'" in str(e.value)
 
 
 def test_timeseries_lambda_handler_feature(hydrocron_api):
@@ -378,8 +383,9 @@ def test_timeseries_lambda_handler_feature(hydrocron_api):
     }
 
     context = "_"
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    assert result['status'] == "400: feature parameter should be Reach or Node, not: River"
+    with pytest.raises(RequestMalformed) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: feature parameter should be Reach or Node, not: River" in str(e.value)
 
 
 def test_timeseries_lambda_handler_feature_id(hydrocron_api):
@@ -403,8 +409,9 @@ def test_timeseries_lambda_handler_feature_id(hydrocron_api):
     }
 
     context = "_"
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    assert result['status'] == "400: feature_id cannot contain letters: 7122ff4100223"
+    with pytest.raises(RequestMalformed) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: feature_id cannot contain letters: 7122ff4100223" in str(e.value)
 
 
 def test_timeseries_lambda_handler_dates(hydrocron_api):
@@ -429,8 +436,9 @@ def test_timeseries_lambda_handler_dates(hydrocron_api):
     }
 
     context = "_"
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    assert result['status'] == "400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SS+00:00"
+    with pytest.raises(RequestMalformed) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    assert "400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SS+00:00" in str(e.value)
 
 
 def test_timeseries_lambda_handler_output(hydrocron_api):
@@ -454,8 +462,9 @@ def test_timeseries_lambda_handler_output(hydrocron_api):
     }
 
     context = "_"
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    assert result['status'] == "400: output parameter should be csv or geojson, not: txt"
+    with pytest.raises(RequestMalformed) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: output parameter should be csv or geojson, not: txt" in str(e.value)
 
 
 def test_timeseries_lambda_handler_fields(hydrocron_api):
@@ -479,5 +488,6 @@ def test_timeseries_lambda_handler_fields(hydrocron_api):
     }
 
     context = "_"
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    assert result['status'] == "400: fields parameter should contain valid SWOT fields"
+    with pytest.raises(RequestMalformed) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: fields parameter should contain valid SWOT fields" in str(e.value)
