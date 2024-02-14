@@ -35,7 +35,6 @@ resource "aws_api_gateway_rest_api_policy" "hydrocron-api-gateway-policy" {
 
 resource "aws_api_gateway_deployment" "hydrocron-api-gateway-deployment" {
   rest_api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
-  stage_name  = local.api_version
   depends_on  = [aws_api_gateway_rest_api.hydrocron-api-gateway]
   triggers    = {
     redeployment = sha1(jsonencode([
@@ -69,7 +68,7 @@ resource "aws_api_gateway_method_settings" "hydrocron-api-gateway-settings" {
 
 
 resource "aws_cloudwatch_log_group" "hydrocron-api-gateway-logs" {
-  name              = "${local.aws_resource_prefix}/API-Gateway-Execution-Logs/${aws_api_gateway_deployment.hydrocron-api-gateway-deployment.stage_name}"
+  name              = "${local.aws_resource_prefix}/API-Gateway-Execution-Logs/${local.api_version}"
   retention_in_days = 60
 }
 
