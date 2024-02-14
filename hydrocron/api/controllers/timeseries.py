@@ -14,9 +14,9 @@ from hydrocron.utils import constants
 logger = logging.getLogger()
 
 
-class RequestMalformed(Exception):
+class RequestError(Exception):
     """
-    Exception thrown if expected table is missing
+    Exception thrown if there is an error encoutered with request
     """
 
 
@@ -283,6 +283,6 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     if results['http_code'] == '200 OK':
         data['results'][event['body']['output']] = results['response']
     else:
-        raise RequestMalformed(results['error_message'])
+        raise RequestError(results['error_message'])
 
     return data
