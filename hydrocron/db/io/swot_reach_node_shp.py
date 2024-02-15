@@ -9,7 +9,6 @@ from importlib import resources
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from shapely import wkt
 
 
 def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
