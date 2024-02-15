@@ -138,12 +138,9 @@ def load_test_reach():
     items = []
 
     with resources.path("hydrocron.db", "test_reaches.csv") as csv:
-        data_frame = pd.read_csv(csv)
+        csv_file = pd.read_csv(csv)
 
-        data_frame['geometry'] = data_frame['geometry'].apply(wkt.loads)
-        shp_file = gpd.GeoDataFrame(data_frame, geometry='geometry')
-
-        shp_file = shp_file.astype(str)
+        csv_file = csv_file.astype(str)
         filename_attrs = {
             'cycle_id': '000',
             'pass_id': '000',
@@ -153,6 +150,6 @@ def load_test_reach():
             'crid': 'TEST'
             }
 
-        items = assemble_attributes(shp_file, filename_attrs)
+        items = assemble_attributes(csv_file, filename_attrs)
 
     return items
