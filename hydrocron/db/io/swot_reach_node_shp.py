@@ -155,6 +155,7 @@ def load_test_reach():
 
         items = assemble_attributes(csv_file, filename_attrs)
 
-        logging.info("Benchmarking items: " + str(items.count()))
+        count = str(items.count())
+        logging.info("Benchmarking items: %s", count)
 
     return items
