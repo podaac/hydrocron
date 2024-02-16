@@ -257,14 +257,26 @@ def load_data(dynamo_resource, table_name, items):
         raise err
 
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
-        print("Adding reach items to table")
-        for item_attrs in items:
-            hydrocron_table.add_data(**item_attrs)
+
+        if len(items) > 5:
+            logging.info("Batch adding reach items")
+            hydrocron_table.batch_fill_table(items)
+
+        else:
+            logging.info("Adding reach items to table individually")
+            for item_attrs in items:
+                hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
-        print("Adding node items to table")
-        for item_attrs in items:
-            hydrocron_table.add_data(**item_attrs)
+
+        if len(items) > 5:
+            logging.info("Batch adding node items")
+            hydrocron_table.batch_fill_table(items)
+        
+        else:
+            logging.info("Adding node items to table individually")
+            for item_attrs in items:
+                hydrocron_table.add_data(**item_attrs)
 
     else:
         logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
