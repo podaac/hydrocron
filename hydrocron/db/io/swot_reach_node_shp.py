@@ -137,7 +137,7 @@ def load_test_reach():
     items = []
 
     with resources.path("hydrocron.db", "test_reaches.csv") as csv:
-        csv_file = pd.read_csv(csv)
+        csv_file = pd.read_csv(csv, dtype=str)
 
         csv_file = csv_file.astype(str)
         filename_attrs = {
