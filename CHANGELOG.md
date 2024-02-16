@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 79 - Generate data for use by benchmarks
     - Issue 75 - Update log messaging format
 ### Changed
 ### Deprecated 
