@@ -13,6 +13,7 @@ import pandas as pd
 
 logging.getLogger().setLevel(logging.INFO)
 
+
 def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
     """
     Reads a SWOT River Reach shapefile packaged as a zip
