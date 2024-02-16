@@ -76,17 +76,18 @@ def granule_handler(event, _):
     load_test_reach = event['body']['load_test_reach']
 
     if load_test_reach:
-        logging.info("Loading benchmarking data")
+        print("Loading benchmarking data")
         items = swot_reach_node_shp.load_test_reach()
     else:
-        logging.info("Setting up S3 connection")
+        print("Setting up S3 connection")
         s3_resource = setup_s3connection()
 
         logging.info("Starting read granule")
         items = read_data(granule_path, obscure_data, s3_resource)
 
-    logging.info("Set")
+    print("Set up dynamo connection")
     dynamo_resource = setup_dynamoconnection()
+    print("loading data items")
     load_data(dynamo_resource, table_name, items)
 
 
@@ -248,7 +249,7 @@ def load_data(dynamo_resource, table_name, items):
     """
 
     try:
-        logging.info("Set dynamo table connection")
+        print("Set dynamo table connection")
         hydrocron_table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
     except ClientError as err:
         if err.response['Error']['Code'] == 'ResourceNotFoundException':
@@ -256,12 +257,12 @@ def load_data(dynamo_resource, table_name, items):
         raise err
 
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
-        logging.info("Adding reach items to table")
+        print("Adding reach items to table")
         for item_attrs in items:
             hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
-        logging.info("Adding node items to table")
+        print("Adding node items to table")
         for item_attrs in items:
             hydrocron_table.add_data(**item_attrs)
 
