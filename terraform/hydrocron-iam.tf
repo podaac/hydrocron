@@ -52,7 +52,6 @@ data "aws_iam_policy_document" "lambda-invoke-policy" {
       "lambda:InvokeFunction"
     ]
     resources = [
-      # "arn:aws:lambda:${data.aws_region.current.id}:${local.account_id}:*",
       aws_lambda_function.hydrocron_lambda_load_granule.arn
       ]
   }
@@ -109,6 +108,30 @@ data "aws_iam_policy_document" "assume_role_lambda" {
     }
 
     actions = ["sts:AssumeRole"]
+  }
+}
+
+data "aws_iam_policy_document" "lambda_log_to_cloudwatch" {
+  statement {
+    effect = "Allow"
+    actions =  [
+      "logs:CreateLogGroup"
+    ]
+    resources = [
+      "arn:aws:logs:region:${local.account_id}:parameter/service/${var.app_name}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions =  [
+       "logs:CreateLogStream",
+      "logs:PutLogEvents"
+      ]
+    resources = [
+      "arn:aws:logs:region:${local.account_id}:log-group:/aws/lambda/${aws_lambda_function.hydrocron_lambda_load_data.function_name}:*",
+      "arn:aws:logs:region:${local.account_id}:log-group:/aws/lambda/${aws_lambda_function.hydrocron_lambda_load_granule.function_name}:*"
+    ]
   }
 }
 
@@ -175,6 +198,9 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
     name = "HydrocronLambdaInvoke"
     policy = data.aws_iam_policy_document.lambda-invoke-policy.json
   }
+  inline_policy {
+    policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
+  }
 }
 
 resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
@@ -191,5 +217,8 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   inline_policy {
     name = "HydrocronS3Read"
     policy = data.aws_iam_policy_document.s3-read-policy.json
+  }
+  inline_policy {
+    policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
   }
 }
