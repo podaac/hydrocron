@@ -16,6 +16,8 @@ from hydrocron.db import HydrocronTable
 from hydrocron.db.io import swot_reach_node_shp
 from hydrocron.utils import constants
 
+logging.getLogger().setLevel(logging.INFO)
+
 
 class MissingTable(Exception):
     """
