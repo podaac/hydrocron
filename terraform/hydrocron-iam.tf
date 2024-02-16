@@ -129,7 +129,7 @@ data "aws_iam_policy_document" "lambda_log_to_cloudwatch" {
       "logs:PutLogEvents"
       ]
     resources = [
-      "arn:aws:logs:region:${local.account_id}:log-group:/aws/lambda/${aws_lambda_function.hydrocron_lambda_load_data.function_name}:*",
+      #"arn:aws:logs:region:${local.account_id}:log-group:/aws/lambda/${aws_lambda_function.hydrocron_lambda_load_data.function_name}:*",
       "arn:aws:logs:region:${local.account_id}:log-group:/aws/lambda/${aws_lambda_function.hydrocron_lambda_load_granule.function_name}:*"
     ]
   }
