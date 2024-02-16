@@ -32,6 +32,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     start_date = event['body']['start_date']
     end_date = event['body']['end_date']
     obscure_data = event['body']['obscure_data']
+    load_benchmarking_data = event['body']['load_benchmarking_data']
 
     match table_name:
         case constants.SWOT_REACH_TABLE_NAME:
@@ -56,7 +57,8 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         event2 = ('{"body": {"granule_path": "'
                   + granule_path + '","obscure_data": "'
                   + obscure_data + '","table_name": "'
-                  + table_name + '"}}')
+                  + table_name + '","load_benchmarking_data: "'
+                  + load_benchmarking_data + '"}}')
 
         lambda_client.invoke(
             FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
@@ -71,11 +73,11 @@ def granule_handler(event, _):
     granule_path = event['body']['granule_path']
     obscure_data = event['body']['obscure_data']
     table_name = event['body']['table_name']
-    load_test_reach = event['body']['load_test_reach']
+    load_benchmarking_data = event['body']['load_benchmarking_data']
 
-    if load_test_reach:
+    if load_benchmarking_data:
         print("Loading benchmarking data")
-        items = swot_reach_node_shp.load_test_reach()
+        items = swot_reach_node_shp.load_benchmarking_data()
     else:
         print("Setting up S3 connection")
         s3_resource = connection.s3_resource

@@ -127,7 +127,7 @@ def parse_from_filename(filename):
     return filename_attrs
 
 
-def load_test_reach():
+def load_benchmarking_data():
     """
     Loads many time steps for a fake reach_id to enable performance testing
 
