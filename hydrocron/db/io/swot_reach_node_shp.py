@@ -145,6 +145,7 @@ def load_test_reach():
         logging.info("Read CSV")
 
         csv_file = csv_file.astype(str)
+
         filename_attrs = {
             'cycle_id': '000',
             'pass_id': '000',
@@ -154,7 +155,19 @@ def load_test_reach():
             'crid': 'TEST'
             }
 
-        items = assemble_attributes(csv_file, filename_attrs)
+        for _index, row in csv_file.iterrows():
+
+            attrs = json.loads(
+                row.to_json(default_handler=str))
+
+            filename_attrs['range_start_time'] = row['time_str']
+
+            logging.info("range_start_time: %s", filename_attrs['range_start_time'])
+
+            item_attrs = attrs | filename_attrs
+            items.append(item_attrs)
+
+        # items = assemble_attributes(csv_file, filename_attrs)
 
         count = str(len(items))
         logging.info("Benchmarking items: %s", count)
