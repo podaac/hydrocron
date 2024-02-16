@@ -271,6 +271,7 @@ def load_data(dynamo_resource, table_name, items):
 
         if len(items) > 5:
             logging.info("Batch adding node items")
+            logging.info("items: %s", str(items))
             hydrocron_table.batch_fill_table(items)
 
         else:
