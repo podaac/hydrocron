@@ -95,7 +95,7 @@ class HydrocronTable:
                 err.response['Error']['Code'],
                 err.response['Error']['Message'])
             raise
-    
+
     def batch_fill_table(self, items):
         """
         Fills the DynamoDB table with the specified data, using the Boto3
@@ -116,7 +116,7 @@ class HydrocronTable:
                 for item in items:
                     writer.put_item(Item=item)
             logger.info("Loaded data into table %s.", table.name)
-        
+
         except ClientError:
             logger.exception("Couldn't load data into table %s.", table.name)
             raise
