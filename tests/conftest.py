@@ -129,9 +129,17 @@ def hydrocron_dynamo_table(dynamo_db_resource):
 @pytest.fixture()
 def hydrocron_api(hydrocron_dynamo_instance, dynamo_test_proc):
     os.environ['HYDROCRON_ENV'] = 'test'
-    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"
-    import hydrocron.api.hydrocron  # noqa: E501 # pylint: disable=import-outside-toplevel
-    from hydrocron.api.data_access.db import \
-        DynamoDataRepository  # noqa: E501 # pylint: disable=import-outside-toplevel
+    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"    
+    import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
+    hydrocron.utils.connection._dynamodb_resource = hydrocron_dynamo_instance
 
-    hydrocron.api.hydrocron.construct_repository = lambda: DynamoDataRepository(hydrocron_dynamo_instance)
+
+@pytest.fixture()
+def s3_connection():
+
+    import hydrocron.utils.connection  # noqa: E501 # pylint: disable=import-outside-toplevel
+    hydrocron.utils.connection.retrieve_credentials = lambda: {
+        "accessKeyId": "testkey",
+        "secretAccessKey": "testsecret",
+        "sessionToken": "testtoken"
+    }
