@@ -107,7 +107,7 @@ class HydrocronTable:
 
         Parameters
         ----------
-          items : The data to put in the table. 
+           items : The data to put in the table.
         """
         table = self.table
 
