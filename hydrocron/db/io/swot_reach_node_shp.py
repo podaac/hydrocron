@@ -5,11 +5,13 @@ import os.path
 import json
 from datetime import datetime
 from importlib import resources
+import logging
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 
+logging.getLogger().setLevel(logging.INFO)
 
 def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
     """
@@ -139,6 +141,8 @@ def load_test_reach():
     with resources.path("hydrocron.db", "test_reaches.csv") as csv:
         csv_file = pd.read_csv(csv, dtype=str)
 
+        logging.info("Read CSV")
+
         csv_file = csv_file.astype(str)
         filename_attrs = {
             'cycle_id': '000',
@@ -150,5 +154,7 @@ def load_test_reach():
             }
 
         items = assemble_attributes(csv_file, filename_attrs)
+
+        logging.info("Benchmarking items: " + str(items.count()))
 
     return items
