@@ -110,7 +110,7 @@ resource "aws_lambda_function" "hydrocron_lambda_load_granule" {
   function_name = local.load_granule_function_name
   role          = aws_iam_role.hydrocron-lambda-load-granule-role.arn
   timeout       = 600
-  memory_size   = 512
+  memory_size   = 2048
 
   tags = var.default_tags
   environment {
