@@ -41,6 +41,9 @@ resource "aws_api_gateway_deployment" "hydrocron-api-gateway-deployment" {
       aws_api_gateway_rest_api.hydrocron-api-gateway.body
     ]))
   }
+  variables = {
+    app_version = "${var.app_version}"
+  }
 }
 
 
