@@ -44,6 +44,10 @@ resource "aws_api_gateway_deployment" "hydrocron-api-gateway-deployment" {
   variables = {
     app_version = "${var.app_version}"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 
