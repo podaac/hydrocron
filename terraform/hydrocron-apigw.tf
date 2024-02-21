@@ -27,7 +27,7 @@ resource "aws_api_gateway_rest_api" "hydrocron-api-gateway" {
   }
 }
 
-resource "aws_api_gateway_rest_api_policy" "test" {
+resource "aws_api_gateway_rest_api_policy" "hydrocron-api-gateway-policy" {
   rest_api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
   policy      = data.aws_iam_policy_document.apigw-resource-policy.json
 }
@@ -35,18 +35,47 @@ resource "aws_api_gateway_rest_api_policy" "test" {
 
 resource "aws_api_gateway_deployment" "hydrocron-api-gateway-deployment" {
   rest_api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
-  stage_name  = local.api_version
   depends_on  = [aws_api_gateway_rest_api.hydrocron-api-gateway]
   triggers    = {
     redeployment = sha1(jsonencode([
       aws_api_gateway_rest_api.hydrocron-api-gateway.body
     ]))
   }
+  variables = {
+    app_version = "${var.app_version}"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
+resource "aws_api_gateway_stage" "hydrocron-api-gateway-stage" {
+  deployment_id = aws_api_gateway_deployment.hydrocron-api-gateway-deployment.id
+  rest_api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
+  stage_name = local.api_version
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.hydrocron-api-gateway-logs.arn
+    format = "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] \"$context.httpMethod $context.resourcePath $context.protocol\" $context.status $context.responseLength $context.requestId $context.extendedRequestId"
+  }
+}
+
+
+resource "aws_api_gateway_method_settings" "hydrocron-api-gateway-settings" {
+  rest_api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
+  stage_name = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
+  method_path = "*/*"
+  settings {
+    metrics_enabled = true
+    logging_level = "INFO"
+    data_trace_enabled = true
+  }
 }
 
 
 resource "aws_cloudwatch_log_group" "hydrocron-api-gateway-logs" {
-  name              = "${local.aws_resource_prefix}/API-Gateway-Execution-Logs/${aws_api_gateway_deployment.hydrocron-api-gateway-deployment.stage_name}"
+  name              = "${local.aws_resource_prefix}/API-Gateway-Execution-Logs/${local.api_version}"
   retention_in_days = 60
 }
 
