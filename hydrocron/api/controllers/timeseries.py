@@ -3,6 +3,7 @@ Hydrocron API timeseries controller
 """
 # pylint: disable=R0801
 # pylint: disable=C0103
+import datetime
 import logging
 import time
 
@@ -11,6 +12,12 @@ from hydrocron.utils import connection
 from hydrocron.utils import constants
 
 logger = logging.getLogger()
+
+
+class RequestError(Exception):
+    """
+    Exception thrown if there is an error encoutered with request
+    """
 
 
 def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
@@ -73,16 +80,18 @@ def format_json(feature_lower, results, feature_id, fields):  # noqa: E501 # pyl
     data = {}
     i = 0
 
+    data['http_code'] = '200 OK'
     if results is None:
-        data['error'] = f"404: Results with the specified Feature ID {feature_id} were not found."
+        data['http_code'] = '404 Not Found'
+        data['error_message'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
     elif len(results) > 5750000:
-        data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
-
+        data['http_code'] = '413 Payload Too Large'
+        data['error_message'] = f'413: Query exceeds 6MB with {len(results)} hits.'
     else:
-        data['type'] = "FeatureCollection"
-        data['features'] = []
+        data['response'] = {}
+        data['response']['type'] = "FeatureCollection"
+        data['response']['features'] = []
         fields_set = fields.split(",")
-
         for t in results:
             feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
             columns = []
@@ -115,9 +124,8 @@ def format_json(feature_lower, results, feature_id, fields):  # noqa: E501 # pyl
                                 feature['geometry']['coordinates'] = [float(x), float(y)]
                     else:
                         feature['properties'][j] = t[j]
-            data['features'].append(feature)
+            data['response']['features'].append(feature)
             i += 1
-
     return data, i
 
 
@@ -142,14 +150,15 @@ def format_csv(feature_lower, results, feature_id, fields):  # noqa: E501 # pyli
     i = 0
     csv = fields + '\n'
 
+    data['http_code'] = '200 OK'
     if results is None:
-        data['error'] = f"404: Results with the specified Feature ID {feature_id} were not found."
+        data['http_code'] = '404 Not Found'
+        data['error_message'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
     elif len(results) > 5750000:
-        data['error'] = f'413: Query exceeds 6MB with {len(results)} hits.'
-
+        data['http_code'] = '413 Payload Too Large'
+        data['error_message'] = f'413: Query exceeds 6MB with {len(results)} hits.'
     else:
-        data['type'] = "FeatureCollection"
-        data['features'] = []
+        data['response'] = ""
         fields_set = fields.split(",")
         for t in results:
             columns = []
@@ -163,10 +172,79 @@ def format_csv(feature_lower, results, feature_id, fields):  # noqa: E501 # pyli
                         csv += t['geometry'].replace('; ', ', ')
                     else:
                         csv += t[j]
-                    csv += ','
+                    if j != fields_set[-1]:
+                        csv += ','
             csv += '\n'
             i += 1
-    return csv, i
+        data['response'] = csv
+    return data, i
+
+
+def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
+    """
+    Determine if all parameters are present and in the correct format. Return 400
+    Bad Request if any errors are found alongside 0 hits.
+    """
+
+    data = {'http_code': '200 OK'}
+    if feature not in ('Node', 'Reach'):
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = f'400: feature parameter should be Reach or Node, not: {feature}'
+
+    elif not feature_id.isdigit():
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = f'400: feature_id cannot contain letters: {feature_id}'
+
+    elif not is_date_valid(start_time) or not is_date_valid(end_time):
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = '400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SS+00:00'
+
+    elif output not in ('csv', 'geojson'):
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = f'400: output parameter should be csv or geojson, not: {output}'
+
+    elif not is_fields_valid(feature, fields):
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = '400: fields parameter should contain valid SWOT fields'
+
+    return data, 0
+
+
+def is_date_valid(query_date):
+    """
+    Check if the query date conforms to the correct format.
+    """
+
+    try:
+        datetime.datetime.strptime(query_date, "%Y-%m-%dT%H:%M:%S%z")
+        return True
+    except ValueError:
+        return False
+
+
+def is_fields_valid(feature, fields):
+    """
+    Check if fields are present in either the reach or node list of columns
+    """
+
+    fields = fields.split(',')
+    if feature == 'Reach':
+        columns = constants.REACH_ALL_COLUMNS
+    elif feature == 'Node':
+        columns = constants.NODE_ALL_COLUMNS
+    else:
+        columns = []
+    return all(field in columns for field in fields)
+
+
+def sanitize_time(start_time, end_time):
+    """
+    Return formatted string to handle cases where request includes non-padded numbers
+    """
+
+    start_time = datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
+    end_time = datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
+    return start_time, end_time
 
 
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
@@ -174,20 +252,37 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     This function queries the database for relevant results
     """
 
-    feature = event['body']['feature']
-    feature_id = event['body']['feature_id']
-    start_time = event['body']['start_time']
-    end_time = event['body']['end_time']
-    output = event['body']['output']
-    fields = event['body']['fields']
-
     start = time.time()
-    results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
+    print(f"Event - {event}")
+
+    results = {}
+    try:
+        feature = event['body']['feature']
+        feature_id = event['body']['feature_id']
+        start_time = event['body']['start_time']
+        end_time = event['body']['end_time']
+        output = event['body']['output']
+        fields = event['body']['fields']
+
+        results, hits = validate_parameters(feature, feature_id, start_time, end_time, output, fields)
+
+        if results['http_code'] == '200 OK':
+            start_time, end_time = sanitize_time(start_time, end_time)
+            results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
+
+    except KeyError as e:
+        missing_parameter = str(e).rsplit(' ', maxsplit=1)[-1]
+        results['http_code'] = '400 Bad Request'
+        results['error_message'] = f'400: This required parameter is missing: {missing_parameter}'
+        hits = 0
+
     end = time.time()
     elapsed = round((end - start) * 1000, 3)
-    print({"start": start, "end": end, "elapsed": elapsed})
 
-    data = {'status': "200 OK", 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
-    data['results'][event['body']['output']] = results
+    data = {'status': results['http_code'], 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
+    if results['http_code'] == '200 OK':
+        data['results'][event['body']['output']] = results['response']
+    else:
+        raise RequestError(results['error_message'])
 
     return data
