@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 79 - Generate data for use by benchmarks
     - Issue 75 - Update log messaging format
     - Issue 60 - Encapsulate DyanmoDB under a single shared module
+    - Issue 60 - Improved error handling
 ### Changed
 ### Deprecated 
 ### Removed

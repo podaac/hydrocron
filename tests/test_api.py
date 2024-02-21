@@ -1,7 +1,8 @@
 """
 Tests for API queries
 """
-import json
+
+import pytest
 
 
 def test_timeseries_lambda_handler_geojson(hydrocron_api):
@@ -26,7 +27,6 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
 
     context = "_"
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    print(result['results']['geojson'])
     assert result['status'] == '200 OK' and \
            result['results']['geojson'] == {'type': 'FeatureCollection', 'features': [
                     {'properties': {'reach_id': '71224100223', 'time_str': '2023-06-10T19:39:43Z',
@@ -327,4 +327,165 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
                                         '50.288507, -95.537995 50.288775, -95.538093 50.289043, -95.538192 50.28931, ' \
                                         '-95.538206 50.28958, -95.538221 50.289849, -95.538235 50.290119, -95.538334 ' \
                                         '50.290387, -95.538432 50.290654, -95.538531 50.290922, -95.538629 ' \
-                                        '50.29119),\n')
+                                        '50.29119)\n')
+
+
+def test_timeseries_lambda_handler_missing(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries endpoint for missing parameters
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {"body": {}}
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: This required parameter is missing: 'feature'" in str(e.value)
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "fields": "reach_id,time_str,wse,geometry"
+        }
+    }
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: This required parameter is missing: 'feature_id'" in str(e.value)
+
+
+def test_timeseries_lambda_handler_feature(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries endpoint for feature parameter
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "River",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "fields": "reach_id,time_str,wse,geometry"
+        }
+    }
+
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: feature parameter should be Reach or Node, not: River" in str(e.value)
+
+
+def test_timeseries_lambda_handler_feature_id(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries endpoint for feature_id parameter
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "7122ff4100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "fields": "reach_id,time_str,wse,geometry"
+        }
+    }
+
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: feature_id cannot contain letters: 7122ff4100223" in str(e.value)
+
+
+def test_timeseries_lambda_handler_dates(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries endpoint for start_time and 
+    end_time parameters
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023/06/04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "fields": "reach_id,time_str,wse,geometry"
+        }
+    }
+
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    assert "400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SS+00:00" in str(e.value)
+
+
+def test_timeseries_lambda_handler_output(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries output parameters
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "txt",
+            "fields": "reach_id,time_str,wse,geometry"
+        }
+    }
+
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: output parameter should be csv or geojson, not: txt" in str(e.value)
+
+
+def test_timeseries_lambda_handler_fields(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries output parameters
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "fields": "reach_id,time_str,wse,geometry,height"
+        }
+    }
+
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: fields parameter should contain valid SWOT fields" in str(e.value)
