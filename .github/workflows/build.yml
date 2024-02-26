@@ -292,7 +292,7 @@ jobs:
           startsWith(github.ref, 'refs/heads/release') ||
           startsWith(github.ref, 'refs/heads/feature')
         with:
-          umm-json: 'cmr/hydrocon_umm_s.json'
+          umm-json: 'cmr/hydrocron_umm_s.json'
           provider: 'POCLOUD'
           env: ${{ steps.lowercase.outputs.TARGET_ENV_LOWERCASE }}
           version: ${{ needs.build.outputs.version }}
@@ -317,7 +317,7 @@ jobs:
         if: |
           steps.publish-umm-s.outcome == 'failure'
         with:
-          umm-json: 'cmr/hydrocon_umm_s.json'
+          umm-json: 'cmr/hydrocron_umm_s.json'
           provider: 'POCLOUD'
           env: ${{ steps.lowercase.outputs.TARGET_ENV_LOWERCASE }}
           version: ${{ needs.build.outputs.version }}
