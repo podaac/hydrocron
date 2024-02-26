@@ -76,18 +76,18 @@ def granule_handler(event, _):
     load_benchmarking_data = event['body']['load_benchmarking_data']
 
     if load_benchmarking_data:
-        print("Loading benchmarking data")
+        logging.info("Loading benchmarking data")
         items = swot_reach_node_shp.load_benchmarking_data()
     else:
-        print("Setting up S3 connection")
+        logging.info("Setting up S3 connection")
         s3_resource = connection.s3_resource
 
         logging.info("Starting read granule")
         items = read_data(granule_path, obscure_data, s3_resource)
 
-    print("Set up dynamo connection")
+    logging.info("Set up dynamo connection")
     dynamo_resource = connection.dynamodb_resource
-    print("loading data items")
+    logging.info("Begin loading data items")
     load_data(dynamo_resource, table_name, items)
 
 
@@ -168,7 +168,7 @@ def load_data(dynamo_resource, table_name, items):
     """
 
     try:
-        print("Set dynamo table connection")
+        logging.info("Set up dynamo table connection")
         hydrocron_table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
     except ClientError as err:
         if err.response['Error']['Code'] == 'ResourceNotFoundException':
