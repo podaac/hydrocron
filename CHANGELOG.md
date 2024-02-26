@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
     - Issue 79 - Generate data for use by benchmarks
+    - Issue 88 - There are no CloudWatch logs for the API Gateway
     - Issue 75 - Update log messaging format
     - Issue 60 - Encapsulate DyanmoDB under a single shared module
     - Issue 60 - Improved error handling

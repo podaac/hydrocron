@@ -72,10 +72,9 @@ resource "aws_lambda_permission" "allow_hydrocron-timeseries" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.hydrocron_lambda_timeseries.function_name
   principal     = "apigateway.amazonaws.com"
-
-  # The "/*/*/*" portion grants access from any method on any resource
-  # within the API Gateway REST API.
-  source_arn = "${aws_api_gateway_rest_api.hydrocron-api-gateway.execution_arn}/*/*/*"
+  # The /* part allows invocation from any stage, method and resource path
+  # within API Gateway.
+  source_arn = "${aws_api_gateway_rest_api.hydrocron-api-gateway.execution_arn}/*"
 }
 
 
