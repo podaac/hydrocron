@@ -128,3 +128,11 @@ resource "aws_lambda_permission" "allow_lambda" {
   principal     = "s3.amazonaws.com"
   source_arn = aws_lambda_function.hydrocron_lambda_load_data.arn
 }
+
+# Event source from SQS
+resource "aws_lambda_event_source_mapping" "hydrocron_event_source_mapping" {
+  event_source_arn = "${aws_sqs_queue.hydrocron_sqs_queue_granule_ingest.arn}"
+  enabled          = true
+  function_name    = "${aws_lambda_function.hydrocron_lambda_load_granule.arn}"
+  batch_size       = 1
+}

@@ -112,6 +112,41 @@ data "aws_iam_policy_document" "assume_role_lambda" {
   }
 }
 
+data "aws_iam_policy_document" "sqs-resource-policy" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type = "Service"
+      identifiers = ["sns.amazonaws.com"]
+    }
+
+    actions = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.hydrocron_sqs_queue_granule_ingest.arn]
+
+    condition {
+      test = "ArnEquals"
+      variable = "aws.SourceArn"
+      values = [aws_sns_topic.hydrocron_sns_topic_cnm_response.arn]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "sns-resource-policy" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+      identifiers = "arn:aws:iam::${var.cross_account_id}:root"
+    }
+
+    actions = ["sns:Publish"]
+    resources = ["${aws_sns_topic.hydrocron_sns_topic_cnm_response.arn}"]
+
+  }
+}
+
 data "aws_iam_policy_document" "apigw-resource-policy" {
   statement {
     effect = "Allow"
@@ -186,7 +221,10 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+  managed_policy_arns  = [
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+    ]
 
   inline_policy {
     name   = "HydrocronDynamoWrite"
