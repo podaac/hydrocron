@@ -142,7 +142,7 @@ data "aws_iam_policy_document" "sns-resource-policy" {
     }
 
     actions = ["sns:Publish"]
-    resources = ["${aws_sns_topic.hydrocron_sns_topic_cnm_response.arn}"]
+    resources = [aws_sns_topic.hydrocron_sns_topic_cnm_response.arn]
 
   }
 }
