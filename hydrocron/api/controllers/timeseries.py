@@ -71,6 +71,7 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
 
     return data, hits
 
+
 def convert_to_df(items) -> gpd.GeoDataFrame:
     """Convert reach-level results for GeoPandas Dataframe.
     
@@ -79,11 +80,12 @@ def convert_to_df(items) -> gpd.GeoDataFrame:
     
     :rtype: gpd.GeoDataFrame
     """
-    
+
     df = pd.DataFrame.from_records(items)
-    df['geometry'] = df['geometry'].apply(lambda x: loads(x))
+    df['geometry'] = df['geometry'].apply(loads)
     gdf = gpd.GeoDataFrame(df, geometry='geometry')
     return gdf
+
 
 def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
     """ Format the results to the file format that the user selects (geojson)
@@ -95,23 +97,25 @@ def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
 
     :rtype: dict, integer
     """
-    
+
     columns = fields.split(',')
-    if 'geometry' not in fields: columns.append('geometry')   # Add geometry to convert to geoJSON
+    if 'geometry' not in fields:
+        columns.append('geometry')   # Add geometry to convert to geoJSON
     gdf = gdf[columns]
     gdf_json = json.loads(gdf.to_json())
-    
+
     if 'geometry' not in fields:
         for feature in gdf_json["features"]:
             feature['geometry'] = {}
-    
+
     data = {
         'http_code': '200 OK',
         'response': gdf_json
     }
     hits = gdf.shape[0]
-    
+
     return data, hits
+
 
 def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
     """ Format the results to the file format that the user selects (csv)
@@ -123,11 +127,11 @@ def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
 
     :rtype: dict, integer
     """
-    
+
     columns = fields.split(',')
-    gdf = gdf[columns]    
+    gdf = gdf[columns]
     gdf_csv = gdf.to_csv(index=False)
-    
+
     data = {
         'http_code': '200 OK',
         'response': gdf_csv
@@ -135,6 +139,7 @@ def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
     hits = gdf.shape[0]
 
     return data, hits
+
 
 def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
     """
