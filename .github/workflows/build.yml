@@ -137,8 +137,6 @@ jobs:
         run: |
           terraform init -backend=false
           terraform validate -no-color
-      - name: Set Terraform variables
-        run: echo "TF_VAR_cross_account_id=${{ secrets[format('AWS_ACCOUNT_ID_CUMULUS_SWOT_{0}', env.TARGET_ENV_UPPERCASE)] }}" >> $GITHUB_ENV
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
@@ -298,6 +296,9 @@ jobs:
           aws-access-key-id: ${{ secrets[vars.AWS_ACCESS_KEY_ID_SECRET_NAME] }}
           aws-secret-access-key: ${{ secrets[vars.AWS_SECRET_ACCESS_KEY_SECRET_NAME] }}
           mask-aws-account-id: true
+
+      - name: Set Terraform variables
+        run: echo "TF_VAR_cross_account_id=${{ secrets[format('AWS_ACCOUNT_ID_CUMULUS_SWOT_{0}', env.TARGET_ENV_UPPERCASE)] }}" >> $GITHUB_ENV
 
       - name: Deploy to venue
         id: terraform-deploy
