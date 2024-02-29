@@ -138,7 +138,7 @@ data "aws_iam_policy_document" "sns-resource-policy" {
 
     principals {
       type = "AWS"
-      identifiers = "arn:aws:iam::${var.cross_account_id}:root"
+      identifiers = ["arn:aws:iam::${var.cross_account_id}:root"]
     }
 
     actions = ["sns:Publish"]
