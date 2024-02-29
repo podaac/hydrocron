@@ -4,8 +4,13 @@ Hydrocron API timeseries controller
 # pylint: disable=R0801
 # pylint: disable=C0103
 import datetime
+import json
 import logging
 import time
+
+import pandas as pd
+import geopandas as gpd
+from shapely.wkt import loads
 
 from hydrocron.api.data_access.db import DynamoDataRepository
 from hydrocron.utils import connection
@@ -41,144 +46,95 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     :rtype: Dict, integer
     """
 
+    results = {'Items': []}
     data = {}
     hits = 0
 
     data_repository = DynamoDataRepository(connection.dynamodb_resource)
     if feature.lower() == 'reach':
         results = data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
-    elif feature.lower() == 'node':
+    if feature.lower() == 'node':
         results = data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
-    else:
-        return data, hits
 
-    if output == 'geojson':
-        data, hits = format_json(feature.lower(), results, feature_id, fields)
-    if output == 'csv':
-        data, hits = format_csv(feature.lower(), results, feature_id, fields)
+    if len(results['Items']) == 0:
+        data['http_code'] = '404 Not Found'
+        data['error_message'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
+    elif len(results) > 5750000:
+        data['http_code'] = '413 Payload Too Large'
+        data['error_message'] = f'413: Query exceeds 6MB with {len(results)} hits.'
+    else:
+        gdf = convert_to_df(results['Items'])
+        if output == 'geojson':
+            data, hits = format_json(gdf, fields)
+        if output == 'csv':
+            data, hits = format_csv(gdf, fields)
 
     return data, hits
 
+def convert_to_df(items) -> gpd.GeoDataFrame:
+    """Convert reach-level results for GeoPandas Dataframe.
+    
+    :param items Dictionary of query results
+    :type items: dict
+    
+    :rtype: gpd.GeoDataFrame
+    """
+    
+    df = pd.DataFrame.from_records(items)
+    df['geometry'] = df['geometry'].apply(lambda x: loads(x))
+    gdf = gpd.GeoDataFrame(df, geometry='geometry')
+    return gdf
 
-def format_json(feature_lower, results, feature_id, fields):  # noqa: E501 # pylint: disable=W0613,R0912
+def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
     """ Format the results to the file format that the user selects (geojson)
 
-    :param feature_lower: Lowercase version of the type of feature
-    :type feature_lower: str
-    :param results: We pass the result of the query
-    :type results: dict
-    :param feature_id: ID of the requested feature
-    :type feature_id: str
+    :param gdf: DataFrame of results from query
+    :type gdf: gpd.GeoDataFrame
     :param fields: List of requested columns
     :type fields: dict
 
     :rtype: dict, integer
     """
+    
+    columns = fields.split(',')
+    if 'geometry' not in fields: columns.append('geometry')   # Add geometry to convert to geoJSON
+    gdf = gdf[columns]
+    gdf_json = json.loads(gdf.to_json())
+    
+    if 'geometry' not in fields:
+        for feature in gdf_json["features"]:
+            feature['geometry'] = {}
+    
+    data = {
+        'http_code': '200 OK',
+        'response': gdf_json
+    }
+    hits = gdf.shape[0]
+    
+    return data, hits
 
-    results = results['Items']
-
-    data = {}
-    i = 0
-
-    data['http_code'] = '200 OK'
-    if results is None:
-        data['http_code'] = '404 Not Found'
-        data['error_message'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
-    elif len(results) > 5750000:
-        data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds 6MB with {len(results)} hits.'
-    else:
-        data['response'] = {}
-        data['response']['type'] = "FeatureCollection"
-        data['response']['features'] = []
-        fields_set = fields.split(",")
-        for t in results:
-            feature = {'properties': {}, 'geometry': {}, 'type': "Feature"}
-            columns = []
-            if feature_lower == 'reach':
-                columns = constants.REACH_ALL_COLUMNS
-            if feature_lower == 'node':
-                columns = constants.NODE_ALL_COLUMNS
-            for j in fields_set:
-                if j in columns:
-                    if j == 'geometry':
-                        feature['geometry']['coordinates'] = []
-                        feature_type = ''
-                        geometry = ''
-                        if 'POINT' in t['geometry']:
-                            geometry = t['geometry'].replace('POINT (', '').replace(')', '')
-                            geometry = geometry.replace('"', '')
-                            geometry = geometry.replace("'", "")
-                            feature_type = 'Point'
-                        if 'LINESTRING' in t['geometry']:
-                            geometry = t['geometry'].replace('LINESTRING (', '').replace(')', '')
-                            geometry = geometry.replace('"', '')
-                            geometry = geometry.replace("'", "")
-                            feature_type = 'LineString'
-                        feature['geometry']['type'] = feature_type
-                        for p in geometry.split(", "):
-                            (x, y) = p.split(" ")
-                            if feature_type == 'LineString':
-                                feature['geometry']['coordinates'].append([float(x), float(y)])
-                            if feature_type == 'Point':
-                                feature['geometry']['coordinates'] = [float(x), float(y)]
-                    else:
-                        feature['properties'][j] = t[j]
-            data['response']['features'].append(feature)
-            i += 1
-    return data, i
-
-
-def format_csv(feature_lower, results, feature_id, fields):  # noqa: E501 # pylint: disable=W0613
+def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
     """ Format the results to the file format that the user selects (csv)
 
-    :param feature_lower: Lowercase version of the type of feature
-    :type feature_lower: str
-    :param results: We pass the result of the query
-    :type results: dict
-    :param feature_id: ID of the requested feature
-    :type feature_id: str
+    :param gdf: DataFrame of results from query
+    :type gdf: gpd.GeoDataFrame
     :param fields: List of requested columns
     :type fields: dict
 
     :rtype: dict, integer
     """
+    
+    columns = fields.split(',')
+    gdf = gdf[columns]    
+    gdf_csv = gdf.to_csv(index=False)
+    
+    data = {
+        'http_code': '200 OK',
+        'response': gdf_csv
+    }
+    hits = gdf.shape[0]
 
-    results = results['Items']
-
-    data = {}
-    i = 0
-    csv = fields + '\n'
-
-    data['http_code'] = '200 OK'
-    if results is None:
-        data['http_code'] = '404 Not Found'
-        data['error_message'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
-    elif len(results) > 5750000:
-        data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds 6MB with {len(results)} hits.'
-    else:
-        data['response'] = ""
-        fields_set = fields.split(",")
-        for t in results:
-            columns = []
-            if feature_lower == 'reach':
-                columns = constants.REACH_ALL_COLUMNS
-            if feature_lower == 'node':
-                columns = constants.NODE_ALL_COLUMNS
-            for j in fields_set:
-                if j in columns:
-                    if j == 'geometry':
-                        csv += t['geometry'].replace('; ', ', ')
-                    else:
-                        csv += t[j]
-                    if j != fields_set[-1]:
-                        csv += ','
-            csv += '\n'
-            i += 1
-        data['response'] = csv
-    return data, i
-
+    return data, hits
 
 def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
     """
