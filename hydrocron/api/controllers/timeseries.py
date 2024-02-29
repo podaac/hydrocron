@@ -243,7 +243,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     start = time.time()
     print(f"Event - {event}")
 
-    results = {}
+    results = { 'http_code': '200 OK' }
     try:
         feature = event['body']['feature']
         feature_id = event['body']['feature_id']
@@ -251,18 +251,16 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         end_time = event['body']['end_time']
         output = event['body']['output']
         fields = event['body']['fields']
-
         results, hits = validate_parameters(feature, feature_id, start_time, end_time, output, fields)
-
-        if results['http_code'] == '200 OK':
-            start_time, end_time = sanitize_time(start_time, end_time)
-            results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
-
     except KeyError as e:
         missing_parameter = str(e).rsplit(' ', maxsplit=1)[-1]
         results['http_code'] = '400 Bad Request'
         results['error_message'] = f'400: This required parameter is missing: {missing_parameter}'
         hits = 0
+
+    if results['http_code'] == '200 OK':
+        start_time, end_time = sanitize_time(start_time, end_time)
+        results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
 
     end = time.time()
     elapsed = round((end - start) * 1000, 3)
