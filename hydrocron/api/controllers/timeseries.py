@@ -140,6 +140,21 @@ def validate_parameters(feature, feature_id, start_time, end_time, output, field
     """
     Determine if all parameters are present and in the correct format. Return 400
     Bad Request if any errors are found alongside 0 hits.
+    
+    :param feature: Data requested for Reach or Node or Lake
+    :type feature: str
+    :param feature_id: ID of the feature to retrieve
+    :type feature_id: str
+    :param start_time: Start time of the timeseries
+    :type start_time: str
+    :param end_time: End time of the timeseries
+    :type end_time: str
+    :param output: Format of the data returned
+    :type output: str
+    :param fields: List of requested columns
+    :type fields: dict
+    
+    :rtype: dict, integer
     """
 
     data = {'http_code': '200 OK'}
@@ -169,6 +184,11 @@ def validate_parameters(feature, feature_id, start_time, end_time, output, field
 def is_date_valid(query_date):
     """
     Check if the query date conforms to the correct format.
+    
+    :param start_time: Start or end time of the timeseries
+    :type start_time: str
+    
+    :rtype: bool
     """
 
     try:
@@ -181,6 +201,11 @@ def is_date_valid(query_date):
 def is_fields_valid(feature, fields):
     """
     Check if fields are present in either the reach or node list of columns
+    
+    :param fields: List of requested columns
+    :type fields: dict
+    
+    :rtype: bool
     """
 
     fields = fields.split(',')
@@ -196,6 +221,13 @@ def is_fields_valid(feature, fields):
 def sanitize_time(start_time, end_time):
     """
     Return formatted string to handle cases where request includes non-padded numbers
+    
+    :param start_time: Start time of the timeseries
+    :type start_time: str
+    :param end_time: End time of the timeseries
+    :type end_time: str
+    
+    :rtype: str, str
     """
 
     start_time = datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
