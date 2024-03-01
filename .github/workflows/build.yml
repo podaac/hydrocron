@@ -288,6 +288,7 @@ jobs:
         run: |
           echo ${{ github.workspace }}
           echo $GITHUB_WORKSPACE
+          ls -l
 
       - name: Publish UMM-S with new version
         id: publish-umm-s
