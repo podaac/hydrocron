@@ -280,6 +280,10 @@ jobs:
     needs: [ build, docker ]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+
       - name: Lowercase environment
         id: lowercase
         run: echo TARGET_ENV_LOWERCASE=${{ needs.build.outputs.deploy_env }} | tr '[:upper:]' '[:lower:]' >> "$GITHUB_OUTPUT"
