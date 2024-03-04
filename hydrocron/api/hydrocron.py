@@ -1,15 +1,15 @@
 """
 Hydrocron API context module
 """
+# flake8: noqa: E501
 import os
 import sys
 from types import ModuleType
 from typing import Callable
 
 import boto3
-import connexion
 
-from hydrocronapi.data_access.db import DynamoDataRepository
+from hydrocron.api.data_access.db import DynamoDataRepository
 
 
 class Context(ModuleType):
@@ -17,12 +17,11 @@ class Context(ModuleType):
     Hydrocron API context class
     """
     APP_NAME = 'hydrocron'
-    SSM_PATH = f'/service/{APP_NAME}'
+    SSM_PATH = f'/service/{APP_NAME}/'
 
     def __init__(self, name: str):
         super().__init__(name)
         self.env = os.getenv('HYDROCRON_ENV', 'prod')
-        self._app = None
         self._db = None
 
         if self.env == 'prod':
@@ -55,23 +54,6 @@ class Context(ModuleType):
         return os.getenv(f'{self.APP_NAME.upper()}_{name}')
 
     @property
-    def flask_app(self) -> connexion.App:
-        """
-
-        @return:
-        """
-        if not self._app:
-            app = connexion.App(
-                'hydrocron',
-                specification_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'swagger')
-            )
-            app.add_api('swagger.yaml',
-                        arguments={'title': 'Get time series data from SWOT observations for reaches, nodes, and/or lakes'},
-                        pythonic_params=True)
-            self._app = app.app
-        return self._app
-
-    @property
     def data_repository(self) -> DynamoDataRepository:
         """
 
@@ -99,7 +81,6 @@ class Context(ModuleType):
 
 # Silence the linters
 get_param: Callable[[str], str]
-flask_app: connexion.App
 data_repository: DynamoDataRepository
 
 sys.modules[__name__] = Context(__name__)

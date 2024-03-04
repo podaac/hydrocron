@@ -1,11 +1,60 @@
 version: '3.8'
 services:
- dynamodb-local:
-   command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
-   image: "amazon/dynamodb-local:latest"
-   container_name: dynamodb-local
-   ports:
-     - "8000:8000"
-   volumes:
-     - "./docker/dynamodb:/home/dynamodblocal/data"
-   working_dir: /home/dynamodblocal
+  dynamodb-local:
+#    Uncomment if data should be persisted between container restarts
+#    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+#    volumes:
+#      - "./docker/dynamodb:/home/dynamodblocal/data"
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    working_dir: /home/dynamodblocal
+    networks:
+      - hydrocron
+  hydrocron-table-create:
+    image: "amazon/aws-cli"
+    container_name: hydrocron-table-create
+    entrypoint: /bin/sh -c
+    command: >
+      "aws dynamodb create-table 
+      --table-name hydrocron-swot-reach-table 
+      --attribute-definitions AttributeName=reach_id,AttributeType=S AttributeName=range_start_time,AttributeType=S 
+      --key-schema AttributeName=reach_id,KeyType=HASH AttributeName=range_start_time,KeyType=RANGE
+      --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+      --endpoint-url http://host.docker.internal:8000;
+      aws dynamodb create-table
+      --table-name hydrocron-swot-node-table
+      --attribute-definitions AttributeName=reach_id,AttributeType=S AttributeName=range_start_time,AttributeType=S
+      --key-schema AttributeName=reach_id,KeyType=HASH AttributeName=range_start_time,KeyType=RANGE
+      --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+      --endpoint-url http://host.docker.internal:8000"
+    depends_on:
+      - dynamodb-local
+    networks:
+      - hydrocron
+    environment:
+      HYDROCRON_ENV: LOCAL
+      HYDROCRON_dynamodb_endpoint_url: http://host.docker.internal:8000
+      AWS_ACCESS_KEY_ID: fakeMyKeyId
+      AWS_SECRET_ACCESS_KEY: fakeSecretAccessKey
+      AWS_DEFAULT_REGION: us-west-2
+  hydrocron-lambda:
+    image: "hydrocron:latest"
+    container_name: hydrocron-lambda
+    ports:
+      - "9000:8080"
+    depends_on:
+      - hydrocron-table-create
+    networks:
+      - hydrocron
+    environment:
+      HYDROCRON_ENV: LOCAL
+      HYDROCRON_dynamodb_endpoint_url: http://host.docker.internal:8000
+      AWS_ACCESS_KEY_ID: fakeMyKeyId
+      AWS_SECRET_ACCESS_KEY: fakeSecretAccessKey
+      AWS_DEFAULT_REGION: us-west-2
+networks:
+  # The presence of these objects is sufficient to define them
+  hydrocron: {}

@@ -1,39 +1,44 @@
 [tool.poetry]
-name = "hydrocronapi"
-version = "1.0.0a6"
+name = "hydrocron"
+version = "1.0.0rc2"
 description = "OpenAPI access to Time Series data for SWOT features"
 authors = ["PO.DAAC <podaac@jpl.nasa.gov>"]
 license = "Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/podaac/hydrocron-api"
+repository = "https://github.com/podaac/hydrocron"
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 exclude = ['contrib', 'docs', 'tests']
-packages = [ {include = "hydrocronapi"} ]
+packages = [
+    {include = "hydrocron"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 six = "^1.16.0"
 boto3 = "^1.28.2"
 pymysql = "^1.1.0"
-pandas = "^2.0.3"
+geopandas = "^0.13.2"
+earthaccess = "^0.5.3"
 shapely = "^2.0.1"
-connexion = {version = "^2.14.2", extras = ["swagger-ui"]}
 cryptography = "^41.0.2"
-hydrocron-db = {git = "https://github.com/podaac/hydrocron-db.git", rev = "develop"}
 python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
-flask-testing = "^0.8.1"
-hydrocron-db = {git = "https://github.com/podaac/hydrocron-db.git", rev = "develop"}
 pytest-dynamodb = "^2.2.3"
 pylint = "^2.15.8"
 flake8 = "^6.0.0"
+pytest-cov = "^4.1.0"
+
+
+[tool.poetry.group.docs.dependencies]
+jupyter-book = "^0.15.1"
 
 [tool.poetry.scripts]
-hydrocronapi = "hydrocronapi.__main__:__main__"
+hydrocron_api = "hydrocron.api.__main__:__main__"
+hydrocron_load = 'hydrocron.db.load_data:main'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

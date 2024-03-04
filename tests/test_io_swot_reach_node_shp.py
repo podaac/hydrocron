@@ -6,33 +6,17 @@ Test unpacking a swot reach or node shapefile.
 
 Unit tests for unpacking swot reach and node shapefiles.
 """
-import os.path
+from hydrocron.utils import constants
 
-from hydrocron_db.io import swot_reach_node_shp
-
-TEST_SHAPEFILE_PATH = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)),
-    'data',
-    'SWOT_L2_HR_RiverSP_Reach_548_011_NA_20230610T193337_20230610T193344_PIA1_01.zip'
-)
-
-TEST_FILENAME = (
-    "SWOT_L2_HR_RiverSP_Reach_548_011_NA_"
-    "20230610T193337_20230610T193344_PIA1_01.zip")
-
-TEST_ITEM_DICT = {
-    "reach_id": "71224100223",
-    "time": "739741183.129",
-    "time_str": "2023-06-10T19:39:43Z",
-    "cycle_id": "548"
-}
+from hydrocron.db.io import swot_reach_node_shp
 
 
 def test_parse_from_filename():
-    '''
+    """
     Tests parsing cycle, pass, and time ranges from filename
-    '''
-    filename_attrs = swot_reach_node_shp.parse_from_filename(TEST_FILENAME)
+    """
+    filename_attrs = swot_reach_node_shp.parse_from_filename(
+        constants.TEST_FILENAME)
 
     assert filename_attrs['cycle_id'] == "548"
     assert filename_attrs['pass_id'] == "011"
@@ -43,12 +27,29 @@ def test_parse_from_filename():
 
 
 def test_read_shapefile():
-    '''
+    """
     Tests reading attributes from the shapefile
-    '''
-
-    items = swot_reach_node_shp.read_shapefile(TEST_SHAPEFILE_PATH)
+    """
+    items = swot_reach_node_shp.read_shapefile(
+        constants.TEST_SHAPEFILE_PATH,
+        obscure_data=False,
+        columns=constants.REACH_DATA_COLUMNS)
 
     assert len(items) == 687
-    for key, val in TEST_ITEM_DICT.items():
+    for key, val in constants.TEST_ITEM_DICT.items():
         assert val == items[2][key]
+
+
+def test_read_shapefile_obscured():
+    """
+    Tests reading attributes from the shapefile with real values obscured
+    """
+    items = swot_reach_node_shp.read_shapefile(
+        constants.TEST_SHAPEFILE_PATH,
+        obscure_data=True,
+        columns=constants.REACH_DATA_COLUMNS)
+
+    assert len(items) == 687
+    for key, val in constants.TEST_ITEM_DICT.items():
+        if key == constants.FIELDNAME_WSE:
+            assert val != items[2][key]

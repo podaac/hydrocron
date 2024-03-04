@@ -8,27 +8,11 @@ from boto3.dynamodb.conditions import Key
 logger = logging.getLogger(__name__)
 
 
-class DynamoKeys:
-    """
-    Represents the partition and sort keys for a dynamoDB table
-    """
-    def __init__(
-            self,
-            partition_key,
-            partition_key_type,
-            sort_key,
-            sort_key_type):
-
-        self.partition_key = partition_key
-        self.partition_key_type = partition_key_type
-        self.sort_key = sort_key
-        self.sort_key_type = sort_key_type
-
-
 class HydrocronTable:
     """
     Class representing a Hydrocron DynamoDB table
     """
+
     def __init__(self, dyn_resource,
                  table_name):
         """
@@ -37,9 +21,10 @@ class HydrocronTable:
         dyn_resource : boto3.session.resource('dynamodb')
             A Boto3 DynamoDB resource.
         table_name : string
-            The name of the table to create.
+            The name of the table.
         """
         self.dyn_resource = dyn_resource
+        self.table_name = table_name
 
         if self.exists(table_name):
             self.table = self.dyn_resource.Table(table_name)
@@ -128,36 +113,21 @@ class HydrocronTable:
             The item.
         """
         if sort_key is None:
-
-            try:
-                response = self.table.query(
-                    KeyConditionExpression=(
-                        Key(self.partition_key_name).eq(partition_key)
-                    ))
-            except ClientError as err:
-                logger.error(
-                    "Couldn't query for items: %s: %s",
-                    err.response['Error']['Code'],
-                    err.response['Error']['Message'])
-                raise
-            else:
-                return response['Items']
-
+            key_condition_expression = (Key(self.partition_key_name).eq(partition_key))
         else:
-            try:
-                response = self.table.query(
-                    KeyConditionExpression=(
-                        Key(self.partition_key_name).eq(partition_key) &
-                        Key(self.sort_key_name).eq(sort_key)
-                        ))
-            except ClientError as err:
-                logger.error(
-                    "Couldn't query for items: %s: %s",
-                    err.response['Error']['Code'],
-                    err.response['Error']['Message'])
-                raise
-            else:
-                return response['Items']
+            key_condition_expression = (
+                        Key(self.partition_key_name).eq(partition_key) & Key(self.sort_key_name).eq(sort_key))
+
+        try:
+            response = self.table.query(KeyConditionExpression=key_condition_expression)
+        except ClientError as err:
+            logger.error(
+                "Couldn't query for items: %s: %s",
+                err.response['Error']['Code'],
+                err.response['Error']['Message'])
+            raise
+
+        return response['Items']
 
     def delete_item(self, partition_key, sort_key):
         """

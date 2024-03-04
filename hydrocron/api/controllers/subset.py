@@ -8,8 +8,8 @@ import time
 from datetime import datetime
 from typing import Generator
 from shapely import Polygon, Point
-from hydrocronapi import hydrocron
-
+from hydrocron.utils import constants
+from hydrocron.api import hydrocron
 
 logger = logging.getLogger()
 
@@ -89,13 +89,13 @@ def format_subset_json(results: Generator, polygon, exact, dataTime):  # noqa: E
         data['features'] = []
         i = 0
         for t in results:
-            if t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
+            if t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
                 feature = {}
                 feature['properties'] = {}
                 feature['geometry'] = {}
                 feature['type'] = "Feature"
                 feature['geometry']['coordinates'] = []
-                point = Point(float(t['p_lon']), float(t['p_lat']))
+                point = Point(float(t[constants.FIELDNAME_P_LON]), float(t[constants.FIELDNAME_P_LAT]))
                 if polygon.contains(point):
                     feature_type = ''
                     if 'POINT' in t['geometry']:
@@ -116,15 +116,17 @@ def format_subset_json(results: Generator, polygon, exact, dataTime):  # noqa: E
                             feature['geometry']['coordinates'].append([float(x), float(y)])
                             feature['properties']['time'] = datetime.fromtimestamp(
                                 float(t['time']) + 946710000).strftime("%Y-%m-%d %H:%M:%S")
-                            feature['properties']['reach_id'] = float(t['reach_id'])
-                            feature['properties']['wse'] = float(t['wse'])
+                            feature['properties']['reach_id'] = float(t[constants.FIELDNAME_REACH_ID])
+                            feature['properties']['wse'] = float(t[constants.FIELDNAME_WSE])
 
                     if feature_type == 'Point':
-                        feature['geometry']['coordinates'] = [float(t['p_lon']), float(t['p_lat'])]
-                        feature['properties']['time'] = datetime.fromtimestamp(float(t['time']) + 946710000).strftime(
+                        feature['geometry']['coordinates'] = [float(t[constants.FIELDNAME_P_LON]), float(t[
+                                                                                                             constants.FIELDNAME_P_LAT])]
+                        feature['properties']['time'] = datetime.fromtimestamp(float(t[
+                                                                                         constants.FIELDNAME_TIME]) + 946710000).strftime(
                             "%Y-%m-%d %H:%M:%S")
-                        feature['properties']['reach_id'] = float(t['reach_id'])
-                        feature['properties']['wse'] = float(t['wse'])
+                        feature['properties']['reach_id'] = float(t[constants.FIELDNAME_REACH_ID])
+                        feature['properties']['wse'] = float(t[constants.FIELDNAME_REACH_ID])
 
                     data['features'].append(feature)
                     i += 1
@@ -162,17 +164,17 @@ def format_subset_csv(results: Generator, polygon, exact, dataTime, fields):  # 
         csv = fields + '\n'
         fields_set = fields.split(", ")
         for t in results:
-            if t['time'] != '-999999999999':  # and (t['width'] != '-999999999999')):
-                point = Point(float(t['p_lon']), float(t['p_lat']))
+            if t[constants.FIELDNAME_TIME] != '-999999999999':  # and (t['width'] != '-999999999999')):
+                point = Point(float(t[constants.FIELDNAME_P_LON]), float(t[constants.FIELDNAME_P_LAT]))
                 if polygon.contains(point):
-                    if 'reach_id' in fields_set:
-                        csv += t['reach_id']
+                    if constants.FIELDNAME_REACH_ID in fields_set:
+                        csv += t[constants.FIELDNAME_REACH_ID]
                         csv += ','
-                    if 'time_str' in fields_set:
-                        csv += t['time_str']
+                    if constants.FIELDNAME_TIME_STR in fields_set:
+                        csv += t[constants.FIELDNAME_TIME_STR]
                         csv += ','
-                    if 'wse' in fields_set:
-                        csv += str(t['wse'])
+                    if constants.FIELDNAME_WSE in fields_set:
+                        csv += str(t[constants.FIELDNAME_WSE])
                         csv += ','
                     if 'geometry' in fields_set:
                         csv += t['geometry'].replace('; ', ', ')
