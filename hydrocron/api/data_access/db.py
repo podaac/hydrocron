@@ -3,7 +3,6 @@ Database module
 """
 
 import logging
-from typing import Generator
 
 from boto3.resources.base import ServiceResource
 from boto3.dynamodb.conditions import Key  # noqa: E501 # pylint: disable=C0412
@@ -20,7 +19,7 @@ class DynamoDataRepository:
         self._dynamo_instance = dynamo_resource
         self._logger = logging.getLogger('hydrocron.api.data_access.db.DynamoDataRepository')
 
-    def get_reach_series_by_feature_id(self, feature_id: str, start_time: str, end_time: str) -> Generator:  # noqa: E501 # pylint: disable=W0613
+    def get_reach_series_by_feature_id(self, feature_id: str, start_time: str, end_time: str):  # noqa: E501 # pylint: disable=W0613
         """
 
         @param feature_id:

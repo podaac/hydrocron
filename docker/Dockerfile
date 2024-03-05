@@ -2,7 +2,6 @@
 ARG FUNCTION_DIR="/function"
 
 FROM public.ecr.aws/lambda/python:3.10 as build_image
-# Include global arg in this stage of the build
 ARG FUNCTION_DIR
 ENV BUILD_DIR=/hydrocron
 
@@ -23,7 +22,6 @@ COPY docker/docker-entrypoint.sh ${FUNCTION_DIR}/bin/docker-entrypoint.sh
 RUN chmod 755 ${FUNCTION_DIR}/bin/docker-entrypoint.sh
 
 FROM public.ecr.aws/lambda/python:3.10
-# Include global arg in this stage of the build
 ARG FUNCTION_DIR
 WORKDIR ${FUNCTION_DIR}
 
