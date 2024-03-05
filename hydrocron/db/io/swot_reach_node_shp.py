@@ -4,8 +4,14 @@ Unpacks SWOT Reach & Node Shapefiles
 import os.path
 import json
 from datetime import datetime
+from importlib import resources
+import logging
+
 import geopandas as gpd
 import numpy as np
+import pandas as pd
+
+logging.getLogger().setLevel(logging.INFO)
 
 
 def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
@@ -51,21 +57,38 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
             shp_file[numeric_columns])
 
     shp_file = shp_file.astype(str)
-
     filename_attrs = parse_from_filename(filename)
+
+    items = assemble_attributes(shp_file, filename_attrs)
+
+    if os.path.exists(lambda_temp_file):
+        os.remove(lambda_temp_file)
+
+    return items
+
+
+def assemble_attributes(file_as_str, attributes):
+    """
+    Helper function to concat file attributes to records
+
+    Parameters
+    ----------
+    file_as_str : string
+        The file records as a string
+
+    attributes : dict
+        A dictionary of attributes to concatenate
+    """
 
     items = []
 
-    for _index, row in shp_file.iterrows():
+    for _index, row in file_as_str.iterrows():
 
         shp_attrs = json.loads(
             row.to_json(default_handler=str))
 
-        item_attrs = shp_attrs | filename_attrs
+        item_attrs = shp_attrs | attributes
         items.append(item_attrs)
-
-    if os.path.exists(lambda_temp_file):
-        os.remove(lambda_temp_file)
 
     return items
 
@@ -102,3 +125,38 @@ def parse_from_filename(filename):
     }
 
     return filename_attrs
+
+
+def load_benchmarking_data():
+    """
+    Loads many time steps for a fake reach_id to enable performance testing
+
+    Returns
+    -------
+    items : list
+        A list containing json dictionaries of each item attributes to add
+        to the database table
+    """
+    items = []
+
+    with resources.path("hydrocron.db", "benchmarking_data_reaches.csv") as csv:
+        csv_file = pd.read_csv(csv, dtype=str)
+
+        logging.info("Read CSV")
+
+        csv_file = csv_file.astype(str)
+
+        filename_attrs = {
+            'cycle_id': '000',
+            'pass_id': '000',
+            'continent_id': 'XX',
+            'range_end_time': '2024-12-31T23:59:00Z',
+            'crid': 'TEST'
+            }
+
+        items = assemble_attributes(csv_file, filename_attrs)
+
+        count = str(len(items))
+        logging.info("Benchmarking items: %s", count)
+
+    return items
