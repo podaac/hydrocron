@@ -12,7 +12,6 @@ resource "aws_dynamodb_table" "hydrocron-swot-reach-table" {
     name = "range_start_time"
     type = "S"
   }
-  lifecycle { ignore_changes = [write_capacity, read_capacity] }
 }
 
 module "reach_table_autoscaling" {
