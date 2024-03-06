@@ -75,7 +75,9 @@ def granule_handler(event, _):
     table_name = event['body']['table_name']
     load_benchmarking_data = event['body']['load_benchmarking_data']
 
-    if load_benchmarking_data:
+    logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
+
+    if load_benchmarking_data == "True":
         logging.info("Loading benchmarking data")
         items = swot_reach_node_shp.load_benchmarking_data()
     else:
