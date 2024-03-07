@@ -167,6 +167,25 @@ data "aws_iam_policy_document" "apigw-resource-policy" {
   }
 }
 
+data "aws_iam_policy_document" "lambda-vpc" {
+
+  statement {
+    effect  = "Allow"
+    actions = ["ec2:CreateNetworkInterface"]
+    resources = concat([for subnet in data.aws_subnet.private_application_subnet : subnet.arn], ["arn:aws:ec2:${local.region}:${local.account_id}:*/*"])
+  }
+  statement {
+    effect  = "Allow"
+    actions = ["ec2:DeleteNetworkInterface"]
+    resources = ["arn:aws:ec2:${local.region}:${local.account_id}:*/*"]
+  }
+  statement {
+    effect  = "Allow"
+    actions = ["ec2:DescribeNetworkInterfaces"]
+    resources = ["*"]
+  }
+}
+
 # IAM Roles
 
 resource "aws_iam_role" "hydrocron-lambda-execution-role" {
@@ -183,6 +202,10 @@ resource "aws_iam_role" "hydrocron-lambda-execution-role" {
   inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
+  }
+  inline_policy {
+    name = "HydrocronLambdaVPC"
+    policy = data.aws_iam_policy_document.lambda-vpc.json
   }
 }
 
@@ -204,6 +227,10 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
   inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
+  }
+  inline_policy {
+    name = "HydrocronLambdaVPC"
+    policy = data.aws_iam_policy_document.lambda-vpc.json
   }
 }
 
@@ -228,5 +255,9 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
+  }
+  inline_policy {
+    name = "HydrocronLambdaVPC"
+    policy = data.aws_iam_policy_document.lambda-vpc.json
   }
 }

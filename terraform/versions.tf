@@ -10,8 +10,8 @@ terraform {
   }
 
   required_providers {
-    aws      = ">= 3.50.0"
-    template = ">= 2.2.0"
+    aws      = "~> 4.0"
+    # template = ">= 2.2.0"
   }
-  required_version = ">= 1.3.7"
+  required_version = ">= 1.7.3"
 }
