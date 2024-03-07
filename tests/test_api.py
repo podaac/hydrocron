@@ -3,7 +3,9 @@ Tests for API queries
 """
 
 import pytest
+import geojson
 import geopandas as gpd
+import json
 import numpy as np
 from numpy.testing import assert_almost_equal
 
@@ -222,6 +224,31 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
                     [-95.538432, 50.290654],
                     [-95.538531, 50.290922], [-95.538629, 50.29119]],
                     'type': 'LineString'}, 'type': 'Feature'}]}
+
+
+def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries endpoint response for valid GeoJSON
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "fields": "reach_id,time_str,wse,slope,time"
+        }
+    }
+
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    assert geojson.loads(json.dumps((result['results']['geojson']))).is_valid
 
 
 def test_timeseries_lambda_handler_csv(hydrocron_api):

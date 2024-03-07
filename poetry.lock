@@ -1425,6 +1425,17 @@ ssh = ["paramiko"]
 tqdm = ["tqdm"]
 
 [[package]]
+name = "geojson"
+version = "3.1.0"
+description = "Python bindings and utilities for GeoJSON"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "geojson-3.1.0-py3-none-any.whl", hash = "sha256:68a9771827237adb8c0c71f8527509c8f5bef61733aa434cefc9c9d4f0ebe8f3"},
+    {file = "geojson-3.1.0.tar.gz", hash = "sha256:58a7fa40727ea058efc28b0e9ff0099eadf6d0965e04690830208d3ef571adac"},
+]
+
+[[package]]
 name = "geopandas"
 version = "0.13.2"
 description = "Geographic pandas extensions"
@@ -4204,4 +4215,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "989b04bbfe90db5be04d6614d422930bce1a55946a2a2c0e0cafcad977130de2"
+content-hash = "5cf31c99337cb423d04851aba96dc1a1a68a86730583ef53923abe81990e9590"
