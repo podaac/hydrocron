@@ -303,7 +303,7 @@ jobs:
           timeout: 60
           disable_removal: 'true'
           umm_type: 'umm-s'
-          use_associations: 'false'        
+          use_associations: 'true'        
         env:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
           LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
