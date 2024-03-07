@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 75 - Update log messaging format
     - Issue 60 - Encapsulate DyanmoDB under a single shared module
     - Issue 60 - Improved error handling
+    - Issue 13 - Add SWORD version from shp.xml to DB entries
 ### Changed
 ### Deprecated 
 ### Removed
