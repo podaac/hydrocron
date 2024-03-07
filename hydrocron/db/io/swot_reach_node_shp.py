@@ -58,13 +58,27 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
 
     shp_file = shp_file.astype(str)
     filename_attrs = parse_from_filename(filename)
+    sword_attrs = parse_from_shpxml(filename)
 
-    items = assemble_attributes(shp_file, filename_attrs)
+    attributes = filename_attrs | sword_attrs
+    items = assemble_attributes(shp_file, attributes)
 
     if os.path.exists(lambda_temp_file):
         os.remove(lambda_temp_file)
 
     return items
+
+
+def parse_from_shpxml(filename):
+    """
+    Read the SWORD version number from the shp.xml file
+    and add to the database fields
+
+    Parameters:
+
+    """
+    sword_attrs = {}
+    return sword_attrs
 
 
 def assemble_attributes(file_as_str, attributes):
