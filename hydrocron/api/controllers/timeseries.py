@@ -104,10 +104,6 @@ def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
     gdf = gdf[columns]
     gdf_json = json.loads(gdf.to_json())
 
-    if 'geometry' not in fields:
-        for feature in gdf_json["features"]:
-            feature['geometry'] = {}
-
     data = {
         'http_code': '200 OK',
         'response': gdf_json

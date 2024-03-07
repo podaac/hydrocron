@@ -24,7 +24,7 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
-            "fields": "reach_id,time_str,wse,geometry"
+            "fields": "reach_id,time_str,wse"
         }
     }
 
