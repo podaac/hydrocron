@@ -172,7 +172,7 @@ data "aws_iam_policy_document" "lambda-vpc" {
   statement {
     effect  = "Allow"
     actions = ["ec2:CreateNetworkInterface"]
-    resources = concat([for subnet in data.aws_subnet.private_application_subnet : subnet.arn], ["arn:aws:ec2:${local.region}:${local.account_id}:*/*"])
+    resources = ["arn:aws:ec2:${local.region}:${local.account_id}:*/*"]
   }
   statement {
     effect  = "Allow"
