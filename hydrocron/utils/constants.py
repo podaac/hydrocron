@@ -23,7 +23,8 @@ TEST_ITEM_DICT = {
     "time_str": "2023-06-10T19:39:43Z",
     "wse": "286.2983",
     "cycle_id": "548",
-    "sword_version": "15"
+    "sword_version": "15",
+    "p_lat_units": "degrees_north"
 }
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
@@ -34,6 +35,8 @@ TEST_REACH_ID_VALUE = '71224100223'
 TEST_TIME_VALUE = '2023-06-10T19:33:37Z'
 TEST_WSE_VALUE = '286.2983'
 TEST_SWORD_VERSION_VALUE = '15'
+TEST_UNITS_FIELD = 'p_lat_units'
+TEST_UNITS = 'degrees_north'
 
 # ------------ #
 # PROD CONSTANTS #

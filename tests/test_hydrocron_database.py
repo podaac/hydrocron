@@ -50,8 +50,10 @@ def test_query(hydrocron_dynamo_table):
 
     items = hydrocron_dynamo_table.run_query(
         partition_key=constants.TEST_REACH_ID_VALUE)
+
     assert items[0][constants.FIELDNAME_WSE] == constants.TEST_WSE_VALUE
     assert items[0][constants.FIELDNAME_SWORD_VERSION] == constants.TEST_SWORD_VERSION_VALUE
+    assert items[0][constants.TEST_UNITS_FIELD] == constants.TEST_UNITS
 
 
 def test_delete_item(hydrocron_dynamo_table):

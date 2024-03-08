@@ -77,28 +77,42 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
     return items
 
 
-def parse_metadata_from_shpxml(xml_etree):
+def parse_metadata_from_shpxml(xml_elem):
     """
     Read the SWORD version number from the shp.xml file
     and add to the database fields
 
     Parameters
     ----------
-    xml_etree : xml.etree.ElementTree
-        an Element Tree representation of the shp.xml metadata file
+    xml_elem : xml.etree.ElementTree.Element
+        an Element representation of the shp.xml metadata file
 
     Returns
     -------
     metadata_attrs : dict
         a dictionary of metadata attributes to add to record
     """
-
-    for globs in xml_etree.findall('global_attributes'):
+    # get SWORD version
+    for globs in xml_elem.findall('global_attributes'):
         prior_db_files = globs.find('xref_prior_river_db_files').text
 
     metadata_attrs = {
         'sword_version': prior_db_files[-5:-3]
     }
+
+    # get units on fields that have them
+    for child in xml_elem:
+        if child.tag == 'attributes':
+            for field in child:
+                try:
+                    units = field.find('units').text
+                except AttributeError:
+                    units = ""
+                    logging.info('No units on field %s', field.tag)
+
+                if units != "":
+                    unit_field_name = field.tag + "_units"
+                    metadata_attrs[unit_field_name] = units
 
     return metadata_attrs
 
