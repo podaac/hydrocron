@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 24 - Indicate collection version of data
     - Issue 85 - Add variable units to API response
     - Issue 105 - Only benchmarking data is being loaded even when load_benchmarking_data flag is false
     - Issue 79 - Generate data for use by benchmarks
