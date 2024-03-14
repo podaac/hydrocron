@@ -293,8 +293,7 @@ jobs:
         uses: podaac/cmr-umm-updater@0.6.0
         if: |
           github.ref == 'refs/heads/main'    ||
-          startsWith(github.ref, 'refs/heads/release') ||
-          startsWith(github.ref, 'refs/heads/feature')
+          startsWith(github.ref, 'refs/heads/release')
         with:
           umm-json: 'cmr/hydrocron_umm_s.json'
           provider: 'POCLOUD'
