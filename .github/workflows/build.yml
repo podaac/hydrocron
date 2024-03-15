@@ -105,7 +105,7 @@ jobs:
       - name: Bump rc version
         # If triggered by push to a release branch
         if: |
-          startsWith(github.ref, 'refs/heads/release/')
+          startsWith(github.ref, 'refs/heads/release/') &&
           github.event_name != 'workflow_dispatch'
         id: rc
         env:
