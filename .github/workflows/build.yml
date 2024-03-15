@@ -85,7 +85,8 @@ jobs:
         if: |
           github.ref != 'refs/heads/develop' &&
           github.ref != 'refs/heads/main'    &&
-          !startsWith(github.ref, 'refs/heads/release')
+          !startsWith(github.ref, 'refs/heads/release') &&
+          github.event_name != 'workflow_dispatch'
         run: |
           new_ver="${{ steps.get-version.outputs.current_version }}+$(git rev-parse --short ${GITHUB_SHA})"
           poetry version $new_ver
@@ -93,7 +94,9 @@ jobs:
           echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
       - name: Bump alpha version
         # If triggered by push to the develop branch
-        if: ${{ github.ref == 'refs/heads/develop' }}
+        if: |
+          github.ref == 'refs/heads/develop' &&
+          github.event_name != 'workflow_dispatch'
         id: alpha
         run: |
           poetry version prerelease
@@ -101,7 +104,9 @@ jobs:
           echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
       - name: Bump rc version
         # If triggered by push to a release branch
-        if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
+        if: |
+          startsWith(github.ref, 'refs/heads/release/') &&
+          github.event_name != 'workflow_dispatch'
         id: rc
         env:
           # True if the version already has a 'rc' pre-release identifier
@@ -116,7 +121,9 @@ jobs:
           echo "TARGET_ENV_UPPERCASE=UAT" >> $GITHUB_ENV
       - name: Release version
         # If triggered by push to the main branch
-        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
+        if: |
+          startsWith(github.ref, 'refs/heads/main') &&
+          github.event_name != 'workflow_dispatch'
         id: release
         run: |
           poetry version major
@@ -124,7 +131,7 @@ jobs:
           echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
       - name: No version bump
         # If triggered by workflow dispatch, no version bump
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+        if: github.event_name == 'workflow_dispatch'
         run: |
           echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=${{ github.event.inputs.venue }}" >> $GITHUB_ENV
@@ -236,6 +243,7 @@ jobs:
     env:
       THE_VERSION: ${{ needs.build.outputs.version }}
       PYPROJECT_NAME: ${{ needs.build.outputs.pyproject_name }}
+    if: github.event_name != 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
         with:
