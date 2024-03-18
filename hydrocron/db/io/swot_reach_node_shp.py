@@ -12,6 +12,7 @@ import logging
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from hydrocron.utils import constants
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -161,6 +162,12 @@ def parse_from_filename(filename):
 
     filename_components = filename.split("_")
 
+    if 'Reach' in filename:
+        collection = constants.SWOT_REACH_COLLECTION_NAME
+
+    if 'Node' in filename:
+        collection = constants.SWOT_NODE_COLLECTION_NAME
+
     filename_attrs = {
         'cycle_id': filename_components[5],
         'pass_id': filename_components[6],
@@ -171,7 +178,8 @@ def parse_from_filename(filename):
         'range_end_time': datetime.strptime(
             filename_components[9],
             '%Y%m%dT%H%M%S').strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'crid': filename_components[10]
+        'crid': filename_components[10],
+        'collection_shortname': collection
     }
 
     return filename_attrs
@@ -201,7 +209,8 @@ def load_benchmarking_data():
             'pass_id': '000',
             'continent_id': 'XX',
             'range_end_time': '2024-12-31T23:59:00Z',
-            'crid': 'TEST'
+            'crid': 'TEST',
+            'collection_shortname': constants.SWOT_REACH_COLLECTION_NAME
             }
 
         items = assemble_attributes(csv_file, filename_attrs)
