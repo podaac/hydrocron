@@ -121,7 +121,7 @@ def cnm_handler(event, _):
                         FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
                         InvocationType='Event',
                         Payload=event2)
-                    
+
                 if 'Node' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","obscure_data": "' + obscure_data
