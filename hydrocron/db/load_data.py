@@ -4,6 +4,7 @@ the appropriate DynamoDB table
 """
 import logging
 import os
+import json
 
 import boto3
 import earthaccess
@@ -91,6 +92,46 @@ def granule_handler(event, _):
     dynamo_resource = connection.dynamodb_resource
     logging.info("Begin loading data items")
     load_data(dynamo_resource, table_name, items)
+
+
+def cnm_handler(event, _):
+    """
+    Unpacks CNM-R message and invokes granule_load lambda
+    """
+    obscure_data = "False"
+    load_benchmarking_data = "False"
+
+    lambda_client = boto3.client('lambda')
+
+    # Parse message
+    for message in event['Records']:
+        cnm = json.loads(message['body'])
+
+        for files in cnm['product']['files']:
+            if files['type'] == 'data':
+                granule_uri = files['uri']
+
+                if 'Reach' in granule_uri:
+                    event2 = ('{"body": {"granule_path": "' + granule_uri
+                              + '","obscure_data": "' + obscure_data
+                              + '","table_name": "' + constants.SWOT_REACH_COLLECTION_NAME
+                              + '","load_benchmarking_data: "' + load_benchmarking_data + '"}}')
+
+                    lambda_client.invoke(
+                        FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+                        InvocationType='Event',
+                        Payload=event2)
+                    
+                if 'Node' in granule_uri:
+                    event2 = ('{"body": {"granule_path": "' + granule_uri
+                              + '","obscure_data": "' + obscure_data
+                              + '","table_name": "' + constants.SWOT_NODE_COLLECTION_NAME
+                              + '","load_benchmarking_data: "' + load_benchmarking_data + '"}}')
+
+                    lambda_client.invoke(
+                        FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+                        InvocationType='Event',
+                        Payload=event2)
 
 
 def find_new_granules(collection_shortname, start_date, end_date):

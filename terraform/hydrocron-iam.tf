@@ -248,8 +248,7 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
   managed_policy_arns  = [
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
     ]
 
   inline_policy {
@@ -266,5 +265,23 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
+  }
+}
+
+resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
+  name = "${local.aws_resource_prefix}-lambda-cnm-role"
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
+  managed_policy_arns  = [
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"]
+
+  inline_policy {
+    name = "HydrocronLambdaInvoke"
+    policy = data.aws_iam_policy_document.lambda-invoke-policy.json
+  }
+  inline_policy {
+    policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
   }
 }
