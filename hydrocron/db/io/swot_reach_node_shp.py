@@ -5,11 +5,14 @@ import os.path
 import json
 from datetime import datetime
 from importlib import resources
+import xml.etree.ElementTree as ET
+import zipfile
 import logging
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -44,8 +47,12 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
         s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
 
         shp_file = gpd.read_file('zip://' + lambda_temp_file)
+        with zipfile.ZipFile(lambda_temp_file) as archive:
+            shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
     else:
         shp_file = gpd.read_file('zip://' + filepath)
+        with zipfile.ZipFile(filepath) as archive:
+            shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
 
     numeric_columns = shp_file[columns].select_dtypes(include=[np.number]).columns
     if obscure_data:
@@ -59,12 +66,41 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
     shp_file = shp_file.astype(str)
     filename_attrs = parse_from_filename(filename)
 
-    items = assemble_attributes(shp_file, filename_attrs)
+    xml_attrs = parse_metadata_from_shpxml(shp_xml_tree)
+
+    attributes = filename_attrs | xml_attrs
+    items = assemble_attributes(shp_file, attributes)
 
     if os.path.exists(lambda_temp_file):
         os.remove(lambda_temp_file)
 
     return items
+
+
+def parse_metadata_from_shpxml(xml_etree):
+    """
+    Read the SWORD version number from the shp.xml file
+    and add to the database fields
+
+    Parameters
+    ----------
+    xml_etree : xml.etree.ElementTree
+        an Element Tree representation of the shp.xml metadata file
+
+    Returns
+    -------
+    metadata_attrs : dict
+        a dictionary of metadata attributes to add to record
+    """
+
+    for globs in xml_etree.findall('global_attributes'):
+        prior_db_files = globs.find('xref_prior_river_db_files').text
+
+    metadata_attrs = {
+        'sword_version': prior_db_files[-5:-3]
+    }
+
+    return metadata_attrs
 
 
 def assemble_attributes(file_as_str, attributes):

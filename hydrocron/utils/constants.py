@@ -22,7 +22,8 @@ TEST_ITEM_DICT = {
     "time": "739741183.129",
     "time_str": "2023-06-10T19:39:43Z",
     "wse": "286.2983",
-    "cycle_id": "548"
+    "cycle_id": "548",
+    "sword_version": "15"
 }
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
@@ -32,6 +33,7 @@ TEST_SORT_KEY_NAME = 'range_start_time'
 TEST_REACH_ID_VALUE = '71224100223'
 TEST_TIME_VALUE = '2023-06-10T19:33:37Z'
 TEST_WSE_VALUE = '286.2983'
+TEST_SWORD_VERSION_VALUE = '15'
 
 # ------------ #
 # PROD CONSTANTS #
@@ -54,6 +56,7 @@ FIELDNAME_WSE = 'wse'
 FIELDNAME_SLOPE = 'slope'
 FIELDNAME_P_LON = 'p_lon'
 FIELDNAME_P_LAT = 'p_lat'
+FIELDNAME_SWORD_VERSION = 'sword_version'
 
 S3_CREDS_ENDPOINT = "https://archive.swot.podaac.earthdata.nasa.gov/s3credentials"
 
