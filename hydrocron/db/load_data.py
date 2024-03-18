@@ -58,7 +58,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         event2 = ('{"body": {"granule_path": "'
                   + granule_path + '","obscure_data": "'
                   + obscure_data + '","table_name": "'
-                  + table_name + '","load_benchmarking_data: "'
+                  + table_name + '","load_benchmarking_data": "'
                   + load_benchmarking_data + '"}}')
 
         lambda_client.invoke(
@@ -115,7 +115,7 @@ def cnm_handler(event, _):
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","obscure_data": "' + obscure_data
                               + '","table_name": "' + constants.SWOT_REACH_COLLECTION_NAME
-                              + '","load_benchmarking_data: "' + load_benchmarking_data + '"}}')
+                              + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
                     lambda_client.invoke(
                         FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
@@ -126,7 +126,7 @@ def cnm_handler(event, _):
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","obscure_data": "' + obscure_data
                               + '","table_name": "' + constants.SWOT_NODE_COLLECTION_NAME
-                              + '","load_benchmarking_data: "' + load_benchmarking_data + '"}}')
+                              + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
                     lambda_client.invoke(
                         FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
