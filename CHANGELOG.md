@@ -7,19 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
     - Issue 85 - Add variable units to API response
-    - Issue 105 - Only benchmarking data is being loaded even when load_benchmarking_data flag is false
     - Issue 79 - Generate data for use by benchmarks
     - Issue 88 - There are no CloudWatch logs for the API Gateway
+    - Issue 13 - Add SWORD version from shp.xml to DB entries
+### Changed
+    - Issue 59 - Using GeoDataFrame to work with data returned from db
     - Issue 75 - Update log messaging format
     - Issue 60 - Encapsulate DyanmoDB under a single shared module
     - Issue 60 - Improved error handling
-    - Issue 13 - Add SWORD version from shp.xml to DB entries
-### Changed
 ### Deprecated 
 ### Removed
     - Issue 39 - Clean up code, removed comments and unused parameters
 ### Fixed
+    - Issue 105 - Only benchmarking data is being loaded even when load_benchmarking_data flag is false
     - Issue 44 - Load data lambda only loads the first granule found in the time range
+    - Issue 116 - CICD will not publish when build run as workflow dispatch
 ### Security
 
 ## [1.0.0]

@@ -25,7 +25,6 @@ TEST_ITEM_DICT = {
     "cycle_id": "548",
     "sword_version": "15",
     "p_lat_units": "degrees_north"
-}
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 API_TEST_TABLE_NAME = "hydrocron-swot-reach-table"
