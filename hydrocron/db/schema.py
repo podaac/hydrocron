@@ -96,6 +96,31 @@ class HydrocronTable:
                 err.response['Error']['Message'])
             raise
 
+    def batch_fill_table(self, items):
+        """
+        Fills the DynamoDB table with the specified data, using the Boto3
+        Table.batch_writer() function to put the items in the table.
+        Inside the context manager, Table.batch_writer builds a list of
+        requests. On exiting the context manager, Table.batch_writer starts sending
+        batches of write requests to Amazon DynamoDB and automatically
+        handles chunking, buffering, and retrying.
+
+        Parameters
+        ----------
+           items : The data to put in the table.
+        """
+        table = self.table
+
+        try:
+            with table.batch_writer() as writer:
+                for item in items:
+                    writer.put_item(Item=item)
+            logger.info("Loaded data into table %s.", table.name)
+
+        except ClientError:
+            logger.exception("Couldn't load data into table %s.", table.name)
+            raise
+
     def run_query(self, partition_key, sort_key=None):
         """
         Perform a query. This is a helper function for testing purposes.

@@ -14,6 +14,8 @@ from hydrocron.db.io import swot_reach_node_shp
 from hydrocron.utils import connection
 from hydrocron.utils import constants
 
+logging.getLogger().setLevel(logging.INFO)
+
 
 class MissingTable(Exception):
     """
@@ -30,6 +32,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     start_date = event['body']['start_date']
     end_date = event['body']['end_date']
     obscure_data = event['body']['obscure_data']
+    load_benchmarking_data = event['body']['load_benchmarking_data']
 
     match table_name:
         case constants.SWOT_REACH_TABLE_NAME:
@@ -54,7 +57,8 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         event2 = ('{"body": {"granule_path": "'
                   + granule_path + '","obscure_data": "'
                   + obscure_data + '","table_name": "'
-                  + table_name + '"}}')
+                  + table_name + '","load_benchmarking_data: "'
+                  + load_benchmarking_data + '"}}')
 
         lambda_client.invoke(
             FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
@@ -69,11 +73,23 @@ def granule_handler(event, _):
     granule_path = event['body']['granule_path']
     obscure_data = event['body']['obscure_data']
     table_name = event['body']['table_name']
+    load_benchmarking_data = event['body']['load_benchmarking_data']
 
-    s3_resource = connection.s3_resource
-    items = read_data(granule_path, obscure_data, s3_resource)
+    logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
 
+    if load_benchmarking_data == "True":
+        logging.info("Loading benchmarking data")
+        items = swot_reach_node_shp.load_benchmarking_data()
+    else:
+        logging.info("Setting up S3 connection")
+        s3_resource = connection.s3_resource
+
+        logging.info("Starting read granule")
+        items = read_data(granule_path, obscure_data, s3_resource)
+
+    logging.info("Set up dynamo connection")
     dynamo_resource = connection.dynamodb_resource
+    logging.info("Begin loading data items")
     load_data(dynamo_resource, table_name, items)
 
 
@@ -121,6 +137,7 @@ def read_data(granule_path, obscure_data, s3_resource=None):
     items = {}
 
     if 'Reach' in granule_path:
+        logging.info("Start reading reach shapefile")
         items = swot_reach_node_shp.read_shapefile(
             granule_path,
             obscure_data,
@@ -128,6 +145,7 @@ def read_data(granule_path, obscure_data, s3_resource=None):
             s3_resource=s3_resource)
 
     if 'Node' in granule_path:
+        logging.info("Start reading node shapefile")
         items = swot_reach_node_shp.read_shapefile(
             granule_path,
             obscure_data,
@@ -152,6 +170,7 @@ def load_data(dynamo_resource, table_name, items):
     """
 
     try:
+        logging.info("Set up dynamo table connection")
         hydrocron_table = HydrocronTable(dyn_resource=dynamo_resource, table_name=table_name)
     except ClientError as err:
         if err.response['Error']['Code'] == 'ResourceNotFoundException':
@@ -160,13 +179,25 @@ def load_data(dynamo_resource, table_name, items):
 
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
 
-        for item_attrs in items:
-            hydrocron_table.add_data(**item_attrs)
+        if len(items) > 5:
+            logging.info("Batch adding reach items")
+            hydrocron_table.batch_fill_table(items)
+
+        else:
+            logging.info("Adding reach items to table individually")
+            for item_attrs in items:
+                hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
 
-        for item_attrs in items:
-            hydrocron_table.add_data(**item_attrs)
+        if len(items) > 5:
+            logging.info("Batch adding node items")
+            hydrocron_table.batch_fill_table(items)
+
+        else:
+            logging.info("Adding node items to table individually")
+            for item_attrs in items:
+                hydrocron_table.add_data(**item_attrs)
 
     else:
         logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
