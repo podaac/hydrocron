@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-    - Issue 91 - Explore possibility of setting CORS headers
+    - Issue 91 - Add CORS headers to API responses
     - Issue 105 - Only benchmarking data is being loaded even when load_benchmarking_data flag is false
     - Issue 79 - Generate data for use by benchmarks
     - Issue 88 - There are no CloudWatch logs for the API Gateway
