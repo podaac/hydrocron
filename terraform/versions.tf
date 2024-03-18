@@ -11,7 +11,6 @@ terraform {
 
   required_providers {
     aws      = "~> 4.0"
-    # template = ">= 2.2.0"
   }
   required_version = ">= 1.7.3"
 }
