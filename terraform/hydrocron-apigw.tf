@@ -30,6 +30,9 @@ resource "aws_api_gateway_rest_api" "hydrocron-api-gateway" {
 resource "aws_api_gateway_rest_api_policy" "hydrocron-api-gateway-policy" {
   rest_api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
   policy      = data.aws_iam_policy_document.apigw-resource-policy.json
+    lifecycle {
+    ignore_changes = [ policy ]
+  }
 }
 
 
