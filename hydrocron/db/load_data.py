@@ -29,6 +29,8 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     Lambda entrypoint for loading the database
     """
 
+    logging.info("Starting lambda handler")
+
     table_name = event['body']['table_name']
     start_date = event['body']['start_date']
     end_date = event['body']['end_date']
@@ -155,6 +157,8 @@ def find_new_granules(collection_shortname, start_date, end_date):
         List of S3 paths to the granules that have not yet been ingested
     """
     auth = earthaccess.login(persist=True)
+
+    logging.info("Searching for granules in collection %s", collection_shortname)
 
     cmr_search = earthaccess.DataGranules(auth).short_name(collection_shortname).temporal(start_date, end_date)
 
