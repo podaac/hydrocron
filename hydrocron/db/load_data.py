@@ -45,6 +45,8 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         case _:
             raise MissingTable(f"Hydrocron table '{table_name}' does not exist.")
 
+    logging.info("Searching for granules in collection %s", collection_shortname)
+
     new_granules = find_new_granules(
         collection_shortname,
         start_date,
@@ -59,7 +61,9 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
                   + granule_path + '","obscure_data": "'
                   + obscure_data + '","table_name": "'
                   + table_name + '","load_benchmarking_data": "'
-                  + load_benchmarking_data + '"}}')
+                  + load_benchmarking_data + '}}')
+        
+        logging.info("Invoking granule load lambda with event json %s", str(event2))
 
         lambda_client.invoke(
             FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
@@ -115,7 +119,7 @@ def cnm_handler(event, _):
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","obscure_data": "' + obscure_data
                               + '","table_name": "' + constants.SWOT_REACH_COLLECTION_NAME
-                              + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
+                              + '","load_benchmarking_data": "' + load_benchmarking_data + '}}')
 
                     lambda_client.invoke(
                         FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
@@ -155,6 +159,8 @@ def find_new_granules(collection_shortname, start_date, end_date):
     cmr_search = earthaccess.DataGranules(auth).short_name(collection_shortname).temporal(start_date, end_date)
 
     results = cmr_search.get()
+
+    logging.info("Found %s granules", str(len(results)))
 
     return results
 
