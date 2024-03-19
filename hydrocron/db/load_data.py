@@ -62,7 +62,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
                   + obscure_data + '","table_name": "'
                   + table_name + '","load_benchmarking_data": "'
                   + load_benchmarking_data + '}}')
-        
+
         logging.info("Invoking granule load lambda with event json %s", str(event2))
 
         lambda_client.invoke(
