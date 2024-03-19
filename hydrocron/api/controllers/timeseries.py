@@ -141,16 +141,15 @@ def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
 
 def add_units(gdf, columns):
     """Add units to list of columns to return in response
-    
+
     :param gdf: DataFrame of results from query
     :type gdf: gpd.GeoDataFrame
     :param columns: List of columns to return in response
-    :type columns: list of str 
+    :type columns: list of str
     """
 
     gdf_columns = gdf.columns.values.tolist()
-    unit_columns = [f"{column}_units" for column in columns \
-        if f"{column}_units" in gdf_columns]
+    unit_columns = [f"{column}_units" for column in columns if f"{column}_units" in gdf_columns]
     return columns + unit_columns
 
 
