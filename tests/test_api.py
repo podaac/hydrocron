@@ -35,7 +35,7 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
     assert result['status'] == '200 OK' and \
            result['results']['geojson'] == {'type': 'FeatureCollection', 'features': [
                     {'id': '0', 'properties': {'reach_id': '71224100223', 'time_str': '2023-06-10T19:39:43Z',
-                    'wse': '286.2983'}, 'geometry': {'coordinates':
+                    'wse': '286.2983', 'wse_units': 'm'}, 'geometry': {'coordinates':
                     [[-95.564991, 50.223686], [-95.564559, 50.223479],
                     [-95.564133, 50.223381],
                     [-95.563713, 50.22339], [-95.563296, 50.223453],
@@ -275,7 +275,7 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
     context = "_"
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
     assert result['status'] == '200 OK'
-    assert result['results']['csv'] == ('reach_id,time_str,wse,geometry\n' \
+    assert result['results']['csv'] == ('reach_id,time_str,wse,geometry,wse_units\n' \
                                         '71224100223,2023-06-10T19:39:43Z,286.2983,"LINESTRING (-95.564991 50.223686, ' \
                                         '-95.564559 50.223479, -95.564133 50.223381, -95.563713 50.22339, -95.563296 ' \
                                         '50.223453, -95.562884 50.223624, -95.562473 50.223795, -95.562062 50.223966, ' \
@@ -357,7 +357,7 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
                                         '50.288507, -95.537995 50.288775, -95.538093 50.289043, -95.538192 50.28931, ' \
                                         '-95.538206 50.28958, -95.538221 50.289849, -95.538235 50.290119, -95.538334 ' \
                                         '50.290387, -95.538432 50.290654, -95.538531 50.290922, -95.538629 ' \
-                                        '50.29119)"\n')
+                                        '50.29119)",m\n')
 
 
 def test_timeseries_convert_to_df_node(hydrocron_api):

@@ -147,7 +147,7 @@ def add_units(gdf, columns):
     :param columns: List of columns to return in response
     :type columns: list of str 
     """
-    
+
     gdf_columns = gdf.columns.values.tolist()
     unit_columns = [f"{column}_units" for column in columns \
         if f"{column}_units" in gdf_columns]
