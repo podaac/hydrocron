@@ -133,6 +133,11 @@ resource "aws_lambda_function" "hydrocron_lambda_cnm" {
   memory_size   = 2048
 
   tags = var.default_tags
+  environment {
+    variables = {
+      GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
+    }
+  }
 }
 
 resource "aws_lambda_permission" "allow_lambda" {
