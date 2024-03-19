@@ -99,6 +99,7 @@ def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
     """
 
     columns = fields.split(',')
+    columns = add_units(gdf, columns)
     if 'geometry' not in fields:
         columns.append('geometry')   # Add geometry to convert to geoJSON
     gdf = gdf[columns]
@@ -125,6 +126,7 @@ def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
     """
 
     columns = fields.split(',')
+    columns = add_units(gdf, columns)
     gdf = gdf[columns]
     gdf_csv = gdf.to_csv(index=False)
 
@@ -135,6 +137,21 @@ def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
     hits = gdf.shape[0]
 
     return data, hits
+
+
+def add_units(gdf, columns):
+    """Add units to list of columns to return in response
+    
+    :param gdf: DataFrame of results from query
+    :type gdf: gpd.GeoDataFrame
+    :param columns: List of columns to return in response
+    :type columns: list of str 
+    """
+    
+    gdf_columns = gdf.columns.values.tolist()
+    unit_columns = [f"{column}_units" for column in columns \
+        if f"{column}_units" in gdf_columns]
+    return columns + unit_columns
 
 
 def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
