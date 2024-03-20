@@ -75,33 +75,40 @@ jobs:
         with:
           path: ./.venv
           key: venv-${{ hashFiles('poetry.lock') }}
-      - name: Get version
+      - name: Get pre-build version
         id: get-version
         run: |
           echo "current_version=$(poetry version | awk '{print $2}')" >> $GITHUB_OUTPUT
           echo "pyproject_name=$(poetry version | awk '{print $1}')" >> $GITHUB_ENV
+      - name: Manual Build
+        # If triggered by workflow dispatch, no version bump
+        if: github.event_name == 'workflow_dispatch'
+        id: manual
+        run: |
+          echo "TARGET_ENV_UPPERCASE=${{ github.event.inputs.venue }}" >> $GITHUB_ENV
       - name: Bump pre-alpha version
         # If triggered by push to a non-tracked branch
         if: |
           github.ref != 'refs/heads/develop' &&
-          github.ref != 'refs/heads/main'    &&
-          !startsWith(github.ref, 'refs/heads/release')
+          github.ref != 'refs/heads/main'
         run: |
           new_ver="${{ steps.get-version.outputs.current_version }}+$(git rev-parse --short ${GITHUB_SHA})"
           poetry version $new_ver
-          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
       - name: Bump alpha version
         # If triggered by push to the develop branch
-        if: ${{ github.ref == 'refs/heads/develop' }}
+        if: |
+          github.ref == 'refs/heads/develop' &&
+          steps.manual.conclusion == 'skipped'
         id: alpha
         run: |
           poetry version prerelease
-          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
       - name: Bump rc version
         # If triggered by push to a release branch
-        if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
+        if: |
+          startsWith(github.ref, 'refs/heads/release/') &&
+          steps.manual.conclusion == 'skipped'
         id: rc
         env:
           # True if the version already has a 'rc' pre-release identifier
@@ -112,22 +119,20 @@ jobs:
           else
             poetry version ${GITHUB_REF#refs/heads/release/}rc1
           fi
-          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=UAT" >> $GITHUB_ENV
       - name: Release version
         # If triggered by push to the main branch
-        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
+        if: |
+          startsWith(github.ref, 'refs/heads/main') &&
+          steps.manual.conclusion == 'skipped'
         id: release
         run: |
           poetry version major
-          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
-      - name: No version bump
-        # If triggered by workflow dispatch, no version bump
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+      - name: Get install version
+        # Get the version of the software being installed and save it as an ENV var
         run: |
           echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
-          echo "TARGET_ENV_UPPERCASE=${{ github.event.inputs.venue }}" >> $GITHUB_ENV
       - name: Install package
         run: poetry install
       - name: Lint
@@ -350,7 +355,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
-      - uses: hashicorp/setup-terraform@v2
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
