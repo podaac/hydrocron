@@ -295,5 +295,5 @@ resource "aws_lambda_permission" "aws_lambda_cnm_responder_sns" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.hydrocron_lambda_cnm.function_name
   principal     = "sns.amazonaws.com"
-  source_arn    = data.aws_sns_topic.hydrocron_sns_topic_cnm_response.arn
+  source_arn    = aws_sns_topic.hydrocron_sns_topic_cnm_response.arn
 }
