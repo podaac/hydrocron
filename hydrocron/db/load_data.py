@@ -40,10 +40,13 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     match table_name:
         case constants.SWOT_REACH_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+            feature_type = 'Reach'
         case constants.SWOT_NODE_TABLE_NAME:
             collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
+            feature_type = 'Node'
         case constants.DB_TEST_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+            feature_type = 'Reach'
         case _:
             raise MissingTable(f"Hydrocron table '{table_name}' does not exist.")
 
@@ -59,18 +62,18 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     for granule in new_granules:
         granule_path = granule.data_links(access='direct')[0]
 
-        event2 = ('{"body": {"granule_path": "'
-                  + granule_path + '","obscure_data": "'
-                  + obscure_data + '","table_name": "'
-                  + table_name + '","load_benchmarking_data": "'
-                  + load_benchmarking_data + '"}}')
+        if feature_type in granule_path:
+            event2 = ('{"body": {"granule_path": "' + granule_path
+                      + '","obscure_data": "' + obscure_data
+                      + '","table_name": "' + table_name
+                      + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
-        logging.info("Invoking granule load lambda with event json %s", str(event2))
+            logging.info("Invoking granule load lambda with event json %s", str(event2))
 
-        lambda_client.invoke(
-            FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
-            InvocationType='Event',
-            Payload=event2)
+            lambda_client.invoke(
+                FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+                InvocationType='Event',
+                Payload=event2)
 
 
 def granule_handler(event, _):
@@ -113,6 +116,8 @@ def cnm_handler(event, _):
     for message in event['Records']:
         cnm = json.loads(message['body'])
 
+        logging.info("Begin processing message %s", str(cnm))
+
         for files in cnm['product']['files']:
             if files['type'] == 'data':
                 granule_uri = files['uri']
@@ -122,6 +127,8 @@ def cnm_handler(event, _):
                               + '","obscure_data": "' + obscure_data
                               + '","table_name": "' + constants.SWOT_REACH_COLLECTION_NAME
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
+                    
+                    logging.info("Invoking granule load lambda with event json %s", str(event2))
 
                     lambda_client.invoke(
                         FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
@@ -133,6 +140,8 @@ def cnm_handler(event, _):
                               + '","obscure_data": "' + obscure_data
                               + '","table_name": "' + constants.SWOT_NODE_COLLECTION_NAME
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
+                    
+                    logging.info("Invoking granule load lambda with event json %s", str(event2))
 
                     lambda_client.invoke(
                         FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
