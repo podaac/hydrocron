@@ -152,13 +152,13 @@ resource "aws_lambda_permission" "allow_lambda_from_cnm" {
   statement_id  = "AllowExecutionFromLambdaCNM"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.hydrocron_lambda_load_granule.function_name
-  principal     = "sqs.amazonaws.com"
+  principal     = "sns.amazonaws.com"
   source_arn = aws_lambda_function.hydrocron_lambda_cnm.arn
 }
 
-# Event source from SQS
+# Event source from SNS
 resource "aws_lambda_event_source_mapping" "hydrocron_event_source_mapping" {
-  event_source_arn = "${aws_sqs_queue.hydrocron_sqs_queue_granule_ingest.arn}"
+  event_source_arn = "${aws_sns_topic.hydrocron_sns_topic_cnm_response.arn}"
   enabled          = true
   function_name    = "${aws_lambda_function.hydrocron_lambda_cnm.arn}"
   batch_size       = 1

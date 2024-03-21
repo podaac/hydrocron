@@ -289,3 +289,11 @@ resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
     policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
 }
+
+resource "aws_lambda_permission" "aws_lambda_cnm_responder_sns" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.hydrocron_lambda_cnm.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = data.aws_sns_topic.hydrocron_sns_topic_cnm_response.arn
+}
