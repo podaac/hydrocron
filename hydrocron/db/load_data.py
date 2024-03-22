@@ -125,7 +125,7 @@ def cnm_handler(event, _):
                 if 'Reach' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","obscure_data": "' + obscure_data
-                              + '","table_name": "' + constants.SWOT_REACH_COLLECTION_NAME
+                              + '","table_name": "' + constants.SWOT_REACH_TABLE_NAME
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
                     logging.info("Invoking granule load lambda with event json %s", str(event2))
@@ -138,7 +138,7 @@ def cnm_handler(event, _):
                 if 'Node' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","obscure_data": "' + obscure_data
-                              + '","table_name": "' + constants.SWOT_NODE_COLLECTION_NAME
+                              + '","table_name": "' + constants.SWOT_NODE_TABLE_NAME
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
                     logging.info("Invoking granule load lambda with event json %s", str(event2))
