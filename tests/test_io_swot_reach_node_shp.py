@@ -24,6 +24,7 @@ def test_parse_from_filename():
     assert filename_attrs['range_start_time'] == "2023-06-10T19:33:37Z"
     assert filename_attrs['range_end_time'] == "2023-06-10T19:33:44Z"
     assert filename_attrs['crid'] == "PIA1"
+    assert filename_attrs['collection_shortname'] == constants.SWOT_REACH_COLLECTION_NAME
 
 
 def test_read_shapefile():
