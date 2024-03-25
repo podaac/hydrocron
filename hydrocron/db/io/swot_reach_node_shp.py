@@ -45,7 +45,7 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
 
     if filepath.startswith('s3'):
         bucket_name, key = filepath.replace("s3://", "").split("/", 1)
-        logging.info("Opening granule %s from bucket %b", key, bucket_name)
+        logging.info("Opening granule %s from bucket %s", key, bucket_name)
 
         s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
 
@@ -55,8 +55,8 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
 
     elif filepath.startswith('https'):
         _, bucket_name, key = filepath.replace("https://", "").split("/", 2)
-        logging.info("Opening granule %s from bucket %b", key, bucket_name)
-        
+        logging.info("Opening granule %s from bucket %s", key, bucket_name)
+
         s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
 
         shp_file = gpd.read_file('zip://' + lambda_temp_file)
