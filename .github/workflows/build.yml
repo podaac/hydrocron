@@ -316,5 +316,6 @@ jobs:
         working-directory: terraform
         env:
           AWS_DEFAULT_REGION: us-west-2
+          TF_VAR_cross_account_id: ${{ secrets[vars.AWS_ACCOUNT_ID_CUMULUS_SWOT_SECRET_NAME] }}
         run: |
           ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ vars.TF_VENUE }} --lambda_container_image_uri ${{ env.CONTAINER_IMAGE_URI }}

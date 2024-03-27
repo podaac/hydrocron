@@ -16,6 +16,7 @@ locals {
   timeseries_function_name         = "${local.aws_resource_prefix}-timeseries-lambda"
   load_data_function_name          = "${local.aws_resource_prefix}-load_data-lambda"
   load_granule_function_name       = "${local.aws_resource_prefix}-load_granule-lambda"
+  cnm_response_function_name       = "${local.aws_resource_prefix}-cnm-lambda"
 }
 
 resource aws_ecr_repository "lambda-image-repo" {
@@ -129,10 +130,37 @@ resource "aws_lambda_function" "hydrocron_lambda_load_granule" {
   }
 }
 
+resource "aws_lambda_function" "hydrocron_lambda_cnm" {
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.lambda-image-repo.repository_url}:${data.aws_ecr_image.lambda_image.image_tag}"
+  image_config {
+    command = ["hydrocron.db.load_data.cnm_handler"]
+  }
+  function_name = local.cnm_response_function_name
+  role          = aws_iam_role.hydrocron-lambda-cnm-role.arn
+  timeout       = 600
+  memory_size   = 2048
+
+  tags = var.default_tags
+  environment {
+    variables = {
+      GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
+    }
+  }
+}
+
 resource "aws_lambda_permission" "allow_lambda" {
   statement_id  = "AllowExecutionFromLambda"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.hydrocron_lambda_load_granule.function_name
   principal     = "s3.amazonaws.com"
   source_arn = aws_lambda_function.hydrocron_lambda_load_data.arn
+}
+
+resource "aws_lambda_permission" "allow_lambda_from_cnm" {
+  statement_id  = "AllowExecutionFromLambdaCNM"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.hydrocron_lambda_load_granule.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn = aws_lambda_function.hydrocron_lambda_cnm.arn
 }

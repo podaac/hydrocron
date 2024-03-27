@@ -17,3 +17,8 @@ variable "app_version" {
 variable "lambda_container_image_uri" {
   type = string
 }
+
+variable "cross_account_id" {
+  type        = string
+  description = "Cross account identifier for Cumulus Topic publication"
+}
