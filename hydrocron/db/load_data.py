@@ -23,6 +23,12 @@ class MissingTable(Exception):
     """
 
 
+class TableMisMatch(Exception):
+    """
+    Exception thrown if table does not match feature type
+    """
+
+
 def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     """
     Lambda entrypoint for loading the database
@@ -54,6 +60,12 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     for granule in new_granules:
         granule_path = granule.data_links(access='direct')[0]
 
+        if ("Reach" in granule_path) & (table_name != constants.SWOT_REACH_TABLE_NAME):
+            raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}")
+
+        if ("Node" in granule_path) & (table_name != constants.SWOT_NODE_TABLE_NAME):
+            raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}")
+
         event2 = ('{"body": {"granule_path": "'
                   + granule_path + '","obscure_data": "'
                   + obscure_data + '","table_name": "'
@@ -74,6 +86,12 @@ def granule_handler(event, _):
     obscure_data = event['body']['obscure_data']
     table_name = event['body']['table_name']
     load_benchmarking_data = event['body']['load_benchmarking_data']
+
+    if ("Reach" in granule_path) & (table_name != constants.SWOT_REACH_TABLE_NAME):
+        raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}")
+
+    if ("Node" in granule_path) & (table_name != constants.SWOT_NODE_TABLE_NAME):
+        raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}")
 
     logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
 
