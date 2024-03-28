@@ -57,7 +57,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         event2 = ('{"body": {"granule_path": "'
                   + granule_path + '","obscure_data": "'
                   + obscure_data + '","table_name": "'
-                  + table_name + '","load_benchmarking_data: "'
+                  + table_name + '","load_benchmarking_data": "'
                   + load_benchmarking_data + '"}}')
 
         lambda_client.invoke(
