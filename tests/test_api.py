@@ -26,7 +26,7 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
-            "fields": "reach_id,time_str,wse"
+            "fields": "reach_id,time_str,wse,sword_version"
         }
     }
 
@@ -35,7 +35,7 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
     assert result['status'] == '200 OK' and \
            result['results']['geojson'] == {'type': 'FeatureCollection', 'features': [
                     {'id': '0', 'properties': {'reach_id': '71224100223', 'time_str': '2023-06-10T19:39:43Z',
-                    'wse': '286.2983', 'wse_units': 'm'}, 'geometry': {'coordinates':
+                    'wse': '286.2983', 'sword_version': '15', 'wse_units': 'm'}, 'geometry': {'coordinates':
                     [[-95.564991, 50.223686], [-95.564559, 50.223479],
                     [-95.564133, 50.223381],
                     [-95.563713, 50.22339], [-95.563296, 50.223453],
@@ -268,15 +268,15 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv",
-            "fields": "reach_id,time_str,wse,geometry"
+            "fields": "reach_id,time_str,wse,sword_version,geometry"
         }
     }
 
     context = "_"
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
     assert result['status'] == '200 OK'
-    assert result['results']['csv'] == ('reach_id,time_str,wse,geometry,wse_units\n' \
-                                        '71224100223,2023-06-10T19:39:43Z,286.2983,"LINESTRING (-95.564991 50.223686, ' \
+    assert result['results']['csv'] == ('reach_id,time_str,wse,sword_version,geometry,wse_units\n' \
+                                        '71224100223,2023-06-10T19:39:43Z,286.2983,15,"LINESTRING (-95.564991 50.223686, ' \
                                         '-95.564559 50.223479, -95.564133 50.223381, -95.563713 50.22339, -95.563296 ' \
                                         '50.223453, -95.562884 50.223624, -95.562473 50.223795, -95.562062 50.223966, ' \
                                         '-95.56165 50.224137, -95.561242 50.224362, -95.560917 50.224585, -95.560595 ' \
