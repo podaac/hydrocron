@@ -1,7 +1,6 @@
 resource "aws_dynamodb_table" "hydrocron-swot-reach-table" {
   name           = "hydrocron-swot-reach-table"
   billing_mode   = "PAY_PER_REQUEST"
-  billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "reach_id"
   range_key      = "range_start_time"
   attribute {
