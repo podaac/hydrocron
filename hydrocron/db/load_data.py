@@ -61,10 +61,10 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         granule_path = granule.data_links(access='direct')[0]
 
         if ("Reach" in granule_path) & (table_name != constants.SWOT_REACH_TABLE_NAME):
-            raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}")
+            raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}'")
 
         if ("Node" in granule_path) & (table_name != constants.SWOT_NODE_TABLE_NAME):
-            raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}")
+            raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}'")
 
         event2 = ('{"body": {"granule_path": "'
                   + granule_path + '","obscure_data": "'
@@ -88,10 +88,10 @@ def granule_handler(event, _):
     load_benchmarking_data = event['body']['load_benchmarking_data']
 
     if ("Reach" in granule_path) & (table_name != constants.SWOT_REACH_TABLE_NAME):
-        raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}")
+        raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}'")
 
     if ("Node" in granule_path) & (table_name != constants.SWOT_NODE_TABLE_NAME):
-        raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}")
+        raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}'")
 
     logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
 
