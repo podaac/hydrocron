@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 70 - Enable notification of swot shapefile to tva
     - Issue 91 - Add CORS headers to API responses
     - Issue 79 - Generate data for use by benchmarks
     - Issue 88 - There are no CloudWatch logs for the API Gateway
