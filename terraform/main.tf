@@ -19,6 +19,33 @@ data "aws_vpc" "default" {
   }
 }
 
+data "aws_security_groups" "vpc_default_sg" {
+  filter {
+    name   = "group-name"
+    values = ["default"]
+  }
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+data "aws_subnet" "private_application_subnet" {
+  for_each = toset(data.aws_subnets.private_application_subnets.ids)
+  id       = each.value
+}
+
+data "aws_subnets" "private_application_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+  filter {
+    name   = "tag:Name"
+    values = ["Private application*"]
+  }
+}
+
 data "aws_ssm_parameter" "edl_username" {
   name = "urs_podaaccloud_user"
 }
@@ -30,6 +57,7 @@ data "aws_ssm_parameter" "edl_password" {
 locals {
   environment = var.stage
   account_id  = data.aws_caller_identity.current.account_id
+  region = data.aws_region.current.name
 
   # This is the convention we use to know what belongs to each other
   aws_resource_prefix = terraform.workspace == "default" ? "svc-${var.app_name}-${local.environment}" : "svc-${var.app_name}-${local.environment}-${terraform.workspace}"

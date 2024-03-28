@@ -31,7 +31,7 @@ on:
 env:
   POETRY_VERSION: "1.7.1"
   PYTHON_VERSION: "3.10"
-  TERRAFORM_VERSION: "1.3.10"
+  TERRAFORM_VERSION: "1.7.3"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 

@@ -63,7 +63,10 @@ resource "aws_lambda_function" "hydrocron_lambda_timeseries" {
   function_name = local.timeseries_function_name
   role          = aws_iam_role.hydrocron-lambda-execution-role.arn
   timeout       = 30
-
+  vpc_config {
+    subnet_ids         = data.aws_subnets.private_application_subnets.ids
+    security_group_ids = data.aws_security_groups.vpc_default_sg.ids
+  }
   tags = var.default_tags
 }
 
@@ -89,7 +92,10 @@ resource "aws_lambda_function" "hydrocron_lambda_load_data" {
   role          = aws_iam_role.hydrocron-lambda-load-data-role.arn
   timeout       = 600
   memory_size   = 512
-
+  vpc_config {
+    subnet_ids         = data.aws_subnets.private_application_subnets.ids
+    security_group_ids = data.aws_security_groups.vpc_default_sg.ids
+  }
   tags = var.default_tags
   environment {
     variables = {
@@ -111,7 +117,10 @@ resource "aws_lambda_function" "hydrocron_lambda_load_granule" {
   role          = aws_iam_role.hydrocron-lambda-load-granule-role.arn
   timeout       = 600
   memory_size   = 2048
-
+  vpc_config {
+    subnet_ids         = data.aws_subnets.private_application_subnets.ids
+    security_group_ids = data.aws_security_groups.vpc_default_sg.ids
+  }
   tags = var.default_tags
   environment {
     variables = {
