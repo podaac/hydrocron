@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 127 - Provide a better error message when there is no data in the star/end dates requested
     - Issue 24 - Indicate which collection version the data belongs to
     - Issue 13 - Add SWORD version from shp.xml to DB entries
     - Issue 85 - Add variable units to API response
