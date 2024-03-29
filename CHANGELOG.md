@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
     - Issue 39 - Clean up code, removed comments and unused parameters
 ### Fixed
+    - Issue 131 - Error message when incorrect time format entered suggests a time format that also fails
     - Issue 105 - Only benchmarking data is being loaded even when load_benchmarking_data flag is false
     - Issue 44 - Load data lambda only loads the first granule found in the time range
     - Issue 116 - CICD will not publish when build run as workflow dispatch

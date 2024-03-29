@@ -517,7 +517,7 @@ def test_timeseries_lambda_handler_dates(hydrocron_api):
     context = "_"
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    assert "400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SS+00:00" in str(e.value)
+    assert "400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00" in str(e.value)
 
 
 def test_timeseries_lambda_handler_output(hydrocron_api):
