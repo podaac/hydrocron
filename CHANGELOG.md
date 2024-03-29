@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 88 - There are no CloudWatch logs for the API Gateway
     - Issue 13 - Add SWORD version from shp.xml to DB entries
 ### Changed
+    - Issue 132 - Update documentation for OPS release
     - Issue 108 - Update collection to 2.0, backload 2.0 data
     - Issue 59 - Using GeoDataFrame to work with data returned from db
     - Issue 75 - Update log messaging format
