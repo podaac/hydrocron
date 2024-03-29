@@ -310,7 +310,7 @@ jobs:
           disable_removal: 'true'
           umm_type: 'umm-s'
           use_associations: 'true'        
-          url_value: ${{ var.HYDROCRON_BASE_URL }}
+          url_value: ${{ vars.HYDROCRON_BASE_URL }}
         env:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
           LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
@@ -336,7 +336,7 @@ jobs:
           disable_removal: 'true'
           umm_type: 'umm-s'
           use_associations: 'false'
-          url_value: ${{ var.HYDROCRON_BASE_URL }}
+          url_value: ${{ vars.HYDROCRON_BASE_URL }}
         env:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
           LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
