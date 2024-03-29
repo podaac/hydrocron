@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 13 - Add SWORD version from shp.xml to DB entries
     - Issue 85 - Add variable units to API response
     - Issue 78 - Use a VPC endpoint and policies to access DynamoDB
+    - Issue 70 - Enable notification of swot shapefile to tva
     - Issue 91 - Add CORS headers to API responses
     - Issue 79 - Generate data for use by benchmarks
     - Issue 88 - There are no CloudWatch logs for the API Gateway
