@@ -4,103 +4,236 @@
 
 Search for a single river reach by reach ID.
 
-    /timeseries?feature=Reach&feature_id=73111000545&output=geojson&start_time=2023-06-04T00:00:00Z&end_time=2023-06-10T00:00:00Z&fields=feature_id,time_str,wse,geometry
+    /timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2023-07-01T00:00:00Z&end_time=2024-03-29T00:00:00Z&fields=reach_id,time_str,wse,slope
 
-Will return geojson, eg:
+Will return GeoJSON:
 
     {
-    "status": "200 OK",
-    "time": "65.691 ms.",
-    "type": "FeatureCollection",
-    "features": [
-        {
-        "properties": {
-            "time": "2023-06-05 06:58:52",
-            "reach_id": 73111000545,
-            "wse": -23.9435,
-            "slope": 0.000005225450000000001
-        },
-        "geometry": {
-            "coordinates": [
-            [
-                -67.138008,
-                45.134336
-            ],
-            [
-                -67.140648,
-                45.137619
-            ],
-            [
-                -67.142347,
-                45.141698
-            ],
-            [
-                -67.144123,
-                45.145777
-            ],
-            [
-                -67.144469,
-                45.146863
-            ],
-            [
-                -67.146042,
-                45.150129
-            ],
-            [
-                -67.148479,
-                45.15503
-            ],
-            [
-                -67.149418,
-                45.156665
-            ],
-            [
-                -67.151297,
-                45.159936
-            ],
-            [
-                -67.153499,
-                45.162672
-            ],
-            [
-                -67.158077,
-                45.162746
-            ],
-            [
-                -67.16379,
-                45.163162
-            ],
-            [
-                -67.17678,
-                45.162777
-            ],
-            [
-                -67.18513,
-                45.164314
-            ],
-            [
-                -67.188161,
-                45.16501
-            ],
-            [
-                -67.191202,
-                45.165436
-            ],
-            [
-                -67.194232,
-                45.166186
-            ],
-            [
-                -67.197255,
-                45.167152
-            ]
-            ],
-            "type": "LineString"
-        },
-        "type": "Feature"
+        "status": "200 OK",
+        "time": 300.768,
+        "hits": 2,
+        "results": {
+            "csv": "",
+            "geojson": {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "id": "0",
+                        "type": "Feature",
+                        "properties": {
+                            "reach_id": "78340600051",
+                            "time_str": "2024-01-30T09:38:22Z",
+                            "wse": "3089.5784",
+                            "slope": "-0.0177291808"
+                        },
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": [
+                                [
+                                    -127.285739,
+                                    54.942484
+                                ],
+                                [
+                                    -127.286202,
+                                    54.942598
+                                ],
+                                [
+                                    -127.286664,
+                                    54.942767
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "id": "1",
+                        "type": "Feature",
+                        "properties": {
+                            "reach_id": "78340600051",
+                            "time_str": "2024-02-03T18:33:48Z",
+                            "wse": "1545.616",
+                            "slope": "-0.0084122704"
+                        },
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": [
+                                [
+                                    -127.285739,
+                                    54.942484
+                                ],
+                                [
+                                    -127.286202,
+                                    54.942598
+                                ],
+                                [
+                                    -127.286664,
+                                    54.942767
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            }
         }
-    ],
-    "hits": 1
     }
 
 ** geometry simplified for example
+
+## Get time series CSV for river reach
+
+Search for a single river reach by ID.
+
+    timeseries?feature=Reach&feature_id=78340600051&output=csv&start_time=2023-07-01T00:00:00Z&end_time=2024-03-29T00:00:00Z&fields=reach_id,time_str,wse,slope
+
+Will return CSV:
+
+    {
+        "status": "200 OK",
+        "time": 685.09,
+        "hits": 10,
+        "results": {
+            "csv": "reach_id,time_str,wse,slope\n78340600051,2024-01-30T09:38:22Z,3089.5784,-0.0177291808\n78340600051,2024-02-03T18:33:48Z,1545.616,-0.0084122704\n78340600051,no_data,-999999999999.0,-999999999999.0\n78340600051,2024-02-13T16:56:05Z,2705.2151,-0.0173284608\n78340600051,2024-02-20T06:23:27Z,2851.5466,-0.0150748836\n78340600051,2024-02-24T15:18:54Z,2315.8056,-0.010764612\n78340600051,no_data,-999999999999.0,-999999999999.0\n78340600051,2024-03-05T13:41:09Z,2699.6648,-0.017148134500000002\n78340600051,2024-03-12T03:08:30Z,1225.3901999999998,-0.0064166586\n78340600051,no_data,-999999999999.0,-999999999999.0\n",
+            "geojson": {}
+        }
+    }
+
+## Get time series GeoJSON for river node
+
+Search for a single river node by ID.
+
+    timeseries?feature=Node&feature_id=12228200110861&start_time=2023-11-29T00:00:00Z&end_time=2024-10-30T00:00:00Z&output=geojson&fields=reach_id,node_id,time_str,wse'
+
+Will return GeoJSON:
+
+    {
+        "status": "200 OK",
+        "time": 460.015,
+        "hits": 6,
+        "results": {
+            "csv": "",
+            "geojson": {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "id": "0",
+                        "type": "Feature",
+                        "properties": {
+                            "reach_id": "12228200111",
+                            "node_id": "12228200110861",
+                            "time_str": "2023-11-29T07:04:03Z",
+                            "wse": "5368.00984"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                35.149314,
+                                -10.256285
+                            ]
+                        }
+                    },
+                    {
+                        "id": "1",
+                        "type": "Feature",
+                        "properties": {
+                            "reach_id": "12228200111",
+                            "node_id": "12228200110861",
+                            "time_str": "2024-01-30T21:19:19Z",
+                            "wse": "5423.3856"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                35.149314,
+                                -10.256285
+                            ]
+                        }
+                    },
+                    {
+                        "id": "2",
+                        "type": "Feature",
+                        "properties": {
+                            "reach_id": "12228200111",
+                            "node_id": "12228200110861",
+                            "time_str": "2024-02-06T08:37:09Z",
+                            "wse": "2020.4075400000002"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                35.149314,
+                                -10.256285
+                            ]
+                        }
+                    },
+                    {
+                        "id": "3",
+                        "type": "Feature",
+                        "properties": {
+                            "reach_id": "12228200111",
+                            "node_id": "12228200110861",
+                            "time_str": "2024-02-20T18:04:24Z",
+                            "wse": "2021.09397"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                35.149314,
+                                -10.256285
+                            ]
+                        }
+                    },
+                    {
+                        "id": "4",
+                        "type": "Feature",
+                        "properties": {
+                            "reach_id": "12228200111",
+                            "node_id": "12228200110861",
+                            "time_str": "2024-03-12T14:49:26Z",
+                            "wse": "5387.82304"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                35.149314,
+                                -10.256285
+                            ]
+                        }
+                    },
+                    {
+                        "id": "5",
+                        "type": "Feature",
+                        "properties": {
+                            "reach_id": "12228200111",
+                            "node_id": "12228200110861",
+                            "time_str": "2024-03-19T02:07:17Z",
+                            "wse": "6077.089709999999"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                35.149314,
+                                -10.256285
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    }
+
+## Get time series CSV for river node
+
+Search for a single river node by ID.
+
+    timeseries?feature=Node&feature_id=12228200110861&start_time=2023-11-29T00:00:00Z&end_time=2024-10-30T00:00:00Z&output=csv&fields=node_id,reach_id,time_str,wse'
+
+Will return CSV:
+
+    {
+    "status": "200 OK",
+    "time": 420.372,
+    "hits": 6,
+    "results": {
+        "csv": "node_id,reach_id,time_str,wse\n12228200110861,12228200111,2023-11-29T07:04:03Z,5368.00984\n12228200110861,12228200111,2024-01-30T21:19:19Z,5423.3856\n12228200110861,12228200111,2024-02-06T08:37:09Z,2020.4075400000002\n12228200110861,12228200111,2024-02-20T18:04:24Z,2021.09397\n12228200110861,12228200111,2024-03-12T14:49:26Z,5387.82304\n12228200110861,12228200111,2024-03-19T02:07:17Z,6077.089709999999\n",
+        "geojson": {}
+    }
+}
