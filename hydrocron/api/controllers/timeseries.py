@@ -6,6 +6,7 @@ Hydrocron API timeseries controller
 import datetime
 import json
 import logging
+import sys
 import time
 
 import pandas as pd
@@ -65,10 +66,11 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     if len(results['Items']) == 0:
         data['http_code'] = '404 Not Found'
         data['error_message'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
-    elif len(results) > 5750000:
+    elif sys.getsizeof(results) > 6291456:
         data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds 6MB with {len(results)} hits.'
+        data['error_message'] = f'413: Query exceeds 6MB with {sys.getsizeof(results)} hits.'
     else:
+        logger.info('query_size: %s', str(sys.getsizeof(results)))
         gdf = convert_to_df(results['Items'])
         if output == 'geojson':
             data, hits = format_json(gdf, fields)
