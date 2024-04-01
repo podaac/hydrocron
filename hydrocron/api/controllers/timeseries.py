@@ -18,12 +18,7 @@ from hydrocron.utils import connection
 from hydrocron.utils import constants
 
 
-logger = logging.getLogger()
-logger.setLevel("INFO")
-console_handler = logging.StreamHandler()
-console_format = logging.Formatter("%(module)s - %(levelname)s : %(message)s")
-console_handler.setFormatter(console_format)
-logger.addHandler(console_handler)
+logging.getLogger().setLevel(logging.INFO)
 
 
 class RequestError(Exception):
@@ -70,7 +65,7 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
         data['http_code'] = '413 Payload Too Large'
         data['error_message'] = f'413: Query exceeds 6MB with {sys.getsizeof(results)} hits.'
     else:
-        logger.info('query_size: %s', str(sys.getsizeof(results)))
+        logging.info('query_size: %s', str(sys.getsizeof(results)))
         gdf = convert_to_df(results['Items'])
         if output == 'geojson':
             data, hits = format_json(gdf, fields)
@@ -267,15 +262,15 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     start = time.time()
 
-    logger.info('headers: %s', json.dumps(event['headers']))
-    logger.info('request: %s', json.dumps(event['body']))
+    logging.info('headers: %s', json.dumps(event['headers']))
+    logging.info('request: %s', json.dumps(event['body']))
 
     try:
         if event['body'] == {} and 'Elastic-Heartbeat' in event['headers']['User-Agent']:
             return {}
-        logger.info('user_ip: %s', event["headers"]["X-Forwarded-For"].split(",")[0])
+        logging.info('user_ip: %s', event["headers"]["X-Forwarded-For"].split(",")[0])
     except KeyError as e:
-        logger.error('Error encountered with headers: %s', e)
+        logging.error('Error encountered with headers: %s', e)
         raise RequestError('400: Issue encountered with request headers') from e
 
     results = {'http_code': '200 OK'}
@@ -303,10 +298,10 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     data = {'status': results['http_code'], 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
     if results['http_code'] == '200 OK':
         data['results'][event['body']['output']] = results['response']
-        logger.info('response: %s', json.dumps(data))
-        logger.info('response_size: %s', str(sys.getsizeof(data)))
+        logging.info('response: %s', json.dumps(data))
+        logging.info('response_size: %s', str(sys.getsizeof(data)))
     else:
-        logger.error(results)
+        logging.error(results)
         raise RequestError(results['error_message'])
 
     return data
