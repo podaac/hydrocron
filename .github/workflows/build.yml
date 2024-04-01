@@ -280,6 +280,68 @@ jobs:
         run: |
           echo "container_image_uri=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> $GITHUB_OUTPUT
 
+  publish:
+    name: Publish
+    needs: [ build, docker ]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.build.outputs.deploy_env }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+
+      - name: set environment vars
+        id: lowercase
+        run: |
+          echo TARGET_ENV_LOWERCASE=${{ needs.build.outputs.deploy_env }} | tr '[:upper:]' '[:lower:]' >> "$GITHUB_OUTPUT"
+
+      - name: Publish UMM-S with new version
+        id: publish-umm-s
+        uses: podaac/cmr-umm-updater@0.7.0
+        if: |
+          github.ref == 'refs/heads/main'    ||
+          startsWith(github.ref, 'refs/heads/release')
+        with:
+          umm-json: 'cmr/hydrocron_umm_s.json'
+          provider: 'POCLOUD'
+          env: ${{ steps.lowercase.outputs.TARGET_ENV_LOWERCASE }}
+          version: ${{ needs.build.outputs.version }}
+          timeout: 60
+          disable_removal: 'true'
+          umm_type: 'umm-s'
+          use_associations: 'true'        
+          url_value: ${{ vars.HYDROCRON_BASE_URL }}
+        env:
+          LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
+          LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
+          LAUNCHPAD_TOKEN_OPS: ${{secrets.LAUNCHPAD_TOKEN_OPS}}
+        continue-on-error: true
+
+      - name: Wait to retry publishing UMM-S
+        if: steps.publish-umm-s.outcome == 'failure'
+        run: |
+          sleep 120
+          
+      - name: Publish UMM-S with new version retry
+        id: publish-umm-s-retry
+        uses: podaac/cmr-umm-updater@0.7.0
+        if: |
+          steps.publish-umm-s.outcome == 'failure'
+        with:
+          umm-json: 'cmr/hydrocron_umm_s.json'
+          provider: 'POCLOUD'
+          env: ${{ steps.lowercase.outputs.TARGET_ENV_LOWERCASE }}
+          version: ${{ needs.build.outputs.version }}
+          timeout: 60
+          disable_removal: 'true'
+          umm_type: 'umm-s'
+          use_associations: 'false'
+          url_value: ${{ vars.HYDROCRON_BASE_URL }}
+        env:
+          LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
+          LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
+          LAUNCHPAD_TOKEN_OPS: ${{secrets.LAUNCHPAD_TOKEN_OPS}}
+
   deploy:
     name: Deploy
     needs: [ build, docker ]
