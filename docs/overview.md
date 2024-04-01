@@ -2,7 +2,7 @@
 
 Hydrocron has a main API endpoint:
 
-- [timeseries/](/timeseries) which returns all of the timesteps for a single feature ID, and
+- [timeseries/](/timeseries) which returns all of the timesteps for a single feature ID.
 
 ## Feature ID
 
