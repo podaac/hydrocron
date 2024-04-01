@@ -16,8 +16,6 @@ from hydrocron.api.data_access.db import DynamoDataRepository
 from hydrocron.utils import connection
 from hydrocron.utils import constants
 
-logger = logging.getLogger()
-
 
 class RequestError(Exception):
     """
@@ -252,24 +250,42 @@ def sanitize_time(start_time, end_time):
     return start_time, end_time
 
 
+def get_logger():
+    """Return a logger object to be used for logging execution.
+    """
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    console_handler = logging.StreamHandler()
+    console_format = logging.Formatter("%(module)s - %(levelname)s : %(message)s")
+    console_handler.setFormatter(console_format)
+
+    logger.addHandler(console_handler)
+
+    return logger
+
+
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
     This function queries the database for relevant results
     """
 
     start = time.time()
-    print(f'Event - {event}')
 
-    results = {'http_code': '200 OK'}
+    logger = get_logger()
+    logger.info('request: %s', json.dumps(event['body']))
+    logger.info('headers: %s', json.dumps(event['headers']))
 
     try:
         if event['body'] == {} and 'Elastic-Heartbeat' in event['headers']['User-Agent']:
             return {}
-        print(f'user_ip: {event["headers"]["X-Forwarded-For"].split(",")[0]}')
+        logger.info('user_ip: %s', event["headers"]["X-Forwarded-For"].split(",")[0])
     except KeyError as e:
-        print(f'Error encountered with headers: {e}')
+        logger.error('Error encountered with headers: %s', e)
         raise RequestError('400: Issue encountered with request headers') from e
 
+    results = {'http_code': '200 OK'}
     try:
         feature = event['body']['feature']
         feature_id = event['body']['feature_id']
@@ -294,7 +310,9 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     data = {'status': results['http_code'], 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
     if results['http_code'] == '200 OK':
         data['results'][event['body']['output']] = results['response']
+        logger.info('response: %s', json.dumps(data))
     else:
+        logger.error(results)
         raise RequestError(results['error_message'])
 
     return data
