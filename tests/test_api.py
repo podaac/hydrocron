@@ -622,3 +622,22 @@ def test_timeseries_lambda_handler_elastic_agent(hydrocron_api):
     context = "_"
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
     assert result == {}
+    
+def test_timeseries_lambda_handler_missing_header(hydrocron_api):
+    """
+    Test the lambda handler for cases where invoked by Elastic Agent.
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {},
+        "headers": {}
+    }
+
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: Issue encountered with request headers" in str(e.value)
