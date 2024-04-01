@@ -4,6 +4,7 @@ the appropriate DynamoDB table
 """
 import logging
 import os
+import json
 
 import boto3
 import earthaccess
@@ -28,6 +29,8 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     Lambda entrypoint for loading the database
     """
 
+    logging.info("Starting lambda handler")
+
     table_name = event['body']['table_name']
     start_date = event['body']['start_date']
     end_date = event['body']['end_date']
@@ -37,12 +40,17 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     match table_name:
         case constants.SWOT_REACH_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+            feature_type = 'Reach'
         case constants.SWOT_NODE_TABLE_NAME:
             collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
+            feature_type = 'Node'
         case constants.DB_TEST_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+            feature_type = 'Reach'
         case _:
             raise MissingTable(f"Hydrocron table '{table_name}' does not exist.")
+
+    logging.info("Searching for granules in collection %s", collection_shortname)
 
     new_granules = find_new_granules(
         collection_shortname,
@@ -54,16 +62,18 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     for granule in new_granules:
         granule_path = granule.data_links(access='direct')[0]
 
-        event2 = ('{"body": {"granule_path": "'
-                  + granule_path + '","obscure_data": "'
-                  + obscure_data + '","table_name": "'
-                  + table_name + '","load_benchmarking_data: "'
-                  + load_benchmarking_data + '"}}')
+        if feature_type in granule_path:
+            event2 = ('{"body": {"granule_path": "' + granule_path
+                      + '","obscure_data": "' + obscure_data
+                      + '","table_name": "' + table_name
+                      + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
-        lambda_client.invoke(
-            FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
-            InvocationType='Event',
-            Payload=event2)
+            logging.info("Invoking granule load lambda with event json %s", str(event2))
+
+            lambda_client.invoke(
+                FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+                InvocationType='Event',
+                Payload=event2)
 
 
 def granule_handler(event, _):
@@ -93,6 +103,52 @@ def granule_handler(event, _):
     load_data(dynamo_resource, table_name, items)
 
 
+def cnm_handler(event, _):
+    """
+    Unpacks CNM-R message and invokes granule_load lambda
+    """
+    obscure_data = "False"
+    load_benchmarking_data = "False"
+
+    lambda_client = boto3.client('lambda')
+
+    # Parse message
+    for message in event['Records']:
+        cnm = json.loads(message['Sns']['Message'])
+
+        logging.info("Begin processing message %s", str(cnm))
+
+        for files in cnm['product']['files']:
+            if files['type'] == 'data':
+                granule_uri = files['uri']
+
+                if 'Reach' in granule_uri:
+                    event2 = ('{"body": {"granule_path": "' + granule_uri
+                              + '","obscure_data": "' + obscure_data
+                              + '","table_name": "' + constants.SWOT_REACH_TABLE_NAME
+                              + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
+
+                    logging.info("Invoking granule load lambda with event json %s", str(event2))
+
+                    lambda_client.invoke(
+                        FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+                        InvocationType='Event',
+                        Payload=event2)
+
+                if 'Node' in granule_uri:
+                    event2 = ('{"body": {"granule_path": "' + granule_uri
+                              + '","obscure_data": "' + obscure_data
+                              + '","table_name": "' + constants.SWOT_NODE_TABLE_NAME
+                              + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
+
+                    logging.info("Invoking granule load lambda with event json %s", str(event2))
+
+                    lambda_client.invoke(
+                        FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+                        InvocationType='Event',
+                        Payload=event2)
+
+
 def find_new_granules(collection_shortname, start_date, end_date):
     """
     Find granules to ingest
@@ -111,9 +167,13 @@ def find_new_granules(collection_shortname, start_date, end_date):
     """
     auth = earthaccess.login(persist=True)
 
+    logging.info("Searching for granules in collection %s", collection_shortname)
+
     cmr_search = earthaccess.DataGranules(auth).short_name(collection_shortname).temporal(start_date, end_date)
 
     results = cmr_search.get()
+
+    logging.info("Found %s granules", str(len(results)))
 
     return results
 
