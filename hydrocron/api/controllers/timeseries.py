@@ -17,6 +17,14 @@ from hydrocron.utils import connection
 from hydrocron.utils import constants
 
 
+logger = logging.getLogger()
+logger.setLevel("INFO")
+console_handler = logging.StreamHandler()
+console_format = logging.Formatter("%(module)s - %(levelname)s : %(message)s")
+console_handler.setFormatter(console_format)
+logger.addHandler(console_handler)
+
+
 class RequestError(Exception):
     """
     Exception thrown if there is an error encoutered with request
@@ -250,22 +258,6 @@ def sanitize_time(start_time, end_time):
     return start_time, end_time
 
 
-def get_logger():
-    """Return a logger object to be used for logging execution.
-    """
-
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-
-    console_handler = logging.StreamHandler()
-    console_format = logging.Formatter("%(module)s - %(levelname)s : %(message)s")
-    console_handler.setFormatter(console_format)
-
-    logger.addHandler(console_handler)
-
-    return logger
-
-
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
     This function queries the database for relevant results
@@ -273,9 +265,8 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     start = time.time()
 
-    logger = get_logger()
-    logger.info('request: %s', json.dumps(event['body']))
     logger.info('headers: %s', json.dumps(event['headers']))
+    logger.info('request: %s', json.dumps(event['body']))
 
     try:
         if event['body'] == {} and 'Elastic-Heartbeat' in event['headers']['User-Agent']:
@@ -311,6 +302,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     if results['http_code'] == '200 OK':
         data['results'][event['body']['output']] = results['response']
         logger.info('response: %s', json.dumps(data))
+        logger.info('response_size: %s', str(sys.getsizeof(data)))
     else:
         logger.error(results)
         raise RequestError(results['error_message'])
