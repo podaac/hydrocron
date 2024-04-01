@@ -57,11 +57,11 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
         results = data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
 
     if len(results['Items']) == 0:
-        data['http_code'] = '404 Not Found'
-        data['error_message'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = f'400: Results with the specified Feature ID {feature_id} were not found'
     elif len(results) > 5750000:
         data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds 6MB with {len(results)} hits.'
+        data['error_message'] = f'413: Query exceeds 6MB with {len(results)} hits'
     else:
         gdf = convert_to_df(results['Items'])
         if output == 'geojson':
