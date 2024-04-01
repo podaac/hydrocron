@@ -27,6 +27,9 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
         }
     }
 
@@ -243,6 +246,9 @@ def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "fields": "reach_id,time_str,wse,slope,time"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
         }
     }
 
@@ -269,6 +275,9 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid,geometry"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
         }
     }
 
@@ -420,7 +429,12 @@ def test_timeseries_lambda_handler_missing(hydrocron_api):
     """
     import hydrocron.api.controllers.timeseries
 
-    event = {"body": {}}
+    event = {
+        "body": {},
+        "headers": {
+            "User-Agent": "curl/8.4.0"
+        }
+    }
     context = "_"
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
@@ -433,6 +447,9 @@ def test_timeseries_lambda_handler_missing(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "fields": "reach_id,time_str,wse,geometry"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
         }
     }
     context = "_"
@@ -458,6 +475,9 @@ def test_timeseries_lambda_handler_feature(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "fields": "reach_id,time_str,wse,geometry"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
         }
     }
 
@@ -484,6 +504,9 @@ def test_timeseries_lambda_handler_feature_id(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "fields": "reach_id,time_str,wse,geometry"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
         }
     }
 
@@ -511,6 +534,9 @@ def test_timeseries_lambda_handler_dates(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "fields": "reach_id,time_str,wse,geometry"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
         }
     }
 
@@ -537,6 +563,9 @@ def test_timeseries_lambda_handler_output(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "txt",
             "fields": "reach_id,time_str,wse,geometry"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
         }
     }
 
@@ -563,6 +592,9 @@ def test_timeseries_lambda_handler_fields(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "fields": "reach_id,time_str,wse,geometry,height"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
         }
     }
 
@@ -570,3 +602,23 @@ def test_timeseries_lambda_handler_fields(hydrocron_api):
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
         assert "400: fields parameter should contain valid SWOT fields" in str(e.value)
+
+def test_timeseries_lambda_handler_elastic_agent(hydrocron_api):
+    """
+    Test the lambda handler for cases where invoked by Elastic Agent.
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {},
+        "headers": {
+            "User-Agent": "Elastic-Heartbeat/7.16.2 (linux; amd64; 3c518f4d17a15dc85bdd68a5a03d5af51d9edd8e; 2021-12-18 21:10:52 +0000 UTC)"
+        }
+    }
+
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    assert result == {}

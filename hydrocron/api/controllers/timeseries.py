@@ -259,7 +259,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     start = time.time()
     print(f"Event - {event}")
-    
+
     if "Elastic-Heartbeat" in event["headers"]["User-Agent"]:
         return {}
 
