@@ -29,7 +29,8 @@ def test_timeseries_lambda_handler_geojson(hydrocron_api):
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
         },
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
 
@@ -248,7 +249,8 @@ def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
             "fields": "reach_id,time_str,wse,slope,time"
         },
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
 
@@ -277,7 +279,8 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid,geometry"
         },
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
 
@@ -432,7 +435,8 @@ def test_timeseries_lambda_handler_missing(hydrocron_api):
     event = {
         "body": {},
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
     context = "_"
@@ -449,7 +453,8 @@ def test_timeseries_lambda_handler_missing(hydrocron_api):
             "fields": "reach_id,time_str,wse,geometry"
         },
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
     context = "_"
@@ -477,7 +482,8 @@ def test_timeseries_lambda_handler_feature(hydrocron_api):
             "fields": "reach_id,time_str,wse,geometry"
         },
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
 
@@ -506,7 +512,8 @@ def test_timeseries_lambda_handler_feature_id(hydrocron_api):
             "fields": "reach_id,time_str,wse,geometry"
         },
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
 
@@ -536,7 +543,8 @@ def test_timeseries_lambda_handler_dates(hydrocron_api):
             "fields": "reach_id,time_str,wse,geometry"
         },
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
 
@@ -565,7 +573,8 @@ def test_timeseries_lambda_handler_output(hydrocron_api):
             "fields": "reach_id,time_str,wse,geometry"
         },
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
 
@@ -594,7 +603,8 @@ def test_timeseries_lambda_handler_fields(hydrocron_api):
             "fields": "reach_id,time_str,wse,geometry,height"
         },
         "headers": {
-            "User-Agent": "curl/8.4.0"
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
 
@@ -615,7 +625,8 @@ def test_timeseries_lambda_handler_elastic_agent(hydrocron_api):
     event = {
         "body": {},
         "headers": {
-            "User-Agent": "Elastic-Heartbeat/7.16.2 (linux; amd64; 3c518f4d17a15dc85bdd68a5a03d5af51d9edd8e; 2021-12-18 21:10:52 +0000 UTC)"
+            "User-Agent": "Elastic-Heartbeat/7.16.2 (linux; amd64; 3c518f4d17a15dc85bdd68a5a03d5af51d9edd8e; 2021-12-18 21:10:52 +0000 UTC)",
+            "X-Forwarded-For": "123.456.789.000"
         }
     }
 

@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 126 - Capture and log the client IP address
     - Issue 89 - Pass headers to timeseries Lambda and test for 'Elastic-Heartbeat' in 'User-Agent' header
     - Issue 24 - Indicate which collection version the data belongs to
     - Issue 13 - Add SWORD version from shp.xml to DB entries
