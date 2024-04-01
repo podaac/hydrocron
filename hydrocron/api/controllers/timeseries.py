@@ -185,7 +185,7 @@ def validate_parameters(feature, feature_id, start_time, end_time, output, field
 
     elif not is_date_valid(start_time) or not is_date_valid(end_time):
         data['http_code'] = '400 Bad Request'
-        data['error_message'] = '400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SS+00:00'
+        data['error_message'] = '400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00'
 
     elif output not in ('csv', 'geojson'):
         data['http_code'] = '400 Bad Request'
