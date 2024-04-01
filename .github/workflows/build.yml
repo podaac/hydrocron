@@ -28,6 +28,11 @@ on:
           - SIT
           - UAT
 
+# Only allow 1 execution of this workflow to be running at any given time per-branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   POETRY_VERSION: "1.7.1"
   PYTHON_VERSION: "3.10"
@@ -125,9 +130,14 @@ jobs:
         if: |
           startsWith(github.ref, 'refs/heads/main') &&
           steps.manual.conclusion == 'skipped'
-        id: release
+        env:
+          CURRENT_VERSION: ${{ steps.get-version.outputs.current_version }}
+        # Remove rc* from end of version string
+        # The ${string%%substring} syntax below deletes the longest match of $substring from back of $string.
         run: |
-          poetry version major
+          poetry version ${CURRENT_VERSION%%rc*}
+          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
+          echo "venue=ops" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
       - name: Get install version
         # Get the version of the software being installed and save it as an ENV var
