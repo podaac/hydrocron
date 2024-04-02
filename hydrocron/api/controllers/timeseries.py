@@ -271,7 +271,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         logging.info('user_ip: %s', event["headers"]["X-Forwarded-For"].split(",")[0])
     except KeyError as e:
         logging.error('Error encountered with headers: %s', e)
-        raise RequestError('400: Issue encountered with request headers') from e
+        raise RequestError(f'400: Issue encountered with request header: {e}') from e
 
     results = {'http_code': '200 OK'}
     try:
