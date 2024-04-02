@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 88 - There are no CloudWatch logs for the API Gateway
     - Issue 13 - Add SWORD version from shp.xml to DB entries
 ### Changed
+    - Issue 125 - Provide better time series Lambda function logging
     - Issue 132 - Update documentation for OPS release
     - Issue 127 - Return a 400 (not 404) response code and a better error message when there is no data in the start/end dates requested
     - Issue 108 - Update collection to 2.0, backload 2.0 data
