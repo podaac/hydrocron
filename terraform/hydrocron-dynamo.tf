@@ -11,6 +11,22 @@ resource "aws_dynamodb_table" "hydrocron-swot-reach-table" {
     name = "range_start_time"
     type = "S"
   }
+  attribute {
+    name = "granuleUR"
+    type = "S"
+  }
+  attribute {
+    name = "collection_shortname"
+    type = "S"
+  }
+  attribute {
+    name = "collection_version"
+    type = "S"
+  }
+  attribute {
+    name = "ingest_time"
+    type = "S"
+  }
   global_secondary_index {
     name               = "GranuleURIndex"
     hash_key           = "granuleUR"
@@ -27,7 +43,7 @@ resource "aws_dynamodb_table" "hydrocron-swot-reach-table" {
   }
   global_secondary_index {
     name               = "CollectionVersionIndex"
-    hash_key           = "collection_shortname"
+    hash_key           = "collection_version"
     range_key          = "range_start_time"
     projection_type    = "INCLUDE"
     non_key_attributes = ["reach_id", "collection_shortname", "granuleUR", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
@@ -56,6 +72,22 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
     name = "range_start_time"
     type = "S"
   }
+  attribute {
+    name = "granuleUR"
+    type = "S"
+  }
+  attribute {
+    name = "collection_shortname"
+    type = "S"
+  }
+  attribute {
+    name = "collection_version"
+    type = "S"
+  }
+  attribute {
+    name = "ingest_time"
+    type = "S"
+  }
   global_secondary_index {
     name               = "GranuleURIndex"
     hash_key           = "granuleUR"
@@ -72,7 +104,7 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
   }
   global_secondary_index {
     name               = "CollectionVersionIndex"
-    hash_key           = "collection_shortname"
+    hash_key           = "collection_version"
     range_key          = "range_start_time"
     projection_type    = "INCLUDE"
     non_key_attributes = ["node_id", "collection_shortname", "granuleUR", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
