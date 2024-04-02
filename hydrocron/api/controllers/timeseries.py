@@ -258,9 +258,17 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
 
     start = time.time()
-    print(f"Event - {event}")
+    print(f'Event - {event}')
 
     results = {'http_code': '200 OK'}
+
+    try:
+        if event['body'] == {} and 'Elastic-Heartbeat' in event['headers']['User-Agent']:
+            return {}
+    except KeyError as e:
+        print(f'Error encountered with headers: {e}')
+        raise RequestError(f'400: Issue encountered with request header: {e}') from e
+
     try:
         feature = event['body']['feature']
         feature_id = event['body']['feature_id']
