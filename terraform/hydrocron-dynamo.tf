@@ -15,18 +15,6 @@ resource "aws_dynamodb_table" "hydrocron-swot-reach-table" {
     name = "granuleUR"
     type = "S"
   }
-  attribute {
-    name = "collection_shortname"
-    type = "S"
-  }
-  attribute {
-    name = "collection_version"
-    type = "S"
-  }
-  attribute {
-    name = "ingest_time"
-    type = "S"
-  }
   global_secondary_index {
     name               = "GranuleURIndex"
     hash_key           = "granuleUR"
@@ -52,18 +40,6 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
   }
   attribute {
     name = "granuleUR"
-    type = "S"
-  }
-  attribute {
-    name = "collection_shortname"
-    type = "S"
-  }
-  attribute {
-    name = "collection_version"
-    type = "S"
-  }
-  attribute {
-    name = "ingest_time"
     type = "S"
   }
   global_secondary_index {
