@@ -6,6 +6,8 @@ Test unpacking a swot reach or node shapefile.
 
 Unit tests for unpacking swot reach and node shapefiles.
 """
+from datetime import datetime, timedelta, timezone
+import pytz
 from hydrocron.utils import constants
 
 from hydrocron.db.io import swot_reach_node_shp
@@ -25,6 +27,9 @@ def test_parse_from_filename():
     assert filename_attrs['range_end_time'] == "2023-06-10T19:33:44Z"
     assert filename_attrs['crid'] == "PIA1"
     assert filename_attrs['collection_shortname'] == constants.SWOT_REACH_COLLECTION_NAME
+    assert filename_attrs['collection_version'] == constants.SWOT_REACH_COLLECTION_VERSION
+    assert filename_attrs['granuleUR'] == constants.TEST_FILENAME
+    assert datetime.strptime(filename_attrs['ingest_time'], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc) - datetime.now(timezone.utc) <= timedelta(minutes=5)
 
 
 def test_read_shapefile():
