@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
     - Issue 77 - Create UMM-S record for hydrocron
     - Issue 89 - Pass headers to timeseries Lambda and test for 'Elastic-Heartbeat' in 'User-Agent' header
+    - Issue 126 - Capture and log the client IP address
     - Issue 24 - Indicate which collection version the data belongs to
     - Issue 13 - Add SWORD version from shp.xml to DB entries
     - Issue 85 - Add variable units to API response
