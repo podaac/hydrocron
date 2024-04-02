@@ -138,7 +138,8 @@ REACH_ALL_COLUMNS = [
     'p_wse', 'p_wse_var', 'p_width', 'p_wid_var', 'p_n_nodes', 'p_dist_out',
     'p_length', 'p_maf', 'p_dam_id', 'p_n_ch_max', 'p_n_ch_mod', 'p_low_slp',
     'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
-    'crid', 'geometry', 'sword_version', 'collection_shortname', 'crid'
+    'crid', 'geometry', 'sword_version', 'collection_shortname', 'collection_version',
+    'granuleUR', 'ingest_time'
 ]
 
 NODE_ALL_COLUMNS = [
