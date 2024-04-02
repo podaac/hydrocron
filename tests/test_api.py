@@ -651,4 +651,4 @@ def test_timeseries_lambda_handler_missing_header(hydrocron_api):
     context = "_"
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-        assert "400: Issue encountered with request headers" in str(e.value)
+        assert "400: Issue encountered with request headers: 'User-Agent'" in str(e.value)
