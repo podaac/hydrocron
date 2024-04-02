@@ -59,11 +59,11 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
         results = data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
 
     if len(results['Items']) == 0:
-        data['http_code'] = '404 Not Found'
-        data['error_message'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = f'400: Results with the specified Feature ID {feature_id} were not found'
     elif sys.getsizeof(results) > 6291456:
         data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds 6MB with {sys.getsizeof(results)} hits.'
+        data['error_message'] = f'413: Query exceeds 6MB with {sys.getsizeof(results)} hits'
     else:
         logging.info('query_size: %s', str(sys.getsizeof(results)))
         gdf = convert_to_df(results['Items'])
@@ -274,6 +274,15 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         raise RequestError(f'400: Issue encountered with request header: {e}') from e
 
     results = {'http_code': '200 OK'}
+
+    try:
+        if event['body'] == {} and 'Elastic-Heartbeat' in event['headers']['User-Agent']:
+            return {}
+        print(f'user_ip: {event["headers"]["X-Forwarded-For"].split(",")[0]}')
+    except KeyError as e:
+        print(f'Error encountered with headers: {e}')
+        raise RequestError('400: Issue encountered with request headers') from e
+
     try:
         feature = event['body']['feature']
         feature_id = event['body']['feature_id']
