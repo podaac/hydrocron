@@ -603,6 +603,37 @@ def test_timeseries_lambda_handler_fields(hydrocron_api):
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
         assert "400: fields parameter should contain valid SWOT fields" in str(e.value)
 
+def test_timeseries_lambda_handler_not_found(hydrocron_api):
+    """
+    Test the lambda handler for cases where the identifier is not found in the
+    database.
+
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100227",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "fields": "reach_id,time_str,wse,geometry,height"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0"
+        }
+    }
+
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: Results with the specified Feature ID 71224100227 were not found" in str(e.value)
+
+
 def test_timeseries_lambda_handler_elastic_agent(hydrocron_api):
     """
     Test the lambda handler for cases where invoked by Elastic Agent.
@@ -622,7 +653,8 @@ def test_timeseries_lambda_handler_elastic_agent(hydrocron_api):
     context = "_"
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
     assert result == {}
-    
+
+
 def test_timeseries_lambda_handler_missing_header(hydrocron_api):
     """
     Test the lambda handler for cases where invoked by Elastic Agent.

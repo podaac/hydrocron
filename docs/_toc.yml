@@ -13,9 +13,6 @@ parts:
 - caption: API ENDPOINTS
   chapters:
   - file: timeseries
-- caption: IMPORTANT USAGE NOTES
-  chapters:
-  - file: time
 - caption: RESOURCES
   chapters:
   - url: https://github.com/podaac/hydrocron
