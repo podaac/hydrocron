@@ -80,8 +80,6 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
                 FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
                 InvocationType='Event',
                 Payload=event2)
-        else:
-            raise TableMisMatch(f"Error: Cannot load '{feature_type}' data into table: '{table_name}'")
 
 
 def granule_handler(event, _):
