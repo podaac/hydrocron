@@ -6,6 +6,7 @@ Hydrocron API timeseries controller
 import datetime
 import json
 import logging
+import sys
 import time
 
 import pandas as pd
@@ -16,7 +17,8 @@ from hydrocron.api.data_access.db import DynamoDataRepository
 from hydrocron.utils import connection
 from hydrocron.utils import constants
 
-logger = logging.getLogger()
+
+logging.getLogger().setLevel(logging.INFO)
 
 
 class RequestError(Exception):
@@ -57,12 +59,13 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
         results = data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
 
     if len(results['Items']) == 0:
-        data['http_code'] = '404 Not Found'
-        data['error_message'] = f'404: Results with the specified Feature ID {feature_id} were not found.'
-    elif len(results) > 5750000:
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = f'400: Results with the specified Feature ID {feature_id} were not found'
+    elif sys.getsizeof(results) > 6291456:
         data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds 6MB with {len(results)} hits.'
+        data['error_message'] = f'413: Query exceeds 6MB with {sys.getsizeof(results)} hits'
     else:
+        logging.info('query_size: %s', str(sys.getsizeof(results)))
         gdf = convert_to_df(results['Items'])
         if output == 'geojson':
             data, hits = format_json(gdf, fields)
@@ -258,9 +261,28 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
 
     start = time.time()
-    print(f"Event - {event}")
+
+    logging.info('headers: %s', json.dumps(event['headers']))
+    logging.info('request: %s', json.dumps(event['body']))
+
+    try:
+        if event['body'] == {} and 'Elastic-Heartbeat' in event['headers']['User-Agent']:
+            return {}
+        logging.info('user_ip: %s', event["headers"]["X-Forwarded-For"].split(",")[0])
+    except KeyError as e:
+        logging.error('Error encountered with headers: %s', e)
+        raise RequestError(f'400: Issue encountered with request header: {e}') from e
 
     results = {'http_code': '200 OK'}
+
+    try:
+        if event['body'] == {} and 'Elastic-Heartbeat' in event['headers']['User-Agent']:
+            return {}
+        print(f'user_ip: {event["headers"]["X-Forwarded-For"].split(",")[0]}')
+    except KeyError as e:
+        print(f'Error encountered with headers: {e}')
+        raise RequestError('400: Issue encountered with request headers') from e
+
     try:
         feature = event['body']['feature']
         feature_id = event['body']['feature_id']
@@ -285,7 +307,10 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     data = {'status': results['http_code'], 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
     if results['http_code'] == '200 OK':
         data['results'][event['body']['output']] = results['response']
+        logging.info('response: %s', json.dumps(data))
+        logging.info('response_size: %s', str(sys.getsizeof(data)))
     else:
+        logging.error(results)
         raise RequestError(results['error_message'])
 
     return data
