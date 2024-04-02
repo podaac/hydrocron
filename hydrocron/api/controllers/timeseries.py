@@ -267,7 +267,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
             return {}
     except KeyError as e:
         print(f'Error encountered with headers: {e}')
-        raise RequestError('400: Issue encountered with request headers') from e
+        raise RequestError(f'400: Issue encountered with request header: {e}') from e
 
     try:
         feature = event['body']['feature']
