@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 105 - Only benchmarking data is being loaded even when load_benchmarking_data flag is false
     - Issue 44 - Load data lambda only loads the first granule found in the time range
     - Issue 116 - CICD will not publish when build run as workflow dispatch
+    - Issue 146 - Fixed value of URL and RelatedURLs in UMM-S record
 ### Security
 
 ## [1.0.0]
