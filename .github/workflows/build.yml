@@ -320,7 +320,8 @@ jobs:
           timeout: 60
           disable_removal: 'true'
           umm_type: 'umm-s'
-          use_associations: 'true'        
+          use_associations: 'true'
+          umm_version: 1.5.2
           url_value: ${{ vars.HYDROCRON_BASE_URL }}
         env:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
@@ -347,6 +348,7 @@ jobs:
           disable_removal: 'true'
           umm_type: 'umm-s'
           use_associations: 'false'
+          umm_version: 1.5.2
           url_value: ${{ vars.HYDROCRON_BASE_URL }}
         env:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
