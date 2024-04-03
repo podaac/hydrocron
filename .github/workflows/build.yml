@@ -96,7 +96,7 @@ jobs:
         if: |
           github.ref != 'refs/heads/develop' &&
           github.ref != 'refs/heads/main' &&
-          github.ref !startsWith(github.ref, 'refs/heads/release/')
+          !startsWith(github.ref, 'refs/heads/release/')
         run: |
           new_ver="${{ steps.get-version.outputs.current_version }}+$(git rev-parse --short ${GITHUB_SHA})"
           poetry version $new_ver
