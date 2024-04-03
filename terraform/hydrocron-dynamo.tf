@@ -23,6 +23,11 @@ resource "aws_dynamodb_table" "hydrocron-swot-reach-table" {
     name = "collection_version"
     type = "S"
   }
+   attribute {
+    name = "ingest_time"
+    type = "S"
+  }
+
   global_secondary_index {
     name               = "GranuleURIndex"
     hash_key           = "granuleUR"
@@ -44,6 +49,14 @@ resource "aws_dynamodb_table" "hydrocron-swot-reach-table" {
     projection_type    = "INCLUDE"
     non_key_attributes = ["reach_id", "collection_shortname", "granuleUR", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
   }
+    global_secondary_index {
+    name               = "IngestTimeIndex"
+    hash_key           = "ingest_time"
+    range_key          = "range_start_time"
+    projection_type    = "INCLUDE"
+    non_key_attributes = ["reach_id", "collection_shortname", "granuleUR", "crid", "cycle_id", "pass_id", "continent_id", "collection_version"]
+  }
+
 
 }
 
@@ -64,8 +77,16 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
     name = "granuleUR"
     type = "S"
   }
+    attribute {
+    name = "collection_shortname"
+    type = "S"
+  }
   attribute {
     name = "collection_version"
+    type = "S"
+  }
+  attribute {
+    name = "ingest_time"
     type = "S"
   }
   global_secondary_index {
@@ -74,10 +95,6 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
     range_key          = "range_start_time"
     projection_type    = "INCLUDE"
     non_key_attributes = ["node_id", "collection_shortname", "collection_version", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
-  }
-    attribute {
-    name = "collection_shortname"
-    type = "S"
   }
   global_secondary_index {
     name               = "CollectionNameIndex"
@@ -92,5 +109,12 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
     range_key          = "range_start_time"
     projection_type    = "INCLUDE"
     non_key_attributes = ["node_id", "collection_shortname", "granuleUR", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
+  }
+  global_secondary_index {
+    name               = "IngestTimeIndex"
+    hash_key           = "ingest_time"
+    range_key          = "range_start_time"
+    projection_type    = "INCLUDE"
+    non_key_attributes = ["node_id", "collection_shortname", "granuleUR", "crid", "cycle_id", "pass_id", "continent_id", "collection_version"]
   }
 }
