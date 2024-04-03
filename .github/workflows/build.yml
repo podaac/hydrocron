@@ -308,7 +308,7 @@ jobs:
 
       - name: Publish UMM-S with new version
         id: publish-umm-s
-        uses: podaac/cmr-umm-updater@0.7.0
+        uses: podaac/cmr-umm-updater@0.7.1
         if: |
           github.ref == 'refs/heads/main'    ||
           startsWith(github.ref, 'refs/heads/release')
@@ -335,7 +335,7 @@ jobs:
           
       - name: Publish UMM-S with new version retry
         id: publish-umm-s-retry
-        uses: podaac/cmr-umm-updater@0.7.0
+        uses: podaac/cmr-umm-updater@0.7.1
         if: |
           steps.publish-umm-s.outcome == 'failure'
         with:

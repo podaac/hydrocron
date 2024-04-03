@@ -5,7 +5,10 @@
     "Version": "#.#.#",
     "VersionDescription": "Version released in UAT",
     "LastUpdatedDate": "20231214",
-    "URL": "https://soto.podaac.uat.earthdatacloud.nasa.gov/hydrocron/v1",
+    "URL": {
+        "Description": "Service top-level URL",
+        "URLValue": "*Replaced by CICD*"
+    },
     "RelatedURLs": [
         {
             "URL": "https://podaac.github.io/hydrocron/intro.html",
@@ -14,7 +17,7 @@
             "Type": "VIEW RELATED INFORMATION"
         },
         {
-            "URL": "https://soto.podaac.uat.earthdatacloud.nasa.gov/hydrocron/v1/timeseries",
+            "URL": "https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries",
             "Description": "Hydrocron time series API endpoint.",
             "URLContentType": "DistributionURL",
             "Format": "GeoJSON",
@@ -23,7 +26,7 @@
             "MimeType": "application/json"
         },
         {
-            "URL": "https://soto.podaac.uat.earthdatacloud.nasa.gov/hydrocron/v1/timeseries",
+            "URL": "https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries",
             "Description": "Hydrocron time series API endpoint.",
             "URLContentType": "DistributionURL",
             "Format": "CSV",
