@@ -6,7 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+### Changed
+### Deprecated 
+### Removed
+### Fixed
     - Issue 104 - Prevent nodes from being loaded into the reach table
+### Security
+
+## [1.1.0]
+### Added
     - Issue 77 - Create UMM-S record for hydrocron
     - Issue 89 - Pass headers to timeseries Lambda and test for 'Elastic-Heartbeat' in 'User-Agent' header
     - Issue 126 - Capture and log the client IP address
