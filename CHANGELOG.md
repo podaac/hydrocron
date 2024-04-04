@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 91 - Added Access-Control-Allow-Origin header to GET method
 ### Changed
 ### Deprecated 
 ### Removed
