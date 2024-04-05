@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated 
 ### Removed
 ### Fixed
+    - Issue 158 - Use Lambda role instead of EDL for s3 connection
 ### Security
 
 ## [1.1.0]
