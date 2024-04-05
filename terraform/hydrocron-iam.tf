@@ -55,29 +55,6 @@ data "aws_iam_policy_document" "lambda-invoke-policy" {
       aws_lambda_function.hydrocron_lambda_load_granule.arn
       ]
   }
-
-}
-data "aws_iam_policy_document" "ssm-read-policy" {
-
-  statement {
-    effect  = "Allow"
-    actions = [
-      "ssm:DescribeParameters"
-    ]
-    resources = ["arn:aws:ssm:${data.aws_region.current.id}:${local.account_id}:parameter/service/${var.app_name}/*"]
-  }
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "ssm:GetParameter",
-      "ssm:GetParameters",
-      "ssm:GetParametersByPath"
-    ]
-
-    resources = ["arn:aws:ssm:${data.aws_region.current.id}:${local.account_id}:parameter/service/${var.app_name}/*"]
-  }
-
 }
 
 data "aws_iam_policy_document" "s3-read-policy" {
@@ -215,10 +192,6 @@ resource "aws_iam_role" "hydrocron-lambda-execution-role" {
     policy = data.aws_iam_policy_document.dynamo-read-policy.json
   }
   inline_policy {
-    name   = "HydrocronSSMRead"
-    policy = data.aws_iam_policy_document.ssm-read-policy.json
-  }
-  inline_policy {
     name = "HydrocronLambdaVPC"
     policy = data.aws_iam_policy_document.lambda-vpc.json
   }
@@ -238,10 +211,6 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
   }
   inline_policy {
     policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
-  }
-  inline_policy {
-    name   = "HydrocronSSMRead"
-    policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
   inline_policy {
     name = "HydrocronLambdaVPC"
@@ -269,10 +238,7 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   inline_policy {
     policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
   }
-  inline_policy {
-    name   = "HydrocronSSMRead"
-    policy = data.aws_iam_policy_document.ssm-read-policy.json
-  }
+
   inline_policy {
     name = "HydrocronLambdaVPC"
     policy = data.aws_iam_policy_document.lambda-vpc.json
@@ -294,10 +260,6 @@ resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
   }
   inline_policy {
     policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
-  }
-  inline_policy {
-    name   = "HydrocronSSMRead"
-    policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
   inline_policy {
     name = "HydrocronS3Read"
