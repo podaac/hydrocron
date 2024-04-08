@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 155 - Log feature ids on database write
 ### Changed
 ### Deprecated 
 ### Removed
