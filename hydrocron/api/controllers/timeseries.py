@@ -274,15 +274,6 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         raise RequestError(f'400: Issue encountered with request header: {e}') from e
 
     results = {'http_code': '200 OK'}
-
-    try:
-        if event['body'] == {} and 'Elastic-Heartbeat' in event['headers']['User-Agent']:
-            return {}
-        print(f'user_ip: {event["headers"]["X-Forwarded-For"].split(",")[0]}')
-    except KeyError as e:
-        print(f'Error encountered with headers: {e}')
-        raise RequestError('400: Issue encountered with request headers') from e
-
     try:
         feature = event['body']['feature']
         feature_id = event['body']['feature_id']
