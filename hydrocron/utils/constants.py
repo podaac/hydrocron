@@ -22,7 +22,9 @@ TEST_ITEM_DICT = {
     "time": "739741183.129",
     "time_str": "2023-06-10T19:39:43Z",
     "wse": "286.2983",
-    "cycle_id": "548"
+    "cycle_id": "548",
+    "sword_version": "15",
+    "p_lat_units": "degrees_north"
 }
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
@@ -32,6 +34,9 @@ TEST_SORT_KEY_NAME = 'range_start_time'
 TEST_REACH_ID_VALUE = '71224100223'
 TEST_TIME_VALUE = '2023-06-10T19:33:37Z'
 TEST_WSE_VALUE = '286.2983'
+TEST_SWORD_VERSION_VALUE = '15'
+TEST_UNITS_FIELD = 'p_lat_units'
+TEST_UNITS = 'degrees_north'
 
 # ------------ #
 # PROD CONSTANTS #
@@ -39,8 +44,8 @@ TEST_WSE_VALUE = '286.2983'
 SWOT_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
 SWOT_NODE_TABLE_NAME = "hydrocron-swot-node-table"
 
-SWOT_REACH_COLLECTION_NAME = "SWOT_L2_HR_RIVERSP_1.0"
-SWOT_NODE_COLLECTION_NAME = "SWOT_L2_HR_RIVERSP_1.0"
+SWOT_REACH_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
+SWOT_NODE_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
 
 SWOT_REACH_PARTITION_KEY = "reach_id"
 SWOT_NODE_PARTITION_KEY = "node_id"
@@ -54,6 +59,7 @@ FIELDNAME_WSE = 'wse'
 FIELDNAME_SLOPE = 'slope'
 FIELDNAME_P_LON = 'p_lon'
 FIELDNAME_P_LAT = 'p_lat'
+FIELDNAME_SWORD_VERSION = 'sword_version'
 
 S3_CREDS_ENDPOINT = "https://archive.swot.podaac.earthdata.nasa.gov/s3credentials"
 
@@ -130,7 +136,7 @@ REACH_ALL_COLUMNS = [
     'p_wse', 'p_wse_var', 'p_width', 'p_wid_var', 'p_n_nodes', 'p_dist_out',
     'p_length', 'p_maf', 'p_dam_id', 'p_n_ch_max', 'p_n_ch_mod', 'p_low_slp',
     'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
-    'crid', 'geometry'
+    'crid', 'geometry', 'sword_version', 'collection_shortname', 'crid'
 ]
 
 NODE_ALL_COLUMNS = [
@@ -148,5 +154,5 @@ NODE_ALL_COLUMNS = [
     'p_wse', 'p_wse_var', 'p_width', 'p_wid_var', 'p_dist_out', 'p_length',
     'p_dam_id', 'p_n_ch_max', 'p_n_ch_mod',
     'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
-    'crid', 'geometry'
+    'crid', 'geometry', 'sword_version', 'collection_shortname', 'crid'
 ]

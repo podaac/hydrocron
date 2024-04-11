@@ -1,0 +1,47 @@
+
+name: Release Branch Created
+
+# Run whenever a ref is created https://docs.github.com/en/actions/reference/events-that-trigger-workflows#create
+on:
+  create
+
+jobs:
+  # First job in the workflow builds and verifies the software artifacts
+  bump:
+    name: Bump minor version on develop
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Only run if ref created was a release branch
+    if:
+      ${{ startsWith(github.ref, 'refs/heads/release/') }}
+    steps:
+      - uses: getsentry/action-github-app-token@v3
+        name: podaac cicd token
+        id: podaac-cicd
+        with:
+          app_id: ${{ secrets.CICD_APP_ID }}
+          private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
+      # Checks-out the develop branch
+      - uses: actions/checkout@v4
+        with:
+          ref: 'refs/heads/develop'
+          repository: ${{ github.repository }}
+          token: ${{ steps.podaac-cicd.outputs.token }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: 1.7.1
+      - name: Bump minor version
+        run: |
+          poetry version ${GITHUB_REF#refs/heads/release/}
+          poetry version preminor
+          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
+      - name: Commit Version Bump
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git commit -am "/version ${{ env.software_version }}"
+          git push

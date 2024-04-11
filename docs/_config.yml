@@ -3,6 +3,7 @@
 
 title: Hydrocron
 author: Physical Oceanography Distributed Active Archive Center (PO.DAAC)
+copyright: "2024"  # Copyright year to be placed in the footer
 logo: hydrocron_logo.png
 
 # Force re-execution of notebooks on each build.

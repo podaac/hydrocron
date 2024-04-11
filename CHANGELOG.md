@@ -12,6 +12,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [1.1.0]
+### Added
+    - Issue 77 - Create UMM-S record for hydrocron
+    - Issue 89 - Pass headers to timeseries Lambda and test for 'Elastic-Heartbeat' in 'User-Agent' header
+    - Issue 126 - Capture and log the client IP address
+    - Issue 24 - Indicate which collection version the data belongs to
+    - Issue 13 - Add SWORD version from shp.xml to DB entries
+    - Issue 85 - Add variable units to API response
+    - Issue 78 - Use a VPC endpoint and policies to access DynamoDB
+    - Issue 70 - Enable notification of swot shapefile to tva
+    - Issue 91 - Add CORS headers to API responses
+    - Issue 79 - Generate data for use by benchmarks
+    - Issue 88 - There are no CloudWatch logs for the API Gateway
+    - Issue 13 - Add SWORD version from shp.xml to DB entries
+### Changed
+    - Issue 125 - Provide better time series Lambda function logging
+    - Issue 132 - Update documentation for OPS release
+    - Issue 127 - Return a 400 (not 404) response code and a better error message when there is no data in the start/end dates requested
+    - Issue 108 - Update collection to 2.0, backload 2.0 data
+    - Issue 59 - Using GeoDataFrame to work with data returned from db
+    - Issue 75 - Update log messaging format
+    - Issue 60 - Encapsulate DyanmoDB under a single shared module
+    - Issue 60 - Improved error handling
+### Deprecated 
+### Removed
+    - Issue 39 - Clean up code, removed comments and unused parameters
+### Fixed
+    - Issue 131 - Error message when incorrect time format entered suggests a time format that also fails
+    - Issue 105 - Only benchmarking data is being loaded even when load_benchmarking_data flag is false
+    - Issue 44 - Load data lambda only loads the first granule found in the time range
+    - Issue 116 - CICD will not publish when build run as workflow dispatch
+    - Issue 146 - Fixed value of URL and RelatedURLs in UMM-S record
+### Security
+
 ## [1.0.0]
 
 ### Added

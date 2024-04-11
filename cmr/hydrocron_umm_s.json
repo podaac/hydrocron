@@ -1,0 +1,99 @@
+{
+    "Name": "PODAAC_Hydrocron",
+    "LongName": "PODAAC Hydrocron API",
+    "Type": "WEB SERVICES",
+    "Version": "*replaced by CICD*",
+    "VersionDescription": "Version of software deployed",
+    "URL": {
+        "Description": "Service top-level URL",
+        "URLValue": "*replaced by CICD*"
+    },
+    "RelatedURLs": [
+        {
+            "URL": "https://podaac.github.io/hydrocron/intro.html",
+            "Description": "Hydrocron API Documentation",
+            "URLContentType": "PublicationURL",
+            "Type": "VIEW RELATED INFORMATION"
+        },
+        {
+            "URL": "https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries",
+            "Description": "Hydrocron time series API endpoint.",
+            "URLContentType": "DistributionURL",
+            "Format": "GeoJSON",
+            "Type": "USE SERVICE API",
+            "MimeType": "application/json"
+        },
+        {
+            "URL": "https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries",
+            "Description": "Hydrocron time series API endpoint.",
+            "URLContentType": "DistributionURL",
+            "Format": "CSV",
+            "Type": "USE SERVICE API",
+            "MimeType": "text/csv"
+        }
+    ],
+    "Description": "Hydrocron is an API that repackages hydrology datasets from the Surface Water and Ocean Topography (SWOT) satellite into formats that make time-series analysis easier. The API returns results in either GeoJSON or CSV format.",
+    "ServiceKeywords": [
+        {
+            "ServiceCategory": "EARTH SCIENCE SERVICES",
+            "ServiceTopic": "DATA MANAGEMENT/DATA HANDLING",
+            "ServiceTerm": "SUBSETTING/SUPERSETTING"
+        }
+    ],
+    "ServiceOrganizations": [
+        {
+            "Roles": [
+                "ORIGINATOR"
+            ],
+            "ShortName": "NASA/JPL/PODAAC",
+            "LongName": "Physical Oceanography Distributed Active Archive Center, Jet Propulsion Laboratory, NASA"
+            
+        }
+    ],
+    "ContactGroups":[
+        {
+            "Roles": [
+                "SERVICE PROVIDER",
+                "SOFTWARE AUTHOR"
+            ],
+            "GroupName": "NASA/JPL/PODAAC",
+            "ContactInformation": {
+                "OnlineResources": [
+                    {
+                        "Description": "Data Contact URL",
+                        "Name": "HOME PAGE",
+                        "Linkage": "https://podaac.jpl.nasa.gov/"
+                    }
+                ],
+                "ContactMechanisms": [
+                    {
+                        "Type": "Email",
+                        "Value": "podaac@podaac.jpl.nasa.gov"
+                    },
+                    {
+                        "Type": "Other",
+                        "Value": "https://github.com/podaac/hydrocron/issues"
+                    }
+                ]
+            }
+        }
+    ],
+    "AccessConstraints": "None",
+    "ServiceOptions": {
+        "Subset": {
+            "TemporalSubset": {
+                "AllowMultipleValues": true
+            }
+        }
+    },
+    "OperationMetadata": [
+        {
+            "OperationName": "TEMPORAL_SUBSETTING"
+        }
+    ],
+    "MetadataSpecification": {
+        "URL": "https://cdn.earthdata.nasa.gov/umm/service/v1.5.2",
+        "Name": "UMM-S",
+        "Version": "1.5.2"
+    }
+}

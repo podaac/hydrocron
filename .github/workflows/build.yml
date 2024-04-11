@@ -28,10 +28,15 @@ on:
           - SIT
           - UAT
 
+# Only allow 1 execution of this workflow to be running at any given time per-branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
-  POETRY_VERSION: "1.3.1"
+  POETRY_VERSION: "1.7.1"
   PYTHON_VERSION: "3.10"
-  TERRAFORM_VERSION: "1.3.10"
+  TERRAFORM_VERSION: "1.7.3"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -49,50 +54,67 @@ jobs:
       version: ${{ steps.poetry-build.outputs.the_version }}
       pyproject_name: ${{ steps.poetry-build.outputs.pyproject_name }}
     steps:
-      - uses: getsentry/action-github-app-token@v2
+      - uses: getsentry/action-github-app-token@v3
         name: podaac cicd token
         id: podaac-cicd
         with:
           app_id: ${{ secrets.CICD_APP_ID }}
           private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
           token: ${{ steps.podaac-cicd.outputs.token }}
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@v3
         with:
           poetry-version: ${{ env.POETRY_VERSION }}
-      - name: Get version
+      - name: Setup a local virtual environment
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+      - uses: actions/cache@v4
+        name: Define a cache for the virtual environment based on the dependencies lock file
+        with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+      - name: Get pre-build version
         id: get-version
         run: |
           echo "current_version=$(poetry version | awk '{print $2}')" >> $GITHUB_OUTPUT
           echo "pyproject_name=$(poetry version | awk '{print $1}')" >> $GITHUB_ENV
+      - name: Manual Build
+        # If triggered by workflow dispatch, no version bump
+        if: github.event_name == 'workflow_dispatch'
+        id: manual
+        run: |
+          echo "TARGET_ENV_UPPERCASE=${{ github.event.inputs.venue }}" >> $GITHUB_ENV
       - name: Bump pre-alpha version
         # If triggered by push to a non-tracked branch
         if: |
           github.ref != 'refs/heads/develop' &&
-          github.ref != 'refs/heads/main'    &&
-          !startsWith(github.ref, 'refs/heads/release')
+          github.ref != 'refs/heads/main' &&
+          !startsWith(github.ref, 'refs/heads/release/')
         run: |
           new_ver="${{ steps.get-version.outputs.current_version }}+$(git rev-parse --short ${GITHUB_SHA})"
           poetry version $new_ver
-          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
       - name: Bump alpha version
         # If triggered by push to the develop branch
-        if: ${{ github.ref == 'refs/heads/develop' }}
+        if: |
+          github.ref == 'refs/heads/develop' &&
+          steps.manual.conclusion == 'skipped'
         id: alpha
         run: |
           poetry version prerelease
-          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=SIT" >> $GITHUB_ENV
       - name: Bump rc version
         # If triggered by push to a release branch
-        if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
+        if: |
+          startsWith(github.ref, 'refs/heads/release/') &&
+          steps.manual.conclusion == 'skipped'
         id: rc
         env:
           # True if the version already has a 'rc' pre-release identifier
@@ -103,22 +125,25 @@ jobs:
           else
             poetry version ${GITHUB_REF#refs/heads/release/}rc1
           fi
-          echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=UAT" >> $GITHUB_ENV
       - name: Release version
         # If triggered by push to the main branch
-        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
-        id: release
+        if: |
+          startsWith(github.ref, 'refs/heads/main') &&
+          steps.manual.conclusion == 'skipped'
+        env:
+          CURRENT_VERSION: ${{ steps.get-version.outputs.current_version }}
+        # Remove rc* from end of version string
+        # The ${string%%substring} syntax below deletes the longest match of $substring from back of $string.
         run: |
-          poetry version major
+          poetry version ${CURRENT_VERSION%%rc*}
           echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
+          echo "venue=ops" >> $GITHUB_ENV
           echo "TARGET_ENV_UPPERCASE=OPS" >> $GITHUB_ENV
-      - name: No version bump
-        # If triggered by workflow dispatch, no version bump
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+      - name: Get install version
+        # Get the version of the software being installed and save it as an ENV var
         run: |
           echo "software_version=$(poetry version | awk '{print $2}')" >> $GITHUB_ENV
-          echo "TARGET_ENV_UPPERCASE=${{ github.event.inputs.venue }}" >> $GITHUB_ENV
       - name: Install package
         run: poetry install
       - name: Lint
@@ -128,7 +153,7 @@ jobs:
       - name: Test and coverage
         run: |
           poetry run pytest --junitxml=build/reports/pytest.xml --cov=hydrocron --cov-report=xml:build/reports/coverage.xml tests/
-      - uses: hashicorp/setup-terraform@v2
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
@@ -179,7 +204,7 @@ jobs:
           echo "deploy_env=${{ env.TARGET_ENV_UPPERCASE }}" >> $GITHUB_OUTPUT
           echo "the_version=$(poetry version | awk '{print $2}')" >> $GITHUB_OUTPUT
           echo "pyproject_name=$(poetry version | awk '{print $1}')" >> $GITHUB_OUTPUT
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.poetry-build.outputs.pyproject_name }}-dist
           path: dist/*
@@ -228,7 +253,7 @@ jobs:
       THE_VERSION: ${{ needs.build.outputs.version }}
       PYPROJECT_NAME: ${{ needs.build.outputs.pyproject_name }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
       # Setup docker to build and push images
@@ -266,6 +291,70 @@ jobs:
         run: |
           echo "container_image_uri=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> $GITHUB_OUTPUT
 
+  publish:
+    name: Publish
+    needs: [ build, docker ]
+    runs-on: ubuntu-latest
+    environment: ${{ needs.build.outputs.deploy_env }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+
+      - name: set environment vars
+        id: lowercase
+        run: |
+          echo TARGET_ENV_LOWERCASE=${{ needs.build.outputs.deploy_env }} | tr '[:upper:]' '[:lower:]' >> "$GITHUB_OUTPUT"
+
+      - name: Publish UMM-S with new version
+        id: publish-umm-s
+        uses: podaac/cmr-umm-updater@0.7.1
+        if: |
+          github.ref == 'refs/heads/main'    ||
+          startsWith(github.ref, 'refs/heads/release')
+        with:
+          umm-json: 'cmr/hydrocron_umm_s.json'
+          provider: 'POCLOUD'
+          env: ${{ steps.lowercase.outputs.TARGET_ENV_LOWERCASE }}
+          version: ${{ needs.build.outputs.version }}
+          timeout: 60
+          disable_removal: 'true'
+          umm_type: 'umm-s'
+          use_associations: 'true'
+          umm_version: 1.5.2
+          url_value: ${{ vars.HYDROCRON_BASE_URL }}
+        env:
+          LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
+          LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
+          LAUNCHPAD_TOKEN_OPS: ${{secrets.LAUNCHPAD_TOKEN_OPS}}
+        continue-on-error: true
+
+      - name: Wait to retry publishing UMM-S
+        if: steps.publish-umm-s.outcome == 'failure'
+        run: |
+          sleep 120
+          
+      - name: Publish UMM-S with new version retry
+        id: publish-umm-s-retry
+        uses: podaac/cmr-umm-updater@0.7.1
+        if: |
+          steps.publish-umm-s.outcome == 'failure'
+        with:
+          umm-json: 'cmr/hydrocron_umm_s.json'
+          provider: 'POCLOUD'
+          env: ${{ steps.lowercase.outputs.TARGET_ENV_LOWERCASE }}
+          version: ${{ needs.build.outputs.version }}
+          timeout: 60
+          disable_removal: 'true'
+          umm_type: 'umm-s'
+          use_associations: 'false'
+          umm_version: 1.5.2
+          url_value: ${{ vars.HYDROCRON_BASE_URL }}
+        env:
+          LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
+          LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
+          LAUNCHPAD_TOKEN_OPS: ${{secrets.LAUNCHPAD_TOKEN_OPS}}
+
   deploy:
     name: Deploy
     needs: [ build, docker ]
@@ -280,10 +369,10 @@ jobs:
       startsWith(github.ref, 'refs/heads/release') ||
       github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
-      - uses: hashicorp/setup-terraform@v2
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
@@ -302,5 +391,6 @@ jobs:
         working-directory: terraform
         env:
           AWS_DEFAULT_REGION: us-west-2
+          TF_VAR_cross_account_id: ${{ secrets[vars.AWS_ACCOUNT_ID_CUMULUS_SWOT_SECRET_NAME] }}
         run: |
           ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ vars.TF_VENUE }} --lambda_container_image_uri ${{ env.CONTAINER_IMAGE_URI }}

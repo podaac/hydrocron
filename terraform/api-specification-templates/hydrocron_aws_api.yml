@@ -11,7 +11,7 @@ paths:
     get:
       summary: "Get Timeseries for a particular Reach, Node, or LakeID"
       description: "Get Timeseries for a particular Reach, Node, or LakeID"
-      operationId: gettimeseries_get
+      operationId: timeseries_get
       parameters:
       - name: feature
         in: query
@@ -76,6 +76,10 @@ paths:
       responses:
         "200":
           description: OK
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
           content:
             application/json:
               schema:
@@ -114,6 +118,8 @@ paths:
         responses:
           default:
             statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
               application/json: |
                 #set($inputRoot = $input.path('$'))
@@ -152,18 +158,58 @@ paths:
         requestTemplates:
           application/json: |-
             #set($queryParams = $input.params().querystring)
+            #set($headerParams = $input.params().header)
             {
-            "body" :
-            {
-              #foreach($paramName in $queryParams.keySet())
-              "$paramName": "$util.escapeJavaScript($queryParams.get($paramName))"
-                #if($foreach.hasNext),#end
-              #end
-            }}
+              "body" :
+              {
+                #foreach($paramName in $queryParams.keySet())
+                "$paramName": "$util.escapeJavaScript($queryParams.get($paramName))"
+                  #if($foreach.hasNext),#end
+                #end
+              },
+              "headers" : 
+              {
+                #foreach($header in $headerParams.keySet())
+                "$header": "$util.escapeJavaScript($input.params().header.get($header))" 
+                  #if($foreach.hasNext),#end
+                #end
+              }
+            }
         passthroughBehavior: when_no_templates
         httpMethod: POST
         contentHandling: CONVERT_TO_TEXT
         type: aws
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+      - CORS
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+          content: {}
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+              method.response.header.Access-Control-Allow-Methods: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
 components:
   schemas:
     geojson:

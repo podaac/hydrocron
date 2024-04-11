@@ -1,10 +1,8 @@
 # Overview
 
-Hydrocron has two main API endpoints:
+Hydrocron has a main API endpoint:
 
-- [timeseries/](/timeseries) which returns all of the timesteps for a single feature ID, and
-
-- timeseriesSubset/ which returns all of the timesteps for all of the features within a given GeoJSON polygon (not yet released)
+- [timeseries/](/timeseries) which returns all of the timesteps for a single feature ID.
 
 ## Feature ID
 
