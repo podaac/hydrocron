@@ -7,14 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
     - Issue 124 - Log granule name on ingest
+    - Issue 155 - Log feature ids on database write
+    - Issue 21 - Create tutorial documentation
+    - Issue 142 - Add fields to support OPS monitoring and set up indexes to query on them
 ### Changed
 ### Deprecated 
 ### Removed
 ### Fixed
+    - Issue 158 - Use Lambda role instead of EDL for s3 connection
+    - Issue 104 - Prevent nodes from being loaded into the reach table
 ### Security
 
+
 ## [1.1.0]
-### Added
+### Added 
     - Issue 77 - Create UMM-S record for hydrocron
     - Issue 89 - Pass headers to timeseries Lambda and test for 'Elastic-Heartbeat' in 'User-Agent' header
     - Issue 126 - Capture and log the client IP address

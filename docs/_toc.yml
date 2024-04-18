@@ -10,6 +10,7 @@ parts:
   chapters:
   - file: overview
   - file: examples
+  - file: hydrocron_tutorial
 - caption: API ENDPOINTS
   chapters:
   - file: timeseries

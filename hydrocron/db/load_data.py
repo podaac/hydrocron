@@ -24,6 +24,12 @@ class MissingTable(Exception):
     """
 
 
+class TableMisMatch(Exception):
+    """
+    Exception thrown if table does not match feature type
+    """
+
+
 def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     """
     Lambda entrypoint for loading the database
@@ -84,6 +90,12 @@ def granule_handler(event, _):
     obscure_data = event['body']['obscure_data']
     table_name = event['body']['table_name']
     load_benchmarking_data = event['body']['load_benchmarking_data']
+
+    if ("Reach" in granule_path) & (table_name != constants.SWOT_REACH_TABLE_NAME):
+        raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}'")
+
+    if ("Node" in granule_path) & (table_name != constants.SWOT_NODE_TABLE_NAME):
+        raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}'")
 
     logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
 
@@ -240,23 +252,29 @@ def load_data(dynamo_resource, table_name, items):
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
 
         if len(items) > 5:
-            logging.info("Batch adding reach items")
+            logging.info("Batch adding %s reach items", len(items))
+            for i in range(5):
+                logging.info("Item reach_id: %s", items[i]['reach_id'])
             hydrocron_table.batch_fill_table(items)
 
         else:
             logging.info("Adding reach items to table individually")
             for item_attrs in items:
+                logging.info("Item reach_id: %s", item_attrs['reach_id'])
                 hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
 
         if len(items) > 5:
-            logging.info("Batch adding node items")
+            logging.info("Batch adding %s node items", len(items))
+            for i in range(5):
+                logging.info("Item node_id: %s", items[i]['node_id'])
             hydrocron_table.batch_fill_table(items)
 
         else:
             logging.info("Adding node items to table individually")
             for item_attrs in items:
+                logging.info("Item node_id: %s", item_attrs['node_id'])
                 hydrocron_table.add_data(**item_attrs)
 
     else:
