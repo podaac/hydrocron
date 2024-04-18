@@ -111,7 +111,7 @@ def granule_handler(event, _):
 
     logging.info("Set up dynamo connection")
     dynamo_resource = connection.dynamodb_resource
-    logging.info("Begin loading data items")
+    logging.info("Begin loading data from granule: %s", os.path.basename(granule_path))
     load_data(dynamo_resource, table_name, items)
 
 
