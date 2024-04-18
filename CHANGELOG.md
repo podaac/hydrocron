@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 21 - Create tutorial documentation
     - Issue 142 - Add fields to support OPS monitoring and set up indexes to query on them
 ### Changed
+    - Issue 161 - Remove obscure_data option from load data lambdas before OPS loading, add environment variable.
 ### Deprecated 
 ### Removed
 ### Fixed

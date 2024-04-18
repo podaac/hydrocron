@@ -120,6 +120,11 @@ resource "aws_lambda_function" "hydrocron_lambda_load_granule" {
     security_group_ids = data.aws_security_groups.vpc_default_sg.ids
   }
   tags = var.default_tags
+  environment {
+    variables = {
+      OBSCURE_DATA = "false"
+    }
+  }
 }
 
 resource "aws_lambda_function" "hydrocron_lambda_cnm" {
