@@ -252,23 +252,29 @@ def load_data(dynamo_resource, table_name, items):
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
 
         if len(items) > 5:
-            logging.info("Batch adding reach items")
+            logging.info("Batch adding %s reach items", len(items))
+            for i in range(5):
+                logging.info("Item reach_id: %s", items[i]['reach_id'])
             hydrocron_table.batch_fill_table(items)
 
         else:
             logging.info("Adding reach items to table individually")
             for item_attrs in items:
+                logging.info("Item reach_id: %s", item_attrs['reach_id'])
                 hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
 
         if len(items) > 5:
-            logging.info("Batch adding node items")
+            logging.info("Batch adding %s node items", len(items))
+            for i in range(5):
+                logging.info("Item node_id: %s", items[i]['node_id'])
             hydrocron_table.batch_fill_table(items)
 
         else:
             logging.info("Adding node items to table individually")
             for item_attrs in items:
+                logging.info("Item node_id: %s", item_attrs['node_id'])
                 hydrocron_table.add_data(**item_attrs)
 
     else:
