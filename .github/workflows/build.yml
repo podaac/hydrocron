@@ -95,7 +95,8 @@ jobs:
         # If triggered by push to a non-tracked branch
         if: |
           github.ref != 'refs/heads/develop' &&
-          github.ref != 'refs/heads/main'
+          github.ref != 'refs/heads/main' &&
+          !startsWith(github.ref, 'refs/heads/release/')
         run: |
           new_ver="${{ steps.get-version.outputs.current_version }}+$(git rev-parse --short ${GITHUB_SHA})"
           poetry version $new_ver
@@ -307,7 +308,7 @@ jobs:
 
       - name: Publish UMM-S with new version
         id: publish-umm-s
-        uses: podaac/cmr-umm-updater@0.7.0
+        uses: podaac/cmr-umm-updater@0.7.1
         if: |
           github.ref == 'refs/heads/main'    ||
           startsWith(github.ref, 'refs/heads/release')
@@ -319,7 +320,8 @@ jobs:
           timeout: 60
           disable_removal: 'true'
           umm_type: 'umm-s'
-          use_associations: 'true'        
+          use_associations: 'true'
+          umm_version: 1.5.2
           url_value: ${{ vars.HYDROCRON_BASE_URL }}
         env:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
@@ -334,7 +336,7 @@ jobs:
           
       - name: Publish UMM-S with new version retry
         id: publish-umm-s-retry
-        uses: podaac/cmr-umm-updater@0.7.0
+        uses: podaac/cmr-umm-updater@0.7.1
         if: |
           steps.publish-umm-s.outcome == 'failure'
         with:
@@ -346,6 +348,7 @@ jobs:
           disable_removal: 'true'
           umm_type: 'umm-s'
           use_associations: 'false'
+          umm_version: 1.5.2
           url_value: ${{ vars.HYDROCRON_BASE_URL }}
         env:
           LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
