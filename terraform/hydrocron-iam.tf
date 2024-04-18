@@ -55,7 +55,6 @@ data "aws_iam_policy_document" "lambda-invoke-policy" {
       aws_lambda_function.hydrocron_lambda_load_granule.arn
       ]
   }
-
 }
 data "aws_iam_policy_document" "ssm-read-policy" {
 
@@ -79,7 +78,6 @@ data "aws_iam_policy_document" "ssm-read-policy" {
   }
 
 }
-
 data "aws_iam_policy_document" "s3-read-policy" {
   statement {
     effect  = "Allow"
@@ -239,7 +237,7 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
   inline_policy {
     policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
   }
-  inline_policy {
+    inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
@@ -295,7 +293,7 @@ resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
   inline_policy {
     policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
   }
-  inline_policy {
+    inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
