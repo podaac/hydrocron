@@ -11,7 +11,17 @@ resource "aws_dynamodb_table" "hydrocron-swot-reach-table" {
     name = "range_start_time"
     type = "S"
   }
-
+  attribute {
+    name = "granuleUR"
+    type = "S"
+  }
+  global_secondary_index {
+    name               = "GranuleURIndex"
+    hash_key           = "granuleUR"
+    range_key          = "range_start_time"
+    projection_type    = "INCLUDE"
+    non_key_attributes = ["reach_id", "collection_shortname", "collection_version", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
+  }
 }
 
 resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
@@ -26,5 +36,17 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
   attribute {
     name = "range_start_time"
     type = "S"
+  }
+  attribute {
+    name = "granuleUR"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name               = "GranuleURIndex"
+    hash_key           = "granuleUR"
+    range_key          = "range_start_time"
+    projection_type    = "INCLUDE"
+    non_key_attributes = ["node_id", "collection_shortname", "collection_version", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
   }
 }
