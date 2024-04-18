@@ -124,6 +124,7 @@ resource "aws_lambda_function" "hydrocron_lambda_load_granule" {
     variables = {
       OBSCURE_DATA = "false"
     }
+  }
 }
 
 resource "aws_lambda_function" "hydrocron_lambda_cnm" {
