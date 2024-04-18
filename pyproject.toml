@@ -36,6 +36,8 @@ pytest-cov = "^4.1.0"
 
 [tool.poetry.group.docs.dependencies]
 jupyter-book = "^0.15.1"
+folium = "^0.16.0"
+matplotlib = "^3.8.3"
 
 
 [tool.poetry.group.test.dependencies]

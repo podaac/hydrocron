@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+    - Issue 21 - Create tutorial documentation
     - Issue 142 - Add fields to support OPS monitoring and set up indexes to query on them
 ### Changed
 ### Deprecated 
