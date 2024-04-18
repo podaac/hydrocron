@@ -3,7 +3,7 @@ Unpacks SWOT Reach & Node Shapefiles
 """
 import os.path
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from importlib import resources
 import xml.etree.ElementTree as ET
 import zipfile
@@ -176,9 +176,11 @@ def parse_from_filename(filename):
 
     if 'Reach' in filename:
         collection = constants.SWOT_REACH_COLLECTION_NAME
+        collection_version = constants.SWOT_REACH_COLLECTION_VERSION
 
     if 'Node' in filename:
         collection = constants.SWOT_NODE_COLLECTION_NAME
+        collection_version = constants.SWOT_NODE_COLLECTION_VERSION
 
     filename_attrs = {
         'cycle_id': filename_components[5],
@@ -191,7 +193,10 @@ def parse_from_filename(filename):
             filename_components[9],
             '%Y%m%dT%H%M%S').strftime('%Y-%m-%dT%H:%M:%SZ'),
         'crid': filename_components[10],
-        'collection_shortname': collection
+        'collection_shortname': collection,
+        'collection_version': collection_version,
+        'granuleUR': filename,
+        'ingest_time': datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     }
 
     return filename_attrs
