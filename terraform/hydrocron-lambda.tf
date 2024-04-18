@@ -99,6 +99,8 @@ resource "aws_lambda_function" "hydrocron_lambda_load_data" {
   tags = var.default_tags
   environment {
     variables = {
+      EARTHDATA_USERNAME = data.aws_ssm_parameter.edl_username.value
+      EARTHDATA_PASSWORD = data.aws_ssm_parameter.edl_password.value
       GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
     }
   }

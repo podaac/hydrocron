@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated 
 ### Removed
 ### Fixed
+    - Issue 169 - 403 Error when accessing grnule through bulk load_data
     - Issue 158 - Use Lambda role instead of EDL for s3 connection
     - Issue 104 - Prevent nodes from being loaded into the reach table
 ### Security
