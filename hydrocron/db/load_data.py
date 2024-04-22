@@ -54,7 +54,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
             collection_shortname = constants.SWOT_PRIOR_LAKE_COLLECTION_NAME
             track_table = constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME
-            feature_type = 'LakeSP_Prior'
+            feature_type = 'LakeSP_prior'
         case constants.DB_TEST_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
             track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
@@ -81,7 +81,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
             logging.info('No UMM checksum')
 
         try:
-            revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]][0]
+            revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]]
         except KeyError:
             revision_date = "Not Found"
             logging.info('No UMM revision date')

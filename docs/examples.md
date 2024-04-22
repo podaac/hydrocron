@@ -266,6 +266,193 @@ Will return GeoJSON:
             }
         ]
         }
+}
+```
+
+** geometry simplified for example
+
+## Get time series GeoJSON for river node
+
+Search for a single river node by ID.
+
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=12228200110861&start_time=2024-01-25T00:00:00Z&end_time=2024-03-30T00:00:00Z&output=geojson&fields=reach_id,node_id,time_str,wse](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=12228200110861&start_time=2024-01-25T00:00:00Z&end_time=2024-03-30T00:00:00Z&output=geojson&fields=reach_id,node_id,time_str,wse)
+
+Will return GeoJSON:
+
+```json
+{
+"status": "200 OK",
+"time": 604.705,
+"hits": 9,
+"results": {
+    "csv": "",
+    "geojson": {
+        "type": "FeatureCollection",
+        "features": [
+            {
+            "id": "0",
+            "type": "Feature",
+            "properties": {
+                "reach_id": "12228200111",
+                "node_id": "12228200110861",
+                "time_str": "2024-01-30T21:19:19Z",
+                "wse": "677.9232",
+                "wse_units": "m"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                35.149314,
+                -10.256285
+                ]
+            }
+            },
+            {
+            "id": "1",
+            "type": "Feature",
+            "properties": {
+                "reach_id": "12228200111",
+                "node_id": "12228200110861",
+                "time_str": "2024-02-06T08:37:09Z",
+                "wse": "673.46918",
+                "wse_units": "m"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                35.149314,
+                -10.256285
+                ]
+            }
+            },
+            {
+            "id": "2",
+            "type": "Feature",
+            "properties": {
+                "reach_id": "12228200111",
+                "node_id": "12228200110861",
+                "time_str": "no_data",
+                "wse": "-999999999999.0",
+                "wse_units": "m"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                35.149314,
+                -10.256285
+                ]
+            }
+            },
+            {
+            "id": "3",
+            "type": "Feature",
+            "properties": {
+                "reach_id": "12228200111",
+                "node_id": "12228200110861",
+                "time_str": "2024-02-20T18:04:24Z",
+                "wse": "673.69799",
+                "wse_units": "m"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                35.149314,
+                -10.256285
+                ]
+            }
+            },
+            {
+            "id": "4",
+            "type": "Feature",
+            "properties": {
+                "reach_id": "12228200111",
+                "node_id": "12228200110861",
+                "time_str": "2024-02-27T05:22:15Z",
+                "wse": "674.66235",
+                "wse_units": "m"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                35.149314,
+                -10.256285
+                ]
+            }
+            },
+            {
+            "id": "5",
+            "type": "Feature",
+            "properties": {
+                "reach_id": "12228200111",
+                "node_id": "12228200110861",
+                "time_str": "no_data",
+                "wse": "-999999999999.0",
+                "wse_units": "m"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                35.149314,
+                -10.256285
+                ]
+            }
+            },
+            {
+            "id": "6",
+            "type": "Feature",
+            "properties": {
+                "reach_id": "12228200111",
+                "node_id": "12228200110861",
+                "time_str": "2024-03-12T14:49:26Z",
+                "wse": "673.47788",
+                "wse_units": "m"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                35.149314,
+                -10.256285
+                ]
+            }
+            },
+            {
+            "id": "7",
+            "type": "Feature",
+            "properties": {
+                "reach_id": "12228200111",
+                "node_id": "12228200110861",
+                "time_str": "2024-03-19T02:07:17Z",
+                "wse": "675.23219",
+                "wse_units": "m"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                35.149314,
+                -10.256285
+                ]
+            }
+            },
+            {
+            "id": "8",
+            "type": "Feature",
+            "properties": {
+                "reach_id": "12228200111",
+                "node_id": "12228200110861",
+                "time_str": "no_data",
+                "wse": "-999999999999.0",
+                "wse_units": "m"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                35.149314,
+                -10.256285
+                ]
+            }
+            }
+        ]
+        }
     }
 }
 ```

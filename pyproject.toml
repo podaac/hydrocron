@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hydrocron"
-version = "1.4.0"
+version = "1.5.0a0"
 description = "OpenAPI access to Time Series data for SWOT features"
 authors = ["PO.DAAC <podaac@jpl.nasa.gov>"]
 license = "Apache-2.0"
@@ -20,7 +20,7 @@ six = "^1.16.0"
 boto3 = "^1.28.2"
 pymysql = "^1.1.1"
 geopandas = "0.14.4"
-earthaccess = "0.10.0"
+earthaccess = "^0.5.3"
 shapely = "^2.0.1"
 cryptography = "43.0.1"
 python-dotenv = "^1.0.0"
