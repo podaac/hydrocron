@@ -33,10 +33,10 @@ class RequestError(Exception):
 
 def get_request_headers(event):
     """Return request headers from event object.
-    
+
     :param event: Request data dictionary
     :type event: dict
-    
+
     :rtype: dict
     """
 
@@ -53,10 +53,10 @@ def get_request_headers(event):
 
 def get_request_parameters(event):
     """Return request parameters from event object.
-    
+
     :param event: Request data dictionary
     :type event: dict
-    
+
     :rtype: dict
     """
 
@@ -81,10 +81,10 @@ def get_request_parameters(event):
 
 def get_return_type(accept_header, output):
     """Determine return type and output value requested by user from Accept header
-    
+
     :param accept_header: Accept request header
     :type accept_header: str
-    
+
     :rtype: str, str
     """
 
@@ -95,9 +95,9 @@ def get_return_type(accept_header, output):
 
     if output != 'default':
         if return_type != 'application/json':
-            raise RequestError('400: Invalid combination of Accept header and '\
-                + 'output request parameter. Remove output request parameter when '\
-                + 'requesting application/geo+json or text/csv.')
+            raise RequestError('400: Invalid combination of Accept header and '
+                               + 'output request parameter. Remove output request parameter when '
+                               + 'requesting application/geo+json or text/csv.')
 
     else:
         if return_type in ('application/json', 'application/geo+json'):
@@ -344,7 +344,7 @@ def add_units(gdf, columns):
 
 def get_response(results, hits, elapsed, return_type, output):
     """Create and return HTTP response based on results.
-    
+
     :param results: Dictionary of SWOT timeseries results
     :type results: dict
     :param hits: Number of results returned from query
@@ -355,7 +355,7 @@ def get_response(results, hits, elapsed, return_type, output):
     :type return_type: str
     :param output: Output to return in request
     :type output: str
-    
+
     rtype: dict
     """
 
@@ -367,11 +367,11 @@ def get_response(results, hits, elapsed, return_type, output):
 
         else:  # 'application/json'
             data = {
-                'status': results['http_code'], 
-                'time': elapsed, 
-                'hits': hits, 
+                'status': results['http_code'],
+                'time': elapsed,
+                'hits': hits,
                 'results': {
-                    'csv': "", 
+                    'csv': "",
                     'geojson': {}
                     }
                 }
