@@ -27,6 +27,158 @@ class RequestError(Exception):
     """
 
 
+def get_request_headers(event):
+    """Return request headers from event object.
+    
+    :param event: Request data dictionary
+    :type event: dict
+    
+    :rtype: dict
+    """
+
+    headers = {}
+    try:
+        headers['user_agent'] = event['headers']['User-Agent']
+        headers['user_ip'] = event["headers"]["X-Forwarded-For"].split(",")[0]
+    except KeyError as e:
+        logging.error('Error encountered with headers: %s', e)
+        raise RequestError(f'400: Issue encountered with request header: {e}') from e
+    return headers
+
+
+def get_request_parameters(event):
+    """Return request parameters from event object.
+    
+    :param event: Request data dictionary
+    :type event: dict
+    
+    :rtype: dict
+    """
+
+    parameters = {}
+    try:
+        feature = event['body']['feature']
+        feature_id = event['body']['feature_id']
+        start_time = event['body']['start_time']
+        end_time = event['body']['end_time']
+        output = event['body']['output']
+        fields = event['body']['fields']
+    except KeyError as e:
+        logging.error('Error encountered with request parameters: %s', e)
+        raise RequestError(f'400: This required parameter is missing: {e}') from e
+
+    parameters, error_message = validate_parameters(feature, feature_id, start_time, end_time, output, fields)
+    if error_message:
+        raise RequestError(error_message)
+
+    return parameters
+
+
+def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
+    """
+    Determine if all parameters are present and in the correct format. Return 400
+    Bad Request if any errors are found alongside 0 hits.
+
+    :param feature: Data requested for Reach or Node or Lake
+    :type feature: str
+    :param feature_id: ID of the feature to retrieve
+    :type feature_id: str
+    :param start_time: Start time of the timeseries
+    :type start_time: str
+    :param end_time: End time of the timeseries
+    :type end_time: str
+    :param output: Format of the data returned
+    :type output: str
+    :param fields: List of requested columns
+    :type fields: dict
+
+    :rtype: dict
+    """
+
+    parameters = {}
+    error_message = ''
+
+    if feature not in ('Node', 'Reach'):
+        error_message = f'400: feature parameter should be Reach or Node, not: {feature}'
+
+    elif not feature_id.isdigit():
+        error_message = f'400: feature_id cannot contain letters: {feature_id}'
+
+    elif not is_date_valid(start_time) or not is_date_valid(end_time):
+        error_message = '400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00'
+
+    elif output not in ('csv', 'geojson'):
+        error_message = f'400: output parameter should be csv or geojson, not: {output}'
+
+    elif not is_fields_valid(feature, fields):
+        error_message = '400: fields parameter should contain valid SWOT fields'
+
+    else:
+        parameters['feature'] = feature
+        parameters['feature_id'] = feature_id
+        start_time, end_time = sanitize_time(start_time, end_time)
+        parameters['start_time'] = start_time
+        parameters['end_time'] = end_time
+        parameters['output'] = output
+        parameters['fields'] = fields
+
+    return parameters, error_message
+
+
+def is_date_valid(query_date):
+    """
+    Check if the query date conforms to the correct format.
+
+    :param start_time: Start or end time of the timeseries
+    :type start_time: str
+
+    :rtype: bool
+    """
+
+    try:
+        datetime.datetime.strptime(query_date, "%Y-%m-%dT%H:%M:%S%z")
+        return True
+    except ValueError:
+        return False
+
+
+def is_fields_valid(feature, fields):
+    """
+    Check if fields are present in either the reach or node list of columns
+
+    :param fields: List of requested columns
+    :type fields: dict
+
+    :rtype: bool
+    """
+
+    fields = fields.split(',')
+    if feature == 'Reach':
+        columns = constants.REACH_ALL_COLUMNS
+    elif feature == 'Node':
+        columns = constants.NODE_ALL_COLUMNS
+    else:
+        columns = []
+    return all(field in columns for field in fields)
+
+
+def sanitize_time(start_time, end_time):
+    """
+    Return formatted string to handle cases where request includes non-padded numbers
+
+    :param start_time: Start time of the timeseries
+    :type start_time: str
+    :param end_time: End time of the timeseries
+    :type end_time: str
+
+    :rtype: str, str
+    """
+
+    start_time = datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
+    end_time = datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
+    return start_time, end_time
+
+
 def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
     """Get Timeseries for a particular Reach, Node, or LakeID
 
@@ -156,105 +308,6 @@ def add_units(gdf, columns):
     return columns + unit_columns
 
 
-def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
-    """
-    Determine if all parameters are present and in the correct format. Return 400
-    Bad Request if any errors are found alongside 0 hits.
-
-    :param feature: Data requested for Reach or Node or Lake
-    :type feature: str
-    :param feature_id: ID of the feature to retrieve
-    :type feature_id: str
-    :param start_time: Start time of the timeseries
-    :type start_time: str
-    :param end_time: End time of the timeseries
-    :type end_time: str
-    :param output: Format of the data returned
-    :type output: str
-    :param fields: List of requested columns
-    :type fields: dict
-
-    :rtype: dict, integer
-    """
-
-    data = {'http_code': '200 OK'}
-    if feature not in ('Node', 'Reach'):
-        data['http_code'] = '400 Bad Request'
-        data['error_message'] = f'400: feature parameter should be Reach or Node, not: {feature}'
-
-    elif not feature_id.isdigit():
-        data['http_code'] = '400 Bad Request'
-        data['error_message'] = f'400: feature_id cannot contain letters: {feature_id}'
-
-    elif not is_date_valid(start_time) or not is_date_valid(end_time):
-        data['http_code'] = '400 Bad Request'
-        data['error_message'] = '400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00'
-
-    elif output not in ('csv', 'geojson'):
-        data['http_code'] = '400 Bad Request'
-        data['error_message'] = f'400: output parameter should be csv or geojson, not: {output}'
-
-    elif not is_fields_valid(feature, fields):
-        data['http_code'] = '400 Bad Request'
-        data['error_message'] = '400: fields parameter should contain valid SWOT fields'
-
-    return data, 0
-
-
-def is_date_valid(query_date):
-    """
-    Check if the query date conforms to the correct format.
-
-    :param start_time: Start or end time of the timeseries
-    :type start_time: str
-
-    :rtype: bool
-    """
-
-    try:
-        datetime.datetime.strptime(query_date, "%Y-%m-%dT%H:%M:%S%z")
-        return True
-    except ValueError:
-        return False
-
-
-def is_fields_valid(feature, fields):
-    """
-    Check if fields are present in either the reach or node list of columns
-
-    :param fields: List of requested columns
-    :type fields: dict
-
-    :rtype: bool
-    """
-
-    fields = fields.split(',')
-    if feature == 'Reach':
-        columns = constants.REACH_ALL_COLUMNS
-    elif feature == 'Node':
-        columns = constants.NODE_ALL_COLUMNS
-    else:
-        columns = []
-    return all(field in columns for field in fields)
-
-
-def sanitize_time(start_time, end_time):
-    """
-    Return formatted string to handle cases where request includes non-padded numbers
-
-    :param start_time: Start time of the timeseries
-    :type start_time: str
-    :param end_time: End time of the timeseries
-    :type end_time: str
-
-    :rtype: str, str
-    """
-
-    start_time = datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
-    end_time = datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
-    return start_time, end_time
-
-
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
     This function queries the database for relevant results
@@ -266,31 +319,22 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     logging.info('request: %s', json.dumps(event['body']))
 
     try:
-        if event['body'] == {} and 'Elastic-Heartbeat' in event['headers']['User-Agent']:
+        headers = get_request_headers(event)
+        if event['body'] == {} and 'Elastic-Heartbeat' in headers['user_agent']:
             return {}
-        logging.info('user_ip: %s', event["headers"]["X-Forwarded-For"].split(",")[0])
-    except KeyError as e:
-        logging.error('Error encountered with headers: %s', e)
-        raise RequestError(f'400: Issue encountered with request header: {e}') from e
+        logging.info('user_ip: %s', headers['user_ip'])
+        parameters = get_request_parameters(event)
+    except RequestError as e:
+        raise e
 
-    results = {'http_code': '200 OK'}
-    try:
-        feature = event['body']['feature']
-        feature_id = event['body']['feature_id']
-        start_time = event['body']['start_time']
-        end_time = event['body']['end_time']
-        output = event['body']['output']
-        fields = event['body']['fields']
-        results, hits = validate_parameters(feature, feature_id, start_time, end_time, output, fields)
-    except KeyError as e:
-        missing_parameter = str(e).rsplit(' ', maxsplit=1)[-1]
-        results['http_code'] = '400 Bad Request'
-        results['error_message'] = f'400: This required parameter is missing: {missing_parameter}'
-        hits = 0
-
-    if results['http_code'] == '200 OK':
-        start_time, end_time = sanitize_time(start_time, end_time)
-        results, hits = timeseries_get(feature, feature_id, start_time, end_time, output, fields)
+    results, hits = timeseries_get(
+        parameters['feature'],
+        parameters['feature_id'],
+        parameters['start_time'],
+        parameters['end_time'],
+        parameters['output'],
+        parameters['fields']
+    )
 
     end = time.time()
     elapsed = round((end - start) * 1000, 3)
