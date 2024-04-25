@@ -9,6 +9,7 @@ import logging
 import sys
 import time
 
+from accept_types import get_best_match
 import pandas as pd
 import geopandas as gpd
 from shapely.wkt import loads
@@ -19,6 +20,9 @@ from hydrocron.utils import constants
 
 
 logging.getLogger().setLevel(logging.INFO)
+
+
+ACCEPT_TYPES = ['application/json', 'text/csv', 'application/geo+json']
 
 
 class RequestError(Exception):
@@ -39,7 +43,8 @@ def get_request_headers(event):
     headers = {}
     try:
         headers['user_agent'] = event['headers']['User-Agent']
-        headers['user_ip'] = event["headers"]["X-Forwarded-For"].split(",")[0]
+        headers['user_ip'] = event['headers']['X-Forwarded-For'].split(',')[0]
+        headers['accept'] = '*/*' if 'Accept' not in event['headers'].keys() else event['headers']['Accept']
     except KeyError as e:
         logging.error('Error encountered with headers: %s', e)
         raise RequestError(f'400: Issue encountered with request header: {e}') from e
@@ -61,7 +66,7 @@ def get_request_parameters(event):
         feature_id = event['body']['feature_id']
         start_time = event['body']['start_time']
         end_time = event['body']['end_time']
-        output = event['body']['output']
+        output = 'default' if 'output' not in event['body'].keys() else event['body']['output']
         fields = event['body']['fields']
     except KeyError as e:
         logging.error('Error encountered with request parameters: %s', e)
@@ -72,6 +77,35 @@ def get_request_parameters(event):
         raise RequestError(error_message)
 
     return parameters
+
+
+def get_return_type(accept_header, output):
+    """Determine return type and output value requested by user from Accept header
+    
+    :param accept_header: Accept request header
+    :type accept_header: str
+    
+    :rtype: str, str
+    """
+
+    return_type = get_best_match(accept_header, ACCEPT_TYPES)
+
+    if return_type is None:
+        raise RequestError(f'415: Unsupported media type in Accept request header: {accept_header}.')
+
+    if output != 'default':
+        if return_type != 'application/json':
+            raise RequestError('400: Invalid combination of Accept header and '\
+                + 'output request parameter. Remove output request parameter when '\
+                + 'requesting application/geo+json or text/csv.')
+
+    else:
+        if return_type in ('application/json', 'application/geo+json'):
+            output = 'geojson'
+        elif return_type == 'text/csv':
+            output = 'csv'
+
+    return return_type, output
 
 
 def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
@@ -107,7 +141,7 @@ def validate_parameters(feature, feature_id, start_time, end_time, output, field
     elif not is_date_valid(start_time) or not is_date_valid(end_time):
         error_message = '400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00'
 
-    elif output not in ('csv', 'geojson'):
+    elif output not in ('csv', 'geojson', 'default'):
         error_message = f'400: output parameter should be csv or geojson, not: {output}'
 
     elif not is_fields_valid(feature, fields):
@@ -308,6 +342,48 @@ def add_units(gdf, columns):
     return columns + unit_columns
 
 
+def get_response(results, hits, elapsed, return_type, output):
+    """Create and return HTTP response based on results.
+    
+    :param results: Dictionary of SWOT timeseries results
+    :type results: dict
+    :param hits: Number of results returned from query
+    :type hits: int
+    :param elapsed: Number of seconds it took to query for results
+    :type elapsed: float
+    :param return_type: Accept request header
+    :type return_type: str
+    :param output: Output to return in request
+    :type output: str
+    
+    rtype: dict
+    """
+
+    data = {}
+    if results['http_code'] == '200 OK':
+
+        if return_type in ('text/csv', 'application/geo+json'):
+            data = results['response']
+
+        else:  # 'application/json'
+            data = {
+                'status': results['http_code'], 
+                'time': elapsed, 
+                'hits': hits, 
+                'results': {
+                    'csv': "", 
+                    'geojson': {}
+                    }
+                }
+            data['results'][output] = results['response']
+
+    else:
+        logging.error(results)
+        raise RequestError(results['error_message'])
+
+    return data
+
+
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     """
     This function queries the database for relevant results
@@ -324,6 +400,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
             return {}
         logging.info('user_ip: %s', headers['user_ip'])
         parameters = get_request_parameters(event)
+        return_type, output = get_return_type(headers['accept'], parameters['output'])
     except RequestError as e:
         raise e
 
@@ -332,20 +409,15 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         parameters['feature_id'],
         parameters['start_time'],
         parameters['end_time'],
-        parameters['output'],
+        output,
         parameters['fields']
     )
 
     end = time.time()
     elapsed = round((end - start) * 1000, 3)
 
-    data = {'status': results['http_code'], 'time': elapsed, 'hits': hits, 'results': {'csv': "", 'geojson': {}}}
-    if results['http_code'] == '200 OK':
-        data['results'][event['body']['output']] = results['response']
-        logging.info('response: %s', json.dumps(data))
-        logging.info('response_size: %s', str(sys.getsizeof(data)))
-    else:
-        logging.error(results)
-        raise RequestError(results['error_message'])
+    data = get_response(results, hits, elapsed, return_type, output)
+    logging.info('response: %s', json.dumps(data))
+    logging.info('response_size: %s', str(sys.getsizeof(data)))
 
     return data
