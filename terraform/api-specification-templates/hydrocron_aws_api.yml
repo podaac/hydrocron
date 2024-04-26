@@ -114,6 +114,14 @@ paths:
                 type: array
                 items:
                   type: string
+        "415":
+          description: "415 error. Your request includes an unsupported media type."
+          content:
+            text/csv:
+              schema:
+                type: array
+                items:
+                  type: string
       x-openapi-router-controller: hydrocron_api.controllers.timeseries
 
       x-amazon-apigateway-integration:
@@ -158,6 +166,13 @@ paths:
                 }
           ^413.*:
             statusCode: "413"
+            responseTemplates:
+              application/json: |-
+                {
+                  "error" : "$input.path('$.errorMessage')"
+                }
+          ^415.*:
+            statusCode: "415"
             responseTemplates:
               application/json: |-
                 {
