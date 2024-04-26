@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+    - Issue 102 - Enable compression for API Responses
+### Deprecated 
+### Removed
+### Fixed
+### Security
+
+## [1.2.0]
+
 ### Added
     - Issue 124 - Log granule name on ingest
     - Issue 155 - Log feature ids on database write
@@ -20,8 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 104 - Prevent nodes from being loaded into the reach table
 ### Security
 
-
 ## [1.1.0]
+
 ### Added 
     - Issue 77 - Create UMM-S record for hydrocron
     - Issue 89 - Pass headers to timeseries Lambda and test for 'Elastic-Heartbeat' in 'User-Agent' header
