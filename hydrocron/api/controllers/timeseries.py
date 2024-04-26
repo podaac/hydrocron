@@ -91,13 +91,14 @@ def get_return_type(accept_header, output):
     return_type = get_best_match(accept_header, ACCEPT_TYPES)
 
     if return_type is None:
-        raise RequestError(f'415: Unsupported media type in Accept request header: {accept_header}.')
+        raise RequestError(f'415: Unsupported media type in Accept request header: {accept_header}')
 
     if output != 'default':
         if return_type != 'application/json':
+            logging.error('Error encountered with request Accept header: %s and output: %s', return_type, output)
             raise RequestError('400: Invalid combination of Accept header and '
                                + 'output request parameter. Remove output request parameter when '
-                               + 'requesting application/geo+json or text/csv.')
+                               + 'requesting application/geo+json or text/csv')
 
     else:
         if return_type in ('application/json', 'application/geo+json'):
@@ -416,7 +417,10 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     end = time.time()
     elapsed = round((end - start) * 1000, 3)
 
-    data = get_response(results, hits, elapsed, return_type, output)
+    try:
+        data = get_response(results, hits, elapsed, return_type, output)
+    except RequestError as e:
+        raise e
     logging.info('response: %s', json.dumps(data))
     logging.info('response_size: %s', str(sys.getsizeof(data)))
 

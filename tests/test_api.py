@@ -640,3 +640,33 @@ def test_timeseries_lambda_handler_unsupported(hydrocron_api):
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
         assert "415: Unsupported media type in Accept request header: image/jpg." in str(e.value)
+
+
+def test_timeseries_lambda_handler_reachid_not_found(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries endpoint
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100228",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000",
+            "Accept": "image/jpg"
+        }
+    }
+
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+        assert "400: Results with the specified Feature ID 71224100228 were not found" in str(e.value)
