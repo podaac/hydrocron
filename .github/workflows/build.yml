@@ -131,6 +131,7 @@ jobs:
         if: |
           startsWith(github.ref, 'refs/heads/main') &&
           steps.manual.conclusion == 'skipped'
+        id: release
         env:
           CURRENT_VERSION: ${{ steps.get-version.outputs.current_version }}
         # Remove rc* from end of version string
