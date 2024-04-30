@@ -24,6 +24,12 @@ class MissingTable(Exception):
     """
 
 
+class TableMisMatch(Exception):
+    """
+    Exception thrown if table does not match feature type
+    """
+
+
 def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     """
     Lambda entrypoint for loading the database
@@ -34,7 +40,6 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     table_name = event['body']['table_name']
     start_date = event['body']['start_date']
     end_date = event['body']['end_date']
-    obscure_data = event['body']['obscure_data']
     load_benchmarking_data = event['body']['load_benchmarking_data']
 
     match table_name:
@@ -64,7 +69,6 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
 
         if feature_type in granule_path:
             event2 = ('{"body": {"granule_path": "' + granule_path
-                      + '","obscure_data": "' + obscure_data
                       + '","table_name": "' + table_name
                       + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
@@ -81,11 +85,20 @@ def granule_handler(event, _):
     Second Lambda entrypoint for loading individual granules
     """
     granule_path = event['body']['granule_path']
-    obscure_data = event['body']['obscure_data']
     table_name = event['body']['table_name']
+
     load_benchmarking_data = event['body']['load_benchmarking_data']
 
+    if ("Reach" in granule_path) & (table_name != constants.SWOT_REACH_TABLE_NAME):
+        raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}'")
+
+    if ("Node" in granule_path) & (table_name != constants.SWOT_NODE_TABLE_NAME):
+        raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}'")
+
     logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
+
+    obscure_data = "true" in os.getenv("OBSCURE_DATA").lower()
+    logging.info("Value of obscure_data is: %s", obscure_data)
 
     if load_benchmarking_data == "True":
         logging.info("Loading benchmarking data")
@@ -99,7 +112,7 @@ def granule_handler(event, _):
 
     logging.info("Set up dynamo connection")
     dynamo_resource = connection.dynamodb_resource
-    logging.info("Begin loading data items")
+    logging.info("Begin loading data from granule: %s", os.path.basename(granule_path))
     load_data(dynamo_resource, table_name, items)
 
 
@@ -107,7 +120,6 @@ def cnm_handler(event, _):
     """
     Unpacks CNM-R message and invokes granule_load lambda
     """
-    obscure_data = "False"
     load_benchmarking_data = "False"
 
     lambda_client = boto3.client('lambda')
@@ -124,7 +136,6 @@ def cnm_handler(event, _):
 
                 if 'Reach' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
-                              + '","obscure_data": "' + obscure_data
                               + '","table_name": "' + constants.SWOT_REACH_TABLE_NAME
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
@@ -137,7 +148,6 @@ def cnm_handler(event, _):
 
                 if 'Node' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
-                              + '","obscure_data": "' + obscure_data
                               + '","table_name": "' + constants.SWOT_NODE_TABLE_NAME
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
@@ -240,23 +250,29 @@ def load_data(dynamo_resource, table_name, items):
     if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
 
         if len(items) > 5:
-            logging.info("Batch adding reach items")
+            logging.info("Batch adding %s reach items", len(items))
+            for i in range(5):
+                logging.info("Item reach_id: %s", items[i]['reach_id'])
             hydrocron_table.batch_fill_table(items)
 
         else:
             logging.info("Adding reach items to table individually")
             for item_attrs in items:
+                logging.info("Item reach_id: %s", item_attrs['reach_id'])
                 hydrocron_table.add_data(**item_attrs)
 
     elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
 
         if len(items) > 5:
-            logging.info("Batch adding node items")
+            logging.info("Batch adding %s node items", len(items))
+            for i in range(5):
+                logging.info("Item node_id: %s", items[i]['node_id'])
             hydrocron_table.batch_fill_table(items)
 
         else:
             logging.info("Adding node items to table individually")
             for item_attrs in items:
+                logging.info("Item node_id: %s", item_attrs['node_id'])
                 hydrocron_table.add_data(**item_attrs)
 
     else:
