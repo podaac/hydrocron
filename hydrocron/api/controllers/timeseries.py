@@ -101,7 +101,7 @@ def get_return_type(accept_header, output):
             logging.error('Error encountered with request Accept header: %s and output: %s', return_type, output)
             raise RequestError(f'400: Invalid combination of Accept header ({accept_header}) and '
                                + f'output request parameter ({output}). Remove output request parameter when '
-                               + f'requesting application/geo+json or text/csv')
+                               + 'requesting application/geo+json or text/csv')
 
     else:
         if return_type in ('application/json', 'application/geo+json'):
