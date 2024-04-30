@@ -60,7 +60,6 @@ def get_request_parameters(event):
     :rtype: dict
     """
 
-    parameters = {}
     try:
         feature = event['body']['feature']
         feature_id = event['body']['feature_id']
@@ -85,20 +84,24 @@ def get_return_type(accept_header, output):
     :param accept_header: Accept request header
     :type accept_header: str
 
+    :param output: Output type requested by user
+    :type output: str
+
     :rtype: str, str
     """
 
     return_type = get_best_match(accept_header, ACCEPT_TYPES)
 
     if return_type is None:
-        raise RequestError(f'415: Unsupported media type in Accept request header: {accept_header}')
+        raise RequestError(f'415: Unsupported media type in Accept request header: {accept_header}. Hydrocron '
+                           f'only supports the following media types: {ACCEPT_TYPES}')
 
     if output != 'default':
         if return_type != 'application/json':
             logging.error('Error encountered with request Accept header: %s and output: %s', return_type, output)
-            raise RequestError('400: Invalid combination of Accept header and '
-                               + 'output request parameter. Remove output request parameter when '
-                               + 'requesting application/geo+json or text/csv')
+            raise RequestError(f'400: Invalid combination of Accept header ({accept_header}) and '
+                               + f'output request parameter ({output}). Remove output request parameter when '
+                               + f'requesting application/geo+json or text/csv')
 
     else:
         if return_type in ('application/json', 'application/geo+json'):
@@ -125,7 +128,7 @@ def validate_parameters(feature, feature_id, start_time, end_time, output, field
     :param output: Format of the data returned
     :type output: str
     :param fields: List of requested columns
-    :type fields: dict
+    :type fields: str
 
     :rtype: dict
     """
@@ -140,7 +143,8 @@ def validate_parameters(feature, feature_id, start_time, end_time, output, field
         error_message = f'400: feature_id cannot contain letters: {feature_id}'
 
     elif not is_date_valid(start_time) or not is_date_valid(end_time):
-        error_message = '400: start_time and end_time parameters must conform to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00'
+        error_message = ('400: start_time and end_time parameters must conform '
+                         'to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00')
 
     elif output not in ('csv', 'geojson', 'default'):
         error_message = f'400: output parameter should be csv or geojson, not: {output}'
@@ -164,8 +168,8 @@ def is_date_valid(query_date):
     """
     Check if the query date conforms to the correct format.
 
-    :param start_time: Start or end time of the timeseries
-    :type start_time: str
+    :param query_date: Start or end time of the timeseries
+    :type query_date: str
 
     :rtype: bool
     """
@@ -181,8 +185,11 @@ def is_fields_valid(feature, fields):
     """
     Check if fields are present in either the reach or node list of columns
 
+    :param feature: The type of feature, either 'Reach' or 'Node'
+    :type feature: str
+
     :param fields: List of requested columns
-    :type fields: dict
+    :type fields: str
 
     :rtype: bool
     """
@@ -230,7 +237,7 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     :param output: Format of the data returned
     :type output: str
     :param fields: List of requested columns
-    :type fields: dict
+    :type fields: str
 
     :rtype: Dict, integer
     """
@@ -283,7 +290,7 @@ def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
     :param gdf: DataFrame of results from query
     :type gdf: gpd.GeoDataFrame
     :param fields: List of requested columns
-    :type fields: dict
+    :type fields: str
 
     :rtype: dict, integer
     """
@@ -310,7 +317,7 @@ def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
     :param gdf: DataFrame of results from query
     :type gdf: gpd.GeoDataFrame
     :param fields: List of requested columns
-    :type fields: dict
+    :type fields: str
 
     :rtype: dict, integer
     """
@@ -360,7 +367,6 @@ def get_response(results, hits, elapsed, return_type, output):
     rtype: dict
     """
 
-    data = {}
     if results['http_code'] == '200 OK':
 
         if return_type in ('text/csv', 'application/geo+json'):
@@ -397,6 +403,10 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
 
     try:
         headers = get_request_headers(event)
+        # The cloud metrics Elastic Heartbeat is a Health check that occurs
+        # every 15 seconds. The following statement checks if the current request is an Elastic Heartbeat
+        # and if it is, simply return success immediately instead of further processing the request
+        # More background: https://github.com/podaac/hydrocron/issues/89
         if event['body'] == {} and 'Elastic-Heartbeat' in headers['user_agent']:
             return {}
         logging.info('user_ip: %s', headers['user_ip'])
