@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated 
 ### Removed
 ### Fixed
+    - Issue 175 - Update all documentation to point to OPS instead of UAT
 ### Security
 
 ## [1.2.0]
