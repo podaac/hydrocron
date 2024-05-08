@@ -73,6 +73,14 @@ paths:
           type: string
           default: feature_id, time_str, wse, geometry
         example: feature_id, time_str, wse, geometry
+      - name: compact
+        in: query
+        description: Whether to return a compact GeoJSON response
+        required: false
+        schema:
+          type: boolean
+          default: false
+        example: true
       responses:
         "200":
           description: OK
