@@ -25,6 +25,7 @@ resource "aws_api_gateway_rest_api" "hydrocron-api-gateway" {
   lifecycle {
     prevent_destroy = true
   }
+  minimum_compression_size = 20480
 }
 
 resource "aws_api_gateway_rest_api_policy" "hydrocron-api-gateway-policy" {

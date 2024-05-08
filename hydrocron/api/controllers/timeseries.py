@@ -352,6 +352,15 @@ def get_response(results, hits, elapsed, return_type, output, compact):
     :param return_type: Accept request header
     :type return_type: str
     :param output: Output to return in request
+    :param results: Dictionary of SWOT timeseries results
+    :type results: dict
+    :param hits: Number of results returned from query
+    :type hits: int
+    :param elapsed: Number of seconds it took to query for results
+    :type elapsed: float
+    :param return_type: Accept request header
+    :type return_type: str
+    :param output: Output to return in request
     :type output: str
     :param compact: Whether to return compact GeoJSON response
     :type compact: str

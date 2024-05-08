@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-    - Issue 101 - Add support for HTTP Accept header
     - Issue 100 - Add option to 'compact' GeoJSON result into single feature
+    - Issue 101 - Add support for HTTP Accept header
+    - Issue 102 - Enable compression for API Responses
 ### Deprecated 
 ### Removed
 ### Fixed
