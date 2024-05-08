@@ -389,7 +389,7 @@ def get_response(results, hits, elapsed, return_type, output, compact):
 
 
 def compact_results(results):
-    """Compact GeoJSON results to return a properties object with aggregated 
+    """Compact GeoJSON results to return a properties object with aggregated
     time series data.
 
     :param results: Dictionary of SWOT timeseries results
@@ -412,7 +412,7 @@ def compact_results(results):
 
     fields = list(results['features'][0]['properties'].keys())
     for field in fields:
-        response['features'][0]['properties'][field] = [ feature['properties'][field] for feature in results['features'] ]
+        response['features'][0]['properties'][field] = [feature['properties'][field] for feature in results['features']]
 
     return response
 
