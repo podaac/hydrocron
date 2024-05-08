@@ -16,7 +16,7 @@ paths:
       - name: feature
         in: query
         description: Type of feature being requested
-        required: false
+        required: true
         style: form
         explode: true
         schema:
@@ -66,7 +66,7 @@ paths:
       - name: fields
         in: query
         description: Format of the data returned
-        required: false
+        required: true
         style: form
         explode: true
         schema:
