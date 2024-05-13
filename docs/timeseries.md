@@ -19,18 +19,6 @@ Possible header and request parameter combinations:
 Example GeoJSON request and response:
 
 ```bash
-curl -v --header "Accept: text/csv" --location 'https://soto.podaac.sit.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
-```
-
-Content-Type: text/csv
-
-```json
-"reach_id,time_str,wse,wse_units\n63470800171,2024-02-01T02:26:50Z,3386.9332,m\n63470800171,2024-02-08T13:48:41Z,1453.4136,m\n"
-```
-
-Example CSV request and response:
-
-```bash
 curl -v --header "Accept: application/geo+json" --location 'https://soto.podaac.sit.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
 ```
 
@@ -73,6 +61,18 @@ Content-Type: 'application/geo+json'
 ```
 
 *Coordinates removed
+
+Example CSV request and response:
+
+```bash
+curl -v --header "Accept: text/csv" --location 'https://soto.podaac.sit.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
+```
+
+Content-Type: text/csv
+
+```json
+"reach_id,time_str,wse,wse_units\n63470800171,2024-02-01T02:26:50Z,3386.9332,m\n63470800171,2024-02-08T13:48:41Z,1453.4136,m\n"
+```
 
 ## Request Parameters
 
@@ -303,7 +303,7 @@ Example JSON response:
 
 If the user sends a request parameter of `compact=true` and the request parameter `output=geojson`, the response will be compacted. The compacted response appends time series data into a single list for each requested field and is stored under the `properties` object in the `results` object.
 
-Only one Feature is ever returned as the data is aggregated under a single "Feature". The geometry for the data is included in the response's `geometry` object in the response which is only listed once as there is only one Feature represented in the response.
+Only one Feature is ever returned as the data is aggregated under a single "Feature". The geometry for the data is included in the response's `geometry` object which is listed once as there is only one Feature represented in the response.
 
 Example compacted JSON response:
 
