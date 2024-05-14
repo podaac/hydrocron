@@ -459,7 +459,8 @@ def test_timeseries_lambda_handler_geojson_accept(hydrocron_api):
             "feature_id": "71224100223",
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
-            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
+            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid",
+            "compact": "false"
         },
         "headers": {
             "User-Agent": "curl/8.4.0",
@@ -670,3 +671,71 @@ def test_timeseries_lambda_handler_reachid_not_found(hydrocron_api):
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
         assert "400: Results with the specified Feature ID 71224100228 were not found" in str(e.value)
+
+
+def test_timeseries_lambda_handler_json_compact(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries endpoint
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid",
+            "compact": "true"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
+        }
+    }
+
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    test_data = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+                 .joinpath('test_data').joinpath('api_query_results_geojson_compact.json'))
+    with open(test_data) as jf:
+        expected = json.load(jf)
+    assert result['status'] == '200 OK' and \
+           result['results']['geojson'] == expected
+
+
+def test_timeseries_lambda_handler_geojson_accept_compact(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries endpoint
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid",
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000",
+            "Accept": "application/geo+json"
+        }
+    }
+
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    test_data = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+                 .joinpath('test_data').joinpath('api_query_results_geojson_compact.json'))
+    with open(test_data) as jf:
+        expected = json.load(jf)
+    assert result == expected

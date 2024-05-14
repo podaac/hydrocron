@@ -16,7 +16,7 @@ paths:
       - name: feature
         in: query
         description: Type of feature being requested
-        required: false
+        required: true
         style: form
         explode: true
         schema:
@@ -66,13 +66,21 @@ paths:
       - name: fields
         in: query
         description: Format of the data returned
-        required: false
+        required: true
         style: form
         explode: true
         schema:
           type: string
           default: feature_id, time_str, wse, geometry
         example: feature_id, time_str, wse, geometry
+      - name: compact
+        in: query
+        description: Whether to return a compact GeoJSON response
+        required: false
+        schema:
+          type: boolean
+          default: false
+        example: true
       responses:
         "200":
           description: OK

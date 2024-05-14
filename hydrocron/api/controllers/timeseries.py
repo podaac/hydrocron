@@ -51,7 +51,7 @@ def get_request_headers(event):
     return headers
 
 
-def get_request_parameters(event):
+def get_request_parameters(event, accept_header):
     """Return request parameters from event object.
 
     :param event: Request data dictionary
@@ -60,18 +60,22 @@ def get_request_parameters(event):
     :rtype: dict
     """
 
+    parameters = {}
     try:
-        feature = event['body']['feature']
-        feature_id = event['body']['feature_id']
-        start_time = event['body']['start_time']
-        end_time = event['body']['end_time']
-        output = 'default' if 'output' not in event['body'].keys() else event['body']['output']
-        fields = event['body']['fields']
+        parameters['feature'] = event['body']['feature']
+        parameters['feature_id'] = event['body']['feature_id']
+        parameters['start_time'] = event['body']['start_time']
+        parameters['end_time'] = event['body']['end_time']
+        parameters['output'] = 'default' if 'output' not in event['body'].keys() else event['body']['output']
+        parameters['fields'] = event['body']['fields']
+        parameters['compact'] = 'false' if 'compact' not in event['body'].keys() else event['body']['compact']
+        if accept_header == 'application/geo+json':   # Default is different for geo+json
+            parameters['compact'] = 'true' if 'compact' not in event['body'].keys() else event['body']['compact']
     except KeyError as e:
         logging.error('Error encountered with request parameters: %s', e)
         raise RequestError(f'400: This required parameter is missing: {e}') from e
 
-    parameters, error_message = validate_parameters(feature, feature_id, start_time, end_time, output, fields)
+    error_message = validate_parameters(parameters)
     if error_message:
         raise RequestError(error_message)
 
@@ -112,56 +116,42 @@ def get_return_type(accept_header, output):
     return return_type, output
 
 
-def validate_parameters(feature, feature_id, start_time, end_time, output, fields):
+def validate_parameters(parameters):
     """
     Determine if all parameters are present and in the correct format. Return 400
     Bad Request if any errors are found alongside 0 hits.
 
-    :param feature: Data requested for Reach or Node or Lake
-    :type feature: str
-    :param feature_id: ID of the feature to retrieve
-    :type feature_id: str
-    :param start_time: Start time of the timeseries
-    :type start_time: str
-    :param end_time: End time of the timeseries
-    :type end_time: str
-    :param output: Format of the data returned
-    :type output: str
-    :param fields: List of requested columns
-    :type fields: str
+    :param parameters: Dictionary of query parameters
+    :type parameters: dict
 
-    :rtype: dict
+    :rtype: str
     """
 
-    parameters = {}
     error_message = ''
 
-    if feature not in ('Node', 'Reach'):
-        error_message = f'400: feature parameter should be Reach or Node, not: {feature}'
+    if parameters['feature'] not in ('Node', 'Reach'):
+        error_message = f'400: feature parameter should be Reach or Node, not: {parameters["feature"]}'
 
-    elif not feature_id.isdigit():
-        error_message = f'400: feature_id cannot contain letters: {feature_id}'
+    elif not parameters['feature_id'].isdigit():
+        error_message = f'400: feature_id cannot contain letters: {parameters["feature_id"]}'
 
-    elif not is_date_valid(start_time) or not is_date_valid(end_time):
+    elif not is_date_valid(parameters['start_time']) or not is_date_valid(parameters['end_time']):
         error_message = ('400: start_time and end_time parameters must conform '
                          'to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00')
 
-    elif output not in ('csv', 'geojson', 'default'):
-        error_message = f'400: output parameter should be csv or geojson, not: {output}'
+    elif parameters['output'] not in ('csv', 'geojson', 'default'):
+        error_message = f'400: output parameter should be csv or geojson, not: {parameters["output"]}'
 
-    elif not is_fields_valid(feature, fields):
+    elif not is_fields_valid(parameters['feature'], parameters['fields']):
         error_message = '400: fields parameter should contain valid SWOT fields'
 
-    else:
-        parameters['feature'] = feature
-        parameters['feature_id'] = feature_id
-        start_time, end_time = sanitize_time(start_time, end_time)
-        parameters['start_time'] = start_time
-        parameters['end_time'] = end_time
-        parameters['output'] = output
-        parameters['fields'] = fields
+    elif parameters['compact'] not in ('true', 'false'):
+        error_message = f'400: compact parameter should be true or false, not {parameters["compact"]}'
 
-    return parameters, error_message
+    else:
+        parameters['start_time'], parameters['end_time'] = sanitize_time(parameters['start_time'], parameters['end_time'])
+
+    return error_message
 
 
 def is_date_valid(query_date):
@@ -350,7 +340,7 @@ def add_units(gdf, columns):
     return columns + unit_columns
 
 
-def get_response(results, hits, elapsed, return_type, output):
+def get_response(results, hits, elapsed, return_type, output, compact):
     """Create and return HTTP response based on results.
 
     :param results: Dictionary of SWOT timeseries results
@@ -362,7 +352,18 @@ def get_response(results, hits, elapsed, return_type, output):
     :param return_type: Accept request header
     :type return_type: str
     :param output: Output to return in request
+    :param results: Dictionary of SWOT timeseries results
+    :type results: dict
+    :param hits: Number of results returned from query
+    :type hits: int
+    :param elapsed: Number of seconds it took to query for results
+    :type elapsed: float
+    :param return_type: Accept request header
+    :type return_type: str
+    :param output: Output to return in request
     :type output: str
+    :param compact: Whether to return compact GeoJSON response
+    :type compact: str
 
     rtype: dict
     """
@@ -370,7 +371,10 @@ def get_response(results, hits, elapsed, return_type, output):
     if results['http_code'] == '200 OK':
 
         if return_type in ('text/csv', 'application/geo+json'):
-            data = results['response']
+            if compact == 'true' and return_type == 'application/geo+json':
+                data = compact_results(results['response'])
+            else:
+                data = results['response']
 
         else:  # 'application/json'
             data = {
@@ -378,10 +382,12 @@ def get_response(results, hits, elapsed, return_type, output):
                 'time': elapsed,
                 'hits': hits,
                 'results': {
-                    'csv': "",
+                    'csv': '',
                     'geojson': {}
                     }
                 }
+            if output == 'geojson' and compact == 'true':
+                results['response'] = compact_results(results['response'])
             data['results'][output] = results['response']
 
     else:
@@ -389,6 +395,35 @@ def get_response(results, hits, elapsed, return_type, output):
         raise RequestError(results['error_message'])
 
     return data
+
+
+def compact_results(results):
+    """Compact GeoJSON results to return a properties object with aggregated
+    time series data.
+
+    :param results: Dictionary of SWOT timeseries results
+    :type results: dict
+
+    rtype: dict
+    """
+
+    response = {
+        'type': 'FeatureCollection',
+        'features': [
+            {
+                'id': '0',
+                'type': 'Feature',
+                'properties': {},
+                'geometry': results['features'][0]['geometry']   # Grab first geometry
+            }
+        ]
+    }
+
+    fields = list(results['features'][0]['properties'].keys())
+    for field in fields:
+        response['features'][0]['properties'][field] = [feature['properties'][field] for feature in results['features']]
+
+    return response
 
 
 def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
@@ -410,7 +445,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         if event['body'] == {} and 'Elastic-Heartbeat' in headers['user_agent']:
             return {}
         logging.info('user_ip: %s', headers['user_ip'])
-        parameters = get_request_parameters(event)
+        parameters = get_request_parameters(event, headers['accept'])
         return_type, output = get_return_type(headers['accept'], parameters['output'])
     except RequestError as e:
         raise e
@@ -428,7 +463,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     elapsed = round((end - start) * 1000, 3)
 
     try:
-        data = get_response(results, hits, elapsed, return_type, output)
+        data = get_response(results, hits, elapsed, return_type, output, parameters['compact'])
     except RequestError as e:
         raise e
     logging.info('response: %s', json.dumps(data))
