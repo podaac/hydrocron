@@ -1,8 +1,8 @@
 """
 Hydrocron class to track status of ingested granules.
 
-Note: Current usage uses a JSON file as a substitute for a DynamoDB table and 
-queries that JSON file to determine what has been ingested. If this is 
+Note: Current usage uses a JSON file as a substitute for a DynamoDB table and
+queries that JSON file to determine what has been ingested. If this is
 implemented we should query the Hydrocron reaches and nodes tables.
 """
 
@@ -30,7 +30,7 @@ logging.basicConfig(filename=f"{TMP_WORKSPACE}/track.log",
 
 class Track:
     """
-    Class to track the status of ingested granules and submit missed or 
+    Class to track the status of ingested granules and submit missed or
     newly discovered granules for Hydrocron database ingestion.
     """
 
@@ -167,14 +167,14 @@ class Track:
             json.dump(hydrocron_granules, json_file, indent=2)
 
         # Report on granules that have been set to to_ingest
-        to_ingest = {key:value for key,value in self.hydrocron_granules.items() if value["status"] == "to_ingest"}
+        to_ingest = {key: value for key, value in self.hydrocron_granules.items() if value["status"] == "to_ingest"}
         with open(f"{TMP_WORKSPACE}/granule_toingest_{self.revision_end.strftime('%Y%m%dT%H%M%S')}.json", 'w', encoding="utf-8") as json_file:
             json.dump(to_ingest, json_file, indent=2)
 
         # Report on granules that have been set to ingested
-        ingested = {key:value for key,value in self.hydrocron_granules.items() \
-            if value["status"] == "ingested" and \
-            datetime.datetime.strptime(value["revision_date"], "%Y-%m-%dT%H:%M:%S.%fZ") != self.revision_start}
+        ingested = {key: value for key, value in self.hydrocron_granules.items()
+                    if value["status"] == "ingested" and
+                    datetime.datetime.strptime(value["revision_date"], "%Y-%m-%dT%H:%M:%S.%fZ") != self.revision_start}
         with open(f"{TMP_WORKSPACE}/granule_ingested_{self.revision_end.strftime('%Y%m%dT%H%M%S')}.json", 'w', encoding="utf-8") as json_file:
             json.dump(ingested, json_file, indent=2)
 
