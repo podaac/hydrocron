@@ -1,6 +1,10 @@
 # timeseries
 
-Retrieve time series data from SWOT observations for reaches and nodes.
+This page serves to document the timeseries request endpoint for the Hydrocron API. The timeseries endpoint retrieves time series data from SWOT observations for reaches and nodes based on a user request which can include the headers and query parameters documented below under "Request Headers" and "Request Parameteres".
+
+The timeseries endpoint returns a CSV or GeoJSON response depending on the user request, see "Response Format" below. If something goes wrong the timeseries endpoint returns different response codes to indicate to the user what might have caused an error, see "Response Codes" below.
+
+For more information on content negotiation via request headers here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation
 
 ## Request Headers
 
@@ -219,7 +223,7 @@ Hydrocron includes additional fields beyond the source data shapefile attributes
 'crid', 'sword_version', 'collection_shortname','geometry'
 ```
 
-## Returns
+## Response Format
 
 ### Default
 
