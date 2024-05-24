@@ -14,7 +14,7 @@ Accept headers: `application/json`, `text/csv`, `application/geo+json`
 
 Possible header and request parameter combinations:
 
-- If the Accept header is `text/csv` or `applicatin/geo+json`, the raw CSV or GeoJSON response is returned.
+- If the Accept header is `text/csv` or `application/geo+json`, the raw CSV or GeoJSON response is returned.
 - If the Accept header is `application/json` with an output field of `geojson`, the entire JSON object with metadata including GeoJSON response is returned.
 - If the Accept header is `application/json` with an output field of `csv`, the entire JSON object with metadata including CSV response is returned.
 - If the Accept header is `application/json` without an output field, the entire JSON object with metadata including GeoJSON response is returned.
