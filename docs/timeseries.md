@@ -1,6 +1,6 @@
 # timeseries
 
-This page serves to document the timeseries request endpoint for the Hydrocron API. The timeseries endpoint retrieves time series data from SWOT observations for reaches and nodes based on a user request which can include the headers and query parameters documented below under "Request Headers" and "Request Parameteres".
+This page serves to document the timeseries request endpoint for the Hydrocron API. The timeseries endpoint retrieves time series data from SWOT observations for reaches and nodes based on a user request which can include the headers and query parameters documented below under "Request Headers" and "Request Parameters".
 
 The timeseries endpoint returns a CSV or GeoJSON response depending on the user request, see "Response Format" below. If something goes wrong the timeseries endpoint returns different response codes to indicate to the user what might have caused an error, see "Response Codes" below.
 
