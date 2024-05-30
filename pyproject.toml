@@ -26,6 +26,7 @@ cryptography = "42.0.0"
 python-dotenv = "^1.0.0"
 geojson = "^3.1.0"
 accept-types = "^0.4.1"
+moto = "^5.0.8"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
