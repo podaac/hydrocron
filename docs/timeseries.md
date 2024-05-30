@@ -4,11 +4,13 @@ This page serves to document the timeseries request endpoint for the Hydrocron A
 
 The timeseries endpoint returns a CSV or GeoJSON response depending on the user request, see "Response Format" below. If something goes wrong the timeseries endpoint returns different response codes to indicate to the user what might have caused an error, see "Response Codes" below.
 
-For more information on content negotiation via request headers here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation
+For more information on using request headers when working with an API like Hydrocron programatically, see: https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation
 
 ## Request Headers
 
 ### Accept
+
+Accept headers provide more control over the output that is returned by Hydrocron. You can pass the `Accept` header in your request to return a specific response format.
 
 Accept headers: `application/json`, `text/csv`, `application/geo+json`
 
@@ -19,6 +21,7 @@ Possible header and request parameter combinations:
 - If the Accept header is `application/json` with an output field of `csv`, the entire JSON object with metadata including CSV response is returned.
 - If the Accept header is `application/json` without an output field, the entire JSON object with metadata including GeoJSON response is returned.
 - If the Accept header is none of the accepted types then a 415 Unsupported is returned.
+- If no Accept header is passed in the request then the default is to return `application/json` with metadata. The `output` field is used to determine whether a GeoJSON or CSV response is returned in the `results` field of the response.
 
 Example GeoJSON request and response:
 
@@ -133,9 +136,7 @@ The SWOT data fields to return in the request.
 
 This is specified in the form of a comma separated list (without any spaces): `fields=reach_id,time_str,wse,slope`
 
-**NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron.**
-
-Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, and SWORD and collection versions. The complete list of fields that are available through Hydrocron are below:
+Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, and SWORD and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are below:
 
 **Reach data fields**
 

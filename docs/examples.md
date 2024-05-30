@@ -312,6 +312,8 @@ Will return CSV:
 
 ## Accept headers
 
+See the [documentation on the timeseries endpoint](timeseries.md) for an explanation of Accept headers.
+
 ### Get time series for application/geo+json Accept Header
 
 ```bash
