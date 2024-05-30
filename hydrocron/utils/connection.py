@@ -11,6 +11,7 @@ import sys
 import boto3
 from boto3.resources.base import ServiceResource
 import botocore
+from botocore.client import BaseClient
 
 
 class Connection(ModuleType):
@@ -27,6 +28,7 @@ class Connection(ModuleType):
         self._dynamodb_resource = None
         self._dynamodb_endpoint = self._get_dynamodb_endpoint()
         self._s3_resource = None
+        self._ssm_client = None
 
     def _get_dynamodb_endpoint(self):
         """Return dynamodb endpoint URL."""
@@ -69,8 +71,20 @@ class Connection(ModuleType):
 
         return self._s3_resource
 
+    @property
+    def ssm_client(self) -> BaseClient:
+        """Return SSM client."""
+
+        if not self._ssm_client:
+
+            ssm_session = boto3.session.Session()
+            self._ssm_client = ssm_session.client('ssm')
+
+        return self._ssm_client
+
 
 dynamodb_resource: ServiceResource
 s3_resource: ServiceResource
+ssm_client: BaseClient
 
 sys.modules[__name__] = Connection(__name__)
