@@ -1,5 +1,5 @@
 data "aws_ecr_authorization_token" "token" {}
-data aws_ecr_image lambda_image {
+data "aws_ecr_image" "lambda_image" {
   depends_on = [
     null_resource.upload_ecr_image
   ]
@@ -19,12 +19,12 @@ locals {
   cnm_response_function_name       = "${local.aws_resource_prefix}-cnm-lambda"
 }
 
-resource aws_ecr_repository "lambda-image-repo" {
+resource "aws_ecr_repository" "lambda-image-repo" {
   name = local.ecr_image_name
   tags = var.default_tags
 }
 
-resource null_resource ecr_login {
+resource "null_resource" "ecr_login" {
   triggers = {
     image_uri = var.lambda_container_image_uri
   }
@@ -37,9 +37,9 @@ resource null_resource ecr_login {
   }
 }
 
-resource null_resource upload_ecr_image {
+resource "null_resource" "upload_ecr_image" {
   depends_on = [null_resource.ecr_login]
-  triggers   = {
+  triggers = {
     image_uri = var.lambda_container_image_uri
   }
 
@@ -99,8 +99,8 @@ resource "aws_lambda_function" "hydrocron_lambda_load_data" {
   tags = var.default_tags
   environment {
     variables = {
-      EARTHDATA_USERNAME = data.aws_ssm_parameter.edl_username.value
-      EARTHDATA_PASSWORD = data.aws_ssm_parameter.edl_password.value
+      EARTHDATA_USERNAME           = data.aws_ssm_parameter.edl_username.value
+      EARTHDATA_PASSWORD           = data.aws_ssm_parameter.edl_password.value
       GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
     }
   }
@@ -153,7 +153,7 @@ resource "aws_lambda_permission" "allow_lambda" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.hydrocron_lambda_load_granule.function_name
   principal     = "s3.amazonaws.com"
-  source_arn = aws_lambda_function.hydrocron_lambda_load_data.arn
+  source_arn    = aws_lambda_function.hydrocron_lambda_load_data.arn
 }
 
 resource "aws_lambda_permission" "allow_lambda_from_cnm" {
@@ -161,5 +161,5 @@ resource "aws_lambda_permission" "allow_lambda_from_cnm" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.hydrocron_lambda_load_granule.function_name
   principal     = "sns.amazonaws.com"
-  source_arn = aws_lambda_function.hydrocron_lambda_cnm.arn
+  source_arn    = aws_lambda_function.hydrocron_lambda_cnm.arn
 }
