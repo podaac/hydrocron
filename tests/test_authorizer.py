@@ -18,6 +18,9 @@ class TestAuthorizer(unittest.TestCase):
         self.mock_aws = moto.mock_aws()
         self.mock_aws.start()
         
+        # Set region
+        os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
+        
         # Create SSM client and put API keys
         ssm = boto3.client("ssm")
         ssm.put_parameter(Name="/service/hydrocron/api-key-default", Value="abc123", Type="SecureString")
