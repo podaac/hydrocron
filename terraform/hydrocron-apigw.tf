@@ -3,6 +3,7 @@ locals {
   api_version = "v${split(".", var.app_version)[0]}"
 }
 
+
 resource "aws_api_gateway_rest_api" "hydrocron-api-gateway" {
   name        = "${local.aws_resource_prefix}-api-gateway"
   description = "API to access Hydrocron"
@@ -12,6 +13,9 @@ resource "aws_api_gateway_rest_api" "hydrocron-api-gateway" {
       hydrocron_api_lambda_arn_timeseries = aws_lambda_function.hydrocron_lambda_timeseries.invoke_arn
       api_version                         = local.api_version
       software_version                    = var.app_version
+      authorizer_url                      = aws_lambda_function.hydrocron_lambda_authorizer.invoke_arn
+      authorizer_credentials              = aws_iam_role.hydrocron-gateway-authorizer-role.arn
+      authorizer_name                     = "${local.aws_resource_prefix}-lambda-authorizer"
   })
   parameters = {
     "basepath" = "ignore"
@@ -27,6 +31,7 @@ resource "aws_api_gateway_rest_api" "hydrocron-api-gateway" {
   }
   minimum_compression_size = 20480
 }
+
 
 resource "aws_api_gateway_rest_api_policy" "hydrocron-api-gateway-policy" {
   rest_api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
@@ -83,12 +88,91 @@ resource "aws_cloudwatch_log_group" "hydrocron-api-gateway-logs" {
   retention_in_days = 60
 }
 
+
 output "url" {
   value = "${aws_api_gateway_deployment.hydrocron-api-gateway-deployment.invoke_url}/api"
 }
+
 
 resource "aws_ssm_parameter" "hydrocron-api-url" {
   name  = "/service/${var.app_name}/api-url"
   type  = "String"
   value = aws_api_gateway_deployment.hydrocron-api-gateway-deployment.invoke_url
+}
+
+
+# API Keys
+resource "aws_api_gateway_api_key" "default-user-key" {
+  name = "${local.aws_resource_prefix}-api-key-default"
+}
+
+
+resource "aws_api_gateway_api_key" "trusted-user-key" {
+  name = "${local.aws_resource_prefix}-api-key-trusted"
+}
+
+
+resource "aws_ssm_parameter" "default-user-parameter" {
+  name        = "/service/${var.app_name}/api-key-default"
+  description = "Hydrocron default user API key"
+  type        = "SecureString"
+  value       = aws_api_gateway_api_key.default-user-key.value
+}
+
+
+resource "aws_ssm_parameter" "trusted-user-parameter" {
+  name        = "/service/${var.app_name}/api-key-trusted"
+  description = "Hydrocron trusted user API key"
+  type        = "SecureString"
+  value       = aws_api_gateway_api_key.trusted-user-key.value
+}
+
+
+# Usage Plans
+resource "aws_api_gateway_usage_plan" "default-user-usage-plan" {
+  name        = "${local.aws_resource_prefix}-usage-plan-default"
+  description = "Hydrocron default user usage plan"
+  api_stages {
+    api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
+    stage  = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
+  }
+  quota_settings {
+    limit  = 1000000
+    period = "MONTH"
+  }
+  throttle_settings {
+    burst_limit = 5000
+    rate_limit  = 10000
+  }
+}
+
+resource "aws_api_gateway_usage_plan_key" "default-user-usage-key" {
+  key_id        = aws_api_gateway_api_key.default-user-key.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.default-user-usage-plan.id
+}
+
+
+
+resource "aws_api_gateway_usage_plan" "trusted-user-usage-plan" {
+  name        = "${local.aws_resource_prefix}-usage-plan-trusted"
+  description = "Hydrocron trusted user usage plan"
+  api_stages {
+    api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
+    stage  = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
+  }
+  quota_settings {
+    limit  = 1000000
+    period = "MONTH"
+  }
+  throttle_settings {
+    burst_limit = 5000
+    rate_limit  = 10000
+  }
+}
+
+resource "aws_api_gateway_usage_plan_key" "trusted-user-usage-key" {
+  key_id        = aws_api_gateway_api_key.trusted-user-key.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.trusted-user-usage-plan.id
 }

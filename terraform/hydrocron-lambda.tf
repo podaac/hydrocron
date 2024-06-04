@@ -14,6 +14,7 @@ locals {
   ecr_image_name                   = "${local.environment}-${element(local.ecr_image_name_and_tag, 0)}"
   ecr_image_tag                    = element(local.ecr_image_name_and_tag, 1)
   timeseries_function_name         = "${local.aws_resource_prefix}-timeseries-lambda"
+  authorizer_function_name         = "${local.aws_resource_prefix}-authorizer-lambda"
   load_data_function_name          = "${local.aws_resource_prefix}-load_data-lambda"
   load_granule_function_name       = "${local.aws_resource_prefix}-load_granule-lambda"
   cnm_response_function_name       = "${local.aws_resource_prefix}-cnm-lambda"
@@ -79,6 +80,23 @@ resource "aws_lambda_permission" "allow_hydrocron-timeseries" {
   # The /* part allows invocation from any stage, method and resource path
   # within API Gateway.
   source_arn = "${aws_api_gateway_rest_api.hydrocron-api-gateway.execution_arn}/*"
+}
+
+
+resource "aws_lambda_function" "hydrocron_lambda_authorizer" {
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.lambda-image-repo.repository_url}:${data.aws_ecr_image.lambda_image.image_tag}"
+  image_config {
+    command = ["hydrocron.api.controllers.authorizer.authorization_handler"]
+  }
+  function_name = local.authorizer_function_name
+  role          = aws_iam_role.hydrocron-lambda-authorizer-role.arn
+  timeout       = 30
+  vpc_config {
+    subnet_ids         = data.aws_subnets.private_application_subnets.ids
+    security_group_ids = data.aws_security_groups.vpc_default_sg.ids
+  }
+  tags = var.default_tags
 }
 
 

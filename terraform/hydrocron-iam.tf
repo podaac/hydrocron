@@ -1,4 +1,32 @@
 # IAM Policies
+data "aws_iam_policy_document" "assume_role_lambda" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+
+data "aws_iam_policy_document" "assume_role_authorizer" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["apigateway.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+
 data "aws_iam_policy_document" "dynamo-read-policy" {
 
   statement {
@@ -19,6 +47,7 @@ data "aws_iam_policy_document" "dynamo-read-policy" {
   }
 
 }
+
 
 data "aws_iam_policy_document" "dynamo-write-policy" {
 
@@ -44,6 +73,8 @@ data "aws_iam_policy_document" "dynamo-write-policy" {
   }
 
 }
+
+
 data "aws_iam_policy_document" "lambda-invoke-policy" {
 
   statement {
@@ -56,6 +87,22 @@ data "aws_iam_policy_document" "lambda-invoke-policy" {
     ]
   }
 }
+
+
+data "aws_iam_policy_document" "lambda-invoke-authorizer-policy" {
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+    resources = [
+      aws_lambda_function.hydrocron_lambda_authorizer.arn
+    ]
+  }
+}
+
+
 data "aws_iam_policy_document" "ssm-read-policy" {
 
   statement {
@@ -78,6 +125,8 @@ data "aws_iam_policy_document" "ssm-read-policy" {
   }
 
 }
+
+
 data "aws_iam_policy_document" "s3-read-policy" {
   statement {
     effect = "Allow"
@@ -96,18 +145,6 @@ data "aws_iam_policy_document" "s3-read-policy" {
   }
 }
 
-data "aws_iam_policy_document" "assume_role_lambda" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
 
 data "aws_iam_policy_document" "lambda_log_to_cloudwatch" {
   statement {
@@ -133,6 +170,7 @@ data "aws_iam_policy_document" "lambda_log_to_cloudwatch" {
   }
 }
 
+
 data "aws_iam_policy_document" "sns-resource-policy" {
   statement {
     effect = "Allow"
@@ -147,6 +185,7 @@ data "aws_iam_policy_document" "sns-resource-policy" {
 
   }
 }
+
 
 data "aws_iam_policy_document" "apigw-resource-policy" {
   statement {
@@ -167,6 +206,7 @@ data "aws_iam_policy_document" "apigw-resource-policy" {
     }
   }
 
+
   statement {
     effect = "Allow"
 
@@ -179,6 +219,7 @@ data "aws_iam_policy_document" "apigw-resource-policy" {
     resources = [aws_api_gateway_rest_api.hydrocron-api-gateway.execution_arn]
   }
 }
+
 
 data "aws_iam_policy_document" "lambda-vpc" {
 
@@ -199,7 +240,19 @@ data "aws_iam_policy_document" "lambda-vpc" {
   }
 }
 
+
 # IAM Roles
+
+resource "aws_iam_role" "hydrocron-gateway-authorizer-role" {
+  name                 = "${local.aws_resource_prefix}-api-gateway-authorizer-role"
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_authorizer.json
+  inline_policy {
+    name   = "HydrocronInvokeLambdaAuthorizer"
+    policy = data.aws_iam_policy_document.lambda-invoke-authorizer-policy.json
+  }
+}
+
 
 resource "aws_iam_role" "hydrocron-lambda-execution-role" {
   name = "${local.aws_resource_prefix}-lambda-execution-role"
@@ -219,6 +272,24 @@ resource "aws_iam_role" "hydrocron-lambda-execution-role" {
   inline_policy {
     name   = "HydrocronLambdaVPC"
     policy = data.aws_iam_policy_document.lambda-vpc.json
+  }
+}
+
+
+resource "aws_iam_role" "hydrocron-lambda-authorizer-role" {
+  name = "${local.aws_resource_prefix}-lambda-authorizer-role"
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+
+  inline_policy {
+    name   = "HydrocronLambdaVPC"
+    policy = data.aws_iam_policy_document.lambda-vpc.json
+  }
+  inline_policy {
+    name   = "HydrocronSSMRead"
+    policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
 }
 
