@@ -1,7 +1,7 @@
 """
 Lambda Authorizer to facilitate usage of API keys and usage plans.
 
-Taken from example: 
+Taken from example:
 https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html
 """
 
