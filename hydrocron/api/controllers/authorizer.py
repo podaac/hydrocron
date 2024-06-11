@@ -20,10 +20,10 @@ def authorization_handler(event, context):
     logging.info("Event: %s", event)
     logging.info("Context: %s", context)
 
-    api_key = "" if "x-api-key" not in event["headers"].keys() else event["headers"]["x-api-key"]
+    api_key_trusted = "" if "x-hydrocron-key" not in event["headers"].keys() else event["headers"]["x-hydrocron-key"]
     stored_api_key_trusted = get_api_key("trusted")
 
-    if api_key and api_key == stored_api_key_trusted:
+    if api_key_trusted and api_key_trusted == stored_api_key_trusted:
         response_policy = create_policy("trusted_partner", "Allow", event["methodArn"], stored_api_key_trusted)
         logging.info("Created policy for truster partner.")
 

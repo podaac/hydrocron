@@ -5,7 +5,7 @@
     "path": "/timeseries",
     "httpMethod": "GET",
     "headers": {
-        "x-api-key": "def456"
+        "x-hydrocron-key": "def456"
     },
     "pathParameters": {},
     "stageVariables": {},
