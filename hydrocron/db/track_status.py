@@ -8,6 +8,7 @@ implemented we should query the Hydrocron reaches and nodes tables.
 
 # Standard Imports
 import datetime
+from datetime import timezone
 import json
 import logging
 import pathlib
@@ -20,7 +21,7 @@ TMP_WORKSPACE = pathlib.Path("/path/to/store/track/data")
 TMP_WORKSPACE.mkdir(parents=True, exist_ok=True)
 
 
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
 logging.basicConfig(filename=f"{TMP_WORKSPACE}/track.log",
                     filemode='a',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
@@ -44,7 +45,7 @@ class Track:
         self.cmr_granules = {}
         self.hydrocron_granules = {}
         self.revision_start = self._get_revision_start()
-        self.revision_end = datetime.datetime.now()
+        self.revision_end = datetime.datetime.now(timezone.utc)
 
     def _get_revision_start(self):
         """Locate the last most recent date that was queried in order to only
@@ -57,7 +58,7 @@ class Track:
             revision_start = self.COLLECTION_START_DATE
 
         else:
-            revision_start = max(datetime.datetime.strptime(granule["revision_date"], "%Y-%m-%dT%H:%M:%S.%fZ") for granule in track_data.values())
+            revision_start = max(datetime.datetime.strptime(granule["revision_date"], "%Y-%m-%dT%H:%M:%S.%fZ") for granule in track_data.values()).replace(tzinfo=timezone.utc)
 
         return revision_start
 
@@ -97,6 +98,7 @@ class Track:
             else:
                 search_after = ""
 
+        for granule in self.cmr_granules: logging.debug("CMR granule located: %s  -  %s", granule, self.cmr_granules[granule])
         logging.info("Located %s granules in CMR.", len(self.cmr_granules.keys()))
 
     @staticmethod
@@ -122,8 +124,8 @@ class Track:
 
         if track_data:
             for key, value in track_data.items():
-                db_date = datetime.datetime.strptime(value["revision_date"], "%Y-%m-%dT%H:%M:%S.%fZ")
-                if self.revision_start <= db_date <= self.revision_end:
+                db_date = datetime.datetime.strptime(value["revision_date"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                if self.revision_start <= db_date <= self.revision_end:    # Track any granules ingested outside track_status execution
                     self.hydrocron_granules[key] = value
                 status = value["status"]
                 if status == "to_ingest":
@@ -136,17 +138,21 @@ class Track:
         ingested.
         """
 
-        # Determine what has been ingested but has a to_ingest status
+        # Determine what has been ingested but has a 'to_ingest' status
         overlap_keys = [overlap for overlap in self.hydrocron_granules if overlap in self.cmr_granules]
         count_ingested = 0
         for key in overlap_keys:
-            if self.hydrocron_granules[key]["revision_date"] != self.cmr_granules[key]:
-                continue    # Need to ingest the granule again as it may have change since last run
-            if self.hydrocron_granules[key]["status"] == "to_ingest":
-                self.hydrocron_granules[key] = {
-                    "status": "ingested",
-                    "revision_date": self.cmr_granules[key]
-                }
+            # Need to ingest the granule again as it may have change since last run
+            if self.hydrocron_granules[key]["revision_date"] != self.cmr_granules[key] and self.hydrocron_granules[key]["status"] == "ingested":
+                self.hydrocron_granules[key]["status"] = "to_ingest"
+                self.hydrocron_granules[key]["revision_date"] = self.cmr_granules[key]
+
+        # Determine what has been partially ingested, for proof of concept just indicate ingested
+        count_ingested = 0
+        for granule in self.hydrocron_granules:
+            if self.hydrocron_granules[granule]["status"] == "to_ingest":
+                self.hydrocron_granules[granule]["status"] = "ingested"
+                logging.debug("Set status to 'ingested': %s", granule)
                 count_ingested += 1
         logging.info("Set %s granules' status to 'ingested'.", count_ingested)
 
@@ -157,6 +163,7 @@ class Track:
                 "status": "to_ingest",
                 "revision_date": self.cmr_granules[key]
             }
+            logging.debug("Set status to 'to_ingest': %s", key)
         logging.info("Set %s granules' status to 'to_ingest'.", len(cmr_keys))
 
         # Update database
