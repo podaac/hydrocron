@@ -98,7 +98,8 @@ class Track:
             else:
                 search_after = ""
 
-        for granule in self.cmr_granules: logging.debug("CMR granule located: %s  -  %s", granule, self.cmr_granules[granule])
+        for granule, revision_date in self.cmr_granules.items():
+            logging.debug("CMR granule located: %s  -  %s", granule, revision_date)
         logging.info("Located %s granules in CMR.", len(self.cmr_granules.keys()))
 
     @staticmethod
@@ -149,9 +150,9 @@ class Track:
 
         # Determine what has been partially ingested, for proof of concept just indicate ingested
         count_ingested = 0
-        for granule in self.hydrocron_granules:
-            if self.hydrocron_granules[granule]["status"] == "to_ingest":
-                self.hydrocron_granules[granule]["status"] = "ingested"
+        for granule, granule_data in self.hydrocron_granules.items():
+            if granule_data["status"] == "to_ingest":
+                granule_data["status"] = "ingested"
                 logging.debug("Set status to 'ingested': %s", granule)
                 count_ingested += 1
         logging.info("Set %s granules' status to 'ingested'.", count_ingested)
