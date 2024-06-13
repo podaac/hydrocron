@@ -137,12 +137,12 @@ resource "aws_api_gateway_usage_plan" "default-user-usage-plan" {
     stage  = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
   }
   quota_settings {
-    limit  = 1000000
+    limit  = 2000000000
     period = "MONTH"
   }
   throttle_settings {
-    burst_limit = 5000
-    rate_limit  = 10000
+    burst_limit = 200
+    rate_limit  = 2000
   }
 }
 
@@ -162,12 +162,12 @@ resource "aws_api_gateway_usage_plan" "trusted-user-usage-plan" {
     stage  = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
   }
   quota_settings {
-    limit  = 1000000
+    limit  = 5
     period = "MONTH"
   }
   throttle_settings {
-    burst_limit = 5000
-    rate_limit  = 10000
+    burst_limit = 1
+    rate_limit  = 1
   }
 }
 
