@@ -14,6 +14,11 @@ from hydrocron.utils import connection
 logging.getLogger().setLevel(logging.INFO)
 
 
+ssm_client = connection.ssm_client
+STORED_API_KEY_TRUSTED = ssm_client.get_parameter(Name="/service/hydrocron/api-key-trusted", WithDecryption=True)["Parameter"]["Value"]
+STORED_API_KEY_DEFAULT = ssm_client.get_parameter(Name="/service/hydrocron/api-key-default", WithDecryption=True)["Parameter"]["Value"]
+
+
 def authorization_handler(event, context):
     """Lambda authorizer function to allow or deny a request."""
 
@@ -21,28 +26,17 @@ def authorization_handler(event, context):
     logging.info("Context: %s", context)
 
     api_key_trusted = "" if "x-hydrocron-key" not in event["headers"].keys() else event["headers"]["x-hydrocron-key"]
-    stored_api_key_trusted = get_api_key("trusted")
 
-    if api_key_trusted and api_key_trusted == stored_api_key_trusted:
-        response_policy = create_policy("trusted_partner", "Allow", event["methodArn"], stored_api_key_trusted)
+    if api_key_trusted and api_key_trusted == STORED_API_KEY_TRUSTED:
+        response_policy = create_policy("trusted_partner", "Allow", event["methodArn"], STORED_API_KEY_TRUSTED)
         logging.info("Created policy for truster partner.")
 
     else:
-        stored_api_key_default = get_api_key("default")
-        response_policy = create_policy("default_user", "Allow", event["methodArn"], stored_api_key_default)
+        response_policy = create_policy("default_user", "Allow", event["methodArn"], STORED_API_KEY_DEFAULT)
         logging.info("Created policy for default user.")
 
     logging.info("Response: %s", response_policy)
     return json.loads(response_policy)
-
-
-def get_api_key(key_type):
-    """Return API key value from SSM parameter store."""
-
-    ssm_client = connection.ssm_client
-    api_key = ssm_client.get_parameter(Name=f"/service/hydrocron/api-key-{key_type}", WithDecryption=True)["Parameter"]["Value"]
-    logging.info("Retrieved API key from SSM parameter: /service/hydrocron/api-key-%s", key_type)
-    return api_key
 
 
 def create_policy(principle_id, effect, method_arn, api_key=""):
