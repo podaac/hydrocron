@@ -443,3 +443,51 @@ Example CSV response:
 | 415     | 'Unsupported Media Type': The user send an invalid `Accept` header.                                                                                                         |
 
 *The 400 code is also currently returned for queries where no time series data could be located for the request specified feature ID. The message returned with the response indicates this and it can be helpful to adjust the date ranges you are searching.
+
+## API Keys [DRAFT]
+
+> ⚠️
+>API keys not yet implemented but coming soon! Content below is not finalized. More details to follow...
+
+Users may request a special API key for cases where their intended usage of the API may be considered heavy or more complex. Heavy usage can be defined as continued used with over x requests per day or continue use which require many requests per second or concurrent requests. To request an API key or to discuss your use case, please contact us at x.
+
+**Note: Users do *not* have to send an API key in their request to use the Hydrocron API. The API key is optional.**
+
+### How to use an API key in requests [DRAFT]
+
+Hydrocron API key header: `x-hydrocron-key`
+
+After receiving the API key, users may send the API key in their request under the `x-hydrocron-key` header.
+
+Example
+
+```bash
+curl --header 'x-hydrocron-key: <podaac-provided-api-key>' --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
+```
+
+Replace `<podaac-provided-api-key>` with the API key provided to you.
+
+Python Example
+
+```python
+import requests
+
+url = "https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries"
+
+headers = {
+    "x-hydrocon-key": "<podaac-provided-api-key>"
+}
+
+params = {
+    "feature": "Reach",
+    "feature_id": "63470800171",
+    "output": "csv",
+    "start_time": "2024-02-01T00:00:00%2b00:00",
+    "end_time": "2024-10-30T00:00:00%2b00:00",
+    "fields": "reach_id,time_str,wse,slope,width"
+}
+
+response = requests.get(url=url, headers=headers, params=params)
+```
+
+Replace `<podaac-provided-api-key>` with the API key provided to you.
