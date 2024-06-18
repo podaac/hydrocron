@@ -30,6 +30,7 @@ resource "aws_api_gateway_rest_api" "hydrocron-api-gateway" {
     prevent_destroy = true
   }
   minimum_compression_size = 20480
+  api_key_source = "AUTHORIZER"
 }
 
 
