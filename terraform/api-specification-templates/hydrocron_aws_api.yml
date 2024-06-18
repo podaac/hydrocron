@@ -13,8 +13,7 @@ paths:
       description: "Get Timeseries for a particular Reach, Node, or LakeID"
       operationId: timeseries_get
       security:
-      - api-key-auth: []
-        ${authorizer_name}: []
+      - ${authorizer_name}: []
       parameters:
       - name: feature
         in: query
@@ -261,13 +260,9 @@ components:
     csv:
       type: object
   securitySchemes:
-    api-key-auth:
-      type: apiKey
-      in: header       
-      name: x-api-key
     ${authorizer_name}:
       type: apiKey
-      name: x-api-key
+      name: x-hydrocron-key
       in: header
       x-amazon-apigateway-authorizer:
         type: request
