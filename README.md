@@ -8,7 +8,7 @@ as CSV and geoJSON.
 ## Requirements
 Python 3.10+
 
-## Running Locally with Docker 
+## Running Locally with Docker
 
 1. Build or pull the hydrocron docker image
 2. Run docker compose to launch dynamodb local and hydrocron local

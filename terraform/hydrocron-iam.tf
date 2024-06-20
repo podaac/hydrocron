@@ -1,8 +1,36 @@
 # IAM Policies
+data "aws_iam_policy_document" "assume_role_lambda" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+
+data "aws_iam_policy_document" "assume_role_authorizer" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["apigateway.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+
 data "aws_iam_policy_document" "dynamo-read-policy" {
 
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "dynamodb:GetItem",
       "dynamodb:BatchGetItem",
@@ -20,10 +48,11 @@ data "aws_iam_policy_document" "dynamo-read-policy" {
 
 }
 
+
 data "aws_iam_policy_document" "dynamo-write-policy" {
 
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "dynamodb:PutItem",
       "dynamodb:UpdateItem",
@@ -44,22 +73,40 @@ data "aws_iam_policy_document" "dynamo-write-policy" {
   }
 
 }
+
+
 data "aws_iam_policy_document" "lambda-invoke-policy" {
 
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "lambda:InvokeFunction"
     ]
     resources = [
       aws_lambda_function.hydrocron_lambda_load_granule.arn
-      ]
+    ]
   }
 }
+
+
+data "aws_iam_policy_document" "lambda-invoke-authorizer-policy" {
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+    resources = [
+      aws_lambda_function.hydrocron_lambda_authorizer.arn
+    ]
+  }
+}
+
+
 data "aws_iam_policy_document" "ssm-read-policy" {
 
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "ssm:DescribeParameters"
     ]
@@ -78,9 +125,11 @@ data "aws_iam_policy_document" "ssm-read-policy" {
   }
 
 }
+
+
 data "aws_iam_policy_document" "s3-read-policy" {
   statement {
-    effect  = "Allow"
+    effect = "Allow"
     actions = [
       "s3:Get*",
       "s3:List*",
@@ -96,23 +145,11 @@ data "aws_iam_policy_document" "s3-read-policy" {
   }
 }
 
-data "aws_iam_policy_document" "assume_role_lambda" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
 
 data "aws_iam_policy_document" "lambda_log_to_cloudwatch" {
   statement {
     effect = "Allow"
-    actions =  [
+    actions = [
       "logs:CreateLogGroup"
     ]
     resources = [
@@ -122,10 +159,10 @@ data "aws_iam_policy_document" "lambda_log_to_cloudwatch" {
 
   statement {
     effect = "Allow"
-    actions =  [
-       "logs:CreateLogStream",
+    actions = [
+      "logs:CreateLogStream",
       "logs:PutLogEvents"
-      ]
+    ]
     resources = [
       #"arn:aws:logs:region:${local.account_id}:log-group:/aws/lambda/${aws_lambda_function.hydrocron_lambda_load_data.function_name}:*",
       "arn:aws:logs:region:${local.account_id}:log-group:/aws/lambda:*"
@@ -133,20 +170,22 @@ data "aws_iam_policy_document" "lambda_log_to_cloudwatch" {
   }
 }
 
+
 data "aws_iam_policy_document" "sns-resource-policy" {
   statement {
     effect = "Allow"
 
     principals {
-      type = "AWS"
+      type        = "AWS"
       identifiers = ["arn:aws:iam::${var.cross_account_id}:root"]
     }
 
-    actions = ["sns:Publish"]
+    actions   = ["sns:Publish"]
     resources = [aws_sns_topic.hydrocron_sns_topic_cnm_response.arn]
 
   }
 }
+
 
 data "aws_iam_policy_document" "apigw-resource-policy" {
   statement {
@@ -167,6 +206,7 @@ data "aws_iam_policy_document" "apigw-resource-policy" {
     }
   }
 
+
   statement {
     effect = "Allow"
 
@@ -180,26 +220,39 @@ data "aws_iam_policy_document" "apigw-resource-policy" {
   }
 }
 
+
 data "aws_iam_policy_document" "lambda-vpc" {
 
   statement {
-    effect  = "Allow"
-    actions = ["ec2:CreateNetworkInterface"]
+    effect    = "Allow"
+    actions   = ["ec2:CreateNetworkInterface"]
     resources = ["arn:aws:ec2:${local.region}:${local.account_id}:*/*"]
   }
   statement {
-    effect  = "Allow"
-    actions = ["ec2:DeleteNetworkInterface"]
+    effect    = "Allow"
+    actions   = ["ec2:DeleteNetworkInterface"]
     resources = ["arn:aws:ec2:${local.region}:${local.account_id}:*/*"]
   }
   statement {
-    effect  = "Allow"
-    actions = ["ec2:DescribeNetworkInterfaces"]
+    effect    = "Allow"
+    actions   = ["ec2:DescribeNetworkInterfaces"]
     resources = ["*"]
   }
 }
 
+
 # IAM Roles
+
+resource "aws_iam_role" "hydrocron-gateway-authorizer-role" {
+  name                 = "${local.aws_resource_prefix}-api-gateway-authorizer-role"
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_authorizer.json
+  inline_policy {
+    name   = "HydrocronInvokeLambdaAuthorizer"
+    policy = data.aws_iam_policy_document.lambda-invoke-authorizer-policy.json
+  }
+}
+
 
 resource "aws_iam_role" "hydrocron-lambda-execution-role" {
   name = "${local.aws_resource_prefix}-lambda-execution-role"
@@ -217,8 +270,26 @@ resource "aws_iam_role" "hydrocron-lambda-execution-role" {
     policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
   inline_policy {
-    name = "HydrocronLambdaVPC"
+    name   = "HydrocronLambdaVPC"
     policy = data.aws_iam_policy_document.lambda-vpc.json
+  }
+}
+
+
+resource "aws_iam_role" "hydrocron-lambda-authorizer-role" {
+  name = "${local.aws_resource_prefix}-lambda-authorizer-role"
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+
+  inline_policy {
+    name   = "HydrocronLambdaVPC"
+    policy = data.aws_iam_policy_document.lambda-vpc.json
+  }
+  inline_policy {
+    name   = "HydrocronSSMRead"
+    policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
 }
 
@@ -231,18 +302,18 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
   managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 
   inline_policy {
-    name = "HydrocronLambdaInvoke"
+    name   = "HydrocronLambdaInvoke"
     policy = data.aws_iam_policy_document.lambda-invoke-policy.json
   }
   inline_policy {
     policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
   }
-    inline_policy {
+  inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
   inline_policy {
-    name = "HydrocronLambdaVPC"
+    name   = "HydrocronLambdaVPC"
     policy = data.aws_iam_policy_document.lambda-vpc.json
   }
 }
@@ -252,16 +323,16 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-  managed_policy_arns  = [
+  managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-    ]
+  ]
 
   inline_policy {
     name   = "HydrocronDynamoWrite"
     policy = data.aws_iam_policy_document.dynamo-write-policy.json
   }
   inline_policy {
-    name = "HydrocronS3Read"
+    name   = "HydrocronS3Read"
     policy = data.aws_iam_policy_document.s3-read-policy.json
   }
   inline_policy {
@@ -272,7 +343,7 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
     policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
   inline_policy {
-    name = "HydrocronLambdaVPC"
+    name   = "HydrocronLambdaVPC"
     policy = data.aws_iam_policy_document.lambda-vpc.json
   }
 }
@@ -282,23 +353,23 @@ resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-  managed_policy_arns  = [
+  managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"]
+  "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"]
 
   inline_policy {
-    name = "HydrocronLambdaInvoke"
+    name   = "HydrocronLambdaInvoke"
     policy = data.aws_iam_policy_document.lambda-invoke-policy.json
   }
   inline_policy {
     policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json
   }
-    inline_policy {
+  inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
   inline_policy {
-    name = "HydrocronS3Read"
+    name   = "HydrocronS3Read"
     policy = data.aws_iam_policy_document.s3-read-policy.json
   }
 }

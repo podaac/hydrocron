@@ -1,0 +1,20 @@
+{
+    "type": "REQUEST",
+    "methodArn": "arn:aws:execute-api:us-west-2:xxxx:xxxx/v1/GET/timeseries",
+    "resource": "/timeseries",
+    "path": "/timeseries",
+    "httpMethod": "GET",
+    "headers": {
+        "x-api-key": "abc123"
+    },
+    "pathParameters": {},
+    "stageVariables": {},
+    "requestContext": {
+        "identity": {
+            "userAgent": "curl/8.6.0"
+        },
+        "domainName": "xxx.execute-api.us-west-2.amazonaws.com",
+        "deploymentId": "xxx",
+        "apiId": "xxx"
+    }
+}
