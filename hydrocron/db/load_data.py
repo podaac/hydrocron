@@ -97,7 +97,7 @@ def granule_handler(event, _):
 
     if ("Node" in granule_path) & (table_name != constants.SWOT_NODE_TABLE_NAME):
         raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}'")
-    
+
     if ("LakeSP_prior" in granule_path) & (table_name != constants.SWOT_PRIOR_LAKE_TABLE_NAME):
         raise TableMisMatch(f"Error: Cannot load Prior Lake data into table: '{table_name}'")
 
@@ -163,7 +163,7 @@ def cnm_handler(event, _):
                         FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
                         InvocationType='Event',
                         Payload=event2)
-                
+
                 if 'LakeSP_prior' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","table_name": "' + constants.SWOT_PRIOR_LAKE_TABLE_NAME
@@ -239,7 +239,7 @@ def read_data(granule_path, obscure_data, s3_resource=None):
             obscure_data,
             constants.NODE_DATA_COLUMNS,
             s3_resource=s3_resource)
-        
+
     if 'LakeSP_prior' in granule_path:
         logging.info("Start reading prior lake shapefile")
         items = swot_shp.read_shapefile(
@@ -300,7 +300,7 @@ def load_data(dynamo_resource, table_name, items):
             for item_attrs in items:
                 logging.info("Item node_id: %s", item_attrs['node_id'])
                 hydrocron_table.add_data(**item_attrs)
-    
+
     elif hydrocron_table.table_name == constants.SWOT_PRIOR_LAKE_TABLE_NAME:
 
         if len(items) > 5:

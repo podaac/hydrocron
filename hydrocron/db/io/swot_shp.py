@@ -114,7 +114,6 @@ def parse_metadata_from_shpxml(xml_elem):
     # get PLD version
     for globs in xml_elem.findall('global_metadata'):
         prior_db_files = globs.find('xref_prior_lake_db_file').text
-        logging.info("prior db files: " + prior_db_files)
         metadata_attrs = {'PLD_version': prior_db_files[-10:-7]}
 
     # get units on fields that have them
