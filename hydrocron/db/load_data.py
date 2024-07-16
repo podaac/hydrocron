@@ -11,7 +11,7 @@ import earthaccess
 from botocore.exceptions import ClientError
 
 from hydrocron.db import HydrocronTable
-from hydrocron.db.io import swot_reach_node_shp
+from hydrocron.db.io import swot_shp
 from hydrocron.utils import connection
 from hydrocron.utils import constants
 
@@ -49,6 +49,9 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         case constants.SWOT_NODE_TABLE_NAME:
             collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
             feature_type = 'Node'
+        case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
+            collection_shortname = constants.SWOT_PRIOR_LAKE_COLLECTION_NAME
+            feature_type = 'LakeSP_prior'
         case constants.DB_TEST_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
             feature_type = 'Reach'
@@ -94,6 +97,9 @@ def granule_handler(event, _):
 
     if ("Node" in granule_path) & (table_name != constants.SWOT_NODE_TABLE_NAME):
         raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}'")
+    
+    if ("LakeSP_prior" in granule_path) & (table_name != constants.SWOT_PRIOR_LAKE_TABLE_NAME):
+        raise TableMisMatch(f"Error: Cannot load Prior Lake data into table: '{table_name}'")
 
     logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
 
@@ -102,7 +108,7 @@ def granule_handler(event, _):
 
     if load_benchmarking_data == "True":
         logging.info("Loading benchmarking data")
-        items = swot_reach_node_shp.load_benchmarking_data()
+        items = swot_shp.load_benchmarking_data()
     else:
         logging.info("Setting up S3 connection")
         s3_resource = connection.s3_resource
@@ -149,6 +155,18 @@ def cnm_handler(event, _):
                 if 'Node' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","table_name": "' + constants.SWOT_NODE_TABLE_NAME
+                              + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
+
+                    logging.info("Invoking granule load lambda with event json %s", str(event2))
+
+                    lambda_client.invoke(
+                        FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+                        InvocationType='Event',
+                        Payload=event2)
+                
+                if 'LakeSP_prior' in granule_uri:
+                    event2 = ('{"body": {"granule_path": "' + granule_uri
+                              + '","table_name": "' + constants.SWOT_PRIOR_LAKE_TABLE_NAME
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
                     logging.info("Invoking granule load lambda with event json %s", str(event2))
@@ -208,7 +226,7 @@ def read_data(granule_path, obscure_data, s3_resource=None):
 
     if 'Reach' in granule_path:
         logging.info("Start reading reach shapefile")
-        items = swot_reach_node_shp.read_shapefile(
+        items = swot_shp.read_shapefile(
             granule_path,
             obscure_data,
             constants.REACH_DATA_COLUMNS,
@@ -216,10 +234,18 @@ def read_data(granule_path, obscure_data, s3_resource=None):
 
     if 'Node' in granule_path:
         logging.info("Start reading node shapefile")
-        items = swot_reach_node_shp.read_shapefile(
+        items = swot_shp.read_shapefile(
             granule_path,
             obscure_data,
             constants.NODE_DATA_COLUMNS,
+            s3_resource=s3_resource)
+        
+    if 'LakeSP_prior' in granule_path:
+        logging.info("Start reading prior lake shapefile")
+        items = swot_shp.read_shapefile(
+            granule_path,
+            obscure_data,
+            constants.PRIOR_LAKE_DATA_COLUMNS,
             s3_resource=s3_resource)
 
     return items
@@ -273,6 +299,20 @@ def load_data(dynamo_resource, table_name, items):
             logging.info("Adding node items to table individually")
             for item_attrs in items:
                 logging.info("Item node_id: %s", item_attrs['node_id'])
+                hydrocron_table.add_data(**item_attrs)
+    
+    elif hydrocron_table.table_name == constants.SWOT_PRIOR_LAKE_TABLE_NAME:
+
+        if len(items) > 5:
+            logging.info("Batch adding %s prior lake items", len(items))
+            for i in range(5):
+                logging.info("Item lake_id: %s", items[i]['lake_id'])
+            hydrocron_table.batch_fill_table(items)
+
+        else:
+            logging.info("Adding prior lake items to table individually")
+            for item_attrs in items:
+                logging.info("Item lake_id: %s", item_attrs['lake_id'])
                 hydrocron_table.add_data(**item_attrs)
 
     else:

@@ -1,0 +1,550 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<swot_product>
+  <global_metadata>
+    <Conventions>Esri conventions as given in 'ESRI Shapefile Technical Description, an ESRI White Paper, July 1998' http://www.esri.com/library/whitepapers/pdfs/shapefile.pdf</Conventions>
+    <title>Level 2 KaRIn high rate lake single pass vector product</title>
+    <short_name>L2_HR_LakeSP</short_name>
+    <product_file_id>Prior</product_file_id>
+    <institution>CNES</institution>
+    <source>Level 1B KaRIn High Rate Single Look Complex Data Product</source>
+    <history>2024-07-16T00:36:01.141170Z: Creation</history>
+    <platform>SWOT</platform>
+    <references>SWOT-DD-CDM-0565-CNES_SAS_Design_L2_HR_LakeSP - Revision A - 20220531</references>
+    <reference_document>SWOT-TN-CDM-0673-CNES_Product_Description_L2_HR_LakeSP - Revision A - 20220531</reference_document>
+    <product_version>V5.3.0</product_version>
+    <crid>PIC0</crid>
+    <pge_name>PGE_L2_HR_LakeSP</pge_name>
+    <pge_version>V4.3.1</pge_version>
+    <contact>SWOT-contact@cnes.fr</contact>
+    <cycle_number>018</cycle_number>
+    <pass_number>084</pass_number>
+    <continent_id>SI</continent_id>
+    <continent_code>3</continent_code>
+    <basin_code>331;332;351;354;356</basin_code>
+    <time_granule_start>2024-07-12T21:30:19.812134Z</time_granule_start>
+    <time_granule_end>2024-07-12T21:38:00.759966Z</time_granule_end>
+    <time_coverage_start>2024-07-12T21:33:53.078000Z</time_coverage_start>
+    <time_coverage_end>2024-07-12T21:38:00.751000Z</time_coverage_end>
+    <geospatial_lon_min>103.60990916711097</geospatial_lon_min>
+    <geospatial_lon_max>168.7840286589893</geospatial_lon_max>
+    <geospatial_lat_min>60.14946621258256</geospatial_lat_min>
+    <geospatial_lat_max>78.27560652614555</geospatial_lat_max>
+    <left_first_longitude>103.67956871624978</left_first_longitude>
+    <left_first_latitude>77.66556697316169</left_first_latitude>
+    <left_last_longitude>168.7840286589893</left_last_longitude>
+    <left_last_latitude>60.655059282979764</left_last_latitude>
+    <right_first_longitude>103.60990916711097</right_first_longitude>
+    <right_first_latitude>77.06557558880277</right_first_latitude>
+    <right_last_longitude>167.62281621388104</right_last_longitude>
+    <right_last_latitude>60.40903888679373</right_last_latitude>
+    <xref_l2_hr_pixc_files>SWOT_L2_HR_PIXC_018_084_040R_20240712T213645_20240712T213656_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_032R_20240712T213525_20240712T213536_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_037L_20240712T213615_20240712T213626_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_044R_20240712T213725_20240712T213736_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_045L_20240712T213735_20240712T213746_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_023R_20240712T213354_20240712T213406_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_001R_20240712T213019_20240712T213024_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_046L_20240712T213745_20240712T213756_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_031R_20240712T213515_20240712T213526_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_033R_20240712T213535_20240712T213546_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_025L_20240712T213414_20240712T213426_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_028L_20240712T213445_20240712T213456_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_029L_20240712T213455_20240712T213506_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_043L_20240712T213715_20240712T213726_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_035L_20240712T213555_20240712T213606_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_027R_20240712T213434_20240712T213446_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_024R_20240712T213404_20240712T213416_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_045R_20240712T213735_20240712T213746_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_042L_20240712T213705_20240712T213716_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_025R_20240712T213414_20240712T213426_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_036R_20240712T213605_20240712T213616_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_034L_20240712T213545_20240712T213556_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_044L_20240712T213725_20240712T213736_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_041R_20240712T213655_20240712T213706_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_034R_20240712T213545_20240712T213556_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_031L_20240712T213515_20240712T213526_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_039R_20240712T213635_20240712T213646_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_030R_20240712T213505_20240712T213516_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_023L_20240712T213354_20240712T213406_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_033L_20240712T213535_20240712T213546_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_024L_20240712T213404_20240712T213416_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_040L_20240712T213645_20240712T213656_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_047L_20240712T213755_20240712T213800_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_038L_20240712T213625_20240712T213636_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_043R_20240712T213715_20240712T213726_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_047R_20240712T213755_20240712T213800_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_028R_20240712T213445_20240712T213456_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_026L_20240712T213424_20240712T213436_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_027L_20240712T213434_20240712T213446_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_001L_20240712T213019_20240712T213024_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_029R_20240712T213455_20240712T213506_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_046R_20240712T213745_20240712T213756_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_038R_20240712T213625_20240712T213636_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_036L_20240712T213605_20240712T213616_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_037R_20240712T213615_20240712T213626_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_026R_20240712T213424_20240712T213436_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_030L_20240712T213505_20240712T213516_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_035R_20240712T213555_20240712T213606_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_039L_20240712T213635_20240712T213646_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_042R_20240712T213705_20240712T213716_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_022R_20240712T213353_20240712T213356_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_022L_20240712T213353_20240712T213356_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_041L_20240712T213655_20240712T213706_PIC0_01.nc, SWOT_L2_HR_PIXC_018_084_032L_20240712T213525_20240712T213536_PIC0_01.nc</xref_l2_hr_pixc_files>
+    <xref_l2_hr_laketile_files>SWOT_L2_HR_LakeTile_Obs_018_084_034L_20240712T213545_20240712T213556_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_043R_20240712T213715_20240712T213726_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_033R_20240712T213535_20240712T213546_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_035L_20240712T213555_20240712T213606_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_025L_20240712T213414_20240712T213426_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_037R_20240712T213615_20240712T213626_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_045R_20240712T213735_20240712T213746_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_030L_20240712T213505_20240712T213516_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_023R_20240712T213354_20240712T213406_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_001L_20240712T213019_20240712T213024_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_034R_20240712T213545_20240712T213556_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_024L_20240712T213404_20240712T213416_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_025R_20240712T213414_20240712T213426_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_037L_20240712T213615_20240712T213626_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_041L_20240712T213655_20240712T213706_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_022L_20240712T213353_20240712T213356_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_040R_20240712T213645_20240712T213656_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_026R_20240712T213424_20240712T213436_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_022R_20240712T213353_20240712T213356_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_042R_20240712T213705_20240712T213716_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_039R_20240712T213635_20240712T213646_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_047L_20240712T213755_20240712T213800_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_044L_20240712T213725_20240712T213736_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_035R_20240712T213555_20240712T213606_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_042L_20240712T213705_20240712T213716_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_038R_20240712T213625_20240712T213636_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_029L_20240712T213455_20240712T213506_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_030R_20240712T213505_20240712T213516_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_032R_20240712T213525_20240712T213536_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_029R_20240712T213455_20240712T213506_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_027L_20240712T213434_20240712T213446_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_033L_20240712T213535_20240712T213546_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_001R_20240712T213019_20240712T213024_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_023L_20240712T213354_20240712T213406_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_031L_20240712T213515_20240712T213526_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_038L_20240712T213625_20240712T213636_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_044R_20240712T213725_20240712T213736_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_045L_20240712T213735_20240712T213746_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_036L_20240712T213605_20240712T213616_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_032L_20240712T213525_20240712T213536_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_027R_20240712T213434_20240712T213446_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_046L_20240712T213745_20240712T213756_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_039L_20240712T213635_20240712T213646_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_041R_20240712T213655_20240712T213706_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_026L_20240712T213424_20240712T213436_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_028L_20240712T213445_20240712T213456_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_036R_20240712T213605_20240712T213616_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_024R_20240712T213404_20240712T213416_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_047R_20240712T213755_20240712T213800_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_040L_20240712T213645_20240712T213656_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_046R_20240712T213745_20240712T213756_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_028R_20240712T213445_20240712T213456_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_043L_20240712T213715_20240712T213726_PIC0_01, SWOT_L2_HR_LakeTile_Obs_018_084_031R_20240712T213515_20240712T213526_PIC0_01</xref_l2_hr_laketile_files>
+    <xref_prior_lake_db_file>SWOT_LakeDatabase_Nom_084_20000101T000000_20991231T235959_20231017T000000_v105.sqlite</xref_prior_lake_db_file>
+    <xref_param_l2_hr_laketile_file>SWOT_Param_L2_HR_LakeTile_20000101T000000_20991231T235959_20230922T160000_v411.cfg</xref_param_l2_hr_laketile_file>
+  </global_metadata>
+  <attribute_metadata>
+    <lake_id>
+      <type>text</type>
+      <long_name>lake ID from prior database</long_name>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Identifier of prior lake from the prior lake database. The format of the identifier is CBBNNNNNNT, where C=continent code, B=basin code, N=lake counter within the basin, T=type.</comment>
+    </lake_id>
+    <reach_id>
+      <type>text</type>
+      <fill_value>no_data</fill_value>
+      <long_name>list of reach ID(s) intersecting this lake</long_name>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>If this PLD lake is a connected lake, this attribute provides the list of the identifiers of the river reaches (i.e. reach_id attribute in the PRD) of type “Connected lake” (i.e. ending with digit 3) that are related to it.</comment>
+    </reach_id>
+    <obs_id>
+      <type>text</type>
+      <fill_value>no_data</fill_value>
+      <long_name>Identifier(s) of the observed lake(s)</long_name>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>List of identifiers of observed lakes that intersect the prior lake given by lake_id. Unique observation identifier within the product. The format of the identifier is CBBTTTSNNNNNN, where C=continent code, B=basin code, TTT=tile number within the pass, S=swath side, N=lake counter within the tile. The different identifiers are separated by semicolons.</comment>
+    </obs_id>
+    <overlap>
+      <type>text</type>
+      <fill_value>no_data</fill_value>
+      <long_name>fraction of prior lake covered by each observed lake</long_name>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>List of fractions of prior lake area covered by each observed lake identified in obs_id attribute. The different fractions are separated by semicolons and refer one-to-one to the identifiers listed in the obs_id attribute.</comment>
+    </overlap>
+    <n_overlap>
+      <type>text</type>
+      <fill_value>no_data</fill_value>
+      <long_name>number of observed lake(s) intersecting the PLD lake</long_name>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Number of observed lake(s) intersecting the PLD lake. This attribute provides the number of elements in obs_id and overlap attributes.</comment>
+    </n_overlap>
+    <time>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>time (UTC)</long_name>
+      <standard_name>time</standard_name>
+      <calendar>gregorian</calendar>
+      <tai_utc_difference>[value of TAI-UTC at time of first record]</tai_utc_difference>
+      <leap_second>YYYY-MM-DD hh:mm:ss</leap_second>
+      <units>seconds since 2000-01-01 00:00:00.000</units>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Time of measurement in seconds in the UTC time scale since 1 Jan 2000 00:00:00 UTC. [tai_utc_difference] is the difference between TAI and UTC reference time (seconds) for the first measurement of the data set. If a leap second occurs within the data set, the attribute leap_second is set to the UTC time at which the leap second occurs.</comment>
+    </time>
+    <time_tai>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>time (TAI)</long_name>
+      <standard_name>time</standard_name>
+      <calendar>gregorian</calendar>
+      <units>seconds since 2000-01-01 00:00:00.000</units>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Time of measurement in seconds in the TAI time scale since 1 Jan 2000 00:00:00 TAI. This time scale contains no leap seconds. The difference (in seconds) with time in UTC is given by the attribute [time:tai_utc_difference].</comment>
+    </time_tai>
+    <time_str>
+      <type>text</type>
+      <fill_value>no_data</fill_value>
+      <long_name>UTC time</long_name>
+      <standard_name>time</standard_name>
+      <calendar>gregorian</calendar>
+      <tai_utc_difference>[value of TAI-UTC at time of first record]</tai_utc_difference>
+      <leap_second>YYYY-MM-DD hh:mm:ss</leap_second>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Time string giving UTC time. The format is YYYY-MM-DDThh:mm:ssZ, where the Z suffix indicates UTC time.</comment>
+    </time_str>
+    <wse>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>lake-averaged water surface elevation with respect to the geoid</long_name>
+      <units>m</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>100000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Lake-averaged water surface elevation, relative to the provided model of the geoid (geoid_hght), with corrections for media delays (wet and dry troposphere, and ionosphere), crossover correction, and tidal effects (solid_tide, load_tidef, and pole_tide) applied.</comment>
+    </wse>
+    <wse_u>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>total uncertainty in lake water surface elevation</long_name>
+      <units>m</units>
+      <valid_min>0</valid_min>
+      <valid_max>100</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Total one-sigma uncertainty (random and systematic) in the lake WSE, including uncertainties of corrections and references.</comment>
+    </wse_u>
+    <wse_r_u>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>random-only uncertainty in the height water surface elevation</long_name>
+      <units>m</units>
+      <valid_min>0</valid_min>
+      <valid_max>100</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Random-only component in the lake water surface elevation, including uncertainties of corrections and references, and variation about the fit.</comment>
+    </wse_r_u>
+    <wse_std>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>standard deviation of pixels wse</long_name>
+      <units>m</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>100000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Standard deviation of the water surface elevation of all the pixels composing the lake. Note that this value is therefore with respect to the provided model of the geoid (geoid_hght attribute) whereas the height of pixels is given with respect to the ellipsoid.</comment>
+    </wse_std>
+    <area_total>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>total water area with estimate of dark water</long_name>
+      <units>km^2</units>
+      <valid_min>0</valid_min>
+      <valid_max>200000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Total estimated area, including dark water that was not detected as water in the SWOT observation but identified through the use of a prior water likelihood map.</comment>
+    </area_total>
+    <area_tot_u>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>uncertainty in total water area</long_name>
+      <units>km^2</units>
+      <valid_min>0</valid_min>
+      <valid_max>200000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Total uncertainty (random and systematic) in the total water area.</comment>
+    </area_tot_u>
+    <area_detct>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>area of detected water pixels</long_name>
+      <units>km^2</units>
+      <valid_min>0</valid_min>
+      <valid_max>200000</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Aggregation of used detected pixels area.</comment>
+    </area_detct>
+    <area_det_u>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>uncertainty in area of detected water</long_name>
+      <units>km^2</units>
+      <valid_min>0</valid_min>
+      <valid_max>200000</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Total uncertainty (random and systematic) in the area of detected water pixels.</comment>
+    </area_det_u>
+    <layovr_val>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>metric of layover effect</long_name>
+      <units>TBD</units>
+      <valid_min>TBD</valid_min>
+      <valid_max>TBD</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Value indicating an estimate of the height error due to layover.</comment>
+    </layovr_val>
+    <xtrk_dist>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>distance of lake polygon centroid to the satellite ground track</long_name>
+      <units>m</units>
+      <valid_min>-75000</valid_min>
+      <valid_max>75000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Distance of centroid of polygon delineating lake boundary to the satellite ground track. A negative value indicates the left side of the swath, relative to the spacecraft velocity vector. A positive value indicates the right side of the swath.</comment>
+    </xtrk_dist>
+    <ds1_l>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>storage change computed with direct approach and linear model for bathymetry</long_name>
+      <units>km^3</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>1000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>"Storage change relative to the first SWOT valid measurement</comment>
+    </ds1_l>
+    <ds1_l_u>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>uncertainty in storage change computed with direct approach and linear model for bathymetry</long_name>
+      <units>km^3</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>1000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Uncertainty in storage change computed with the direct approach, and considering a linear model for the lake bathymetry.</comment>
+    </ds1_l_u>
+    <ds1_q>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>storage change computed with direct approach and quadratic model for bathymetry</long_name>
+      <units>km^3</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>1000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>"Storage change relative to the first SWOT measurement</comment>
+    </ds1_q>
+    <ds1_q_u>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>uncertainty in storage change computed with direct approach and quadratic model for bathymetry</long_name>
+      <units>km^3</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>1000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Uncertainty in storage change computed with the direct approach, and considering a quadratic model for the lake bathymetry.</comment>
+    </ds1_q_u>
+    <ds2_l>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>storage change computed with incremental approach and linear model for bathymetry</long_name>
+      <units>km^3</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>1000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>"Storage change relative to the first SWOT valid measurement</comment>
+    </ds2_l>
+    <ds2_l_u>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>uncertainty in storage change computed with incremental approach and linear model for bathymetry</long_name>
+      <units>km^3</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>1000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Uncertainty in storage change computed with the incremental approach, and considering a linear model for the lake bathymetry.</comment>
+    </ds2_l_u>
+    <ds2_q>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>storage change computed with incremental approach and quadratic model for bathymetry</long_name>
+      <units>km^3</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>1000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>"Storage change relative to the first SWOT measurement</comment>
+    </ds2_q>
+    <ds2_q_u>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>uncertainty in storage change computed with incremental approach and quadratic model for bathymetry</long_name>
+      <units>km^3</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>1000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Uncertainty in storage change computed with the incremental approach, and considering a quadratic model for the lake bathymetry.</comment>
+    </ds2_q_u>
+    <quality_f>
+      <type>int4</type>
+      <fill_value>-999</fill_value>
+      <long_name>summary quality indicator for lake measurement</long_name>
+      <flag_meanings>good bad</flag_meanings>
+      <flag_values>0 1</flag_values>
+      <valid_min>0</valid_min>
+      <valid_max>1</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Summary quality flag for the lake measurement. Values of 0 and 1 indicate nominal and off-nominal measurements.</comment>
+    </quality_f>
+    <dark_frac>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>fractional area of dark water</long_name>
+      <units>1</units>
+      <valid_min>0</valid_min>
+      <valid_max>1</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Fraction of lake area_total covered by dark water. The value is between 0 and 1.</comment>
+    </dark_frac>
+    <ice_clim_f>
+      <type>int4</type>
+      <fill_value>-999</fill_value>
+      <long_name>climatological ice cover flag</long_name>
+      <standard_name>status_flag</standard_name>
+      <source>Yang et al. (2020)</source>
+      <flag_meanings>no_ice_cover uncertain_ice_cover full_ice_cover</flag_meanings>
+      <flag_values>0 1 2</flag_values>
+      <valid_min>0</valid_min>
+      <valid_max>2</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Climatological ice cover flag indicating whether the lake is ice-covered on the day of the observation based on external climatological information (not the SWOT measurement). Values of 0, 1, and 2 indicate that the lake is likely not ice covered, may or may not be partially or fully ice covered, and likely fully ice covered, respectively.</comment>
+    </ice_clim_f>
+    <ice_dyn_f>
+      <type>int4</type>
+      <fill_value>-999</fill_value>
+      <long_name>dynamical ice cover flag</long_name>
+      <standard_name>status_flag</standard_name>
+      <source>Yang et al. (2020)</source>
+      <flag_meanings>no_ice_cover partial_ice_cover full_ice_cover</flag_meanings>
+      <flag_values>0 1 2</flag_values>
+      <valid_min>0</valid_min>
+      <valid_max>2</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Dynamic ice cover flag indicating whether the lake is ice-covered on the day of the observation based on analysis of external optical satellite data. Values of 0, 1, and 2 indicate that the lake is not ice covered, partially ice covered, and fully ice covered, respectively.</comment>
+    </ice_dyn_f>
+    <partial_f>
+      <type>int4</type>
+      <fill_value>-999</fill_value>
+      <long_name>partially covered lake flag</long_name>
+      <flag_meanings>covered partially_covered</flag_meanings>
+      <flag_values>0 1</flag_values>
+      <valid_min>0</valid_min>
+      <valid_max>1</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Flag that indicates only partial lake coverage.  0= Indicates that the observed lake is entirely covered by the swath. 1= Indicates that the observed lake is partially covered by the swath.</comment>
+    </partial_f>
+    <xovr_cal_q>
+      <type>int4</type>
+      <fill_value>-999</fill_value>
+      <long_name>quality of the cross-over calibrations</long_name>
+      <flag_meanings>TBD</flag_meanings>
+      <flag_masks>TBD</flag_masks>
+      <flag_values>TBD</flag_values>
+      <valid_min>0</valid_min>
+      <valid_max>TBD</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Quality of the cross-over calibration.</comment>
+    </xovr_cal_q>
+    <geoid_hght>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>geoid height</long_name>
+      <standard_name>geoid_height_above_reference_ellipsoid</standard_name>
+      <source>EGM2008</source>
+      <institution>GSFC</institution>
+      <units>m</units>
+      <valid_min>-150</valid_min>
+      <valid_max>150</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Lake-averaged geoid model height above the reference ellipsoid. The value is computed from the EGM2008 geoid model with a correction to refer the value to the mean tide system (i.e., includes the zero-frequency permanent tide).</comment>
+    </geoid_hght>
+    <solid_tide>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>solid Earth tide height</long_name>
+      <source>Cartwright and Taylor (1971) and Cartwright and Edden (1973)</source>
+      <units>m</units>
+      <valid_min>-1</valid_min>
+      <valid_max>1</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Solid-Earth (Body) tide height, averaged over the lake. The zero-frequency permanent tide component is not included.</comment>
+    </solid_tide>
+    <load_tidef>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>geocentric load tide height (FES)</long_name>
+      <source>FES2014b (Carrere et al., 2016)</source>
+      <institution>LEGOS/CNES</institution>
+      <units>m</units>
+      <valid_min>-0.2</valid_min>
+      <valid_max>0.2</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Geocentric load tide height. The effect of the ocean tide loading of the Earth’s crust. This value is used to compute wse.</comment>
+    </load_tidef>
+    <load_tideg>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>geocentric load tide height (GOT)</long_name>
+      <source>GOT4.10c (Ray, 2013)</source>
+      <institution>GSFC</institution>
+      <units>m</units>
+      <valid_min>-0.2</valid_min>
+      <valid_max>0.2</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Geocentric load tide height. The effect of the ocean tide loading of the Earth’s crust.</comment>
+    </load_tideg>
+    <pole_tide>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>height of pole tide</long_name>
+      <units>m</units>
+      <source>Wahr (1985) and Desai et al. (2015)</source>
+      <valid_min>-0.2</valid_min>
+      <valid_max>0.2</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Geocentric pole tide height. The sum total of the contribution from the solid-Earth (body) pole tide height and the load pole tide height (i.e., the effect of the ocean pole tide loading of the Earth’s crust).</comment>
+    </pole_tide>
+    <dry_trop_c>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>dry tropospheric vertical correction to WSE</long_name>
+      <source>European Centre for Medium-Range Weather Forecasting</source>
+      <institution>ECMWF</institution>
+      <units>m</units>
+      <valid_min>-3</valid_min>
+      <valid_max>-1.5</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Equivalent vertical correction due to dry troposphere delay. Adding the reported correction to the reported lake WSE results in the uncorrected lake WSE.</comment>
+    </dry_trop_c>
+    <wet_trop_c>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>wet tropospheric vertical correction to WSE</long_name>
+      <source>European Centre for Medium-Range Weather Forecasting</source>
+      <institution>ECMWF</institution>
+      <units>m</units>
+      <valid_min>-1</valid_min>
+      <valid_max>0</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Equivalent vertical correction due to wet troposphere delay. Adding the reported correction to the reported lake WSE results in the uncorrected lake WSE.</comment>
+    </wet_trop_c>
+    <iono_c>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>ionospheric vertical correction to WSE</long_name>
+      <source>Global Ionosphere Maps</source>
+      <institution>JPL</institution>
+      <units>m</units>
+      <valid_min>-0.5</valid_min>
+      <valid_max>0</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Equivalent vertical correction due to ionosphere delay. Adding the reported correction to the reported lake WSE results in the uncorrected lake WSE.</comment>
+    </iono_c>
+    <xovr_cal_c>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>crossover calibration height correction</long_name>
+      <units>m</units>
+      <valid_min>-10</valid_min>
+      <valid_max>10</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Equivalent height correction estimated from KaRIn crossover calibration. The correction is applied during processing before geolocation in terms of roll, baseline dilation, etc., but reported as an equivalent height correction. The correction term should be subtracted from the reported WSE to obtain the uncorrected WSE.</comment>
+    </xovr_cal_c>
+    <lake_name>
+      <type>text</type>
+      <fill_value>no_data</fill_value>
+      <long_name>name(s) of the lake</long_name>
+      <comment>Name(s) of the lake, retrieved from Open Street Map, IGN Carthage, GLWD and vMap0 databases. The different names are separated by semicolons.</comment>
+    </lake_name>
+    <p_res_id>
+      <type>int9</type>
+      <fill_value>-99999999</fill_value>
+      <long_name>reservoir Id from GRanD database</long_name>
+      <source>https://doi.org/10.1890/100125</source>
+      <valid_min>0</valid_min>
+      <valid_max>10000</valid_max>
+      <tag_basic_expert>Expert</tag_basic_expert>
+      <comment>Reservoir ID from the Global Reservoir and Dam (GRanD) database. 0=The lake is not a registered reservoir.</comment>
+    </p_res_id>
+    <p_lon>
+      <type>float</type>
+      <long_name>longitude of the deepest point of the prior lake</long_name>
+      <units>degrees_east</units>
+      <valid_min>-180</valid_min>
+      <valid_max>180</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Longitude of the deepest point of the prior lake.</comment>
+    </p_lon>
+    <p_lat>
+      <type>float</type>
+      <long_name>latgitude of the deepest point of the prior lake</long_name>
+      <units>degrees_north</units>
+      <valid_min>-90</valid_min>
+      <valid_max>90</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Latitude of the deepest point of the prior lake.</comment>
+    </p_lat>
+    <p_ref_wse>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>reference water surface elevation</long_name>
+      <units>m</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>100000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Reference water surface elevation from the prior lake database, used to compute storage change.</comment>
+    </p_ref_wse>
+    <p_ref_area>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>reference water surface area</long_name>
+      <units>km^2</units>
+      <valid_min>0</valid_min>
+      <valid_max>500000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Reference water surface area  from the prior lake database, used to compute storage change.</comment>
+    </p_ref_area>
+    <p_date_t0>
+      <type>text</type>
+      <fill_value>no_data</fill_value>
+      <long_name>reference date for the storage change attributes</long_name>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Reference date from the prior lake database for the storage change attributes, corresponding to the date of the first valid measurement. The format is YYYY-MM-DD.</comment>
+    </p_date_t0>
+    <p_ds_t0>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>reference storage change</long_name>
+      <units>km^3</units>
+      <valid_min>-1000</valid_min>
+      <valid_max>1000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Reference storage change from the prior lake database used to translate the storage change values initially computed with respect to the p_ref_wse and p_ref_area of the PLD lake, to the storage change relative to p_date_t0.</comment>
+    </p_ds_t0>
+    <p_storage>
+      <type>float</type>
+      <fill_value>-999999999999</fill_value>
+      <long_name>maximum water storage</long_name>
+      <units>km^3</units>
+      <valid_min>0</valid_min>
+      <valid_max>30000</valid_max>
+      <tag_basic_expert>Basic</tag_basic_expert>
+      <comment>Maximum water storage value from the prior lake database, computed between the minimum (or ground when a bathymetry is available) and maximum observed levels of the lake.</comment>
+    </p_storage>
+  </attribute_metadata>
+</swot_product>

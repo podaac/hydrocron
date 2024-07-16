@@ -7,47 +7,84 @@ import os.path
 # ----------------- #
 # TESTING CONSTANTS #
 # ----------------- #
-TEST_SHAPEFILE_PATH = os.path.abspath(os.path.join(
+
+# -------- River Reach
+TEST_REACH_SHAPEFILE_PATH = os.path.abspath(os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     '../..', 'tests', 'data',
     'SWOT_L2_HR_RiverSP_Reach_548_011_NA_20230610T193337_20230610T193344_PIA1_01.zip'  # noqa E501
 ))
 
-TEST_FILENAME = (
+TEST_REACH_FILENAME = (
     "SWOT_L2_HR_RiverSP_Reach_548_011_NA_"
     "20230610T193337_20230610T193344_PIA1_01.zip")
 
-TEST_ITEM_DICT = {
+TEST_REACH_ITEM_DICT = {
     "reach_id": "71224100223",
     "time": "739741183.129",
     "time_str": "2023-06-10T19:39:43Z",
     "wse": "286.2983",
     "cycle_id": "548",
-    "sword_version": "15",
+    "PLD_version": "15",
     "p_lat_units": "degrees_north"
 }
 
-DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
-API_TEST_TABLE_NAME = "hydrocron-swot-reach-table"
-TEST_PARTITION_KEY_NAME = 'reach_id'
-TEST_SORT_KEY_NAME = 'range_start_time'
+DB_TEST_REACH_TABLE_NAME = "hydrocron-swot-testreach-table"
+API_TEST_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
+TEST_REACH_PARTITION_KEY_NAME = 'reach_id'
+TEST_REACH_SORT_KEY_NAME = 'range_start_time'
 TEST_REACH_ID_VALUE = '71224100223'
-TEST_TIME_VALUE = '2023-06-10T19:33:37Z'
-TEST_WSE_VALUE = '286.2983'
-TEST_SWORD_VERSION_VALUE = '15'
-TEST_UNITS_FIELD = 'p_lat_units'
-TEST_UNITS = 'degrees_north'
+TEST_REACH_TIME_VALUE = '2023-06-10T19:33:37Z'
+TEST_REACH_WSE_VALUE = '286.2983'
+TEST_REACH_SWORD_VERSION_VALUE = '15'
+TEST_REACH_UNITS_FIELD = 'p_lat_units'
+TEST_REACH_UNITS = 'degrees_north'
+
+# -------- Prior Lakes
+TEST_PLAKE_SHAPEFILE_PATH = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    '../..', 'tests', 'data',
+    'SWOT_L2_HR_LakeSP_Prior_018_084_SI_20240712T213019_20240712T213800_PIC0_01.zip'  # noqa E501
+))
+
+TEST_PLAKE_FILENAME = (
+    "SWOT_L2_HR_LakeSP_Prior_018_084_SI_"
+    "20240712T213019_20240712T213800_PIC0_01.zip")
+
+TEST_PLAKE_ITEM_DICT = {
+    "lake_id": "3511322912",
+    "time": "774135298.1",
+    "time_str": "2024-07-12T21:34:58Z",
+    "wse": "17.325",
+    "cycle_id": "018",
+    "PLD_version": "105",
+    "p_lat_units": "km^3"
+}
+
+DB_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-testlake-table"
+API_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"
+TEST_PLAKE_PARTITION_KEY_NAME = 'lake_id'
+TEST_PLAKE_SORT_KEY_NAME = 'range_start_time'
+TEST_PLAKE_ID_VALUE = '3511322912'
+TEST_PLAKE_TIME_VALUE = '2024-07-12T21:34:58Z'
+TEST_PLAKE_WSE_VALUE = '17.325'
+TEST_PLAKE_PLD_VERSION_VALUE = '105'
+TEST_PLAKE_UNITS_FIELD = 'p_storage'
+TEST_PLAKE_UNITS = 'km^3'
 
 # ------------ #
 # PROD CONSTANTS #
 # ------------ #
 SWOT_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
 SWOT_NODE_TABLE_NAME = "hydrocron-swot-node-table"
+SWOT_PRIOR_LAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"
 
 SWOT_REACH_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
 SWOT_NODE_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
+SWOT_PRIOR_LAKE_COLLECTION_NAME = "SWOT_L2_HR_LakeSP_prior_2.0"
 SWOT_REACH_COLLECTION_VERSION = SWOT_REACH_COLLECTION_NAME[19:]
 SWOT_NODE_COLLECTION_VERSION = SWOT_NODE_COLLECTION_NAME[19:]
+SWOT_PRIOR_LAKE_COLLECTION_VERSION = SWOT_PRIOR_LAKE_COLLECTION_NAME[24:]
 
 SWOT_REACH_PARTITION_KEY = "reach_id"
 SWOT_NODE_PARTITION_KEY = "node_id"
@@ -55,6 +92,7 @@ SWOT_REACH_SORT_KEY = "range_start_time"
 SWOT_NODE_SORT_KEY = "range_start_time"
 
 FIELDNAME_REACH_ID = 'reach_id'
+FIELDNAME_LAKE_ID = 'lake_id'
 FIELDNAME_TIME = 'time'
 FIELDNAME_TIME_STR = 'time_str'
 FIELDNAME_WSE = 'wse'
@@ -62,6 +100,7 @@ FIELDNAME_SLOPE = 'slope'
 FIELDNAME_P_LON = 'p_lon'
 FIELDNAME_P_LAT = 'p_lat'
 FIELDNAME_SWORD_VERSION = 'sword_version'
+FIELDNAME_PLD_VERSION = 'PLD_version'
 
 REACH_DATA_COLUMNS = [
     'wse', 'wse_u', 'wse_r_u', 'wse_c', 'wse_c_u',
@@ -101,6 +140,16 @@ NODE_DATA_COLUMNS = [
     'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'n_good_pix',
     'xovr_cal_q', 'rdr_sig0', 'rdr_sig0_u', 'rdr_pol',
     'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
+    'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c'
+]
+
+PRIOR_LAKE_DATA_COLUMNS = [
+    'wse', 'wse_u', 'wse_r_u', 'wse_std',
+    'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
+    'layovr_val', 'xtrk_dist', 'ds1_l', 'ds1_l_u', 'ds1_q', 'ds1_q_u',
+    'ds2_l', 'ds2_l_u', 'ds2_q', 'ds2_q_u',
+    'quality_f', 'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f',
+    'xovr_cal_q', 'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c'
 ]
 
@@ -156,4 +205,18 @@ NODE_ALL_COLUMNS = [
     'p_dam_id', 'p_n_ch_max', 'p_n_ch_mod',
     'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
     'crid', 'geometry', 'sword_version', 'collection_shortname', 'crid'
+]
+
+PRIOR_LAKE_ALL_COLUMNS = [
+    'lake_id', 'reach_id', 'obs_id', 'overlap', 'n_overlap',
+    'time', 'time_tai', 'time_str', 'wse', 'wse_u', 'wse_r_u', 'wse_std',
+    'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
+    'layovr_val', 'xtrk_dist', 'ds1_l', 'ds1_l_u', 'ds1_q', 'ds1_q_u',
+    'ds2_l', 'ds2_l_u', 'ds2_q', 'ds2_q_u',
+    'quality_f', 'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f',
+    'xovr_cal_q', 'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
+    'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c', 'lake_name', 'p_res_id',
+    'p_lon', 'p_lat', 'p_ref_wse', 'p_ref_area', 'p_date_t0', 'p_ds_t0', 'p_storage', 
+    'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
+    'crid', 'geometry', 'PLD_version', 'collection_shortname', 'crid'
 ]
