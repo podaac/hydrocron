@@ -66,6 +66,7 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
         shp_file = gpd.read_file('zip://' + filepath)
         with zipfile.ZipFile(filepath) as archive:
             shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
+            logging.info(shp_xml_tree)
 
     numeric_columns = shp_file[columns].select_dtypes(include=[np.number]).columns
     if obscure_data:
@@ -105,20 +106,20 @@ def parse_metadata_from_shpxml(xml_elem):
     metadata_attrs : dict
         a dictionary of metadata attributes to add to record
     """
-    # get PRD/PLD version
+    # get SWORD version
     for globs in xml_elem.findall('global_attributes'):
-        if globs.find('xref_prior_river_db_files') != -1:
-            prior_db_files = globs.find('xref_prior_river_db_files').text
-            metadata_attrs = {'sword_version': prior_db_files[-5:-3]}
-        elif globs.find('xref_prior_lake_db_file') != -1:
-            prior_db_files = globs.find('xref_prior_lake_db_file').text
-            metadata_attrs = {'PLD_version': prior_db_files[-10:-7]}
-        else:
-            metadata_attrs = {}
+        prior_db_files = globs.find('xref_prior_river_db_files').text
+        metadata_attrs = {'sword_version': prior_db_files[-5:-3]}
+
+    # get PLD version
+    for globs in xml_elem.findall('global_metadata'):
+        prior_db_files = globs.find('xref_prior_lake_db_file').text
+        logging.info("prior db files: " + prior_db_files)
+        metadata_attrs = {'PLD_version': prior_db_files[-10:-7]}
 
     # get units on fields that have them
     for child in xml_elem:
-        if child.tag == 'attributes':
+        if (child.tag == 'attributes') or (child.tag == 'attribute_metadata'):
             for field in child:
                 try:
                     units = field.find('units').text

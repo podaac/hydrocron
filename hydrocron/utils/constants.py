@@ -25,11 +25,11 @@ TEST_REACH_ITEM_DICT = {
     "time_str": "2023-06-10T19:39:43Z",
     "wse": "286.2983",
     "cycle_id": "548",
-    "PLD_version": "15",
+    "sword_version": "15",
     "p_lat_units": "degrees_north"
 }
 
-DB_TEST_REACH_TABLE_NAME = "hydrocron-swot-testreach-table"
+DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 API_TEST_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
 TEST_REACH_PARTITION_KEY_NAME = 'reach_id'
 TEST_REACH_SORT_KEY_NAME = 'range_start_time'
@@ -44,33 +44,32 @@ TEST_REACH_UNITS = 'degrees_north'
 TEST_PLAKE_SHAPEFILE_PATH = os.path.abspath(os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     '../..', 'tests', 'data',
-    'SWOT_L2_HR_LakeSP_Prior_018_084_SI_20240712T213019_20240712T213800_PIC0_01.zip'  # noqa E501
+    'SWOT_L2_HR_LakeSP_Prior_018_100_GR_20240713T111741_20240713T112027_PIC0_01.zip'  # noqa E501
 ))
 
 TEST_PLAKE_FILENAME = (
-    "SWOT_L2_HR_LakeSP_Prior_018_084_SI_"
-    "20240712T213019_20240712T213800_PIC0_01.zip")
+    "SWOT_L2_HR_LakeSP_Prior_018_100_GR_20240713T111741_20240713T112027_PIC0_01.zip")
 
 TEST_PLAKE_ITEM_DICT = {
-    "lake_id": "3511322912",
-    "time": "774135298.1",
-    "time_str": "2024-07-12T21:34:58Z",
-    "wse": "17.325",
+    "lake_id": "9130047472",
+    "time": "774184696.644",
+    "time_str": "2024-07-13T11:18:16Z",
+    "wse": "307.482",
     "cycle_id": "018",
     "PLD_version": "105",
-    "p_lat_units": "km^3"
+    "area_total_units": "km^2"
 }
 
 DB_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-testlake-table"
 API_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"
 TEST_PLAKE_PARTITION_KEY_NAME = 'lake_id'
 TEST_PLAKE_SORT_KEY_NAME = 'range_start_time'
-TEST_PLAKE_ID_VALUE = '3511322912'
-TEST_PLAKE_TIME_VALUE = '2024-07-12T21:34:58Z'
-TEST_PLAKE_WSE_VALUE = '17.325'
+TEST_PLAKE_ID_VALUE = '9130047472'
+TEST_PLAKE_TIME_VALUE = '2024-07-13T11:18:16Z'
+TEST_PLAKE_WSE_VALUE = '307.482'
 TEST_PLAKE_PLD_VERSION_VALUE = '105'
-TEST_PLAKE_UNITS_FIELD = 'p_storage'
-TEST_PLAKE_UNITS = 'km^3'
+TEST_PLAKE_UNITS_FIELD = 'area_total'
+TEST_PLAKE_UNITS = 'km^2'
 
 # ------------ #
 # PROD CONSTANTS #
@@ -88,8 +87,10 @@ SWOT_PRIOR_LAKE_COLLECTION_VERSION = SWOT_PRIOR_LAKE_COLLECTION_NAME[24:]
 
 SWOT_REACH_PARTITION_KEY = "reach_id"
 SWOT_NODE_PARTITION_KEY = "node_id"
+SWOT_PRIOR_LAKE_PARTITION_KEY = "lake_id"
 SWOT_REACH_SORT_KEY = "range_start_time"
 SWOT_NODE_SORT_KEY = "range_start_time"
+SWOT_PRIOR_LAKE_SORT_KEY = "range_start_time"
 
 FIELDNAME_REACH_ID = 'reach_id'
 FIELDNAME_LAKE_ID = 'lake_id'

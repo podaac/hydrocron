@@ -18,7 +18,7 @@ def test_table_exists(hydrocron_dynamo_table):
     """
     Test that a table exists in the database
     """
-    assert hydrocron_dynamo_table.exists(constants.DB_TEST_REACH_TABLE_NAME)
+    assert hydrocron_dynamo_table.exists(constants.DB_TEST_TABLE_NAME)
 
 
 def test_add_data_reaches(hydrocron_dynamo_table):

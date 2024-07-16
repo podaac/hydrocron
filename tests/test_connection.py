@@ -4,7 +4,7 @@ Class to test Connection class which handles access to AWS service resources.
 
 # Local imports
 import os
-from hydrocron.utils.constants import DB_TEST_REACH_TABLE_NAME
+from hydrocron.utils.constants import DB_TEST_TABLE_NAME
 
 
 def test_dynamodb_resource():
@@ -12,7 +12,7 @@ def test_dynamodb_resource():
 
     os.environ['AWS_DEFAULT_REGION'] = 'us-west-2'
     from hydrocron.utils import connection
-    assert connection.dynamodb_resource.Table(DB_TEST_REACH_TABLE_NAME).name == "hydrocron-swot-testreach-table"
+    assert connection.dynamodb_resource.Table(DB_TEST_TABLE_NAME).name == "hydrocron-swot-test-table"
 
 
 def test_s3_resource(s3_connection):
@@ -21,7 +21,8 @@ def test_s3_resource(s3_connection):
     # Import module
     from hydrocron.utils import connection
     assert type(connection.s3_resource).__name__ == "s3.ServiceResource"
-    
+
+
 def test_ssm_client():
     """Test retrieval of DynamoDB resource."""
 

@@ -40,10 +40,10 @@ def test_parse_from_filename_lake():
         constants.TEST_PLAKE_FILENAME)
 
     assert filename_attrs['cycle_id'] == "018"
-    assert filename_attrs['pass_id'] == "084"
-    assert filename_attrs['continent_id'] == "SI"
-    assert filename_attrs['range_start_time'] == "2024-07-12T21:30:19Z"
-    assert filename_attrs['range_end_time'] == "2024-07-12T21:38:00Z"
+    assert filename_attrs['pass_id'] == "100"
+    assert filename_attrs['continent_id'] == "GR"
+    assert filename_attrs['range_start_time'] == "2024-07-13T11:17:41Z"
+    assert filename_attrs['range_end_time'] == "2024-07-13T11:20:27Z"
     assert filename_attrs['crid'] == "PIC0"
     assert filename_attrs['collection_shortname'] == constants.SWOT_PRIOR_LAKE_COLLECTION_NAME
     assert filename_attrs['collection_version'] == constants.SWOT_PRIOR_LAKE_COLLECTION_VERSION
@@ -74,9 +74,9 @@ def test_read_lake_shapefile():
         obscure_data=False,
         columns=constants.PRIOR_LAKE_DATA_COLUMNS)
 
-    assert len(items) == 43202
+    assert len(items) == 5389
     for key, val in constants.TEST_PLAKE_ITEM_DICT.items():
-        assert val == items[2][key]
+        assert val == items[4596][key]
 
 
 def test_read_shapefile_obscured():
