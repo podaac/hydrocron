@@ -42,7 +42,8 @@ data "aws_iam_policy_document" "dynamo-read-policy" {
 
     resources = [
       aws_dynamodb_table.hydrocron-swot-node-table.arn,
-      aws_dynamodb_table.hydrocron-swot-reach-table.arn
+      aws_dynamodb_table.hydrocron-swot-reach-table.arn,
+      aws_dynamodb_table.hydrocron-swot-prior-lake-table.arn
     ]
   }
 
@@ -68,7 +69,8 @@ data "aws_iam_policy_document" "dynamo-write-policy" {
 
     resources = [
       aws_dynamodb_table.hydrocron-swot-node-table.arn,
-      aws_dynamodb_table.hydrocron-swot-reach-table.arn
+      aws_dynamodb_table.hydrocron-swot-reach-table.arn,
+      aws_dynamodb_table.hydrocron-swot-prior-lake-table.arn
     ]
   }
 
