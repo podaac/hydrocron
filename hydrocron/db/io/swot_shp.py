@@ -118,7 +118,7 @@ def parse_metadata_from_shpxml(xml_elem):
 
     # get units on fields that have them
     for child in xml_elem:
-        if (child.tag == 'attributes') or (child.tag == 'attribute_metadata'):
+        if child.tag in ('attributes', 'attribute_metadata'):
             for field in child:
                 try:
                     units = field.find('units').text
