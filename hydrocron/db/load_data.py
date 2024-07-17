@@ -273,47 +273,26 @@ def load_data(dynamo_resource, table_name, items):
             raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from err
         raise err
 
-    if hydrocron_table.table_name == constants.SWOT_REACH_TABLE_NAME:
+    match hydrocron_table.table_name:
+        case constants.SWOT_REACH_TABLE_NAME:
+            feature_name = 'reach'
+        case constants.SWOT_NODE_TABLE_NAME:
+            feature_name = 'node'
+        case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
+            feature_name = 'prior_lake'
+        case _:
+            logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
 
-        if len(items) > 5:
-            logging.info("Batch adding %s reach items", len(items))
-            for i in range(5):
-                logging.info("Item reach_id: %s", items[i]['reach_id'])
-            hydrocron_table.batch_fill_table(items)
+    feature_id = feature_name + '_id'
 
-        else:
-            logging.info("Adding reach items to table individually")
-            for item_attrs in items:
-                logging.info("Item reach_id: %s", item_attrs['reach_id'])
-                hydrocron_table.add_data(**item_attrs)
-
-    elif hydrocron_table.table_name == constants.SWOT_NODE_TABLE_NAME:
-
-        if len(items) > 5:
-            logging.info("Batch adding %s node items", len(items))
-            for i in range(5):
-                logging.info("Item node_id: %s", items[i]['node_id'])
-            hydrocron_table.batch_fill_table(items)
-
-        else:
-            logging.info("Adding node items to table individually")
-            for item_attrs in items:
-                logging.info("Item node_id: %s", item_attrs['node_id'])
-                hydrocron_table.add_data(**item_attrs)
-
-    elif hydrocron_table.table_name == constants.SWOT_PRIOR_LAKE_TABLE_NAME:
-
-        if len(items) > 5:
-            logging.info("Batch adding %s prior lake items", len(items))
-            for i in range(5):
-                logging.info("Item lake_id: %s", items[i]['lake_id'])
-            hydrocron_table.batch_fill_table(items)
-
-        else:
-            logging.info("Adding prior lake items to table individually")
-            for item_attrs in items:
-                logging.info("Item lake_id: %s", item_attrs['lake_id'])
-                hydrocron_table.add_data(**item_attrs)
+    if len(items) > 5:
+        logging.info("Batch adding %s %s items", len(items), feature_name)
+        for i in range(5):
+            logging.info("Item %s: %s", feature_name, items[i][feature_id])
+        hydrocron_table.batch_fill_table(items)
 
     else:
-        logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
+        logging.info("Adding %s items to table individually", feature_name)
+        for item_attrs in items:
+            logging.info("Item %s: %s", feature_id, item_attrs[feature_id])
+            hydrocron_table.add_data(**item_attrs)
