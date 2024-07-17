@@ -217,7 +217,7 @@ PRIOR_LAKE_ALL_COLUMNS = [
     'quality_f', 'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f',
     'xovr_cal_q', 'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c', 'lake_name', 'p_res_id',
-    'p_lon', 'p_lat', 'p_ref_wse', 'p_ref_area', 'p_date_t0', 'p_ds_t0', 'p_storage', 
+    'p_lon', 'p_lat', 'p_ref_wse', 'p_ref_area', 'p_date_t0', 'p_ds_t0', 'p_storage',
     'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
     'crid', 'geometry', 'PLD_version', 'collection_shortname', 'crid'
 ]
