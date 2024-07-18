@@ -223,7 +223,8 @@ def load_benchmarking_data():
     """
     items = []
 
-    with resources.path("hydrocron.db", "benchmarking_data_reaches.csv") as csv:
+    csv_resource = resources.files("hydrocron.db").joinpath("benchmarking_data_reaches.csv")
+    with resources.as_file(csv_resource) as csv:
         csv_file = pd.read_csv(csv, dtype=str)
 
         logging.info("Read CSV")
