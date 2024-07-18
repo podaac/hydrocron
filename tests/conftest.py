@@ -46,7 +46,8 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         TableName=SWOT_REACH_TABLE_NAME,
         AttributeDefinitions=[
             {'AttributeName': 'reach_id', 'AttributeType': 'S'},
-            {'AttributeName': 'range_start_time', 'AttributeType': 'S'}
+            {'AttributeName': 'range_start_time', 'AttributeType': 'S'},
+            {'AttributeName': 'granuleUR', 'AttributeType': 'S'}
         ],
         KeySchema=[
             {
@@ -62,7 +63,39 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         ProvisionedThroughput={
             'ReadCapacityUnits': 10,
             'WriteCapacityUnits': 10
-        }
+        },
+        GlobalSecondaryIndexes=[
+            {
+                "IndexName": "GranuleURIndex",
+                "KeySchema": [
+                    {
+                        "AttributeName": "granuleUR",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "range_start_time",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "Projection": {
+                    "ProjectionType": "INCLUDE",
+                    "NonKeyAttributes": [
+                        "reach_id",
+                        "collection_shortname",
+                        "collection_version",
+                        "crid",
+                        "cycle_id",
+                        "pass_id",
+                        "continent_id",
+                        "ingest_time"
+                    ]
+                },
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": 5,
+                    "WriteCapacityUnits": 5
+                }
+            }
+        ]
     )
 
     hydro_table = HydrocronTable(dynamo_db, SWOT_REACH_TABLE_NAME)
