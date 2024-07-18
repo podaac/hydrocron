@@ -18,6 +18,7 @@ locals {
   load_data_function_name          = "${local.aws_resource_prefix}-load_data-lambda"
   load_granule_function_name       = "${local.aws_resource_prefix}-load_granule-lambda"
   cnm_response_function_name       = "${local.aws_resource_prefix}-cnm-lambda"
+  track_ingest_function_name       = "${local.aws_resource_prefix}-track-ingest-lambda"
 }
 
 resource "aws_ecr_repository" "lambda-image-repo" {
@@ -180,4 +181,23 @@ resource "aws_lambda_permission" "allow_lambda_from_cnm" {
   function_name = aws_lambda_function.hydrocron_lambda_load_granule.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = aws_lambda_function.hydrocron_lambda_cnm.arn
+}
+
+
+resource "aws_lambda_function" "hydrocron_lambda_track_ingest" {
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.lambda-image-repo.repository_url}:${data.aws_ecr_image.lambda_image.image_tag}"
+  image_config {
+    command = ["hydrocron.db.track_ingest.track_ingest_handler"]
+  }
+  function_name = local.track_ingest_function_name
+  role          = aws_iam_role.hydrocron_lambda_track_ingest_role.arn
+  timeout       = 300
+
+  tags = var.default_tags
+  environment {
+    variables = {
+      GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
+    }
+  }
 }

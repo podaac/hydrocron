@@ -318,6 +318,7 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
   }
 }
 
+
 resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   name = "${local.aws_resource_prefix}-lambda-load-granule-role"
 
@@ -348,6 +349,7 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   }
 }
 
+
 resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
   name = "${local.aws_resource_prefix}-lambda-cnm-role"
 
@@ -374,10 +376,25 @@ resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
   }
 }
 
+
 resource "aws_lambda_permission" "aws_lambda_cnm_responder_sns" {
   statement_id  = "AllowExecutionFromSNS"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.hydrocron_lambda_cnm.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = aws_sns_topic.hydrocron_sns_topic_cnm_response.arn
+}
+
+
+resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
+  name = "${local.aws_resource_prefix}-lambda-track-ingest-role"
+
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
+  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+
+  inline_policy {
+    name   = "HydrocronDynamoRead"
+    policy = data.aws_iam_policy_document.dynamo-read-policy.json
+  }
 }
