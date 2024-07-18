@@ -126,7 +126,7 @@ class Track:
 
         logging.info("Located %s granules in Hydrocron.", len(self.hydrocron_granules.keys()))
 
-    def query_track_status(self):
+    def query_track_ingest(self):
         """Query track status table for granules with "to_ingest" status."""
 
     def count_features(self):
@@ -135,11 +135,11 @@ class Track:
     def publish_cnm_ingest(self):
         """Publish CNM message to trigger granule ingestion."""
 
-    def update_track_status(self):
+    def update_track_ingest(self):
         """Update track status table with new granules and statuses."""
 
 
-def track_status_handler(event, context):
+def track_ingest_handler(event, context):
     """Lambda handler to track status of ingested granules to Hydrocron."""
 
     start = datetime.datetime.now()
@@ -154,10 +154,10 @@ def track_status_handler(event, context):
     track = Track(collection_shortname, collection_start_date, hydrocron_table)
     track.query_cmr()
     track.query_hydrocron()
-    track.query_track_status()
+    track.query_track_ingest()
     track.count_features()
     track.publish_cnm_ingest()
-    track.update_track_status()
+    track.update_track_ingest()
 
     end = datetime.datetime.now()
     logging.info("Elapsed: %s", (end - start))
