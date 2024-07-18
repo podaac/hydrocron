@@ -77,7 +77,7 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
             np.random.default_rng().integers(low=2, high=10)*shp_file[numeric_columns],
             shp_file[numeric_columns])
 
-    shp_file = shp_file.astype(str)
+    # shp_file = shp_file.astype(str)
     filename_attrs = parse_from_filename(filename)
 
     xml_attrs = parse_metadata_from_shpxml(shp_xml_tree)
@@ -133,27 +133,29 @@ def parse_metadata_from_shpxml(xml_elem):
     return metadata_attrs
 
 
-def assemble_attributes(file_as_str, attributes):
+def assemble_attributes(geodf, attributes):
     """
     Helper function to concat file attributes to records
 
     Parameters
     ----------
-    file_as_str : string
-        The file records as a string
+    geodf : geodataframe
+        The file records as a geodataframe
 
     attributes : dict
         A dictionary of attributes to concatenate
     """
 
     items = []
-
-    for _index, row in file_as_str.iterrows():
+    # rework to use dataframe instead of file as string
+    for _index, row in geodf.iterrows():
 
         shp_attrs = json.loads(
             row.to_json(default_handler=str))
 
         item_attrs = shp_attrs | attributes
+
+        item_attrs = {key: str(item_attrs[key]) for key in item_attrs.keys()}
         items.append(item_attrs)
 
     return items

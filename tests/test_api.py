@@ -578,7 +578,8 @@ def test_timeseries_lambda_handler_json_no_output(hydrocron_api):
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
            result['results']['geojson'] == expected
-           
+
+
 def test_timeseries_lambda_handler_json_multi_accept(hydrocron_api):
     """
     Test the lambda handler for the timeseries endpoint
