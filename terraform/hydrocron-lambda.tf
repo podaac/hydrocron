@@ -193,6 +193,7 @@ resource "aws_lambda_function" "hydrocron_lambda_track_ingest" {
   function_name = local.track_ingest_function_name
   role          = aws_iam_role.hydrocron_lambda_track_ingest_role.arn
   timeout       = 300
+  memory_size   = 512
 
   tags = var.default_tags
   environment {
