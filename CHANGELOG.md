@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-    - Issue 198 - Implement queries for cmr and hydrocron
+    - Issue 198 - Implement track ingest lambda function CMR and Hydrocron queries
 ### Changed
 ### Deprecated 
 ### Removed
