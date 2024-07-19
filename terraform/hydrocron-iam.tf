@@ -401,4 +401,8 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
+    inline_policy {
+    name   = "HydrocronDynamoRead"
+    policy = data.aws_iam_policy_document.dynamo-read-policy.json
+  }
 }
