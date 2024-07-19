@@ -59,3 +59,12 @@ def test_read_shapefile_obscured():
     for key, val in constants.TEST_ITEM_DICT.items():
         if key == constants.FIELDNAME_WSE:
             assert val != items[2][key]
+
+
+def test_read_benchmarking_data():
+    """
+    Tests reading the benchmarking data
+    """
+    items = swot_reach_node_shp.load_benchmarking_data()
+
+    assert len(items) == 1199
