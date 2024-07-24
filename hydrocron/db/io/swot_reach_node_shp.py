@@ -174,6 +174,9 @@ def parse_from_filename(filename):
 
     filename_components = filename.split("_")
 
+    collection = ""
+    collection_version = ""
+
     if 'Reach' in filename:
         collection = constants.SWOT_REACH_COLLECTION_NAME
         collection_version = constants.SWOT_REACH_COLLECTION_VERSION
