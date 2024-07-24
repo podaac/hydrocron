@@ -3309,18 +3309,19 @@ pytest = "*"
 
 [[package]]
 name = "python-cmr"
-version = "0.10.0"
+version = "0.12.0"
 description = "Python wrapper to the NASA Common Metadata Repository (CMR) API."
 optional = false
-python-versions = "<4.0,>=3.8"
+python-versions = "<4.0.0,>=3.8.1"
 files = [
-    {file = "python_cmr-0.10.0-py3-none-any.whl", hash = "sha256:f9ef557b42b2482b0fae99ad4885556daf7689d45e796f0041209c46dc150ccf"},
-    {file = "python_cmr-0.10.0.tar.gz", hash = "sha256:d806025ab80ebabe9607ddf905bae58e90e3a93076a164f35df0f37fb3b2d564"},
+    {file = "python_cmr-0.12.0-py3-none-any.whl", hash = "sha256:022cf7e393e245c27b722f181d5e2bedce61fa4b60267baa88421e1f079832cf"},
+    {file = "python_cmr-0.12.0.tar.gz", hash = "sha256:16d61f7fa1ac24c3cbf484723244482934b71e04434093b4bb5663ae934a19c6"},
 ]
 
 [package.dependencies]
 python-dateutil = ">=2.8.2,<3.0.0"
 requests = ">=2.26.0,<3.0.0"
+typing-extensions = ">=4.11.0,<5.0.0"
 
 [[package]]
 name = "python-dateutil"
@@ -4743,4 +4744,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "82e4191c1dac232464bd9288b09f4efa3e2d0b5f4e0a598f274ca470b9f4d694"
+content-hash = "e590a761366acda188484d3d61978083a5c8de9fa8a4d4d8dc95e08bbe8dc23f"

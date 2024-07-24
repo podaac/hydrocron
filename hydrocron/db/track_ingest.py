@@ -5,10 +5,11 @@ Hydrocron class to track status of ingested granules.
 # Standard Imports
 import datetime
 from datetime import timezone
+import json
 import logging
 
 # Third-party Imports
-import requests
+from cmr import GranuleQuery
 
 # Application Imports
 from hydrocron.api.data_access.db import DynamoDataRepository
@@ -57,39 +58,13 @@ class Track:
         been reprocessed in the time range.
         """
 
-        temporal_range = f"{self.revision_start.strftime('%Y-%m-%dT%H:%M:%SZ')},{self.revision_end.strftime('%Y-%m-%dT%H:%M:%SZ')}"
-        parameters = {
-            "short_name": self.collection_shortname,
-            "revision_date": temporal_range,
-            "page_size": self.PAGE_SIZE
-        }
-        logging.info("Search URL: %s", self.CMR_API)
-        logging.info("Search Parameters: %s", parameters)
-        cmr_response = requests.get(url=self.CMR_API, params=parameters, timeout=30)
-        self.cmr_granules = self._get_granule_ur_list(cmr_response.json())
+        query = GranuleQuery()
+        logging.info("Querying revision_date range: %s to %s.", self.revision_start, self.revision_end)
+        granules = query.short_name(self.collection_shortname).revision_date(self.revision_start, self.revision_end).format("umm_json").get(query.hits())
+        for granule in granules:
+            granule_json = json.loads(granule)
+            self.cmr_granules.update(self._get_granule_ur_list(granule_json))
 
-        hits = cmr_response.headers["CMR-Hits"]
-        total = len(self.cmr_granules.keys())
-
-        if "CMR-Search-After" in cmr_response.headers.keys():
-            search_after = cmr_response.headers["CMR-Search-After"]
-        else:
-            search_after = ""
-
-        headers = {}
-        while search_after:
-            logging.info("Searching for more results...%s out of %s", total, hits)
-            headers["CMR-Search-After"] = search_after
-            cmr_response = requests.get(url=self.CMR_API, headers=headers, params=parameters, timeout=30)
-            self.cmr_granules.update(self._get_granule_ur_list(cmr_response.json()))
-            total = len(self.cmr_granules.keys())
-            if "CMR-Search-After" in cmr_response.headers.keys():
-                search_after = cmr_response.headers["CMR-Search-After"]
-            else:
-                search_after = ""
-
-        for granule, revision_date in self.cmr_granules.items():
-            logging.debug("CMR granule located: %s  -  %s", granule, revision_date)
         logging.info("Located %s granules in CMR.", len(self.cmr_granules.keys()))
 
     @staticmethod
