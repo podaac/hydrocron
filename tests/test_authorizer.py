@@ -24,7 +24,7 @@ class TestAuthorizer(unittest.TestCase):
         # Create SSM client and put API keys
         ssm = boto3.client("ssm")
         ssm.put_parameter(Name="/service/hydrocron/api-key-default", Value="abc123", Type="SecureString")
-        ssm.put_parameter(Name="/service/hydrocron/api-key-trusted", Value="def456", Type="SecureString")
+        ssm.put_parameter(Name="/service/hydrocron/api-key-trusted", Value='["def456", "qrs789"]', Type="SecureString")
         
     def tearDown(self):
         

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 205 - Define a an API key for the Confluence workflow and usage plan limits
 ### Changed
 ### Deprecated 
 ### Removed

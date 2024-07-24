@@ -120,11 +120,15 @@ resource "aws_ssm_parameter" "default-user-parameter" {
 }
 
 
-resource "aws_ssm_parameter" "confluence-user-parameter" {
-  name        = "/service/${var.app_name}/api-key-confluence"
-  description = "Hydrocron Confluence user API key"
+resource "aws_ssm_parameter" "trusted-user-parameter" {
+  name        = "/service/${var.app_name}/api-key-trusted"
+  description = "Hydrocron trusted user API key"
   type        = "SecureString"
-  value       = aws_api_gateway_api_key.confluence-user-key.value
+  value = jsonencode(
+    [
+      "${aws_api_gateway_api_key.confluence-user-key.value}"
+    ]
+  )
 }
 
 
