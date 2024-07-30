@@ -98,7 +98,7 @@ def granule_handler(event, _):
     if ("Node" in granule_path) & (table_name != constants.SWOT_NODE_TABLE_NAME):
         raise TableMisMatch(f"Error: Cannot load Node data into table: '{table_name}'")
 
-    if ("LakeSP_prior" in granule_path) & (table_name != constants.SWOT_PRIOR_LAKE_TABLE_NAME):
+    if ("LakeSP_Prior" in granule_path) & (table_name != constants.SWOT_PRIOR_LAKE_TABLE_NAME):
         raise TableMisMatch(f"Error: Cannot load Prior Lake data into table: '{table_name}'")
 
     logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
@@ -164,7 +164,7 @@ def cnm_handler(event, _):
                         InvocationType='Event',
                         Payload=event2)
 
-                if 'LakeSP_prior' in granule_uri:
+                if 'LakeSP_Prior' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","table_name": "' + constants.SWOT_PRIOR_LAKE_TABLE_NAME
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
@@ -240,7 +240,7 @@ def read_data(granule_path, obscure_data, s3_resource=None):
             constants.NODE_DATA_COLUMNS,
             s3_resource=s3_resource)
 
-    if 'LakeSP_prior' in granule_path:
+    if 'LakeSP_Prior' in granule_path:
         logging.info("Start reading prior lake shapefile")
         items = swot_shp.read_shapefile(
             granule_path,
