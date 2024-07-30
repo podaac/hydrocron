@@ -2,6 +2,7 @@
 Hydrocron Table module
 """
 import logging
+import sys
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key
 
@@ -114,7 +115,14 @@ class HydrocronTable:
         try:
             with table.batch_writer() as writer:
                 for item in items:
-                    writer.put_item(Item=item)
+                    if sys.getsizeof(item) < 409600:
+                        writer.put_item(Item=item)
+                    else:
+                        logger.Warning(
+                            "Item larger than 400 KB, could not load: %s %s",
+                            self.partition_key_name,
+                            item[self.partition_key_name]
+                        )
             logger.info("Loaded data into table %s.", table.name)
 
         except ClientError:
