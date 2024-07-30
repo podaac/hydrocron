@@ -115,19 +115,24 @@ class HydrocronTable:
         try:
             with table.batch_writer() as writer:
                 for item in items:
-                    if sys.getsizeof(item) < 409600:
+                    logger.info(
+                        "Item %s size: %s",
+                        item[self.partition_key_name],
+                        str(sys.getsizeof(item))
+                    )
+                    if sys.getsizeof(item) < 300000:
                         writer.put_item(Item=item)
                     else:
                         logger.Warning(
-                            "Item larger than 400 KB, could not load: %s %s",
+                            "Item too large, could not load: %s %s",
                             self.partition_key_name,
                             item[self.partition_key_name]
                         )
+                        continue
             logger.info("Loaded data into table %s.", table.name)
 
         except ClientError:
             logger.exception("Couldn't load data into table %s.", table.name)
-            raise
 
     def run_query(self, partition_key, sort_key=None):
         """

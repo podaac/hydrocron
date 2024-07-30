@@ -289,7 +289,7 @@ def load_data(dynamo_resource, table_name, items):
     if len(items) > 5:
         logging.info("Batch adding %s %s items", len(items), feature_name)
         for i in range(5):
-            logging.info("Item %s: %s", feature_name, items[i][feature_id])
+            logging.info("Item %s: %s", feature_id, items[i][feature_id])
         hydrocron_table.batch_fill_table(items)
 
     else:
