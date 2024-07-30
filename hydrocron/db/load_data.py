@@ -276,14 +276,15 @@ def load_data(dynamo_resource, table_name, items):
     match hydrocron_table.table_name:
         case constants.SWOT_REACH_TABLE_NAME:
             feature_name = 'reach'
+            feature_id = feature_name + '_id'
         case constants.SWOT_NODE_TABLE_NAME:
             feature_name = 'node'
+            feature_id = feature_name + '_id'
         case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
             feature_name = 'prior_lake'
+            feature_id = 'lake_id'
         case _:
             logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
-
-    feature_id = feature_name + '_id'
 
     if len(items) > 5:
         logging.info("Batch adding %s %s items", len(items), feature_name)
