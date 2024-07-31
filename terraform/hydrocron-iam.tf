@@ -51,6 +51,27 @@ data "aws_iam_policy_document" "dynamo-read-policy" {
 }
 
 
+data "aws_iam_policy_document" "dynamo-read-policy-track-ingest" {
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:BatchGetItem",
+      "dynamodb:Scan",
+      "dynamodb:Query",
+      "dynamodb:ConditionCheckItem",
+      "dynamodb:DescribeTable"
+    ]
+
+    resources = [
+      aws_dynamodb_table.hydrocron-track-ingest-table.arn,
+    ]
+  }
+
+}
+
+
 data "aws_iam_policy_document" "dynamo-write-policy" {
 
   statement {
@@ -71,6 +92,31 @@ data "aws_iam_policy_document" "dynamo-write-policy" {
     resources = [
       aws_dynamodb_table.hydrocron-swot-node-table.arn,
       aws_dynamodb_table.hydrocron-swot-reach-table.arn
+    ]
+  }
+
+}
+
+
+data "aws_iam_policy_document" "dynamo-write-policy-track-ingest" {
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:GetItem",
+      "dynamodb:BatchGetItem",
+      "dynamodb:Scan",
+      "dynamodb:Query",
+      "dynamodb:ConditionCheckItem",
+      "dynamodb:DescribeTable"
+    ]
+
+    resources = [
+      aws_dynamodb_table.hydrocron-track-ingest-table.arn
     ]
   }
 
@@ -398,6 +444,14 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
   inline_policy {
     name   = "HydrocronDynamoRead"
     policy = data.aws_iam_policy_document.dynamo-read-policy.json
+  }
+  inline_policy {
+    name   = "HydrocronDynamoReadIngest"
+    policy = data.aws_iam_policy_document.dynamo-read-policy-track-ingest.json
+  }
+  inline_policy {
+    name   = "HydrocronDynamoWriteIngest"
+    policy = data.aws_iam_policy_document.dynamo-write-policy-track-ingest.json
   }
   inline_policy {
     name   = "HydrocronSSMRead"

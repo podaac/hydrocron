@@ -50,3 +50,21 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
     non_key_attributes = ["node_id", "collection_shortname", "collection_version", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
   }
 }
+
+resource "aws_dynamodb_table" "hydrocron-track-ingest-table" {
+  name         = "hydrocron-track-ingest-table"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "granuleUR"
+  range_key    = "status"
+  attribute {
+    name = "granuleUR"
+    type = "S"
+  }
+  attribute {
+    name = "status"
+    type = "S"
+  }
+  point_in_time_recovery {
+    enabled = true
+  }
+}
