@@ -174,6 +174,9 @@ def parse_from_filename(filename):
 
     filename_components = filename.split("_")
 
+    collection = ""
+    collection_version = ""
+
     if 'Reach' in filename:
         collection = constants.SWOT_REACH_COLLECTION_NAME
         collection_version = constants.SWOT_REACH_COLLECTION_VERSION
@@ -214,7 +217,8 @@ def load_benchmarking_data():
     """
     items = []
 
-    with resources.path("hydrocron.db", "benchmarking_data_reaches.csv") as csv:
+    csv_resource = resources.files("hydrocron.db").joinpath("benchmarking_data_reaches.csv")
+    with resources.as_file(csv_resource) as csv:
         csv_file = pd.read_csv(csv, dtype=str)
 
         logging.info("Read CSV")
