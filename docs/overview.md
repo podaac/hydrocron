@@ -17,3 +17,7 @@ Hydrocron does not currently support Unassigned rivers and lakes.
 ## Limitations
 
 Data return size is limited to 6 MB. If your query response is larger than this a 413 error will be returned.
+
+## Citation
+
+Cite Hydrocron using the following DOI: [10.5281/zenodo.11193245](https://doi.org/10.5281/zenodo.11193245).
