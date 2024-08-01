@@ -47,6 +47,10 @@ matplotlib = "^3.8.3"
 [tool.poetry.group.test.dependencies]
 pytz = "^2024.1"
 
+[tool.coverage.run]
+source = ['hydrocron']
+relative_files = true
+
 [tool.poetry.scripts]
 hydrocron_api = "hydrocron.api.__main__:__main__"
 hydrocron_load = 'hydrocron.db.load_data:main'
