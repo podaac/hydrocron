@@ -22,6 +22,9 @@ resource "aws_dynamodb_table" "hydrocron-swot-reach-table" {
     projection_type    = "INCLUDE"
     non_key_attributes = ["reach_id", "collection_shortname", "collection_version", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
   }
+  point_in_time_recovery {
+    enabled = var.stage == "ops" ? true : false
+  }
 }
 
 resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
@@ -48,6 +51,9 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
     range_key          = "range_start_time"
     projection_type    = "INCLUDE"
     non_key_attributes = ["node_id", "collection_shortname", "collection_version", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
+  }
+  point_in_time_recovery {
+    enabled = var.stage == "ops" ? true : false
   }
 }
 
@@ -76,6 +82,9 @@ resource "aws_dynamodb_table" "hydrocron-swot-prior-lake-table" {
     projection_type    = "INCLUDE"
     non_key_attributes = ["lake_id", "collection_shortname", "collection_version", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
   }
+  point_in_time_recovery {
+    enabled = var.stage == "ops" ? true : false
+  }
 }
 
 resource "aws_dynamodb_table" "hydrocron-track-ingest-table" {
@@ -101,6 +110,6 @@ resource "aws_dynamodb_table" "hydrocron-track-ingest-table" {
     projection_type    = "ALL"
   }
   point_in_time_recovery {
-    enabled = true
+    enabled = var.stage == "ops" ? true : false
   }
 }
