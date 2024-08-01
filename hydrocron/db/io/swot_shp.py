@@ -66,10 +66,10 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
         shp_file = gpd.read_file('zip://' + filepath)
         with zipfile.ZipFile(filepath) as archive:
             shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
-            logging.info(shp_xml_tree)
 
-    numeric_columns = shp_file[columns].select_dtypes(include=[np.number]).columns
     if obscure_data:
+        numeric_columns = shp_file[columns].select_dtypes(include=[np.number]).columns
+
         shp_file[numeric_columns] = np.where(
             (np.rint(shp_file[numeric_columns]) != -999) &
             (np.rint(shp_file[numeric_columns]) != -99999999) &
@@ -77,7 +77,6 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
             np.random.default_rng().integers(low=2, high=10)*shp_file[numeric_columns],
             shp_file[numeric_columns])
 
-    # shp_file = shp_file.astype(str)
     filename_attrs = parse_from_filename(filename)
 
     xml_attrs = parse_metadata_from_shpxml(shp_xml_tree)
