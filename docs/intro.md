@@ -1,5 +1,7 @@
 # Hydrocron Documentation
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11193245.svg)](https://doi.org/10.5281/zenodo.11193245)
+
 Hydrocron is an API that repackages hydrology datasets from the Surface Water and Ocean Topography (SWOT) satellite into formats that make time-series analysis easier.
 
 SWOT data is archived as individually timestamped shapefiles, which would otherwise require users to perform potentially thousands of file IO operations per river feature to view the data as a timeseries. Hydrocron makes this possible with a single API call.
