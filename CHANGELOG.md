@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
     - Issue 201- Create table for tracking granule ingest status
     - Issue 198 - Implement track ingest lambda function CMR and Hydrocron queries
+    - Issue 193 - Add new Dynamo table for prior lake data
 ### Changed
 ### Deprecated 
 ### Removed
