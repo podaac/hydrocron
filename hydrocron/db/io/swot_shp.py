@@ -3,6 +3,7 @@ Unpacks SWOT Shapefiles
 """
 import os.path
 import json
+import tempfile
 from datetime import datetime, timezone
 from importlib import resources
 import xml.etree.ElementTree as ET
@@ -41,31 +42,32 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
         to the database table
     """
     filename = os.path.basename(filepath)
-    lambda_temp_file = '/tmp/' + filename
 
-    if filepath.startswith('s3'):
-        bucket_name, key = filepath.replace("s3://", "").split("/", 1)
-        logging.info("Opening granule %s from bucket %s", key, bucket_name)
+    with tempfile.TemporaryDirectory() as lambda_temp_dir_name:
+        lambda_temp_file = os.path.join(lambda_temp_dir_name, filename)
+        if filepath.startswith('s3'):
+            bucket_name, key = filepath.replace("s3://", "").split("/", 1)
+            logging.info("Opening granule %s from bucket %s", key, bucket_name)
 
-        s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
+            s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
 
-        shp_file = gpd.read_file('zip://' + lambda_temp_file)
-        with zipfile.ZipFile(lambda_temp_file) as archive:
-            shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
+            shp_file = gpd.read_file('zip://' + lambda_temp_file)
+            with zipfile.ZipFile(lambda_temp_file) as archive:
+                shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
 
-    elif filepath.startswith('https'):
-        _, bucket_name, key = filepath.replace("https://", "").split("/", 2)
-        logging.info("Opening granule %s from bucket %s", key, bucket_name)
+        elif filepath.startswith('https'):
+            _, bucket_name, key = filepath.replace("https://", "").split("/", 2)
+            logging.info("Opening granule %s from bucket %s", key, bucket_name)
 
-        s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
+            s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
 
-        shp_file = gpd.read_file('zip://' + lambda_temp_file)
-        with zipfile.ZipFile(lambda_temp_file) as archive:
-            shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
-    else:
-        shp_file = gpd.read_file('zip://' + filepath)
-        with zipfile.ZipFile(filepath) as archive:
-            shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
+            shp_file = gpd.read_file('zip://' + lambda_temp_file)
+            with zipfile.ZipFile(lambda_temp_file) as archive:
+                shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
+        else:
+            shp_file = gpd.read_file('zip://' + filepath)
+            with zipfile.ZipFile(filepath) as archive:
+                shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
 
     if obscure_data:
         numeric_columns = shp_file[columns].select_dtypes(include=[np.number]).columns
