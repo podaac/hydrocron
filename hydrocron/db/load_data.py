@@ -287,7 +287,7 @@ def load_data(dynamo_resource, table_name, items):
             logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
 
     if len(items) > 5:
-        logging.info("Batch adding %s %s items", len(items), feature_name)
+        logging.info("Batch adding %s %s items. First 5 feature ids in batch: ", len(items), feature_name)
         for i in range(5):
             logging.info("Item %s: %s", feature_id, items[i][feature_id])
         hydrocron_table.batch_fill_table(items)
