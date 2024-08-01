@@ -51,7 +51,7 @@ def test_get_granule_ur(hydrocron_api):
     
     data_repository = DynamoDataRepository(connection.dynamodb_resource)
     
-    table_name = constants.API_TEST_TABLE_NAME
+    table_name = constants.API_TEST_REACH_TABLE_NAME
     granule_ur = "SWOT_L2_HR_RiverSP_Reach_548_011_NA_20230610T193337_20230610T193344_PIA1_01.zip"
     actual_data = data_repository.get_granule_ur(table_name, granule_ur)
         

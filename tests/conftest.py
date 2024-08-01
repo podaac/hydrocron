@@ -8,12 +8,10 @@ import pytest
 from pytest_dynamodb import factories
 
 from hydrocron.db import HydrocronTable
-from hydrocron.db.io import swot_reach_node_shp
+from hydrocron.db.io import swot_shp
 from hydrocron.utils import constants
-from hydrocron.utils.constants import SWOT_REACH_TABLE_NAME
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
-API_TEST_TABLE_NAME = "hydrocron-swot-reach-table"
 
 TEST_SHAPEFILE_PATH = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
@@ -43,7 +41,7 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
     )
 
     dynamo_db.create_table(
-        TableName=SWOT_REACH_TABLE_NAME,
+        TableName=constants.SWOT_REACH_TABLE_NAME,
         AttributeDefinitions=[
             {'AttributeName': 'reach_id', 'AttributeType': 'S'},
             {'AttributeName': 'range_start_time', 'AttributeType': 'S'},
@@ -98,14 +96,15 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         ]
     )
 
-    hydro_table = HydrocronTable(dynamo_db, SWOT_REACH_TABLE_NAME)
+    hydro_table = HydrocronTable(dynamo_db, constants.SWOT_REACH_TABLE_NAME)
 
-    items = swot_reach_node_shp.read_shapefile(
+    # load reach table
+    reach_items = swot_shp.read_shapefile(
         TEST_SHAPEFILE_PATH,
         obscure_data=False,
         columns=constants.REACH_DATA_COLUMNS)
 
-    for item_attrs in items:
+    for item_attrs in reach_items:
         hydro_table.add_data(**item_attrs)
 
     try:
@@ -148,7 +147,7 @@ def hydrocron_dynamo_table(dynamo_db_resource):
 
     hydro_table = HydrocronTable(dynamo_db_resource, DB_TEST_TABLE_NAME)
 
-    items = swot_reach_node_shp.read_shapefile(
+    items = swot_shp.read_shapefile(
         TEST_SHAPEFILE_PATH,
         obscure_data=False,
         columns=constants.REACH_DATA_COLUMNS)
