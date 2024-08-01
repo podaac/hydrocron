@@ -86,9 +86,6 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
     attributes = filename_attrs | xml_attrs
     items = assemble_attributes(shp_file, attributes)
 
-    if os.path.exists(lambda_temp_file):
-        os.remove(lambda_temp_file)
-
     return items
 
 
