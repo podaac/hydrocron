@@ -1,0 +1,37 @@
+{
+    "status": "200 OK",
+    "time": 835.468,
+    "hits": 2,
+    "results": {
+        "csv": "",
+        "geojson": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "id": "0",
+                    "type": "Feature",
+                    "properties": {
+                        "lake_id": "9120274662",
+                        "time_str": "no_data",
+                        "wse": "-999999999999.0",
+                        "area_total": "-999999999999.0",
+                        "quality_f": "-999",
+                        "collection_shortname": "SWOT_L2_HR_LakeSP_2.0",
+                        "crid": "PIC0",
+                        "PLD_version": "105",
+                        "range_start_time": "2024-07-13T11:17:41Z",
+                        "wse_units": "m",
+                        "area_total_units": "km^2"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            -121.362755,
+                            50.415171
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}

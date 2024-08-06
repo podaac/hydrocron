@@ -114,7 +114,30 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
     assert result['results']['csv'] == row_str
 
 
-def test_timeseries_convert_to_df_node(hydrocron_api):
+def test_timeseries_convert_to_df_lake():
+    """
+    Test conver_to_df function to make sure it creates a correctly formatted
+    GeoDataFrame.
+    """
+    import hydrocron.api.controllers.timeseries
+
+    test_data = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+                 .joinpath('test_data').joinpath('api_query_results_items_lake.json'))
+    with open(test_data) as jf:
+        items = json.load(jf)
+    gdf = hydrocron.api.controllers.timeseries.convert_to_df(items)
+    assert_almost_equal(np.array([-999999999999.0, -999999999999.0], dtype=np.float64),
+                        gdf['wse'].to_numpy().astype(np.float64))
+    assert_almost_equal(np.array([68.693765, 68.693765], dtype=np.float64),
+                        gdf['p_lat'].to_numpy().astype(np.float64))
+    assert_almost_equal(np.array([-999999999999.0, -999999999999.0], dtype=np.float64),
+                        gdf['time'].to_numpy().astype(np.float64))
+    geo_array = gpd.points_from_xy(x=[-121.362755, -121.362755],
+                                   y=[50.415171, 50.415171]).to_numpy()
+    assert str(geo_array) == str(gdf['geometry'].to_numpy())
+
+
+def test_timeseries_convert_to_df_node():
     """
     Test conver_to_df function to make sure it creates a correctly formatted
     GeoDataFrame.
@@ -137,7 +160,7 @@ def test_timeseries_convert_to_df_node(hydrocron_api):
     assert str(geo_array) == str(gdf['geometry'].to_numpy())
 
 
-def test_timeseries_convert_to_df_reach(hydrocron_api):
+def test_timeseries_convert_to_df_reach():
     """
     Test conver_to_df function to make sure it creates a correctly formatted
     GeoDataFrame.
@@ -157,7 +180,7 @@ def test_timeseries_convert_to_df_reach(hydrocron_api):
                         gdf['slope'].to_numpy().astype(np.float64))
 
 
-def test_add_units(hydrocron_api):
+def test_add_units():
     """
     Test add_units function.
     """
@@ -178,12 +201,9 @@ def test_add_units(hydrocron_api):
     assert expected_columns == columns
 
 
-def test_timeseries_lambda_handler_missing(hydrocron_api):
+def test_timeseries_lambda_handler_missing():
     """
     Test the lambda handler for the timeseries endpoint for missing parameters
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -218,12 +238,9 @@ def test_timeseries_lambda_handler_missing(hydrocron_api):
         assert "400: This required parameter is missing: 'feature_id'" in str(e.value)
 
 
-def test_timeseries_lambda_handler_feature(hydrocron_api):
+def test_timeseries_lambda_handler_feature():
     """
     Test the lambda handler for the timeseries endpoint for feature parameter
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -245,15 +262,12 @@ def test_timeseries_lambda_handler_feature(hydrocron_api):
     context = "_"
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-        assert "400: feature parameter should be Reach or Node, not: River" in str(e.value)
+        assert "400: feature parameter should be Reach, Node, or PriorLake, not: River" in str(e.value)
 
 
-def test_timeseries_lambda_handler_feature_id(hydrocron_api):
+def test_timeseries_lambda_handler_feature_id():
     """
     Test the lambda handler for the timeseries endpoint for feature_id parameter
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -278,13 +292,10 @@ def test_timeseries_lambda_handler_feature_id(hydrocron_api):
         assert "400: feature_id cannot contain letters: 7122ff4100223" in str(e.value)
 
 
-def test_timeseries_lambda_handler_dates(hydrocron_api):
+def test_timeseries_lambda_handler_dates():
     """
     Test the lambda handler for the timeseries endpoint for start_time and 
     end_time parameters
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -310,12 +321,9 @@ def test_timeseries_lambda_handler_dates(hydrocron_api):
         e.value)
 
 
-def test_timeseries_lambda_handler_output(hydrocron_api):
+def test_timeseries_lambda_handler_output():
     """
     Test the lambda handler for the timeseries output parameters
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -340,12 +348,9 @@ def test_timeseries_lambda_handler_output(hydrocron_api):
         assert "400: output parameter should be csv or geojson, not: txt" in str(e.value)
 
 
-def test_timeseries_lambda_handler_fields(hydrocron_api):
+def test_timeseries_lambda_handler_fields():
     """
     Test the lambda handler for the timeseries output parameters
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -370,14 +375,10 @@ def test_timeseries_lambda_handler_fields(hydrocron_api):
         assert "400: fields parameter should contain valid SWOT fields" in str(e.value)
 
 
-def test_timeseries_lambda_handler_not_found(hydrocron_api):
+def test_timeseries_lambda_handler_not_found():
     """
     Test the lambda handler for cases where the identifier is not found in the
     database.
-
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -402,12 +403,9 @@ def test_timeseries_lambda_handler_not_found(hydrocron_api):
         assert "400: Results with the specified Feature ID 71224100227 were not found" in str(e.value)
 
 
-def test_timeseries_lambda_handler_elastic_agent(hydrocron_api):
+def test_timeseries_lambda_handler_elastic_agent():
     """
     Test the lambda handler for cases where invoked by Elastic Agent.
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -424,12 +422,9 @@ def test_timeseries_lambda_handler_elastic_agent(hydrocron_api):
     assert result == {}
 
 
-def test_timeseries_lambda_handler_missing_header(hydrocron_api):
+def test_timeseries_lambda_handler_missing_header():
     """
     Test the lambda handler for cases where invoked by Elastic Agent.
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -516,12 +511,9 @@ def test_timeseries_lambda_handler_csv_accept(hydrocron_api):
     assert result == row_str
 
 
-def test_timeseries_lambda_handler_geojson_accept_output(hydrocron_api):
+def test_timeseries_lambda_handler_geojson_accept_output():
     """
     Test the lambda handler for the timeseries endpoint
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -614,12 +606,9 @@ def test_timeseries_lambda_handler_json_multi_accept(hydrocron_api):
            result['results']['geojson'] == expected
 
 
-def test_timeseries_lambda_handler_unsupported(hydrocron_api):
+def test_timeseries_lambda_handler_unsupported():
     """
     Test the lambda handler for the timeseries endpoint
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
@@ -644,12 +633,9 @@ def test_timeseries_lambda_handler_unsupported(hydrocron_api):
         assert "415: Unsupported media type in Accept request header: image/jpg." in str(e.value)
 
 
-def test_timeseries_lambda_handler_reachid_not_found(hydrocron_api):
+def test_timeseries_lambda_handler_reachid_not_found():
     """
     Test the lambda handler for the timeseries endpoint
-    Parameters
-    ----------
-    hydrocron_api: Fixture ensuring the database is configured for the api
     """
     import hydrocron.api.controllers.timeseries
 
