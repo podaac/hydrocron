@@ -56,3 +56,24 @@ class DynamoDataRepository:
             Key(constants.SWOT_NODE_SORT_KEY).between(start_time, end_time))
         )
         return items
+
+    def get_granule_ur(self, table_name, granule_ur):
+        """
+
+        @param table_name: str - Hydrocron table to query
+        @param granule_ur: str - Granule UR
+        @return: dictionary of items
+        """
+
+        hydrocron_table = self._dynamo_instance.Table(table_name)
+        hydrocron_table.load()
+
+        items = hydrocron_table.query(
+            ProjectionExpression="granuleUR",
+            Limit=1,
+            IndexName="GranuleURIndex",
+            KeyConditionExpression=(
+                Key("granuleUR").eq(granule_ur)
+            )
+        )
+        return items
