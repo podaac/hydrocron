@@ -23,9 +23,9 @@ def test_s3_resource(s3_connection):
     assert type(connection.s3_resource).__name__ == "s3.ServiceResource"
 
 
-def test_ssm_client():
+def test_kms_client():
     """Test retrieval of DynamoDB resource."""
 
     # Import module
     from hydrocron.utils import connection
-    assert type(connection.ssm_client).__name__ == "SSM"
+    assert type(connection.kms_client).__name__ == "KMS"
