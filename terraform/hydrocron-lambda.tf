@@ -97,6 +97,13 @@ resource "aws_lambda_function" "hydrocron_lambda_authorizer" {
     subnet_ids         = data.aws_subnets.private_application_subnets.ids
     security_group_ids = data.aws_security_groups.vpc_default_sg.ids
   }
+  environment {
+    variables = {
+      API_KEY_DEFAULT = aws_kms_ciphertext.default-user-key.ciphertext_blob
+      API_KEY_TRUSTED = aws_kms_ciphertext.trusted-user-key.ciphertext_blob
+      VENUE_PREFIX = local.aws_resource_prefix
+    }
+  }
   tags = var.default_tags
 }
 
@@ -201,4 +208,18 @@ resource "aws_lambda_function" "hydrocron_lambda_track_ingest" {
       GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
     }
   }
+}
+
+
+resource "aws_kms_key" "lambda_env_var_kms_key" {
+  description              = "KMS key to encrypt/decrypt Lambda environment variables"
+  key_usage                = "ENCRYPT_DECRYPT"
+  customer_master_key_spec = "SYMMETRIC_DEFAULT"
+  policy                   = data.aws_iam_policy_document.kms-key-policy.json
+}
+
+
+resource "aws_kms_alias" "lambda_env_var_kms_alias" {
+  name          = "alias/${local.aws_resource_prefix}-lambda-key"
+  target_key_id = aws_kms_key.lambda_env_var_kms_key.id
 }

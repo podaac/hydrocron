@@ -112,19 +112,15 @@ resource "aws_api_gateway_api_key" "confluence-user-key" {
 }
 
 
-resource "aws_ssm_parameter" "default-user-parameter" {
-  name        = "/service/${var.app_name}/api-key-default"
-  description = "Hydrocron default user API key"
-  type        = "SecureString"
-  value       = aws_api_gateway_api_key.default-user-key.value
+resource "aws_kms_ciphertext" "default-user-key" {
+  key_id    = aws_kms_key.lambda_env_var_kms_key.id
+  plaintext = aws_api_gateway_api_key.default-user-key.value
 }
 
 
-resource "aws_ssm_parameter" "trusted-user-parameter" {
-  name        = "/service/${var.app_name}/api-key-trusted"
-  description = "Hydrocron trusted user API key"
-  type        = "SecureString"
-  value = jsonencode(
+resource "aws_kms_ciphertext" "trusted-user-key" {
+  key_id = aws_kms_key.lambda_env_var_kms_key.id
+  plaintext = jsonencode(
     [
       "${aws_api_gateway_api_key.confluence-user-key.value}"
     ]
