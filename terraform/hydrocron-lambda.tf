@@ -88,9 +88,8 @@ resource "null_resource" "api_key_hash" {
   This resource is needed because of https://github.com/podaac/hydrocron/issues/205#issuecomment-2250982988
    */
   triggers = {
-    value = sha256(join(",", [
-      aws_ssm_parameter.default-user-parameter.value, aws_ssm_parameter.trusted-user-parameter.value
-    ]))
+    default_key = aws_ssm_parameter.default-user-parameter.value
+    trusted_key_list = aws_ssm_parameter.trusted-user-parameter.value
   }
 }
 
