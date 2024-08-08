@@ -83,6 +83,16 @@ resource "aws_lambda_permission" "allow_hydrocron-timeseries" {
   source_arn = "${aws_api_gateway_rest_api.hydrocron-api-gateway.execution_arn}/*"
 }
 
+resource "null_resource" "api_key_hash" {
+  /**
+  This resource is needed because of https://github.com/podaac/hydrocron/issues/205#issuecomment-2250982988
+   */
+  triggers = {
+    value = sha256(join(",", [
+      aws_ssm_parameter.default-user-parameter.value, aws_ssm_parameter.trusted-user-parameter.value
+    ]))
+  }
+}
 
 resource "aws_lambda_function" "hydrocron_lambda_authorizer" {
   package_type = "Image"
@@ -97,10 +107,20 @@ resource "aws_lambda_function" "hydrocron_lambda_authorizer" {
     subnet_ids         = data.aws_subnets.private_application_subnets.ids
     security_group_ids = data.aws_security_groups.vpc_default_sg.ids
   }
-  lifecycle {
-    replace_triggered_by = [aws_ssm_parameter.trusted-user-parameter.value, aws_ssm_parameter.default-user-parameter.value]
-  }
   tags = var.default_tags
+
+  /**
+  This is the preferred solution in lieu of the nonsense below but when using replace_triggered_by, terraform plan fails
+  to replace the lambda correctly and results in an error "ResourceConflictException: Function already exist"
+
+  lifecycle { replace_triggered_by = [aws_ssm_parameter.default-user-parameter.value, aws_ssm_parameter.trusted-user-parameter.value]}
+   */
+  publish = true
+  environment {
+    variables = {
+      HACK_TO_FORCE_LAMBDA_PUBLISH = null_resource.api_key_hash.id
+    }
+  }
 }
 
 
