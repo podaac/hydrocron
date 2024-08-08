@@ -106,16 +106,14 @@ def handle_null_geometries(geodf):
 
     Returns
     -------
-    geodf : geopandas.GeoDataFrame
+    geodf_no_nulls : geopandas.GeoDataFrame
         the geodataframe with null geometries handled
     """
-    geodf_nulls = geodf.loc[(geodf['geometry'].is_empty | geodf['geometry'].isna())]
 
-    geodf_nulls.set_geometry(
-        Polygon(constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS)
-        )
+    geodf['geometry'].fillna(
+        value=Polygon(constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS),
+        inplace=True)
 
-    geodf.loc[[(geodf['geometry'].is_empty | geodf['geometry'].isna())], 'geometry'] = geodf_nulls['geometry']
     return geodf
 
 

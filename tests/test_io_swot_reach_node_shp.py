@@ -8,6 +8,7 @@ Unit tests for unpacking swot reach and node shapefiles.
 """
 from datetime import datetime, timedelta, timezone
 import pytz
+from shapely import Polygon
 from hydrocron.utils import constants
 
 from hydrocron.db.io import swot_shp
@@ -75,9 +76,36 @@ def test_read_lake_shapefile():
         columns=constants.PRIOR_LAKE_DATA_COLUMNS)
 
     assert len(items) == 5389
-    assert items
     for key, val in constants.TEST_PLAKE_ITEM_DICT.items():
         assert val == items[4596][key]
+
+
+def test_lake_null_geometry():
+    """
+    Tests replacing null geometry with fillvalue for lake polygons
+    """
+    items = swot_shp.read_shapefile(
+        constants.TEST_PLAKE_SHAPEFILE_PATH,
+        obscure_data=False,
+        columns=constants.PRIOR_LAKE_DATA_COLUMNS)
+
+    assert items[0]['geometry'] == Polygon(
+        constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS).centroid()
+
+
+def test_lake_centerpoints():
+    """
+    Tests replacing polygons with centerpoints
+    """
+    items = swot_shp.read_shapefile(
+        constants.TEST_PLAKE_SHAPEFILE_PATH,
+        obscure_data=False,
+        columns=constants.PRIOR_LAKE_DATA_COLUMNS)
+
+    assert items[0]['geometry'] == Polygon(
+        constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS).centroid()
+    assert items[4596]['geometry'] == Polygon(
+        constants.TEST_PLAKE_GEOM_DICT['geometry']).centroid()
 
 
 def test_read_shapefile_obscured():
