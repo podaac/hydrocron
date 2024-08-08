@@ -97,6 +97,9 @@ resource "aws_lambda_function" "hydrocron_lambda_authorizer" {
     subnet_ids         = data.aws_subnets.private_application_subnets.ids
     security_group_ids = data.aws_security_groups.vpc_default_sg.ids
   }
+  lifecycle {
+    replace_triggered_by = [aws_ssm_parameter.trusted-user-parameter.value, aws_ssm_parameter.default-user-parameter.value]
+  }
   tags = var.default_tags
 }
 
