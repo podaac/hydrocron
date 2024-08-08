@@ -13,6 +13,8 @@ import logging
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from shapely import Polygon
+
 from hydrocron.utils import constants
 
 
@@ -69,6 +71,10 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
             with zipfile.ZipFile(filepath) as archive:
                 shp_xml_tree = ET.fromstring(archive.read(filename[:-4] + ".shp.xml"))
 
+    if 'LakeSP_Prior' in filename:
+        shp_file = handle_null_geometries(shp_file)
+        shp_file = convert_polygon_to_centerpoint(shp_file)
+
     if obscure_data:
         numeric_columns = shp_file[columns].select_dtypes(include=[np.number]).columns
 
@@ -87,6 +93,50 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
     items = assemble_attributes(shp_file, attributes)
 
     return items
+
+
+def handle_null_geometries(geodf):
+    """
+    Assign fill value polygon to any features that contain null geometries
+
+    Parameters
+    ----------
+    geodf : geopandas.GeoDataFrame
+        the geodataframe containing the unpacked shapefile features
+
+    Returns
+    -------
+    geodf : geopandas.GeoDataFrame
+        the geodataframe with null geometries handled
+    """
+    geodf_nulls = geodf.loc[(geodf['geometry'].is_empty | geodf['geometry'].isna())]
+
+    geodf_nulls.set_geometry(
+        Polygon(constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS)
+        )
+
+    geodf.loc[[(geodf['geometry'].is_empty | geodf['geometry'].isna())], 'geometry'] = geodf_nulls['geometry']
+    return geodf
+
+
+def convert_polygon_to_centerpoint(geodf_polygon):
+    """
+    Converts polygon geometries to centerpoints. Used to reduce the size of lake features
+
+    Parameters
+    ----------
+    geodf_polygon : geopandas.GeoDataFrame
+        the geodataframe containing the unpacked shapefile features with polygon feature types
+
+    Returns
+    -------
+    geodf_centerpoint : geopandas.GeoDataFrame
+        the geodataframe with point feature types and calculated centerpoint geometries
+    """
+    geodf_centerpoint = geodf_polygon
+    geodf_centerpoint['geometry'] = geodf_polygon['geometry'].centroid
+
+    return geodf_centerpoint
 
 
 def parse_metadata_from_shpxml(xml_elem):

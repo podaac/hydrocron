@@ -75,6 +75,7 @@ def test_read_lake_shapefile():
         columns=constants.PRIOR_LAKE_DATA_COLUMNS)
 
     assert len(items) == 5389
+    assert items
     for key, val in constants.TEST_PLAKE_ITEM_DICT.items():
         assert val == items[4596][key]
 
