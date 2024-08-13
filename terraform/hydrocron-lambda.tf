@@ -114,12 +114,7 @@ resource "aws_lambda_function" "hydrocron_lambda_authorizer" {
 
   lifecycle { replace_triggered_by = [aws_ssm_parameter.default-user-parameter.value, aws_ssm_parameter.trusted-user-parameter.value]}
    */
-  publish = true
-  environment {
-    variables = {
-      HACK_TO_FORCE_LAMBDA_PUBLISH = null_resource.api_key_hash.id
-    }
-  }
+  source_code_hash = null_resource.api_key_hash.id
 }
 
 
