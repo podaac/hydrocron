@@ -444,12 +444,9 @@ Example CSV response:
 
 *The 400 code is also currently returned for queries where no time series data could be located for the request specified feature ID. The message returned with the response indicates this and it can be helpful to adjust the date ranges you are searching.
 
-## API Keys [DRAFT]
+## API Keys
 
-> ⚠️
->API keys not yet implemented but coming soon! Content below is not finalized. More details to follow...
-
-Users may request a special API key for cases where their intended usage of the API may be considered heavy or more complex. Heavy usage can be defined as continued used with over x requests per day or continue use which require many requests per second or concurrent requests. To request an API key or to discuss your use case, please contact us at x.
+Users may request a special API key for cases where their intended usage of the API may be considered heavy or more complex. Heavy usage can be defined as continued used with many requests per hour or day or continued use which may require many requests per second or concurrent requests. To request an API key or to discuss your use case, please submit a GitHub issue [here](https://github.com/podaac/hydrocron/issues).
 
 **Note: Users do *not* have to send an API key in their request to use the Hydrocron API. The API key is optional.**
 
