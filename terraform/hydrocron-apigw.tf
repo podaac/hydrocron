@@ -122,7 +122,7 @@ resource "aws_kms_ciphertext" "trusted-user-key" {
   key_id = aws_kms_key.lambda_env_var_kms_key.id
   plaintext = jsonencode(
     [
-      "${aws_api_gateway_api_key.confluence-user-key.value}"
+      aws_api_gateway_api_key.confluence-user-key.value
     ]
   )
 }
