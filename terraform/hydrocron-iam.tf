@@ -290,32 +290,6 @@ data "aws_iam_policy_document" "lambda-vpc" {
 }
 
 
-data "aws_iam_policy_document" "kms-key-policy" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
-    }
-    actions   = ["kms:*"]
-    resources = ["*"]
-  }
-}
-
-
-data "aws_iam_policy_document" "kms-key-usage" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "kms:Decrypt"
-    ]
-    resources = [
-      aws_kms_key.lambda_env_var_kms_key.arn
-    ]
-  }
-}
-
-
 # IAM Roles
 
 resource "aws_iam_role" "hydrocron-gateway-authorizer-role" {
@@ -363,8 +337,8 @@ resource "aws_iam_role" "hydrocron-lambda-authorizer-role" {
     policy = data.aws_iam_policy_document.lambda-vpc.json
   }
   inline_policy {
-    name   = "HydrocronKMSDecrypt"
-    policy = data.aws_iam_policy_document.kms-key-usage.json
+    name   = "HydrocronSSMRead"
+    policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
 }
 
