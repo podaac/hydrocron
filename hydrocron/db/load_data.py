@@ -69,10 +69,14 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
 
     for granule in new_granules:
         granule_path = granule.data_links(access='direct')[0]
+        checksum = granule['umm']['Checksum']['Value']
+        revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if ("Update" in date["Type"])]
 
         if feature_type in granule_path:
             event2 = ('{"body": {"granule_path": "' + granule_path
                       + '","table_name": "' + table_name
+                      + '","checksum": "' + checksum
+                      + '","revisionDate": "' + revision_date
                       + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
             logging.info("Invoking granule load lambda with event json %s", str(event2))
@@ -91,6 +95,14 @@ def granule_handler(event, _):
     table_name = event['body']['table_name']
 
     load_benchmarking_data = event['body']['load_benchmarking_data']
+
+    try:
+        checksum = event['body']['checksum']
+        revision_date = event['body']['revisionDate']
+    except json.decoder.JSONDecodeError:
+        checksum = ""
+        revision_date = ""
+        logging.info('No CNM checksum')
 
     if ("Reach" in granule_path) & (table_name != constants.SWOT_REACH_TABLE_NAME):
         raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}'")
@@ -118,6 +130,18 @@ def granule_handler(event, _):
 
     logging.info("Set up dynamo connection")
     dynamo_resource = connection.dynamodb_resource
+
+    logging.info("Adding granule to track ingest table")
+    track_ingest_record = [{
+        "granuleUR": os.path.basename(granule_path),
+        "revision_date": revision_date,
+        "expected_feature_count": len(items),
+        "actual_feature_count": 0,
+        "checksum": checksum,
+        "status": "to_ingest"
+        }]
+    load_data(dynamo_resource, table_name=constants.TRACK_INGEST_TABLE_NAME, items=track_ingest_record)
+
     logging.info("Begin loading data from granule: %s", os.path.basename(granule_path))
     load_data(dynamo_resource, table_name, items)
 
@@ -133,16 +157,20 @@ def cnm_handler(event, _):
     # Parse message
     for message in event['Records']:
         cnm = json.loads(message['Sns']['Message'])
+        revision_date = cnm['submissionTime']
 
         logging.info("Begin processing message %s", str(cnm))
 
         for files in cnm['product']['files']:
             if files['type'] == 'data':
                 granule_uri = files['uri']
+                checksum = files['checksum']
 
                 if 'Reach' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","table_name": "' + constants.SWOT_REACH_TABLE_NAME
+                              + '","checksum": "' + checksum
+                              + '","revisionDate": "' + revision_date
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
                     logging.info("Invoking granule load lambda with event json %s", str(event2))
@@ -155,6 +183,8 @@ def cnm_handler(event, _):
                 if 'Node' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","table_name": "' + constants.SWOT_NODE_TABLE_NAME
+                              + '","checksum": "' + checksum
+                              + '","revisionDate": "' + revision_date
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
                     logging.info("Invoking granule load lambda with event json %s", str(event2))
@@ -167,6 +197,8 @@ def cnm_handler(event, _):
                 if 'LakeSP_Prior' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","table_name": "' + constants.SWOT_PRIOR_LAKE_TABLE_NAME
+                              + '","checksum": "' + checksum
+                              + '","revisionDate": "' + revision_date
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
                     logging.info("Invoking granule load lambda with event json %s", str(event2))
@@ -283,6 +315,9 @@ def load_data(dynamo_resource, table_name, items):
         case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
             feature_name = 'prior_lake'
             feature_id = 'lake_id'
+        case constants.TRACK_INGEST_TABLE_NAME:
+            feature_name = 'track ingest'
+            feature_id = 'granuleUR'
         case _:
             logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
 
