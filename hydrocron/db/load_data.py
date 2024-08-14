@@ -70,7 +70,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     for granule in new_granules:
         granule_path = granule.data_links(access='direct')[0]
         checksum = granule['umm']['Checksum']['Value']
-        revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if ("Update" in date["Type"])]
+        revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]]
 
         if feature_type in granule_path:
             event2 = ('{"body": {"granule_path": "' + granule_path
