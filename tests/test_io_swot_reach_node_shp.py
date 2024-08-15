@@ -8,6 +8,8 @@ Unit tests for unpacking swot reach and node shapefiles.
 """
 from datetime import datetime, timedelta, timezone
 import pytz
+import numpy as np
+from shapely import Polygon, Point, geometry, wkt, centroid
 from hydrocron.utils import constants
 
 from hydrocron.db.io import swot_shp
@@ -77,6 +79,47 @@ def test_read_lake_shapefile():
     assert len(items) == 5389
     for key, val in constants.TEST_PLAKE_ITEM_DICT.items():
         assert val == items[4596][key]
+
+
+def test_lake_null_geometry():
+    """
+    Tests replacing null geometry with fillvalue for lake polygons
+    """
+    items = swot_shp.read_shapefile(
+        constants.TEST_PLAKE_SHAPEFILE_PATH,
+        obscure_data=False,
+        columns=constants.PRIOR_LAKE_DATA_COLUMNS)
+
+    geojson = geometry.mapping(wkt.loads(items[0]['geometry']))
+    coords_0 = np.round(np.array(geojson['coordinates']), 3)
+
+    assert str(Point(coords_0) == str(centroid(Polygon(
+        constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS))))
+
+
+def test_lake_centerpoints():
+    """
+    Tests replacing polygons with centerpoints
+    """
+    items = swot_shp.read_shapefile(
+        constants.TEST_PLAKE_SHAPEFILE_PATH,
+        obscure_data=False,
+        columns=constants.PRIOR_LAKE_DATA_COLUMNS)
+
+    geojson = geometry.mapping(wkt.loads(items[0]['geometry']))
+    coords_0 = np.round(np.array(geojson['coordinates']), 3)
+
+    assert str(Point(coords_0) == str(centroid(Polygon(
+        constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS))))
+
+    geojson_4596 = geometry.mapping(wkt.loads(items[4596]['geometry']))
+    coords_4596 = np.round(np.array(geojson_4596['coordinates']), 3)
+
+    geojson_test_4596 = geometry.mapping(centroid(Polygon(
+        constants.TEST_PLAKE_GEOM_DICT['geometry'])))
+    test_4596 = np.round(np.array(geojson_test_4596['coordinates']), 3)
+
+    assert str(Point(coords_4596)) == str(Point(test_4596))
 
 
 def test_read_shapefile_obscured():
