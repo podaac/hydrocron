@@ -69,8 +69,17 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
 
     for granule in new_granules:
         granule_path = granule.data_links(access='direct')[0]
-        checksum = granule['umm']['Checksum']['Value']
-        revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]]
+        try:
+            checksum = granule['umm']['Checksum']['Value']
+        except KeyError:
+            checksum = "Not Found"
+            logging.info('No UMM checksum')
+        
+        try:
+            revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]]
+        except KeyError:
+            revision_date = "Not Found"
+            logging.info('No UMM revision date')
 
         if feature_type in granule_path:
             event2 = ('{"body": {"granule_path": "' + granule_path
@@ -98,11 +107,15 @@ def granule_handler(event, _):
 
     try:
         checksum = event['body']['checksum']
-        revision_date = event['body']['revisionDate']
     except KeyError:
         checksum = "Not Found"
-        revision_date = "Not Found"
         logging.info('No CNM checksum')
+
+    try:
+        revision_date = event['body']['revisionDate']
+    except KeyError:
+        revision_date = "Not Found"
+        logging.info('No CNM revision date')
 
     if ("Reach" in granule_path) & (table_name != constants.SWOT_REACH_TABLE_NAME):
         raise TableMisMatch(f"Error: Cannot load Reach data into table: '{table_name}'")
