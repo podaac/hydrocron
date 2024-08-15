@@ -45,8 +45,8 @@ data "aws_iam_policy_document" "dynamo-read-policy" {
       "${aws_dynamodb_table.hydrocron-swot-node-table.arn}/index/*",
       aws_dynamodb_table.hydrocron-swot-reach-table.arn,
       "${aws_dynamodb_table.hydrocron-swot-reach-table.arn}/index/*",
-      aws_dynamodb_table.hydrocron-swot-prior-lakes-table.arn,
-      "${aws_dynamodb_table.hydrocron-swot-prior-lakes-table.arn}/index/*"
+      aws_dynamodb_table.hydrocron-swot-prior-lake-table.arn,
+      "${aws_dynamodb_table.hydrocron-swot-prior-lake-table.arn}/index/*"
     ]
   }
 
