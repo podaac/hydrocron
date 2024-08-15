@@ -74,7 +74,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         except KeyError:
             checksum = "Not Found"
             logging.info('No UMM checksum')
-        
+
         try:
             revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]]
         except KeyError:
