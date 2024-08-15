@@ -99,7 +99,7 @@ def granule_handler(event, _):
     try:
         checksum = event['body']['checksum']
         revision_date = event['body']['revisionDate']
-    except json.decoder.JSONDecodeError:
+    except KeyError:
         checksum = ""
         revision_date = ""
         logging.info('No CNM checksum')
