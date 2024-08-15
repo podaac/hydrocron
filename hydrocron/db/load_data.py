@@ -69,6 +69,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
 
     for granule in new_granules:
         granule_path = granule.data_links(access='direct')[0]
+        logging.info('Granule: %s', granule_path)
         try:
             checksum = granule['umm']['Checksum']['Value']
         except KeyError:
