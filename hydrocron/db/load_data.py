@@ -100,8 +100,8 @@ def granule_handler(event, _):
         checksum = event['body']['checksum']
         revision_date = event['body']['revisionDate']
     except KeyError:
-        checksum = ""
-        revision_date = ""
+        checksum = "Not Found"
+        revision_date = "Not Found"
         logging.info('No CNM checksum')
 
     if ("Reach" in granule_path) & (table_name != constants.SWOT_REACH_TABLE_NAME):
