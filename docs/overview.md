@@ -25,7 +25,9 @@ See this PO.DAAC [page](https://podaac.jpl.nasa.gov/SWOT?tab=datasets-informatio
 
 ## Limitations
 
-Data return size is limited to 6 MB. If your query response is larger than this a 413 error will be returned.
+Data return size is limited to **6 MB**. If your query response is larger than this a 413 error will be returned.
+
+**For Lake data:** Due to the size of the original polygon in the lake (L2_HR_LakeSP) shapefiles, we are only returning the calculated center point of the lake. This is to facilitate conformance with the GeoJSON specification and center points should not be considered accurate.
 
 ## Citation
 

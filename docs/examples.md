@@ -318,6 +318,8 @@ Will return GeoJSON:
 }
 ```
 
+**NOTE:** Due to the size of the original polygon in the lake (L2_HR_LakeSP) shapefiles, we are only returning the calculated center point of the lake. This is to facilitate conformance with the GeoJSON specification and center points should not be considered accurate.
+
 ## Get time series CSV for river reach
 
 Search for a single river reach by ID.
