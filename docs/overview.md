@@ -20,4 +20,4 @@ Data return size is limited to 6 MB. If your query response is larger than this 
 
 ## Citation
 
-Cite Hydrocron using the following DOI: [10.5281/zenodo.11193245](https://doi.org/10.5281/zenodo.11193245).
+Cite Hydrocron using the following DOI: [10.5281/zenodo.11176233](https://doi.org/10.5281/zenodo.11176233).
