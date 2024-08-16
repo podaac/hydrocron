@@ -13,10 +13,16 @@ from hydrocron.utils import constants
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 
-TEST_SHAPEFILE_PATH = os.path.join(
+TEST_SHAPEFILE_PATH_REACH = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     'data',
     'SWOT_L2_HR_RiverSP_Reach_548_011_NA_20230610T193337_20230610T193344_PIA1_01.zip'  # noqa
+)
+
+TEST_SHAPEFILE_PATH_LAKE = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_LakeSP_Prior_018_100_GR_20240713T111741_20240713T112027_PIC0_01.zip'  # noqa
 )
 
 dynamo_test_proc = factories.dynamodb_proc(
@@ -25,31 +31,19 @@ dynamo_test_proc = factories.dynamodb_proc(
 
 dynamo_db_resource = factories.dynamodb("dynamo_test_proc")
 
-
-@pytest.fixture()
-def hydrocron_dynamo_instance(request, dynamo_test_proc):
-    """
-    Set up a connection to a local dynamodb instance and
-    create a table for testing
-    """
-    dynamo_db = boto3.resource(
-        "dynamodb",
-        endpoint_url=f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}",
-        aws_access_key_id='fakeMyKeyId',
-        aws_secret_access_key='fakeSecretAccessKey',
-        region_name='us-west-2',
-    )
-
+def create_tables(dynamo_db, table_name, feature_id, non_key_atts):
+    """Create DynamoDB tables for testing."""
+    
     dynamo_db.create_table(
-        TableName=constants.SWOT_REACH_TABLE_NAME,
+        TableName=table_name,
         AttributeDefinitions=[
-            {'AttributeName': 'reach_id', 'AttributeType': 'S'},
+            {'AttributeName': feature_id, 'AttributeType': 'S'},
             {'AttributeName': 'range_start_time', 'AttributeType': 'S'},
             {'AttributeName': 'granuleUR', 'AttributeType': 'S'}
         ],
         KeySchema=[
             {
-                'AttributeName': 'reach_id',
+                'AttributeName': feature_id,
                 'KeyType': 'HASH'
             },
             {
@@ -77,16 +71,7 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
                 ],
                 "Projection": {
                     "ProjectionType": "INCLUDE",
-                    "NonKeyAttributes": [
-                        "reach_id",
-                        "collection_shortname",
-                        "collection_version",
-                        "crid",
-                        "cycle_id",
-                        "pass_id",
-                        "continent_id",
-                        "ingest_time"
-                    ]
+                    "NonKeyAttributes": non_key_atts
                 },
                 "ProvisionedThroughput": {
                     "ReadCapacityUnits": 5,
@@ -96,16 +81,52 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         ]
     )
 
-    hydro_table = HydrocronTable(dynamo_db, constants.SWOT_REACH_TABLE_NAME)
 
+@pytest.fixture()
+def hydrocron_dynamo_instance(request, dynamo_test_proc):
+    """
+    Set up a connection to a local dynamodb instance and
+    create a table for testing
+    """
+    dynamo_db = boto3.resource(
+        "dynamodb",
+        endpoint_url=f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}",
+        aws_access_key_id='fakeMyKeyId',
+        aws_secret_access_key='fakeSecretAccessKey',
+        region_name='us-west-2',
+    )
+    
+    create_tables(
+        dynamo_db, 
+        constants.SWOT_REACH_TABLE_NAME, 
+        'reach_id', 
+        ['reach_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
+    )
+    
+    create_tables(
+        dynamo_db, 
+        constants.SWOT_PRIOR_LAKE_TABLE_NAME, 
+        'lake_id', 
+        ['lake_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
+    )
+    
     # load reach table
+    reach_hydro_table = HydrocronTable(dynamo_db, constants.SWOT_REACH_TABLE_NAME)
     reach_items = swot_shp.read_shapefile(
-        TEST_SHAPEFILE_PATH,
+        TEST_SHAPEFILE_PATH_REACH,
         obscure_data=False,
         columns=constants.REACH_DATA_COLUMNS)
-
     for item_attrs in reach_items:
-        hydro_table.add_data(**item_attrs)
+        reach_hydro_table.add_data(**item_attrs)
+    
+    # load lake table
+    lake_hydro_table = HydrocronTable(dynamo_db, constants.SWOT_PRIOR_LAKE_TABLE_NAME)
+    lake_items = swot_shp.read_shapefile(
+        TEST_SHAPEFILE_PATH_LAKE,
+        obscure_data=False,
+        columns=constants.PRIOR_LAKE_DATA_COLUMNS)
+    for item_attrs in lake_items:
+        lake_hydro_table.add_data(**item_attrs)
 
     try:
         request.cls.dynamo_db = dynamo_db
@@ -148,7 +169,7 @@ def hydrocron_dynamo_table(dynamo_db_resource):
     hydro_table = HydrocronTable(dynamo_db_resource, DB_TEST_TABLE_NAME)
 
     items = swot_shp.read_shapefile(
-        TEST_SHAPEFILE_PATH,
+        TEST_SHAPEFILE_PATH_REACH,
         obscure_data=False,
         columns=constants.REACH_DATA_COLUMNS)
 

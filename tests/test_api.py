@@ -13,7 +13,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 
 
-def test_timeseries_lambda_handler_json(hydrocron_api):
+def test_timeseries_lambda_handler_json_reach(hydrocron_api):
     """
     Test the lambda handler for the timeseries endpoint
     Parameters
@@ -41,6 +41,40 @@ def test_timeseries_lambda_handler_json(hydrocron_api):
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
     test_data = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
                  .joinpath('test_data').joinpath('api_query_results_geojson.json'))
+    with open(test_data) as jf:
+        expected = json.load(jf)
+    assert result['status'] == '200 OK' and \
+           result['results']['geojson'] == expected
+           
+
+def test_timeseries_lambda_handler_json_lake(hydrocron_api):
+    """
+    Test the lambda handler for the timeseries endpoint for lake data
+    Parameters
+    ----------
+    hydrocron_api: Fixture ensuring the database is configured for the api
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "PriorLake",
+            "feature_id": "9120274662",
+            "start_time": "2024-06-22T00:00:00-00:00",
+            "end_time": "2024-07-13T23:59:59-00:00",
+            "output": "geojson",
+            "fields": "lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time"
+        },
+        "headers": {
+            "User-Agent": "curl/8.4.0",
+            "X-Forwarded-For": "123.456.789.000"
+        }
+    }
+
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    test_data = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+                 .joinpath('test_data').joinpath('api_query_results_geojson_lakes.json'))
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
@@ -114,7 +148,7 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
     assert result['results']['csv'] == row_str
 
 
-def test_timeseries_convert_to_df_lake():
+def test_timeseries_convert_to_df_lake(hydrocron_api):
     """
     Test conver_to_df function to make sure it creates a correctly formatted
     GeoDataFrame.
@@ -132,8 +166,8 @@ def test_timeseries_convert_to_df_lake():
                         gdf['p_lat'].to_numpy().astype(np.float64))
     assert_almost_equal(np.array([-999999999999.0, -999999999999.0], dtype=np.float64),
                         gdf['time'].to_numpy().astype(np.float64))
-    geo_array = gpd.points_from_xy(x=[-121.362755, -121.362755],
-                                   y=[50.415171, 50.415171]).to_numpy()
+    geo_array = gpd.points_from_xy(x=[-20.455824376849105, -20.455824376849105],
+                                   y=[-25.566241858842833, -25.566241858842833]).to_numpy()
     assert str(geo_array) == str(gdf['geometry'].to_numpy())
 
 

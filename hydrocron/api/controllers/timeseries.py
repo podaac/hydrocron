@@ -273,14 +273,8 @@ def convert_to_df(items) -> gpd.GeoDataFrame:
     """
 
     df = pd.DataFrame.from_records(items)
-    if (df['geometry'] == 'None').all():    # TODO - Remove when lake geometries exist
-        import shapely    #pylint: disable=import-outside-toplevel
-        point = shapely.Point([-121.362755, 50.415171])
-        df['geometry'] = pd.DataFrame(data={'geometry': pd.Series(point).repeat(df.shape[0]).to_numpy()})['geometry']
-        gdf = gpd.GeoDataFrame(df, geometry='geometry')
-    else:
-        df['geometry'] = df['geometry'].apply(loads)
-        gdf = gpd.GeoDataFrame(df, geometry='geometry')
+    df['geometry'] = df['geometry'].apply(loads)
+    gdf = gpd.GeoDataFrame(df, geometry='geometry')
     return gdf
 
 
