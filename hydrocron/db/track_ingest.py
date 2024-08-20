@@ -43,8 +43,12 @@ class Track:
         """Locate the last most recent date that was queried in order to only
         query on granules that have not seen before."""
 
-        # TODO - Query track-ingest table to determine max revision date
-        revision_start = None
+        ssm_client = connection.ssm_client
+        last_run = ssm_client.get_parameter(Name="/service/hydrocron/track-ingest-runtime")["Parameter"]["Value"]
+        if last_run != "no_data":
+            revision_start = datetime.datetime.strptime(last_run, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        else:
+            revision_start = None
 
         if not revision_start:
             revision_start = collection_start_date
