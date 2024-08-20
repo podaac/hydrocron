@@ -446,7 +446,7 @@ Example CSV response:
 
 ## API Keys
 
-Users may request a special API key for cases where their intended usage of the API may be considered heavy or more complex. Heavy usage can be defined as continued used with many requests per hour or day or continued use which may require many requests per second or concurrent requests. To request an API key or to discuss your use case, please submit a GitHub issue [here](https://github.com/podaac/hydrocron/issues).
+Users may request a special API key for cases where their intended usage of the API may be considered heavy or more complex. Heavy usage can be defined as continued use with many requests per hour or day or continued use which may require many requests per second or concurrent requests. To request an API key or to discuss your use case, please submit a [GitHub issue](https://github.com/podaac/hydrocron/issues).
 
 **Note: Users do *not* have to send an API key in their request to use the Hydrocron API. The API key is optional.**
 
