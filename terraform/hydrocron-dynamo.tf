@@ -87,8 +87,62 @@ resource "aws_dynamodb_table" "hydrocron-swot-prior-lake-table" {
   }
 }
 
-resource "aws_dynamodb_table" "hydrocron-track-ingest-table" {
-  name         = "hydrocron-track-ingest-table"
+resource "aws_dynamodb_table" "hydrocron-reach-track-ingest-table" {
+  name         = "hydrocron-swot-reach-track-ingest-table"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "granuleUR"
+  range_key    = "revision_date"
+  attribute {
+    name = "granuleUR"
+    type = "S"
+  }
+  attribute {
+    name = "revision_date"
+    type = "S"
+  }
+  attribute {
+    name = "status"
+    type = "S"
+  }
+  global_secondary_index {
+    name               = "statusIndex"
+    hash_key           = "status"
+    projection_type    = "ALL"
+  }
+  point_in_time_recovery {
+    enabled = var.stage == "ops" ? true : false
+  }
+}
+
+resource "aws_dynamodb_table" "hydrocron-node-track-ingest-table" {
+  name         = "hydrocron-swot-node-track-ingest-table"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "granuleUR"
+  range_key    = "revision_date"
+  attribute {
+    name = "granuleUR"
+    type = "S"
+  }
+  attribute {
+    name = "revision_date"
+    type = "S"
+  }
+  attribute {
+    name = "status"
+    type = "S"
+  }
+  global_secondary_index {
+    name               = "statusIndex"
+    hash_key           = "status"
+    projection_type    = "ALL"
+  }
+  point_in_time_recovery {
+    enabled = var.stage == "ops" ? true : false
+  }
+}
+
+resource "aws_dynamodb_table" "hydrocron-priorlake-track-ingest-table" {
+  name         = "hydrocron-swot-prior-lake-track-ingest-table"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "granuleUR"
   range_key    = "revision_date"
