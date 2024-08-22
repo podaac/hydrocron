@@ -67,7 +67,9 @@ data "aws_iam_policy_document" "dynamo-read-policy-track-ingest" {
     ]
 
     resources = [
-      aws_dynamodb_table.hydrocron-track-ingest-table.arn,
+      aws_dynamodb_table.hydrocron-reach-track-ingest-table.arn,
+      aws_dynamodb_table.hydrocron-node-track-ingest-table.arn,
+      aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.arn,
     ]
   }
 
@@ -119,7 +121,9 @@ data "aws_iam_policy_document" "dynamo-write-policy-track-ingest" {
     ]
 
     resources = [
-      aws_dynamodb_table.hydrocron-track-ingest-table.arn
+      aws_dynamodb_table.hydrocron-reach-track-ingest-table.arn,
+      aws_dynamodb_table.hydrocron-node-track-ingest-table.arn,
+      aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.arn,
     ]
   }
 
@@ -382,6 +386,10 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   inline_policy {
     name   = "HydrocronDynamoWrite"
     policy = data.aws_iam_policy_document.dynamo-write-policy.json
+  }
+  inline_policy {
+    name   = "HydrocronTrackIngestDynamoWrite"
+    policy = data.aws_iam_policy_document.dynamo-write-policy-track-ingest.json
   }
   inline_policy {
     name   = "HydrocronS3Read"
