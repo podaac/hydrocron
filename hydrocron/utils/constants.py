@@ -128,7 +128,9 @@ TEST_PLAKE_UNITS = 'km^2'
 SWOT_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
 SWOT_NODE_TABLE_NAME = "hydrocron-swot-node-table"
 SWOT_PRIOR_LAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"
-TRACK_INGEST_TABLE_NAME = "hydrocron-track-ingest-table"
+SWOT_REACH_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-reach-track-ingest-table"
+SWOT_NODE_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-node-track-ingest-table"
+SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-prior-lake-track-ingest-table"
 
 SWOT_REACH_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
 SWOT_NODE_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
