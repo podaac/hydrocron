@@ -11,3 +11,4 @@ Original SWOT data is archived at NASA's [Physical Oceanography Distributed Acti
 Datasets included in Hydrocron:
 
 - [SWOT Level 2 River Single-Pass Vector Data Product, Version 2.0](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_RiverSP_2.0)
+- [SWOT Level 2 Lake Single-Pass Vector Data Product, Version 2.0](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_LakeSP_2.0)
