@@ -159,9 +159,9 @@ resource "aws_dynamodb_table" "hydrocron-priorlake-track-ingest-table" {
     type = "S"
   }
   global_secondary_index {
-    name               = "statusIndex"
-    hash_key           = "status"
-    projection_type    = "ALL"
+    name            = "statusIndex"
+    hash_key        = "status"
+    projection_type = "ALL"
   }
   point_in_time_recovery {
     enabled = var.stage == "ops" ? true : false
