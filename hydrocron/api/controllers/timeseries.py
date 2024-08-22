@@ -129,8 +129,8 @@ def validate_parameters(parameters):
 
     error_message = ''
 
-    if parameters['feature'] not in ('Node', 'Reach'):
-        error_message = f'400: feature parameter should be Reach or Node, not: {parameters["feature"]}'
+    if parameters['feature'] not in ('Node', 'Reach', 'PriorLake'):
+        error_message = f'400: feature parameter should be Reach, Node, or PriorLake, not: {parameters["feature"]}'
 
     elif not parameters['feature_id'].isdigit():
         error_message = f'400: feature_id cannot contain letters: {parameters["feature_id"]}'
@@ -189,6 +189,8 @@ def is_fields_valid(feature, fields):
         columns = constants.REACH_ALL_COLUMNS
     elif feature == 'Node':
         columns = constants.NODE_ALL_COLUMNS
+    elif feature == 'PriorLake':
+        columns = constants.PRIOR_LAKE_ALL_COLUMNS
     else:
         columns = []
     return all(field in columns for field in fields)
@@ -241,6 +243,8 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
         results = data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
     if feature.lower() == 'node':
         results = data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
+    if feature.lower() == 'priorlake':
+        results = data_repository.get_prior_lake_series_by_feature_id(feature_id, start_time, end_time)
 
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
@@ -343,15 +347,6 @@ def add_units(gdf, columns):
 def get_response(results, hits, elapsed, return_type, output, compact):
     """Create and return HTTP response based on results.
 
-    :param results: Dictionary of SWOT timeseries results
-    :type results: dict
-    :param hits: Number of results returned from query
-    :type hits: int
-    :param elapsed: Number of seconds it took to query for results
-    :type elapsed: float
-    :param return_type: Accept request header
-    :type return_type: str
-    :param output: Output to return in request
     :param results: Dictionary of SWOT timeseries results
     :type results: dict
     :param hits: Number of results returned from query
