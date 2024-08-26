@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [1.4.0]
+
+### Added
     - Issue 205 - Define a an API key for the Confluence workflow and usage plan limits
     - Issue 201- Create table for tracking granule ingest status
     - Issue 225 - Create one track ingest table per feature type
