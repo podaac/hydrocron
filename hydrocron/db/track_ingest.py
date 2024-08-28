@@ -23,7 +23,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(messa
                     level=logging.INFO)
 
 
-class Track:
+class Track:    # pylint: disable=too-many-instance-attributes
     """
     Class to track the status of ingested granules and submit missed or
     newly discovered granules for Hydrocron database ingestion.
@@ -111,17 +111,17 @@ class Track:
                     "actual_feature_count": 0,
                     "status": "to_ingest"
                 })
-        logging.info("Located %s granules NOT in Hydrocron.", len(self.to_ingest.keys()))
+        logging.info("Located %s granules NOT in Hydrocron.", len(self.to_ingest))
 
     def query_track_ingest(self):
         """Query track status table for granules with "to_ingest" status."""
-        
+
         items = self.data_repository.get_status("hydrocron-track-ingest-table", "to_ingest")
         logging.info("Located %s granules with 'to_ingest' status.", len(items))
         for item in items:
             # TODO - Implement in the cloud direct access
             # count_features(item["granuleUR"])
-            import os
+            import os    # pylint: disable=import-outside-toplevel
             granule_ur = os.path.basename(item["granuleUR"])
             number_features = count_features(granule_ur)
             print('item["expected_feature_count"]', item["expected_feature_count"])
@@ -141,7 +141,7 @@ class Track:
                     "expected_feature_count": item["expected_feature_count"],
                     "actual_feature_count": number_features,
                     "status": "to_ingeset"
-                })        
+                })
         logging.info("Located %s granules that require ingestion.", len(self.to_ingest))
         logging.info("Located %s granules that are already ingested.", len(self.ingested))
 

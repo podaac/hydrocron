@@ -310,7 +310,7 @@ def count_features(granule_ur):
     number_features : integer
         Number of feature present in the granule file
     """
-    
+
     # TODO - Implement in the cloud direct access
     # filename = os.path.basename(granule_ur)
     # with tempfile.TemporaryDirectory() as lambda_temp_dir_name:
@@ -319,7 +319,7 @@ def count_features(granule_ur):
     #     s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
     #     shp_file = gpd.read_file('zip://' + lambda_temp_file)
     #     return shp_file.shape[0]
-    
+
     lambda_temp_file = granule_ur
     shp_file = gpd.read_file('zip://' + lambda_temp_file)
     return shp_file.shape[0]

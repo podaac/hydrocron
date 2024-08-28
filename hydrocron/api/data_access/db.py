@@ -103,7 +103,7 @@ class DynamoDataRepository:
         @param table_name: str - Hydrocron table to query
         @param status: str - Status to query for
         """
-        
+
         hydrocron_table = self._dynamo_instance.Table(table_name)
         items = hydrocron_table.query(
             IndexName="statusIndex",
@@ -112,7 +112,7 @@ class DynamoDataRepository:
         last_key_evaluated = ""
         if "LastEvaluatedKey" in items.keys():
             last_key_evaluated = items["LastEvaluatedKey"]
-            
+
         while last_key_evaluated:
             next_items = hydrocron_table.query(
                 ExclusiveStartKey=last_key_evaluated,
@@ -123,5 +123,5 @@ class DynamoDataRepository:
             last_key_evaluated = ""
             if "LastEvaluatedKey" in items.keys():
                 last_key_evaluated = next_items["LastEvaluatedKey"]
-        
+
         return items["Items"]
