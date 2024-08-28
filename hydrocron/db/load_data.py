@@ -54,7 +54,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
             collection_shortname = constants.SWOT_PRIOR_LAKE_COLLECTION_NAME
             track_table = constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME
-            feature_type = 'LakeSP_prior'
+            feature_type = 'LakeSP_Prior'
         case constants.DB_TEST_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
             track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
