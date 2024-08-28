@@ -248,7 +248,10 @@ def find_new_granules(collection_shortname, start_date, end_date):
     results : list of Granule objects
         List of S3 paths to the granules that have not yet been ingested
     """
-    auth = earthaccess.login(persist=True)
+    if os.environ['CMR_ENV'] == "UAT":
+        auth = earthaccess.login(persist=True, system=earthaccess.UAT)
+    else:
+        auth = earthaccess.login(persist=True)
 
     logging.info("Searching for granules in collection %s", collection_shortname)
 
