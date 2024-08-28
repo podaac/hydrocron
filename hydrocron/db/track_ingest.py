@@ -13,6 +13,7 @@ from cmr import GranuleQuery
 
 # Application Imports
 from hydrocron.api.data_access.db import DynamoDataRepository
+from hydrocron.db.io.swot_shp import count_features
 from hydrocron.utils import connection
 
 
@@ -34,10 +35,12 @@ class Track:
     def __init__(self, collection_shortname, collection_start_date, hydrocron_table):
         self.collection_shortname = collection_shortname
         self.cmr_granules = {}
-        self.hydrocron_granules = {}
+        self.data_repository = DynamoDataRepository(connection.dynamodb_resource)
         self.hydrocron_table = hydrocron_table
         self.revision_start = self._get_revision_start(collection_start_date)
         self.revision_end = datetime.datetime.now(timezone.utc)  # TODO - Decide on latency and subtract from current datetime
+        self.to_ingest = []
+        self.ingested = []
 
     def _get_revision_start(self, collection_start_date):
         """Locate the last most recent date that was queried in order to only
@@ -95,21 +98,52 @@ class Track:
         return granule_dict
 
     def query_hydrocron(self):
-        """Query Hydrocron for time range and gather GranuleURs."""
+        """Query Hydrocron for time range and gather GranuleURs that do NOT exist in the Hydrocron table."""
 
-        data_repository = DynamoDataRepository(connection.dynamodb_resource)
         for granule_ur, data in self.cmr_granules.items():
-            items = data_repository.get_granule_ur(self.hydrocron_table, f"{granule_ur}.zip")
-            if len(items["Items"]) > 0:
-                self.hydrocron_granules[granule_ur] = data
-
-        logging.info("Located %s granules in Hydrocron.", len(self.hydrocron_granules.keys()))
+            items = self.data_repository.get_granule_ur(self.hydrocron_table, f"{granule_ur}.zip")
+            if len(items["Items"]) == 0:
+                self.to_ingest.append({
+                    "granuleUR": granule_ur,
+                    "revision_date": data["revision_date"],
+                    "checksum": data["checksum"],
+                    "expected_feature_count": -1,
+                    "actual_feature_count": 0,
+                    "status": "to_ingest"
+                })
+        logging.info("Located %s granules NOT in Hydrocron.", len(self.to_ingest.keys()))
 
     def query_track_ingest(self):
         """Query track status table for granules with "to_ingest" status."""
-
-    def count_features(self):
-        """Count granule features to determine if all features have been ingested."""
+        
+        items = self.data_repository.get_status("hydrocron-track-ingest-table", "to_ingest")
+        logging.info("Located %s granules with 'to_ingest' status.", len(items))
+        for item in items:
+            # TODO - Implement in the cloud direct access
+            # count_features(item["granuleUR"])
+            import os
+            granule_ur = os.path.basename(item["granuleUR"])
+            number_features = count_features(granule_ur)
+            print('item["expected_feature_count"]', item["expected_feature_count"])
+            if number_features == item["expected_feature_count"]:
+                self.ingested.append({
+                    "granuleUR": granule_ur,
+                    "revision_date": item["revision_date"],
+                    "checksum": item["checksum"],
+                    "expected_feature_count": item["expected_feature_count"],
+                    "actual_feature_count": number_features
+                })
+            else:
+                self.to_ingest.append({
+                    "granuleUR": granule_ur,
+                    "revision_date": item["revision_date"],
+                    "checksum": item["checksum"],
+                    "expected_feature_count": item["expected_feature_count"],
+                    "actual_feature_count": number_features,
+                    "status": "to_ingeset"
+                })        
+        logging.info("Located %s granules that require ingestion.", len(self.to_ingest))
+        logging.info("Located %s granules that are already ingested.", len(self.ingested))
 
     def publish_cnm_ingest(self):
         """Publish CNM message to trigger granule ingestion."""
@@ -134,7 +168,6 @@ def track_ingest_handler(event, context):
     track.query_cmr()
     track.query_hydrocron()
     track.query_track_ingest()
-    track.count_features()
     track.publish_cnm_ingest()
     track.update_track_ingest()
 

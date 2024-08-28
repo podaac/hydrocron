@@ -295,3 +295,31 @@ def load_benchmarking_data():
         logging.info("Benchmarking items: %s", count)
 
     return items
+
+
+def count_features(granule_ur):
+    """Count the number of features present in the granule.
+    
+    Parameters
+    ----------
+    granule_ur : string
+        The full path to the granule stored in an S3 bucket
+    
+    Returns
+    -------
+    number_features : integer
+        Number of feature present in the granule file
+    """
+    
+    # TODO - Implement in the cloud direct access
+    # filename = os.path.basename(granule_ur)
+    # with tempfile.TemporaryDirectory() as lambda_temp_dir_name:
+    #     lambda_temp_file = os.path.join(lambda_temp_dir_name, filename)
+    #     bucket_name, key = granule_ur.replace("s3://", "").split("/", 1)
+    #     s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
+    #     shp_file = gpd.read_file('zip://' + lambda_temp_file)
+    #     return shp_file.shape[0]
+    
+    lambda_temp_file = granule_ur
+    shp_file = gpd.read_file('zip://' + lambda_temp_file)
+    return shp_file.shape[0]
