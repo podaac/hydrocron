@@ -57,6 +57,25 @@ class DynamoDataRepository:
         )
         return items
 
+    def get_prior_lake_series_by_feature_id(self, feature_id, start_time, end_time):  # noqa: E501 # pylint: disable=W0613
+        """
+
+        @param feature_id:
+        @param start_time:
+        @param end_time:
+        @return:
+        """
+        table_name = constants.SWOT_PRIOR_LAKE_TABLE_NAME
+
+        hydrocron_table = self._dynamo_instance.Table(table_name)
+        hydrocron_table.load()
+
+        items = hydrocron_table.query(KeyConditionExpression=(
+            Key(constants.SWOT_PRIOR_LAKE_PARTITION_KEY).eq(feature_id) &
+            Key(constants.SWOT_PRIOR_LAKE_SORT_KEY).between(start_time, end_time))
+        )
+        return items
+
     def get_granule_ur(self, table_name, granule_ur):
         """
 

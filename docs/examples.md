@@ -270,6 +270,56 @@ Will return GeoJSON:
 }
 ```
 
+## Get time series GeoJSON for a lake
+
+Search for a single lake by ID.
+
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=PriorLake&feature_id=6350036102&start_time=2024-07-20T00:00:00Z&end_time=2024-07-26T00:00:00Z&fields=lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time&output=geojson](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=PriorLake&feature_id=6350036102&start_time=2024-07-20T00:00:00Z&end_time=2024-07-26T00:00:00Z&fields=lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time&output=geojson)
+
+Will return GeoJSON:
+
+```json
+{
+    "status": "200 OK",
+    "time": 391.613,
+    "hits": 1,
+    "results": {
+        "csv": "",
+        "geojson": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "id": "0",
+                    "type": "Feature",
+                    "properties": {
+                        "lake_id": "6350036102",
+                        "time_str": "2024-07-25T22:48:23Z",
+                        "wse": "260.802",
+                        "area_total": "0.553409",
+                        "quality_f": "1",
+                        "collection_shortname": "SWOT_L2_HR_LakeSP_2.0",
+                        "crid": "PIC0",
+                        "PLD_version": "105",
+                        "range_start_time": "2024-07-25T22:47:27Z",
+                        "wse_units": "m",
+                        "area_total_units": "km^2"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            -42.590727027987064,
+                            -19.822613018107482
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}
+```
+
+**NOTE:** Due to the size of the original polygon in the lake (L2_HR_LakeSP) shapefiles, we are only returning the calculated center point of the lake. This is to facilitate conformance with the GeoJSON specification and center points should not be considered accurate.
+
 ## Get time series CSV for river reach
 
 Search for a single river reach by ID.
@@ -305,6 +355,26 @@ Will return CSV:
     "hits": 11,
     "results": {
         "csv": "node_id,reach_id,time_str,wse,geometry,wse_units\n28311800020621,28311800021,2024-01-28T08:15:21Z,-15.54433,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-01-31T21:37:09Z,-15.63838,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-07T06:37:36Z,-999999999999.0,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-10T19:59:24Z,-14.46997,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-18T05:00:26Z,-15.99808,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-21T18:22:14Z,-999999999999.0,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-28T03:22:42Z,-999999999999.0,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-03-02T16:44:30Z,-16.80069,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-03-10T01:45:29Z,-15.65594,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-03-13T15:07:16Z,-999999999999.0,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-03-23T13:29:33Z,-16.73133,POINT (45.949474 48.354881),m\n",
+        "geojson": {}
+    }
+}
+```
+
+## Get time series CSV for lake
+
+Search for a single lake by ID.
+
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=PriorLake&feature_id=6350036102&start_time=2024-07-20T00:00:00Z&end_time=2024-07-26T00:00:00Z&fields=lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time&output=csv](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=PriorLake&feature_id=6350036102&start_time=2024-07-20T00:00:00Z&end_time=2024-07-26T00:00:00Z&fields=lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time&output=csv)
+
+Will return CSV:
+
+```json
+{
+    "status": "200 OK",
+    "time": 321.592,
+    "hits": 1,
+    "results": {
+        "csv": "lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time,wse_units,area_total_units\n6350036102,2024-07-25T22:48:23Z,260.802,0.553409,1,SWOT_L2_HR_LakeSP_2.0,PIC0,105,2024-07-25T22:47:27Z,m,km^2\n",
         "geojson": {}
     }
 }

@@ -4,9 +4,7 @@
     "resource": "/timeseries",
     "path": "/timeseries",
     "httpMethod": "GET",
-    "headers": {
-        "x-api-key": "abc123"
-    },
+    "headers": {},
     "pathParameters": {},
     "stageVariables": {},
     "requestContext": {

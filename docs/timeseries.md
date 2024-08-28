@@ -85,7 +85,7 @@ Content-Type: text/csv
 
 ### feature : string, required: yes
 
-Type of feature being requested. Either: "Reach" or "Node"
+Type of feature being requested. Either: "Reach", "Node" or "PriorLake"
 
 ### feature_id : string, required: yes
 
@@ -93,8 +93,10 @@ ID of the feature to retrieve
 
 - Reaches have the format CBBBBBRRRRT (e.g., 78340600051)
 - Nodes have the format CBBBBBRRRRNNNT (e.g., 12228200110861)
+- PriorLakes have the format CBBNNNNNNT (e.g., 2710046612)
 
-Please see the [SWOT Product Description Document for the L2_HR_RiverSP Dataset](https://podaac.jpl.nasa.gov/SWOT?tab=datasets-information&sections=about) for more information on identifiers.
+Please see the [SWOT Product Description Document for the L2_HR_RiverSP Dataset](https://podaac.jpl.nasa.gov/SWOT?tab=datasets-information&sections=about) for more information on reach and node identifiers.
+Please see the [SWOT Product Description Document for the L2_HR_LakeSP Dataset](https://podaac.jpl.nasa.gov/SWOT?tab=datasets-information&sections=about) for more information on lake identifiers.
 
 ### start_time : string, required: yes
 
@@ -136,7 +138,7 @@ The SWOT data fields to return in the request.
 
 This is specified in the form of a comma separated list (without any spaces): `fields=reach_id,time_str,wse,slope`
 
-Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, and SWORD and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are below:
+Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, SWORD and PLD (prior river and lake database names), and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are below:
 
 **Reach data fields**
 
@@ -194,6 +196,21 @@ Hydrocron includes additional fields beyond the source data shapefile attributes
 'p_dam_id', 'p_n_ch_max', 'p_n_ch_mod',
 'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
 'crid', 'geometry', 'sword_version', 'collection_shortname'
+```
+
+**Lake data fields**
+```bash
+'lake_id', 'reach_id', 'obs_id', 'overlap', 'n_overlap',
+'time', 'time_tai', 'time_str', 'wse', 'wse_u', 'wse_r_u', 'wse_std',
+'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
+'layovr_val', 'xtrk_dist', 'ds1_l', 'ds1_l_u', 'ds1_q', 'ds1_q_u',
+'ds2_l', 'ds2_l_u', 'ds2_q', 'ds2_q_u',
+'quality_f', 'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f',
+'xovr_cal_q', 'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
+'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c', 'lake_name', 'p_res_id',
+'p_lon', 'p_lat', 'p_ref_wse', 'p_ref_area', 'p_date_t0', 'p_ds_t0', 'p_storage',
+'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
+'crid', 'geometry', 'PLD_version', 'collection_shortname', 'crid'
 ```
 
 ## Response Format
@@ -444,12 +461,9 @@ Example CSV response:
 
 *The 400 code is also currently returned for queries where no time series data could be located for the request specified feature ID. The message returned with the response indicates this and it can be helpful to adjust the date ranges you are searching.
 
-## API Keys [DRAFT]
+## API Keys
 
-> ⚠️
->API keys not yet implemented but coming soon! Content below is not finalized. More details to follow...
-
-Users may request a special API key for cases where their intended usage of the API may be considered heavy or more complex. Heavy usage can be defined as continued used with over x requests per day or continue use which require many requests per second or concurrent requests. To request an API key or to discuss your use case, please contact us at x.
+Users may request a special API key for cases where their intended usage of the API may be considered heavy or more complex. Heavy usage can be defined as continued use with many requests per hour or day or continued use which may require many requests per second or concurrent requests. To request an API key or to discuss your use case, please submit a [GitHub issue](https://github.com/podaac/hydrocron/issues).
 
 **Note: Users do *not* have to send an API key in their request to use the Hydrocron API. The API key is optional.**
 

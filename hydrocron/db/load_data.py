@@ -45,15 +45,19 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     match table_name:
         case constants.SWOT_REACH_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+            track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
             feature_type = 'Reach'
         case constants.SWOT_NODE_TABLE_NAME:
             collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
+            track_table = constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME
             feature_type = 'Node'
         case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
             collection_shortname = constants.SWOT_PRIOR_LAKE_COLLECTION_NAME
+            track_table = constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME
             feature_type = 'LakeSP_prior'
         case constants.DB_TEST_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
+            track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
             feature_type = 'Reach'
         case _:
             raise MissingTable(f"Hydrocron table '{table_name}' does not exist.")
@@ -85,6 +89,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         if feature_type in granule_path:
             event2 = ('{"body": {"granule_path": "' + granule_path
                       + '","table_name": "' + table_name
+                      + '","track_table": "' + track_table
                       + '","checksum": "' + checksum
                       + '","revisionDate": "' + revision_date
                       + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
@@ -103,6 +108,7 @@ def granule_handler(event, _):
     """
     granule_path = event['body']['granule_path']
     table_name = event['body']['table_name']
+    track_table = event['body']['track_table']
 
     load_benchmarking_data = event['body']['load_benchmarking_data']
 
@@ -154,7 +160,7 @@ def granule_handler(event, _):
         "checksum": checksum,
         "status": "to_ingest"
         }]
-    load_data(dynamo_resource, table_name=constants.TRACK_INGEST_TABLE_NAME, items=track_ingest_record)
+    load_data(dynamo_resource, table_name=track_table, items=track_ingest_record)
 
     logging.info("Begin loading data from granule: %s", os.path.basename(granule_path))
     load_data(dynamo_resource, table_name, items)
@@ -183,6 +189,7 @@ def cnm_handler(event, _):
                 if 'Reach' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","table_name": "' + constants.SWOT_REACH_TABLE_NAME
+                              + '","track_table": "' + constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
                               + '","checksum": "' + checksum
                               + '","revisionDate": "' + revision_date
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
@@ -197,6 +204,7 @@ def cnm_handler(event, _):
                 if 'Node' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","table_name": "' + constants.SWOT_NODE_TABLE_NAME
+                              + '","track_table": "' + constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME
                               + '","checksum": "' + checksum
                               + '","revisionDate": "' + revision_date
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
@@ -211,6 +219,7 @@ def cnm_handler(event, _):
                 if 'LakeSP_Prior' in granule_uri:
                     event2 = ('{"body": {"granule_path": "' + granule_uri
                               + '","table_name": "' + constants.SWOT_PRIOR_LAKE_TABLE_NAME
+                              + '","track_table": "' + constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME
                               + '","checksum": "' + checksum
                               + '","revisionDate": "' + revision_date
                               + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
@@ -329,8 +338,14 @@ def load_data(dynamo_resource, table_name, items):
         case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
             feature_name = 'prior_lake'
             feature_id = 'lake_id'
-        case constants.TRACK_INGEST_TABLE_NAME:
-            feature_name = 'track ingest'
+        case constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME:
+            feature_name = 'track ingest reaches'
+            feature_id = 'granuleUR'
+        case constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME:
+            feature_name = 'track ingest nodes'
+            feature_id = 'granuleUR'
+        case constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME:
+            feature_name = 'track ingest prior lakes'
             feature_id = 'granuleUR'
         case _:
             logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
