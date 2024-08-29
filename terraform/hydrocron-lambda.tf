@@ -216,6 +216,7 @@ resource "aws_lambda_function" "hydrocron_lambda_track_ingest" {
   environment {
     variables = {
       GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
+      HYDROCRON_ENV = local.environment
     }
   }
 }
