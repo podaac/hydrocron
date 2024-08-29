@@ -51,7 +51,7 @@ class Track:
     def _get_revision_start(self, collection_start_date):
         """Locate the last most recent date that was queried in order to only
         query on granules that have not seen before.
-        
+
         :param collection_start_date: Date to begin revision_date query in CMR
         :type collection-start_date: datetime
         """
@@ -109,7 +109,7 @@ class Track:
 
     def query_hydrocron(self, hydrocron_table, cmr_granules):
         """Query Hydrocron for time range and gather GranuleURs that do NOT exist in the Hydrocron table.
-        
+
         :param hydrocron_table: Name of hydrocron table to query
         :type hydrocron_table: str
         :param cmr_granules: List of CMR granules to query for
@@ -131,7 +131,7 @@ class Track:
 
     def query_track_ingest(self, hydrocron_track_table):
         """Query track status table for granules with "to_ingest" status.
-        
+
         :param hydrocron_track_table: Name of hydrocron track table to query
         :type hydrocron_track_table: str
         """
@@ -164,9 +164,9 @@ class Track:
 
     def _query_for_granule_ur(self, granule_ur):
         """Query CMR for direct S3 access URL.
-        
+
         Note: Does modify S3 access based on venue.
-        
+
         :param granule_ur: String Granule UR identifier
         :type granule_ur: str
         """
@@ -194,7 +194,7 @@ class Track:
 
     def update_track_ingest(self, hydrocron_track_table):
         """Update track status table with new granules and statuses.
-        
+
         :param hydrocron_track_table: Name of hydrocron track table to query
         :type hydrocron_track_table: str
         """
@@ -206,9 +206,10 @@ class Track:
                                       Value=self.revision_end.strftime("%Y-%m-%dT%H:%M:%S"),
                                       Overwrite=True)
 
+
 def track_ingest_handler(event, context):
     """Lambda handler to track status of ingested granules to Hydrocron.
-    
+
     :param event: Lambda handler Event object
     :type event: dict
     :param context: Lambda handler Context object
