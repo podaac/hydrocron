@@ -15,7 +15,6 @@ from cmr import GranuleQuery
 # Application Imports
 from hydrocron.api.data_access.db import DynamoDataRepository
 from hydrocron.db.io.swot_shp import count_features
-from hydrocron.db.load_data import load_data
 from hydrocron.utils import connection
 
 
@@ -34,7 +33,7 @@ class Track:
     CMR_API = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
     PAGE_SIZE = 2000
 
-    def __init__(self, collection_shortname, collection_start_date, hydrocron_table):
+    def __init__(self, collection_shortname, collection_start_date):
         self.collection_shortname = collection_shortname
         self.data_repository = DynamoDataRepository(connection.dynamodb_resource)
         self.ingested = []
@@ -156,12 +155,12 @@ class Track:
                     if granule_ur == link["href"].split("/")[-1]:
                         s3_granule_ur = link["href"]
                         break
-        
+
         venue = os.getenv("HYDROCRON_ENV").lower()
-        if venue == "sit" or venue == "uat":
+        if venue in ("sit", "uat"):
             s3_granule_ur = s3_granule_ur.replace("ops", venue)
             logging.info("Retrieving granule from %s venue.", venue.upper())
-        
+
         return s3_granule_ur
 
     def publish_cnm_ingest(self):
@@ -183,13 +182,13 @@ def track_ingest_handler(event, context):
     collection_start_date = datetime.datetime.strptime(event["collection_start_date"], "%Y%m%d").replace(tzinfo=timezone.utc)
     hydrocron_table = event["hydrocron_table"]
     hydrocron_track_table = event["hydrocron_track_table"]
-    
+
     logging.info("Collection shortname: %s", collection_shortname)
     logging.info("Collection start date: %s", collection_start_date)
     logging.info("Hydrocron table: %s", hydrocron_table)
     logging.info("Hydrocron track ingest table: %s", hydrocron_track_table)
 
-    track = Track(collection_shortname, collection_start_date, hydrocron_table)
+    track = Track(collection_shortname, collection_start_date)
     cmr_granules = track.query_cmr()
     track.query_hydrocron(hydrocron_table, cmr_granules)
     track.query_track_ingest(hydrocron_track_table)
