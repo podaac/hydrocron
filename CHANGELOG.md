@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 211 - Query track ingest table for granules with "to_ingest" status
 ### Changed
 ### Deprecated
 ### Removed
