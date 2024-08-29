@@ -299,14 +299,14 @@ def load_benchmarking_data():
 
 def count_features(granule_ur, s3_resource=None):
     """Count the number of features present in the granule.
-    
+
     Parameters
     ----------
     granule_ur : string
         The full path to the granule stored in an S3 bucket
     s3_resource : string
         The s3 granule object to open
-    
+
     Returns
     -------
     number_features : integer

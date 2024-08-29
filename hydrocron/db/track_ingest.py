@@ -34,6 +34,12 @@ class Track:
     PAGE_SIZE = 2000
 
     def __init__(self, collection_shortname, collection_start_date):
+        """
+        :param collection_shortname: Collection shortname to query CMR for
+        :type collection-collection_shortname: string
+        :param collection_start_date: Date to begin revision_date query in CMR
+        :type collection-start_date: datetime
+        """
         self.collection_shortname = collection_shortname
         self.data_repository = DynamoDataRepository(connection.dynamodb_resource)
         self.ingested = []
@@ -44,7 +50,11 @@ class Track:
 
     def _get_revision_start(self, collection_start_date):
         """Locate the last most recent date that was queried in order to only
-        query on granules that have not seen before."""
+        query on granules that have not seen before.
+        
+        :param collection_start_date: Date to begin revision_date query in CMR
+        :type collection-start_date: datetime
+        """
 
         last_run = self.ssm_client.get_parameter(Name="/service/hydrocron/track-ingest-runtime")["Parameter"]["Value"]
         if last_run != "no_data":
@@ -98,7 +108,13 @@ class Track:
         return granule_dict
 
     def query_hydrocron(self, hydrocron_table, cmr_granules):
-        """Query Hydrocron for time range and gather GranuleURs that do NOT exist in the Hydrocron table."""
+        """Query Hydrocron for time range and gather GranuleURs that do NOT exist in the Hydrocron table.
+        
+        :param hydrocron_table: Name of hydrocron table to query
+        :type hydrocron_table: str
+        :param cmr_granules: List of CMR granules to query for
+        :type cmr_granules: list
+        """
 
         for granule_ur, data in cmr_granules.items():
             items = self.data_repository.get_granule_ur(hydrocron_table, f"{granule_ur}.zip")
@@ -114,7 +130,11 @@ class Track:
         logging.info("Located %s granules NOT in Hydrocron.", len(self.to_ingest))
 
     def query_track_ingest(self, hydrocron_track_table):
-        """Query track status table for granules with "to_ingest" status."""
+        """Query track status table for granules with "to_ingest" status.
+        
+        :param hydrocron_track_table: Name of hydrocron track table to query
+        :type hydrocron_track_table: str
+        """
 
         items = self.data_repository.get_status(hydrocron_track_table, "to_ingest")
         logging.info("Located %s granules with 'to_ingest' status.", len(items))
@@ -143,7 +163,13 @@ class Track:
         logging.info("Located %s granules that are already ingested.", len(self.ingested))
 
     def _query_for_granule_ur(self, granule_ur):
-        """Query CMR for direct S3 access URL."""
+        """Query CMR for direct S3 access URL.
+        
+        Note: Does modify S3 access based on venue.
+        
+        :param granule_ur: String Granule UR identifier
+        :type granule_ur: str
+        """
 
         query = GranuleQuery()
         granules = query.short_name(self.collection_shortname).readable_granule_name(granule_ur).get_all()
@@ -167,11 +193,21 @@ class Track:
         """Publish CNM message to trigger granule ingestion."""
 
     def update_track_ingest(self, hydrocron_track_table):
-        """Update track status table with new granules and statuses."""
+        """Update track status table with new granules and statuses.
+        
+        :param hydrocron_track_table: Name of hydrocron track table to query
+        :type hydrocron_track_table: str
+        """
 
 
 def track_ingest_handler(event, context):
-    """Lambda handler to track status of ingested granules to Hydrocron."""
+    """Lambda handler to track status of ingested granules to Hydrocron.
+    
+    :param event: Lambda handler Event object
+    :type event: dict
+    :param context: Lambda handler Context object
+    :type context: dict
+    """
 
     start = datetime.datetime.now()
 
