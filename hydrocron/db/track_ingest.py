@@ -56,7 +56,7 @@ class Track:
         :type collection-start_date: datetime
         """
 
-        last_run = self.ssm_client.get_parameter(Name="/service/hydrocron/track-ingest-runtime")["Parameter"]["Value"]
+        last_run = self.ssm_client.get_parameter(Name=f"/service/hydrocron/track-ingest-runtime/{self.collection_shortname}")["Parameter"]["Value"]
         if last_run != "no_data":
             revision_start = datetime.datetime.strptime(last_run, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
         else:
@@ -199,6 +199,12 @@ class Track:
         :type hydrocron_track_table: str
         """
 
+    def update_runtime(self):
+        """Update SSM parameter runtime for next execution."""
+
+        self.ssm_client.put_parameter(Name=f"/service/hydrocron/track-ingest-runtime/{self.collection_shortname}",
+                                      Value=self.revision_end.strftime("%Y-%m-%dT%H:%M:%S"),
+                                      Overwrite=True)
 
 def track_ingest_handler(event, context):
     """Lambda handler to track status of ingested granules to Hydrocron.
@@ -215,7 +221,7 @@ def track_ingest_handler(event, context):
     logging.info("Event: %s", event)
 
     collection_shortname = event["collection_shortname"]
-    collection_start_date = datetime.datetime.strptime(event["collection_start_date"], "%Y%m%d").replace(tzinfo=timezone.utc)
+    collection_start_date = datetime.datetime.strptime(event["collection_start_date"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
     hydrocron_table = event["hydrocron_table"]
     hydrocron_track_table = event["hydrocron_track_table"]
 
@@ -230,6 +236,7 @@ def track_ingest_handler(event, context):
     track.query_track_ingest(hydrocron_track_table)
     track.publish_cnm_ingest()
     track.update_track_ingest(hydrocron_track_table)
+    track.update_runtime()
 
     end = datetime.datetime.now()
     logging.info("Elapsed: %s", (end - start))

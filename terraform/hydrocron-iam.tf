@@ -182,6 +182,19 @@ data "aws_iam_policy_document" "ssm-read-policy" {
 }
 
 
+data "aws_iam_policy_document" "ssm-put-policy-track-ingest" {
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:ssm:PutParameter"
+    ]
+    resources = ["arn:aws:ssm:${data.aws_region.current.id}:${local.account_id}:parameter/service/${var.app_name}/track-ingest-runtime/*"]
+  }
+
+}
+
+
 data "aws_iam_policy_document" "s3-read-policy" {
   statement {
     effect = "Allow"
@@ -467,6 +480,10 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
   inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
+  }
+  inline_policy {
+    name = "HydrocronSSMPutTrack"
+    policy = data.aws_iam_policy.ssm-put-policy-track-ingest.json
   }
   inline_policy {
     name = "HydrocronS3Read"
