@@ -213,7 +213,7 @@ def mock_ssm():
    
     ssm = boto3.client("ssm")
     runtime = (datetime.datetime.now() - datetime.timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
-    ssm.put_parameter(Name="/service/hydrocron/track-ingest-runtime", Value=runtime, Type="String")
+    ssm.put_parameter(Name="/service/hydrocron/track-ingest-runtime/SWOT_L2_HR_RiverSP_reach_2.0", Value=runtime, Type="String")
    
     yield mock_aws
 
