@@ -483,7 +483,7 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
   }
   inline_policy {
     name = "HydrocronSSMPutTrack"
-    policy = data.aws_iam_policy.ssm-put-policy-track-ingest.json
+    policy = data.aws_iam_policy_document.ssm-put-policy-track-ingest.json
   }
   inline_policy {
     name = "HydrocronS3Read"
