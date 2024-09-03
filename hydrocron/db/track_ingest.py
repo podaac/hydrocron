@@ -33,20 +33,28 @@ class Track:
     CMR_API = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
     PAGE_SIZE = 2000
 
-    def __init__(self, collection_shortname, collection_start_date):
+    def __init__(self, collection_shortname, collection_start_date=None, revision_start=None, revision_end=None):
         """
         :param collection_shortname: Collection shortname to query CMR for
         :type collection-collection_shortname: string
         :param collection_start_date: Date to begin revision_date query in CMR
         :type collection-start_date: datetime
+        :param revision_start: Start date to query revision_date for granules on
+        :type revision_start: datetime
+        :param revision_end: End date to query revision_date for granules on
+        :type revision_end: datetime
         """
         self.collection_shortname = collection_shortname
         self.data_repository = DynamoDataRepository(connection.dynamodb_resource)
         self.ingested = []
-        self.ssm_client = connection.ssm_client
-        self.revision_start = self._get_revision_start(collection_start_date)
-        self.revision_end = datetime.datetime.now(timezone.utc)  # TODO - Decide on latency and subtract from current datetime
         self.to_ingest = []
+        self.ssm_client = connection.ssm_client
+        if collection_start_date:
+            self.revision_start = self._get_revision_start(collection_start_date)
+            self.revision_end = datetime.datetime.now(timezone.utc)  # TODO - Decide on latency and subtract from current datetime
+        else:
+            self.revision_start = revision_start
+            self.revision_end = revision_end
 
     def _get_revision_start(self, collection_start_date):
         """Locate the last most recent date that was queried in order to only
@@ -222,22 +230,37 @@ def track_ingest_handler(event, context):
     logging.info("Event: %s", event)
 
     collection_shortname = event["collection_shortname"]
-    collection_start_date = datetime.datetime.strptime(event["collection_start_date"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
     hydrocron_table = event["hydrocron_table"]
     hydrocron_track_table = event["hydrocron_track_table"]
+    temporal = "temporal" in event.keys()
+    if temporal:
+        revision_start = datetime.datetime.strptime(event["revision_start"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        revision_end = datetime.datetime.strptime(event["revision_end"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        track = Track(collection_shortname, revision_start=revision_start, revision_end=revision_end)
+    else:
+        collection_start_date = datetime.datetime.strptime(event["collection_start_date"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        track = Track(collection_shortname, collection_start_date=collection_start_date)
 
     logging.info("Collection shortname: %s", collection_shortname)
-    logging.info("Collection start date: %s", collection_start_date)
     logging.info("Hydrocron table: %s", hydrocron_table)
     logging.info("Hydrocron track ingest table: %s", hydrocron_track_table)
+    logging.info("Temporal indicator for revision dates: %s", temporal)
+    if temporal:
+        logging.info("Revision start date: %s", revision_start)
+        logging.info("Revision end date: %s", revision_end)
+    else:
+        logging.info("Collection start date: %s", collection_start_date)
 
-    track = Track(collection_shortname, collection_start_date)
     cmr_granules = track.query_cmr()
     track.query_hydrocron(hydrocron_table, cmr_granules)
     track.query_track_ingest(hydrocron_track_table)
     track.publish_cnm_ingest()
     track.update_track_ingest(hydrocron_track_table)
-    track.update_runtime()
+    if not temporal:
+        track.update_runtime()
+
+    logging.info("To Ingest: %s", track.to_ingest)
+    logging.info("Ingested: %s", track.ingested)
 
     end = datetime.datetime.now()
     logging.info("Elapsed: %s", (end - start))
