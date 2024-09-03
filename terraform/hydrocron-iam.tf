@@ -68,8 +68,11 @@ data "aws_iam_policy_document" "dynamo-read-policy-track-ingest" {
 
     resources = [
       aws_dynamodb_table.hydrocron-reach-track-ingest-table.arn,
+      "${aws_dynamodb_table.hydrocron-reach-track-ingest-table.arn}/index/*",
       aws_dynamodb_table.hydrocron-node-track-ingest-table.arn,
+      "${aws_dynamodb_table.hydrocron-node-track-ingest-table.arn}/index/*",
       aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.arn,
+      "${aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.arn}/index/*",
     ]
   }
 
