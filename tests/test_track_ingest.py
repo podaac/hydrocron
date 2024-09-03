@@ -22,13 +22,13 @@ def test_query_cmr(mock_ssm):
     collection_shortname = "SWOT_L2_HR_RiverSP_reach_2.0"
     collection_start_date = datetime.datetime.strptime("20240630", "%Y%m%d").replace(tzinfo=datetime.timezone.utc)
     track = Track(collection_shortname, collection_start_date)
-    track.revision_start = datetime.datetime(2024, 6, 30, 0, 0, 0, tzinfo=datetime.timezone.utc)
-    track.revision_end = datetime.datetime(2024, 6, 30, 12, 0, 0, tzinfo=datetime.timezone.utc)
+    track.query_start = datetime.datetime(2024, 6, 30, 0, 0, 0, tzinfo=datetime.timezone.utc)
+    track.query_end = datetime.datetime(2024, 6, 30, 12, 0, 0, tzinfo=datetime.timezone.utc)
 
     vcr_cassette = pathlib.Path(os.path.dirname(os.path.realpath(__file__))) \
         .joinpath('vcr_cassettes').joinpath('cmr_query.yaml')
     with vcr.use_cassette(vcr_cassette):
-        actual_data = track.query_cmr()
+        actual_data = track.query_cmr(False)
         
     expected_file = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
                 .joinpath('test_data').joinpath('query_cmr_granule_results.json'))
@@ -89,10 +89,6 @@ def test_query_hydrocron(track_ingest_fixture):
         "actual_feature_count": 0,
         "status": "to_ingest"
     }]
-    
-    print(expected)
-    print("------")
-    print(actual_data)
     assert actual_data == expected
 
 
