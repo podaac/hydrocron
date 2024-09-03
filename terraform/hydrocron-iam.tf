@@ -187,7 +187,7 @@ data "aws_iam_policy_document" "ssm-put-policy-track-ingest" {
   statement {
     effect = "Allow"
     actions = [
-      "ssm:ssm:PutParameter"
+      "ssm:PutParameter"
     ]
     resources = ["arn:aws:ssm:${data.aws_region.current.id}:${local.account_id}:parameter/service/${var.app_name}/track-ingest-runtime/*"]
   }
