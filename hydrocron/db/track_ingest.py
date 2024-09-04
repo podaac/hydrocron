@@ -113,7 +113,7 @@ class Track:
 
         granule_dict = {}
         for item in granules["items"]:
-            granule_ur = item["umm"]["GranuleUR"].replace("_swot", "")
+            granule_ur = item["umm"]["GranuleUR"].replace("_swot", ".zip")
             checksum = 0
             for file in item["umm"]["DataGranule"]["ArchiveAndDistributionInformation"]:
                 if f"{granule_ur}.zip" == file["Name"]:
@@ -134,7 +134,7 @@ class Track:
         """
 
         for granule_ur, data in cmr_granules.items():
-            items = self.data_repository.get_granule_ur(hydrocron_table, f"{granule_ur}.zip")
+            items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
             if len(items["Items"]) == 0:
                 self.to_ingest.append({
                     "granuleUR": granule_ur,
