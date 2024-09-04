@@ -146,7 +146,7 @@ def test_query_ingest(track_ingest_fixture):
     track._query_for_granule_ur.return_value = "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
     
     hydrocron_track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
-    track.query_track_ingest(hydrocron_track_table)
+    track.query_track_ingest(hydrocron_track_table, False)
     
     expected = [{
         "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip",
@@ -193,7 +193,7 @@ def test_query_ingest_to_ingest(track_ingest_fixture):
     track._query_for_granule_ur.return_value = "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
     
     hydrocron_track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
-    track.query_track_ingest(hydrocron_track_table)
+    track.query_track_ingest(hydrocron_track_table, False)
     
     expected = [{
         "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip",
