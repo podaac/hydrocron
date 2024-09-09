@@ -195,7 +195,7 @@ def test_query_ingest_to_ingest(track_ingest_fixture):
     track = Track(collection_shortname, collection_start_date)
     track._query_for_granule_ur = MagicMock(name="_query_for_granule_ur")
     track._query_for_granule_ur.return_value = "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
-    
+
     hydrocron_track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
     hydrocron_table = constants.SWOT_REACH_TABLE_NAME
     track.query_track_ingest(hydrocron_track_table, hydrocron_table)
@@ -209,3 +209,68 @@ def test_query_ingest_to_ingest(track_ingest_fixture):
         "status": "to_ingest"
     }]
     assert track.to_ingest == expected
+
+
+def test_update_track_to_ingest(track_ingest_fixture):
+    """Test query_ingest function for require ingest.
+    
+    Parameters
+    ----------
+    track_ingest_fixture: Fixture ensuring the database is configured for track ingest operations
+    """
+    from boto3.dynamodb.conditions import Key
+    from hydrocron.db.track_ingest import Track
+    import hydrocron.utils.connection
+    
+    collection_shortname = "SWOT_L2_HR_RiverSP_reach_2.0"
+    collection_start_date = datetime.datetime.strptime("20240630", "%Y%m%d").replace(tzinfo=datetime.timezone.utc)
+    track = Track(collection_shortname, collection_start_date)
+    track.to_ingest = [{
+        "granuleUR": "SWOT_L2_HR_RiverSP_Reach_010_177_NA_20240131T074748_20240131T074759_PIC0_01.zip",
+        "revision_date": "2024-06-30T21:22:23.123Z",
+        "checksum": "1234",
+        "expected_feature_count": -1,
+        "actual_feature_count": 0,
+        "status": "to_ingest"
+    }]
+    track.update_track_ingest(constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
+
+    dynamodb = hydrocron.utils.connection._dynamodb_resource
+    table = dynamodb.Table(constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
+    table.load()
+    actual_item = table.query(
+        KeyConditionExpression=(Key("granuleUR").eq("SWOT_L2_HR_RiverSP_Reach_010_177_NA_20240131T074748_20240131T074759_PIC0_01.zip"))
+    )
+    assert actual_item["Items"] == track.to_ingest
+
+def test_update_track_ingested(track_ingest_fixture):
+    """Test query_ingest function for require ingest.
+    
+    Parameters
+    ----------
+    track_ingest_fixture: Fixture ensuring the database is configured for track ingest operations
+    """
+    from boto3.dynamodb.conditions import Key
+    from hydrocron.db.track_ingest import Track
+    import hydrocron.utils.connection
+    
+    collection_shortname = "SWOT_L2_HR_RiverSP_reach_2.0"
+    collection_start_date = datetime.datetime.strptime("20240630", "%Y%m%d").replace(tzinfo=datetime.timezone.utc)
+    track = Track(collection_shortname, collection_start_date)
+    track = Track(collection_shortname, collection_start_date)
+    track.ingested = [{
+        "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip",
+        "revision_date": "2024-05-22T19:15:44.572Z",
+        "checksum": "0823db619be0044e809a5f992e067d03",
+        "expected_feature_count":664,
+        "actual_feature_count": 664,
+    }]
+    track.update_track_ingest(constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
+
+    dynamodb = hydrocron.utils.connection._dynamodb_resource
+    table = dynamodb.Table(constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
+    table.load()
+    actual_item = table.query(
+        KeyConditionExpression=(Key("granuleUR").eq("SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"))
+    )
+    assert actual_item["Items"] == track.ingested
