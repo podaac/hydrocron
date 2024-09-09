@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 import zipfile
 import logging
 
-import earthaccess
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -296,37 +295,3 @@ def load_benchmarking_data():
         logging.info("Benchmarking items: %s", count)
 
     return items
-
-
-def count_features(granule_ur, s3_resource=None, download=False, short_name=None):
-    """Count the number of features present in the granule.
-
-    Parameters
-    ----------
-    granule_ur : string
-        The full path to the granule stored in an S3 bucket
-    s3_resource : string
-        The s3 granule object to open
-
-    Returns
-    -------
-    number_features : integer
-        Number of feature present in the granule file
-    """
-
-    logging.info("Loading: %s ", granule_ur)
-    filename = os.path.basename(granule_ur)
-    if download:
-        granule = earthaccess.search_data(short_name=short_name, readable_granule_name=granule_ur.split("/")[-1].replace(".zip", ""))
-        earthaccess.login()
-        with tempfile.TemporaryDirectory() as lambda_temp_dir_name:
-            earthaccess.download(granule, local_path=lambda_temp_dir_name)
-            lambda_temp_file = os.path.join(lambda_temp_dir_name, filename)
-            shp_file = gpd.read_file('zip://' + lambda_temp_file)
-    else:
-        with tempfile.TemporaryDirectory() as lambda_temp_dir_name:
-            lambda_temp_file = os.path.join(lambda_temp_dir_name, filename)
-            bucket_name, key = granule_ur.replace("s3://", "").split("/", 1)
-            s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
-            shp_file = gpd.read_file('zip://' + lambda_temp_file)
-    return shp_file.shape[0]

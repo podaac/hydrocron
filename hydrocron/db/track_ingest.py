@@ -7,14 +7,12 @@ import datetime
 from datetime import timezone
 import json
 import logging
-import os
 
 # Third-party Imports
 from cmr import GranuleQuery
 
 # Application Imports
 from hydrocron.api.data_access.db import DynamoDataRepository
-from hydrocron.db.io.swot_shp import count_features
 from hydrocron.utils import connection
 
 
@@ -32,21 +30,21 @@ class Track:
 
     CMR_API = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
     PAGE_SIZE = 2000
-    SHORTNAME_DICT = {
-        "SWOT_L2_HR_RiverSP_reach_2.0": "SWOT_L2_HR_RiverSP_2.0",
-        "SWOT_L2_HR_RiverSP_node_2.0": "SWOT_L2_HR_RiverSP_2.0",
-        "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0"
+    FEATURE_ID = {
+        "SWOT_L2_HR_RiverSP_reach_2.0": "reach_id",
+        "SWOT_L2_HR_RiverSP_node_2.0": "node_id",
+        "SWOT_L2_HR_LakeSP_prior_2.0": "lake_id"
     }
 
     def __init__(self, collection_shortname, collection_start_date=None, query_start=None, query_end=None):
         """
         :param collection_shortname: Collection shortname to query CMR for
-        :type collection-collection_shortname: string
+        :type collection_shortname: string
         :param collection_start_date: Date to begin revision_date query in CMR
-        :type collection-start_date: datetime
-        :param revision_start: Start date to query for granules on
-        :type revision_start: datetime
-        :param query_start: End date to query for granules on
+        :type collection_start_date: datetime
+        :param query_start: Start date to query for granules on
+        :type query_start: datetime
+        :param query_end: End date to query for granules on
         :type query_end: datetime
         """
         self.collection_shortname = collection_shortname
@@ -66,7 +64,7 @@ class Track:
         query on granules that have not seen before.
 
         :param collection_start_date: Date to begin revision_date query in CMR
-        :type collection-start_date: datetime
+        :type collection_start_date: datetime
         """
 
         last_run = self.ssm_client.get_parameter(Name=f"/service/hydrocron/track-ingest-runtime/{self.collection_shortname}")["Parameter"]["Value"]
@@ -85,6 +83,9 @@ class Track:
 
         Note: The use of "revision_date" should capture any granules that have
         been reprocessed in the time range.
+        
+        :param temporal: Indicates if temporal search should be conducted
+        :type temporal: boolean
         """
 
         query = GranuleQuery()
@@ -116,7 +117,7 @@ class Track:
             granule_ur = item["umm"]["GranuleUR"].replace("_swot", ".zip")
             checksum = 0
             for file in item["umm"]["DataGranule"]["ArchiveAndDistributionInformation"]:
-                if f"{granule_ur}.zip" == file["Name"]:
+                if granule_ur == file["Name"]:
                     checksum = file["Checksum"]["Value"]
             granule_dict[granule_ur] = {
                 "revision_date": item["meta"]["revision-date"],
@@ -146,78 +147,41 @@ class Track:
                 })
         logging.info("Located %s granules NOT in Hydrocron.", len(self.to_ingest))
 
-    def query_track_ingest(self, hydrocron_track_table, download):
+    def query_track_ingest(self, hydrocron_track_table, hydrocron_table):
         """Query track status table for granules with "to_ingest" status.
 
         :param hydrocron_track_table: Name of hydrocron track table to query
         :type hydrocron_track_table: str
-        :param download: Whether to store the HTTPS download link
-        :type download: bool
+        :param hydrocron_table: Name of hydrocron table to query
+        :type hydrocron_table: str
         """
 
         items = self.data_repository.get_status(hydrocron_track_table, "to_ingest")
         logging.info("Located %s granules with 'to_ingest' status.", len(items))
 
-        s3_resource = connection.s3_resource
         for item in items:
-            s3_granule_ur = self._query_for_granule_ur(item["granuleUR"], download)
-            if s3_granule_ur:
-                number_features = count_features(s3_granule_ur,
-                                                 s3_resource,
-                                                 download,
-                                                 self.SHORTNAME_DICT[self.collection_shortname])
-                ingest_item = {
-                        "granuleUR": item["granuleUR"],
-                        "revision_date": item["revision_date"],
-                        "checksum": item["checksum"],
-                        "expected_feature_count": int(item["expected_feature_count"]),
-                        "actual_feature_count": number_features
-                    }
-                if number_features == item["expected_feature_count"]:
-                    self.ingested.append(ingest_item)
-                else:
-                    ingest_item["status"] = "to_ingest"
-                    self.to_ingest.append(ingest_item)
+            granule_ur = item["granuleUR"]
+            features = self.data_repository.get_series_granule_ur(
+                hydrocron_table,
+                self.FEATURE_ID[self.collection_shortname],
+                granule_ur
+            )
+            number_features = len(features)
+            ingest_item = {
+                "granuleUR": granule_ur,
+                "revision_date": item["revision_date"],
+                "checksum": item["checksum"],
+                "expected_feature_count": int(item["expected_feature_count"]),
+                "actual_feature_count": number_features
+            }
+            if number_features == item["expected_feature_count"]:
+                self.ingested.append(ingest_item)
             else:
-                logging.info("Could not locate S3 URL for granule: %s", item["granuleUR"])
+                ingest_item["status"] = "to_ingest"
+                self.to_ingest.append(ingest_item)
 
         logging.info("Located %s granules that require ingestion.", len(self.to_ingest))
         logging.info("Located %s granules that are already ingested.", len(self.ingested))
-
-    def _query_for_granule_ur(self, granule_ur, download):
-        """Query CMR for direct S3 access URL.
-
-        Note: Does modify S3 access based on venue.
-
-        :param granule_ur: String Granule UR identifier
-        :type granule_ur: str
-        :param download: Whether to store the HTTPS download link
-        :type download: bool
-        """
-
-        query = GranuleQuery()
-        granules = query.short_name(self.collection_shortname).readable_granule_name(granule_ur).get_all()
-        s3_granule_ur = ""
-        for granule in granules:
-            links = granule["links"]
-            for link in links:
-                if download:
-                    if link["title"] == f"Download {granule_ur}":
-                        if granule_ur == link["href"].split("/")[-1]:
-                            s3_granule_ur = link["href"]
-                            break
-                else:
-                    if link["title"] == "This link provides direct download access via S3 to the granule":
-                        if granule_ur == link["href"].split("/")[-1]:
-                            s3_granule_ur = link["href"]
-                            break
-
-        venue = os.getenv("HYDROCRON_ENV").lower()
-        if not download and venue in ("sit", "uat"):
-            s3_granule_ur = s3_granule_ur.replace("ops", venue)
-            logging.info("Retrieving granule from %s venue.", venue.upper())
-
-        return s3_granule_ur
 
     def publish_cnm_ingest(self):
         """Publish CNM message to trigger granule ingestion."""
@@ -262,7 +226,6 @@ def track_ingest_handler(event, context):
     else:
         collection_start_date = datetime.datetime.strptime(event["collection_start_date"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
         track = Track(collection_shortname, collection_start_date=collection_start_date)
-    download = "download" in event.keys()
 
     logging.info("Collection shortname: %s", collection_shortname)
     logging.info("Hydrocron table: %s", hydrocron_table)
@@ -273,11 +236,10 @@ def track_ingest_handler(event, context):
         logging.info("Temporal end date: %s", query_end)
     else:
         logging.info("Collection start date: %s", collection_start_date)
-    logging.info("Download granules indicator: %s", download)
 
     cmr_granules = track.query_cmr(temporal)
     track.query_hydrocron(hydrocron_table, cmr_granules)
-    track.query_track_ingest(hydrocron_track_table, download)
+    track.query_track_ingest(hydrocron_track_table, hydrocron_table)
     track.publish_cnm_ingest()
     track.update_track_ingest(hydrocron_track_table)
     if not temporal:

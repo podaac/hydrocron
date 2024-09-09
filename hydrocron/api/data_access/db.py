@@ -76,6 +76,44 @@ class DynamoDataRepository:
         )
         return items
 
+    def get_series_granule_ur(self, table_name, feature_name, granule_ur):
+        """
+
+        @param table_name: str - Hydrocron table to query
+        @param granule_ur: str - Granule UR
+        @return: dictionary of items
+        """
+
+        hydrocron_table = self._dynamo_instance.Table(table_name)
+        hydrocron_table.load()
+
+        items = hydrocron_table.query(
+            ProjectionExpression=feature_name,
+            IndexName="GranuleURIndex",
+            KeyConditionExpression=(
+                Key("granuleUR").eq(granule_ur)
+            )
+        )
+        last_key_evaluated = ""
+        if "LastEvaluatedKey" in items.keys():
+            last_key_evaluated = items["LastEvaluatedKey"]
+
+        while last_key_evaluated:
+            next_items = hydrocron_table.query(
+                ExclusiveStartKey=last_key_evaluated,
+                ProjectionExpression=feature_name,
+                IndexName="GranuleURIndex",
+                KeyConditionExpression=(
+                    Key("granuleUR").eq(granule_ur)
+                )
+            )
+            items["Items"].extend(next_items["Items"])
+            last_key_evaluated = ""
+            if "LastEvaluatedKey" in next_items.keys():
+                last_key_evaluated = next_items["LastEvaluatedKey"]
+
+        return items["Items"]
+
     def get_granule_ur(self, table_name, granule_ur):
         """
 
@@ -121,7 +159,7 @@ class DynamoDataRepository:
             )
             items["Items"].extend(next_items["Items"])
             last_key_evaluated = ""
-            if "LastEvaluatedKey" in items.keys():
+            if "LastEvaluatedKey" in next_items.keys():
                 last_key_evaluated = next_items["LastEvaluatedKey"]
 
         return items["Items"]

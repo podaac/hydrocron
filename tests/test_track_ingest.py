@@ -115,20 +115,23 @@ def test_get_status(track_ingest_fixture):
     assert items == expected
 
 
-def test_count_features(track_ingest_fixture):
-    """Test count_features function.
+def test_get_series_granule_ur(track_ingest_fixture):
+    """Test get_series_granule_ur.
     
     Parameters
     ----------
     track_ingest_fixture: Fixture ensuring the database is configured for track ingest operations
     """
-    from hydrocron.db.io.swot_shp import count_features
-    import hydrocron.utils.connection
-    
-    granule_ur = "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
-    num_features = count_features(granule_ur, hydrocron.utils.connection._s3_resource)
-    assert num_features == 664
 
+    import hydrocron.utils.connection 
+    from hydrocron.api.data_access.db import DynamoDataRepository
+    
+    hydrocron_table = DynamoDataRepository(hydrocron.utils.connection._dynamodb_resource)
+    table_name = constants.SWOT_REACH_TABLE_NAME
+    feature_name = "reach_id"
+    granule_ur = "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
+    items = hydrocron_table.get_series_granule_ur(table_name, feature_name, granule_ur)
+    assert len(items) == 664
 
 def test_query_ingest(track_ingest_fixture):
     """Test query_ingest function.
@@ -146,7 +149,8 @@ def test_query_ingest(track_ingest_fixture):
     track._query_for_granule_ur.return_value = "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
     
     hydrocron_track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
-    track.query_track_ingest(hydrocron_track_table, False)
+    hydrocron_table = constants.SWOT_REACH_TABLE_NAME
+    track.query_track_ingest(hydrocron_track_table, hydrocron_table)
     
     expected = [{
         "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip",
@@ -193,7 +197,8 @@ def test_query_ingest_to_ingest(track_ingest_fixture):
     track._query_for_granule_ur.return_value = "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
     
     hydrocron_track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
-    track.query_track_ingest(hydrocron_track_table, False)
+    hydrocron_table = constants.SWOT_REACH_TABLE_NAME
+    track.query_track_ingest(hydrocron_track_table, hydrocron_table)
     
     expected = [{
         "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip",
