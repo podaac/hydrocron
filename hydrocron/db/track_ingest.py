@@ -83,7 +83,7 @@ class Track:
 
         Note: The use of "revision_date" should capture any granules that have
         been reprocessed in the time range.
-        
+
         :param temporal: Indicates if temporal search should be conducted
         :type temporal: boolean
         """
