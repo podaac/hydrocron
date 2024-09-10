@@ -769,13 +769,13 @@ crt = ["awscrt (==0.21.2)"]
 
 [[package]]
 name = "botocore-stubs"
-version = "1.35.15"
+version = "1.35.16"
 description = "Type annotations and code completion for botocore"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore_stubs-1.35.15-py3-none-any.whl", hash = "sha256:f07977a01ee2d7247fc23fba428d6d298fbd97e51f7e3ec5c05d6f08d511f5fe"},
-    {file = "botocore_stubs-1.35.15.tar.gz", hash = "sha256:4d195d60ec1f50e2d9796c865e53454fcdba584df4daabe3868c76e002b4d1ed"},
+    {file = "botocore_stubs-1.35.16-py3-none-any.whl", hash = "sha256:7181c2edf169a4dc89f9932cbd8eb82fb6b54ac59784685058f4c6ad180fce92"},
+    {file = "botocore_stubs-1.35.16.tar.gz", hash = "sha256:bfdabe90607dbcb923042da5886eecdcc5839e7c976ccc2ccbd091dc690a633f"},
 ]
 
 [package.dependencies]
@@ -1727,21 +1727,22 @@ files = [
 
 [[package]]
 name = "geopandas"
-version = "0.13.2"
+version = "0.14.4"
 description = "Geographic pandas extensions"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "geopandas-0.13.2-py3-none-any.whl", hash = "sha256:101cfd0de54bcf9e287a55b5ea17ebe0db53a5e25a28bacf100143d0507cabd9"},
-    {file = "geopandas-0.13.2.tar.gz", hash = "sha256:e5b56d9c20800c77bcc0c914db3f27447a37b23b2cd892be543f5001a694a968"},
+    {file = "geopandas-0.14.4-py3-none-any.whl", hash = "sha256:3bb6473cb59d51e1a7fe2dbc24a1a063fb0ebdeddf3ce08ddbf8c7ddc99689aa"},
+    {file = "geopandas-0.14.4.tar.gz", hash = "sha256:56765be9d58e2c743078085db3bd07dc6be7719f0dbe1dfdc1d705cb80be7c25"},
 ]
 
 [package.dependencies]
-fiona = ">=1.8.19"
+fiona = ">=1.8.21"
+numpy = ">=1.22"
 packaging = "*"
-pandas = ">=1.1.0"
-pyproj = ">=3.0.1"
-shapely = ">=1.7.1"
+pandas = ">=1.4.0"
+pyproj = ">=3.3.0"
+shapely = ">=1.8.0"
 
 [[package]]
 name = "greenlet"
@@ -4946,4 +4947,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "e590a761366acda188484d3d61978083a5c8de9fa8a4d4d8dc95e08bbe8dc23f"
+content-hash = "277ef4d5bdb3b55a03863579c4c63518a1566d1560079f3167970ec4b1202a12"
