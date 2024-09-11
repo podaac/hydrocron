@@ -81,7 +81,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
             logging.info('No UMM checksum')
 
         try:
-            revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]]
+            revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]][0]
         except KeyError:
             revision_date = "Not Found"
             logging.info('No UMM revision date')
