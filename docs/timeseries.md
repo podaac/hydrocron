@@ -467,7 +467,7 @@ Users may request a special API key for cases where their intended usage of the 
 
 **Note: Users do *not* have to send an API key in their request to use the Hydrocron API. The API key is optional.**
 
-### How to use an API key in requests [DRAFT]
+### How to use an API key in requests
 
 Hydrocron API key header: `x-hydrocron-key`
 
