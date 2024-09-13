@@ -16,15 +16,22 @@ def test_dynamodb_resource():
 
 
 def test_s3_resource(s3_connection):
-    """Test retrieval of DynamoDB resource."""
+    """Test retrieval of S3 resource."""
 
     # Import module
     from hydrocron.utils import connection
     assert type(connection.s3_resource).__name__ == "s3.ServiceResource"
     
 def test_ssm_client():
-    """Test retrieval of DynamoDB resource."""
+    """Test retrieval of SSM client."""
 
     # Import module
     from hydrocron.utils import connection
     assert type(connection.ssm_client).__name__ == "SSM"
+
+def test_ssm_client():
+    """Test retrieval of SNS client."""
+
+    # Import module
+    from hydrocron.utils import connection
+    assert type(connection.sns_client).__name__ == "SNS"   

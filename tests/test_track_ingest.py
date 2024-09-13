@@ -8,6 +8,8 @@ import os
 import pathlib
 from unittest.mock import MagicMock
 
+from moto.core import DEFAULT_ACCOUNT_ID
+from moto.sns import sns_backends
 import vcr
 
 from hydrocron.utils import constants
@@ -274,3 +276,41 @@ def test_update_track_ingested(track_ingest_fixture):
         KeyConditionExpression=(Key("granuleUR").eq("SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"))
     )
     assert actual_item["Items"] == track.ingested
+
+def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
+    """Test publish_cnm function.
+
+    Parameters
+    ----------
+    track_ingest_cnm_fixture: Fixture ensuring SNS connection is configured
+    """
+
+    from hydrocron.db.track_ingest import Track
+
+    collection_shortname = "SWOT_L2_HR_RiverSP_reach_2.0"
+    query_start = datetime.datetime.strptime("2024-09-05T23:00:00", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=datetime.timezone.utc)
+    query_end = datetime.datetime.strptime("2024-09-05T23:32:00", "%Y-%m-%dT%H:%M:%S").replace(tzinfo=datetime.timezone.utc)
+    track = Track(collection_shortname, query_start=query_start, query_end=query_end)
+    track.to_ingest = [{
+        "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip",
+        "revision_date": "2024-09-09T01:25:25.739Z",
+        "checksum": "6ce27e868bd90055252de186f554759f",
+        "expected_feature_count": -1,
+        "actual_feature_count": 0,
+        "status": "to_ingest"
+    }]
+
+    vcr_cassette = pathlib.Path(os.path.dirname(os.path.realpath(__file__))) \
+        .joinpath('vcr_cassettes').joinpath('publish_cnm.yaml')
+    with vcr.use_cassette(vcr_cassette):
+        track.publish_cnm_ingest(DEFAULT_ACCOUNT_ID)
+
+    sns_backend = sns_backends[DEFAULT_ACCOUNT_ID]["us-west-2"]
+    actual = json.loads(sns_backend.topics[f"arn:aws:sns:us-west-2:{DEFAULT_ACCOUNT_ID}:svc-hydrocron-test-cnm-response"].sent_notifications[0][1])
+
+    expected_file = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+                .joinpath('test_data').joinpath('track_ingest_cnm_message.json'))
+    with open(expected_file) as jf:
+        expected = json.load(jf)
+
+    assert actual == expected
