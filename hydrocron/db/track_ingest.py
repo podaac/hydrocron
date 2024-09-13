@@ -41,7 +41,7 @@ class Track:
     SHORTNAME = {
         "SWOT_L2_HR_RiverSP_reach_2.0": "SWOT_L2_HR_RiverSP_2.0",
         "SWOT_L2_HR_RiverSP_node_2.0": "SWOT_L2_HR_RiverSP_2.0",
-        "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0"        
+        "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0"       
     }
     CNM_VERSION = "1.6.0"
     PROVIDER = "JPL-SWOT"
@@ -218,8 +218,8 @@ class Track:
         sns_client = connection.sns_client
         for cnm_message in cnm_messages:
             sns_client.publish(
-                TopicArn = f"arn:aws:sns:us-west-2:{account_id}:svc-hydrocron-{self.ENV}-cnm-response",
-                Message = json.dumps(cnm_message),
+                TopicArn=f"arn:aws:sns:us-west-2:{account_id}:svc-hydrocron-{self.ENV}-cnm-response",
+                Message=json.dumps(cnm_message)
             )
             logging.info("%s message published to SNS Topic: svc-hydrocron-%s-cnm-response", cnm_message['identifier'], self.ENV)
 
