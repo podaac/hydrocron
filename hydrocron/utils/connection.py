@@ -29,6 +29,7 @@ class Connection(ModuleType):
         self._dynamodb_endpoint = self._get_dynamodb_endpoint()
         self._s3_resource = None
         self._ssm_client = None
+        self._sns_client = None
 
     def _get_dynamodb_endpoint(self):
         """Return dynamodb endpoint URL."""
@@ -82,9 +83,21 @@ class Connection(ModuleType):
 
         return self._ssm_client
 
+    @property
+    def sns_client(self) -> BaseClient:
+        """Return SNS client."""
+
+        if not self._sns_client:
+
+            sns_session = boto3.session.Session()
+            self._sns_client = sns_session.client('sns')
+
+        return self._sns_client
+
 
 dynamodb_resource: ServiceResource
 s3_resource: ServiceResource
 ssm_client: BaseClient
+sns_client: BaseClient
 
 sys.modules[__name__] = Connection(__name__)

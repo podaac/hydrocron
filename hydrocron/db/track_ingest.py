@@ -7,6 +7,7 @@ import datetime
 from datetime import timezone
 import json
 import logging
+import os
 
 # Third-party Imports
 from cmr import GranuleQuery
@@ -30,12 +31,20 @@ class Track:
     """
 
     CMR_API = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
+    ENV = os.getenv("HYDROCRON_ENV").lower()
     PAGE_SIZE = 2000
     FEATURE_ID = {
         "SWOT_L2_HR_RiverSP_reach_2.0": "reach_id",
         "SWOT_L2_HR_RiverSP_node_2.0": "node_id",
         "SWOT_L2_HR_LakeSP_prior_2.0": "lake_id"
     }
+    SHORTNAME = {
+        "SWOT_L2_HR_RiverSP_reach_2.0": "SWOT_L2_HR_RiverSP_2.0",
+        "SWOT_L2_HR_RiverSP_node_2.0": "SWOT_L2_HR_RiverSP_2.0",
+        "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0"        
+    }
+    CNM_VERSION = "1.6.0"
+    PROVIDER = "JPL-SWOT"
 
     def __init__(self, collection_shortname, collection_start_date=None, query_start=None, query_end=None):
         """
@@ -186,8 +195,63 @@ class Track:
         logging.info("Located %s granules that require ingestion.", len(self.to_ingest))
         logging.info("Located %s granules that are already ingested.", len(self.ingested))
 
-    def publish_cnm_ingest(self):
+    def publish_cnm_ingest(self, account_id):
         """Publish CNM message to trigger granule ingestion."""
+
+        cnm_messages = []
+        for granule in self.to_ingest:
+            granule_ur = granule["granuleUR"]
+            cnm_messages.append({
+                "identifier": granule_ur.replace(".zip", ""),
+                "collection": self.SHORTNAME[self.collection_shortname],
+                "provider": self.PROVIDER,
+                "version": self.CNM_VERSION,
+                "submissionTime": granule["revision_date"],
+                "trace": "reproc-hydrocron-track-ingest",
+                "product": {
+                    "dataVersion": self.collection_shortname.split("_")[-1],
+                    "dataProcessingType": "reprocessing",
+                    "files": self._query_granule_files(granule_ur)
+                }
+            })
+
+        sns_client = connection.sns_client
+        for cnm_message in cnm_messages:
+            sns_client.publish(
+                TopicArn = f"arn:aws:sns:us-west-2:{account_id}:svc-hydrocron-{self.ENV}-cnm-response",
+                Message = json.dumps(cnm_message),
+            )
+            logging.info("%s message published to SNS Topic: svc-hydrocron-%s-cnm-response", cnm_message['identifier'], self.ENV)
+
+    def _query_granule_files(self, granule_ur):
+        """Query for files metadata.
+
+        :param granule: Name of granule to query for
+        :param granule: str
+        """
+
+        query = GranuleQuery()
+        granules = query.short_name(self.collection_shortname).readable_granule_name(granule_ur).format("umm_json").get_all()
+        cnm_files = []
+        for granule in granules:
+            granule_json = json.loads(granule)
+            cnm_file = {}
+            for granule_item in granule_json["items"]:
+                for granule_file in granule_item["umm"]["DataGranule"]["ArchiveAndDistributionInformation"]:
+                    if granule_file["Name"] == granule_ur:
+                        cnm_file = {
+                            "type": "data",
+                            "name": granule_ur,
+                            "checksumType": granule_file["Checksum"]["Algorithm"].lower(),
+                            "checksum": granule_file["Checksum"]["Value"],
+                            "size": granule_file["SizeInBytes"]
+                        }
+                for granule_url in granule_item["umm"]["RelatedUrls"]:
+                    if granule_url["Type"] == "GET DATA VIA DIRECT ACCESS":
+                        cnm_file["uri"] = granule_url["URL"].replace("ops", self.ENV)
+            cnm_files.append(cnm_file)
+
+        return cnm_files
 
     def update_track_ingest(self, hydrocron_track_table):
         """Update track status table with new granules and statuses.
@@ -223,6 +287,7 @@ def track_ingest_handler(event, context):
     logging.info("Context: %s", context)
     logging.info("Event: %s", event)
 
+    account_id = context.invoked_function_arn.split(":")[4]
     collection_shortname = event["collection_shortname"]
     hydrocron_table = event["hydrocron_table"]
     hydrocron_track_table = event["hydrocron_track_table"]
@@ -248,7 +313,7 @@ def track_ingest_handler(event, context):
     cmr_granules = track.query_cmr(temporal)
     track.query_hydrocron(hydrocron_table, cmr_granules)
     track.query_track_ingest(hydrocron_track_table, hydrocron_table)
-    track.publish_cnm_ingest()
+    track.publish_cnm_ingest(account_id)
     track.update_track_ingest(hydrocron_track_table)
     if not temporal:
         track.update_runtime()

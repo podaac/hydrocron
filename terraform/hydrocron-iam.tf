@@ -258,6 +258,17 @@ data "aws_iam_policy_document" "sns-resource-policy" {
 }
 
 
+data "aws_iam_policy_document" "sns-resource-cnm-policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "sns:Publish"
+    ]
+    resources = [aws_sns_topic.hydrocron_sns_topic_cnm_response.arn]
+  }
+}
+
+
 data "aws_iam_policy_document" "apigw-resource-policy" {
   statement {
     effect = "Allow"
@@ -487,5 +498,9 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
   inline_policy {
     name = "HydrocronSSMPutTrack"
     policy = data.aws_iam_policy_document.ssm-put-policy-track-ingest.json
+  }
+  inline_policy {
+    name = "HydrocronSNSPublish"
+    policy = data.aws_iam_policy_document.sns-resource-cnm-policy.json
   }
 }
