@@ -24,7 +24,7 @@ resource "aws_scheduler_schedule" "aws_schedule_node" {
   flexible_time_window {
     mode = "OFF"
   }
-  schedule_expression = "cron(0 * * * ? *)"
+  schedule_expression = "cron(5 * * * ? *)"
   target {
     arn      = aws_lambda_function.hydrocron_lambda_track_ingest.arn
     role_arn = aws_iam_role.hydrocron_schedule_role.arn
@@ -44,7 +44,7 @@ resource "aws_scheduler_schedule" "aws_schedule_prior_lake" {
   flexible_time_window {
     mode = "OFF"
   }
-  schedule_expression = "cron(0 * * * ? *)"
+  schedule_expression = "cron(10 * * * ? *)"
   target {
     arn      = aws_lambda_function.hydrocron_lambda_track_ingest.arn
     role_arn = aws_iam_role.hydrocron_schedule_role.arn

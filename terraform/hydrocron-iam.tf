@@ -532,7 +532,7 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
 resource "aws_iam_role" "hydrocron_schedule_role" {
   name                 = "${local.aws_resource_prefix}-track-ingest-schedule-role"
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
-  assume_role_policy   = data.aws_iam_policy_document.assume_role_schedule
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_schedule.json
   inline_policy {
     name   = "ScheduleInvokeLambda"
     policy = data.aws_iam_policy_document.schedule-policy.json
