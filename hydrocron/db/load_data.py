@@ -248,14 +248,17 @@ def find_new_granules(collection_shortname, start_date, end_date):
     results : list of Granule objects
         List of S3 paths to the granules that have not yet been ingested
     """
-    if os.environ['CMR_ENV'] == "UAT":
+    if os.environ['CMR_ENV'] == "SIT":
         auth = earthaccess.login(persist=True, system=earthaccess.UAT)
+        cmr_search = earthaccess.DataGranules(auth).provider('POCUMULUS').short_name(collection_shortname).temporal(start_date, end_date)
+    elif os.environ['CMR_ENV'] == "UAT":
+        auth = earthaccess.login(persist=True, system=earthaccess.UAT)
+        cmr_search = earthaccess.DataGranules(auth).provider('POCLOUD').short_name(collection_shortname).temporal(start_date, end_date)
     else:
         auth = earthaccess.login(persist=True)
+        cmr_search = earthaccess.DataGranules(auth).provider('POCLOUD').short_name(collection_shortname).temporal(start_date, end_date)
 
     logging.info("Searching for granules in collection %s", collection_shortname)
-
-    cmr_search = earthaccess.DataGranules(auth).short_name(collection_shortname).temporal(start_date, end_date)
 
     results = cmr_search.get()
 
