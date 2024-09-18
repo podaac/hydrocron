@@ -5,6 +5,7 @@ resource "aws_scheduler_schedule" "aws_schedule_reach" {
     mode = "OFF"
   }
   schedule_expression = "cron(0 * * * ? *)"
+  state               = "DISABLED"
   target {
     arn      = aws_lambda_function.hydrocron_lambda_track_ingest.arn
     role_arn = aws_iam_role.hydrocron_schedule_role.arn
@@ -25,6 +26,7 @@ resource "aws_scheduler_schedule" "aws_schedule_node" {
     mode = "OFF"
   }
   schedule_expression = "cron(5 * * * ? *)"
+  state               = "DISABLED"
   target {
     arn      = aws_lambda_function.hydrocron_lambda_track_ingest.arn
     role_arn = aws_iam_role.hydrocron_schedule_role.arn
@@ -45,6 +47,7 @@ resource "aws_scheduler_schedule" "aws_schedule_prior_lake" {
     mode = "OFF"
   }
   schedule_expression = "cron(10 * * * ? *)"
+  state               = "DISABLED"
   target {
     arn      = aws_lambda_function.hydrocron_lambda_track_ingest.arn
     role_arn = aws_iam_role.hydrocron_schedule_role.arn
