@@ -64,7 +64,7 @@ class Track:
         self.ssm_client = connection.ssm_client
         if collection_start_date:
             self.query_start = self._get_query_start(collection_start_date)
-            self.query_end = datetime.datetime.now(timezone.utc)  # TODO - Decide on latency and subtract from current datetime
+            self.query_end = datetime.datetime.now(timezone.utc) - datetime.timedelta(hours=1)
         else:
             self.query_start = query_start
             self.query_end = query_end
