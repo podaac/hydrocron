@@ -54,7 +54,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
         case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
             collection_shortname = constants.SWOT_PRIOR_LAKE_COLLECTION_NAME
             track_table = constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME
-            feature_type = 'LakeSP_prior'
+            feature_type = 'LakeSP_Prior'
         case constants.DB_TEST_TABLE_NAME:
             collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
             track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
@@ -81,7 +81,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
             logging.info('No UMM checksum')
 
         try:
-            revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]]
+            revision_date = [date["Date"] for date in granule["umm"]["ProviderDates"] if "Update" in date["Type"]][0]
         except KeyError:
             revision_date = "Not Found"
             logging.info('No UMM revision date')
@@ -248,11 +248,17 @@ def find_new_granules(collection_shortname, start_date, end_date):
     results : list of Granule objects
         List of S3 paths to the granules that have not yet been ingested
     """
-    auth = earthaccess.login(persist=True)
+    if os.environ['CMR_ENV'] == "SIT":
+        auth = earthaccess.login(persist=True, system=earthaccess.UAT)
+        cmr_search = earthaccess.DataGranules(auth).provider('POCUMULUS').short_name(collection_shortname).temporal(start_date, end_date)
+    elif os.environ['CMR_ENV'] == "UAT":
+        auth = earthaccess.login(persist=True, system=earthaccess.UAT)
+        cmr_search = earthaccess.DataGranules(auth).provider('POCLOUD').short_name(collection_shortname).temporal(start_date, end_date)
+    else:
+        auth = earthaccess.login(persist=True)
+        cmr_search = earthaccess.DataGranules(auth).provider('POCLOUD').short_name(collection_shortname).temporal(start_date, end_date)
 
     logging.info("Searching for granules in collection %s", collection_shortname)
-
-    cmr_search = earthaccess.DataGranules(auth).short_name(collection_shortname).temporal(start_date, end_date)
 
     results = cmr_search.get()
 
