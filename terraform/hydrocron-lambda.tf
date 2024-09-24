@@ -19,9 +19,9 @@ locals {
   load_granule_function_name       = "${local.aws_resource_prefix}-load_granule-lambda"
   cnm_response_function_name       = "${local.aws_resource_prefix}-cnm-lambda"
   track_ingest_function_name       = "${local.aws_resource_prefix}-track-ingest-lambda"
-  sit_env                          = "${var.stage == "sit" ? "SIT" : ""}"
-  uat_env                          = "${var.stage == "uat" ? "UAT" : ""}"
-  prod_env                         = "${var.stage == "ops" ? "PROD" : ""}"
+  sit_env                          = var.stage == "sit" ? "SIT" : ""
+  uat_env                          = var.stage == "uat" ? "UAT" : ""
+  prod_env                         = var.stage == "ops" ? "PROD" : ""
 }
 
 resource "aws_ecr_repository" "lambda-image-repo" {
@@ -141,7 +141,7 @@ resource "aws_lambda_function" "hydrocron_lambda_load_data" {
       EARTHDATA_USERNAME           = data.aws_ssm_parameter.edl_username.value
       EARTHDATA_PASSWORD           = data.aws_ssm_parameter.edl_password.value
       GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
-      CMR_ENV                     = "${coalesce(local.sit_env, local.uat_env, local.prod_env)}"
+      CMR_ENV                      = "${coalesce(local.sit_env, local.uat_env, local.prod_env)}"
     }
   }
 }
@@ -221,6 +221,8 @@ resource "aws_lambda_function" "hydrocron_lambda_track_ingest" {
     variables = {
       GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
       HYDROCRON_ENV                = local.environment
+      EARTHDATA_USERNAME           = data.aws_ssm_parameter.edl_username.value
+      EARTHDATA_PASSWORD           = data.aws_ssm_parameter.edl_password.value
     }
   }
 }
