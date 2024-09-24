@@ -105,7 +105,7 @@ class Track:
         query = query.format("umm_json")
         if temporal:
             logging.info("Querying CMR temporal range: %s to %s.", self.query_start, self.query_end)
-            if self.ENV  in ("sit", "uat"):
+            if self.ENV in ("sit", "uat"):
                 bearer_token = self._get_bearer_token()
                 granules = query.short_name(self.SHORTNAME[self.collection_shortname]) \
                     .temporal(self.query_start, self.query_end) \
@@ -149,9 +149,9 @@ class Track:
         username = os.getenv("EARTHDATA_USERNAME")
         password = os.getenv("EARTHDATA_PASSWORD")
         get_response = requests.get(self.URS_UAT_TOKEN,
-                                      headers={"Accept": "application/json"},
-                                      auth=requests.auth.HTTPBasicAuth(username, password),
-                                      timeout=30)
+                                    headers={"Accept": "application/json"},
+                                    auth=requests.auth.HTTPBasicAuth(username, password),
+                                    timeout=30)
         token_data = get_response.json()
         return token_data[0]["access_token"]
 
