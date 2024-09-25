@@ -8,9 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [1.4.0]
+
+### Added
+    - Issue 205 - Define a an API key for the Confluence workflow and usage plan limits
+    - Issue 201- Create table for tracking granule ingest status
+    - Issue 225 - Create one track ingest table per feature type
+    - Issue 222 - Add operations to load granule Lambda to write granule record to track ingest database
+    - Issue 198 - Implement track ingest lambda function CMR and Hydrocron queries
+    - Issue 193 - Add new Dynamo table for prior lake data
+    - Issue 196 - Add new feature type to query the API for lake data
+### Changed
 ### Deprecated 
 ### Removed
 ### Fixed
+    - Issue 210 - Features with large geometries cannot be loaded
 ### Security
 
 ## [1.3.0]

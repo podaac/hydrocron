@@ -30,7 +30,6 @@ resource "aws_api_gateway_rest_api" "hydrocron-api-gateway" {
     prevent_destroy = true
   }
   minimum_compression_size = 20480
-  api_key_source = "AUTHORIZER"
 }
 
 
@@ -108,8 +107,8 @@ resource "aws_api_gateway_api_key" "default-user-key" {
 }
 
 
-resource "aws_api_gateway_api_key" "trusted-user-key" {
-  name = "${local.aws_resource_prefix}-api-key-trusted"
+resource "aws_api_gateway_api_key" "confluence-user-key" {
+  name = "${local.aws_resource_prefix}-api-key-confluence"
 }
 
 
@@ -125,7 +124,11 @@ resource "aws_ssm_parameter" "trusted-user-parameter" {
   name        = "/service/${var.app_name}/api-key-trusted"
   description = "Hydrocron trusted user API key"
   type        = "SecureString"
-  value       = aws_api_gateway_api_key.trusted-user-key.value
+  value = jsonencode(
+    [
+      "${aws_api_gateway_api_key.confluence-user-key.value}"
+    ]
+  )
 }
 
 
@@ -147,12 +150,12 @@ resource "aws_api_gateway_usage_plan" "default-user-usage-plan" {
   }
 }
 
+
 resource "aws_api_gateway_usage_plan_key" "default-user-usage-key" {
   key_id        = aws_api_gateway_api_key.default-user-key.id
   key_type      = "API_KEY"
   usage_plan_id = aws_api_gateway_usage_plan.default-user-usage-plan.id
 }
-
 
 
 resource "aws_api_gateway_usage_plan" "trusted-user-usage-plan" {
@@ -163,17 +166,18 @@ resource "aws_api_gateway_usage_plan" "trusted-user-usage-plan" {
     stage  = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
   }
   quota_settings {
-    limit  = 5
+    limit  = 12107815
     period = "MONTH"
   }
   throttle_settings {
-    burst_limit = 1
-    rate_limit  = 1
+    burst_limit = 3000
+    rate_limit  = 6000
   }
 }
 
-resource "aws_api_gateway_usage_plan_key" "trusted-user-usage-key" {
-  key_id        = aws_api_gateway_api_key.trusted-user-key.id
+
+resource "aws_api_gateway_usage_plan_key" "confluence-user-usage-key" {
+  key_id        = aws_api_gateway_api_key.confluence-user-key.id
   key_type      = "API_KEY"
   usage_plan_id = aws_api_gateway_usage_plan.trusted-user-usage-plan.id
 }

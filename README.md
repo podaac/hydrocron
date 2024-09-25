@@ -1,4 +1,5 @@
 ## Overview
+
 Hydrocron API is a new tool that implements functionalities that will allow 
 hydrologists to have direct access to filtered data from our newest satellites. 
 This innovative tool will provide an effortless way to filter data by feature ID, 
@@ -6,6 +7,7 @@ date range, polygonal area, and more. This data will be returned in formats such
 as CSV and geoJSON.
 
 ## Requirements
+
 Python 3.10+
 
 ## Running Locally with Docker
@@ -18,10 +20,14 @@ Python 3.10+
 ### 1. Build or Pull Hydrocron Docker
 
 Build the docker container:
+
 ```bash
+
 docker build . -f docker/Dockerfile -t hydrocron:latest
 ```
-Pull a pre-built image from https://github.com/podaac/hydrocron/pkgs/container/hydrocron:
+
+Pull a pre-built image from [https://github.com/podaac/hydrocron/pkgs/container/hydrocron](https://github.com/podaac/hydrocron/pkgs/container/hydrocron):
+
 ```bash
 docker pull ghcr.io/podaac/hydrocron:latest
 ```
@@ -29,6 +35,7 @@ docker pull ghcr.io/podaac/hydrocron:latest
 ### 2. Run Docker Compose
 
 Launch dynamodb local on port 8000 and hyrdrocron on port 9000
+
 ```bash
 docker-compose up
 ```
@@ -42,6 +49,7 @@ poetry install
 ```
 
 This will load the data in `test/data` into the local dynamo db instance.
+
 ```bash
 python tests/load_data_local.py
 ```
