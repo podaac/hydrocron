@@ -19,6 +19,9 @@ locals {
   load_granule_function_name       = "${local.aws_resource_prefix}-load_granule-lambda"
   cnm_response_function_name       = "${local.aws_resource_prefix}-cnm-lambda"
   track_ingest_function_name       = "${local.aws_resource_prefix}-track-ingest-lambda"
+  sit_env                          = var.stage == "sit" ? "SIT" : ""
+  uat_env                          = var.stage == "uat" ? "UAT" : ""
+  prod_env                         = var.stage == "ops" ? "PROD" : ""
 }
 
 resource "aws_ecr_repository" "lambda-image-repo" {
