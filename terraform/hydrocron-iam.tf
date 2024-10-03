@@ -68,8 +68,11 @@ data "aws_iam_policy_document" "dynamo-read-policy-track-ingest" {
 
     resources = [
       aws_dynamodb_table.hydrocron-reach-track-ingest-table.arn,
+      "${aws_dynamodb_table.hydrocron-reach-track-ingest-table.arn}/index/*",
       aws_dynamodb_table.hydrocron-node-track-ingest-table.arn,
+      "${aws_dynamodb_table.hydrocron-node-track-ingest-table.arn}/index/*",
       aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.arn,
+      "${aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.arn}/index/*",
     ]
   }
 
@@ -177,6 +180,19 @@ data "aws_iam_policy_document" "ssm-read-policy" {
     ]
 
     resources = ["arn:aws:ssm:${data.aws_region.current.id}:${local.account_id}:parameter/service/${var.app_name}/*"]
+  }
+
+}
+
+
+data "aws_iam_policy_document" "ssm-put-policy-track-ingest" {
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:PutParameter"
+    ]
+    resources = ["arn:aws:ssm:${data.aws_region.current.id}:${local.account_id}:parameter/service/${var.app_name}/track-ingest-runtime/*"]
   }
 
 }
@@ -467,5 +483,9 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
   inline_policy {
     name   = "HydrocronSSMRead"
     policy = data.aws_iam_policy_document.ssm-read-policy.json
+  }
+  inline_policy {
+    name = "HydrocronSSMPutTrack"
+    policy = data.aws_iam_policy_document.ssm-put-policy-track-ingest.json
   }
 }
