@@ -13,6 +13,7 @@ from cmr import GranuleQuery
 
 # Application Imports
 from hydrocron.api.data_access.db import DynamoDataRepository
+from hydrocron.db.load_data import load_data
 from hydrocron.utils import connection
 
 
@@ -178,6 +179,8 @@ class Track:
                 self.ingested.append(ingest_item)
             else:
                 ingest_item["status"] = "to_ingest"
+                if ingest_item in self.to_ingest:
+                    continue    # Skip if not found in Hydrocron table
                 self.to_ingest.append(ingest_item)
 
         logging.info("Located %s granules that require ingestion.", len(self.to_ingest))
@@ -192,6 +195,11 @@ class Track:
         :param hydrocron_track_table: Name of hydrocron track table to query
         :type hydrocron_track_table: str
         """
+
+        items = self.ingested + self.to_ingest
+        dynamo_resource = connection.dynamodb_resource
+        load_data(dynamo_resource=dynamo_resource, table_name=hydrocron_track_table, items=items)
+        logging.info("Updated %s with %s items.", hydrocron_track_table, len(items))
 
     def update_runtime(self):
         """Update SSM parameter runtime for next execution."""
