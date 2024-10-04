@@ -228,7 +228,7 @@ def mock_sns():
     os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
 
     sns = boto3.client("sns")
-    sns.create_topic(Name="svc-hydrocron-test-cnm-response")
+    sns.create_topic(Name="svc-hydrocron-sit-cnm-response")
 
     yield sns
 

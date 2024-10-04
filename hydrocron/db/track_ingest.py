@@ -8,9 +8,11 @@ from datetime import timezone
 import json
 import logging
 import os
+import requests
 
 # Third-party Imports
 from cmr import GranuleQuery
+from cmr import CMR_UAT
 
 # Application Imports
 from hydrocron.api.data_access.db import DynamoDataRepository
@@ -45,6 +47,7 @@ class Track:
     }
     CNM_VERSION = "1.6.0"
     PROVIDER = "JPL-SWOT"
+    URS_UAT_TOKEN = "https://uat.urs.earthdata.nasa.gov/api/users/tokens"
 
     def __init__(self, collection_shortname, collection_start_date=None, query_start=None, query_end=None):
         """
@@ -99,18 +102,79 @@ class Track:
         """
 
         query = GranuleQuery()
+        query = query.format("umm_json")
         if temporal:
             logging.info("Querying CMR temporal range: %s to %s.", self.query_start, self.query_end)
-            granules = query.short_name(self.collection_shortname).temporal(self.query_start, self.query_end).format("umm_json").get(query.hits())
+            if self.ENV in ("sit", "uat"):
+                bearer_token = self._get_bearer_token()
+                granules = query.short_name(self.SHORTNAME[self.collection_shortname]) \
+                    .temporal(self.query_start, self.query_end) \
+                    .format("umm_json") \
+                    .mode(CMR_UAT) \
+                    .bearer_token(bearer_token) \
+                    .get(query.hits())
+                granules = self._filter_granules(granules)
+            else:
+                granules = query.short_name(self.collection_shortname) \
+                    .temporal(self.query_start, self.query_end) \
+                    .format("umm_json") \
+                    .get(query.hits())
         else:
             logging.info("Querying CMR revision_date range: %s to %s.", self.query_start, self.query_end)
-            granules = query.short_name(self.collection_shortname).revision_date(self.query_start, self.query_end).format("umm_json").get(query.hits())
+            if self.ENV in ("sit", "uat"):
+                bearer_token = self._get_bearer_token()
+                granules = query.short_name(self.SHORTNAME[self.collection_shortname]) \
+                    .revision_date(self.query_start, self.query_end) \
+                    .format("umm_json") \
+                    .mode(CMR_UAT) \
+                    .bearer_token(bearer_token) \
+                    .get(query.hits())
+                granules = self._filter_granules(granules)
+            else:
+                granules = query.short_name(self.collection_shortname) \
+                    .revision_date(self.query_start, self.query_end) \
+                    .format("umm_json") \
+                    .get(query.hits())
+
         cmr_granules = {}
         for granule in granules:
             granule_json = json.loads(granule)
             cmr_granules.update(self._get_granule_ur_list(granule_json))
         logging.info("Located %s granules in CMR.", len(cmr_granules.keys()))
         return cmr_granules
+
+    def _get_bearer_token(self):
+        """Get bearer authorizatino token."""
+
+        username = os.getenv("EARTHDATA_USERNAME")
+        password = os.getenv("EARTHDATA_PASSWORD")
+        get_response = requests.get(self.URS_UAT_TOKEN,
+                                    headers={"Accept": "application/json"},
+                                    auth=requests.auth.HTTPBasicAuth(username, password),
+                                    timeout=30)
+        token_data = get_response.json()
+        return token_data[0]["access_token"]
+
+    def _filter_granules(self, granules):
+        """Filter granules for collection.
+
+        Parameters:
+        :param granules: List of granules to filter
+        :type granules: dict
+        """
+
+        data_type = self.collection_shortname.split("_")[4].capitalize()
+        granule_list = []
+        for granule in granules:
+            filter_list = []
+            granule_json = json.loads(granule)
+            for item in granule_json["items"]:
+                if data_type in item["meta"]["native-id"]:
+                    filter_list.append(item)
+            granule_json["hits"] = len(filter_list)
+            granule_json["items"] = filter_list
+            granule_list.append(json.dumps(granule_json))
+        return granule_list
 
     @staticmethod
     def _get_granule_ur_list(granules):
@@ -124,7 +188,7 @@ class Track:
 
         granule_dict = {}
         for item in granules["items"]:
-            granule_ur = item["umm"]["GranuleUR"].replace("_swot", ".zip")
+            granule_ur = f'{item["umm"]["GranuleUR"].replace("_swot", "")}.zip'
             checksum = 0
             for file in item["umm"]["DataGranule"]["ArchiveAndDistributionInformation"]:
                 if granule_ur == file["Name"]:
@@ -248,7 +312,10 @@ class Track:
                         }
                 for granule_url in granule_item["umm"]["RelatedUrls"]:
                     if granule_url["Type"] == "GET DATA VIA DIRECT ACCESS":
-                        cnm_file["uri"] = granule_url["URL"].replace("ops", self.ENV)
+                        if self.ENV in ("sit", "uat"):
+                            cnm_file["uri"] = granule_url["URL"].replace("ops", "uat")
+                        else:
+                            cnm_file["uri"] = granule_url["URL"]
             cnm_files.append(cnm_file)
 
         return cnm_files
@@ -309,6 +376,7 @@ def track_ingest_handler(event, context):
         logging.info("Temporal end date: %s", query_end)
     else:
         logging.info("Collection start date: %s", collection_start_date)
+    logging.info("Environment: %s", track.ENV.upper())
 
     cmr_granules = track.query_cmr(temporal)
     track.query_hydrocron(hydrocron_table, cmr_granules)

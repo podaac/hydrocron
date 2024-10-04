@@ -15,7 +15,7 @@
                 "checksumType": "md5",
                 "checksum": "6ce27e868bd90055252de186f554759f",
                 "size": 745878,
-                "uri": "s3://podaac-swot-test-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip"
+                "uri": "s3://podaac-swot-uat-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip"
             }
         ]
     }
