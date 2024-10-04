@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
     - Issue 211 - Query track ingest table for granules with "to_ingest" status
     - Issue 212 - Update track ingest table with granule status
+    - Issue 203 - Construct CNM to trigger load data operations and ingest granule
 ### Changed
 ### Deprecated
 ### Removed

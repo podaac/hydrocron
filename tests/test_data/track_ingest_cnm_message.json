@@ -1,0 +1,22 @@
+{
+    "identifier": "SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01",
+    "collection": "SWOT_L2_HR_RiverSP_2.0",
+    "provider": "JPL-SWOT",
+    "version": "1.6.0",
+    "submissionTime": "2024-09-09T01:25:25.739Z",
+    "trace": "reproc-hydrocron-track-ingest",
+    "product": {
+        "dataVersion": "2.0",
+        "dataProcessingType": "reprocessing",
+        "files": [
+            {
+                "type": "data",
+                "name": "SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip",
+                "checksumType": "md5",
+                "checksum": "6ce27e868bd90055252de186f554759f",
+                "size": 745878,
+                "uri": "s3://podaac-swot-test-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip"
+            }
+        ]
+    }
+}

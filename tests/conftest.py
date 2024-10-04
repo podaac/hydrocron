@@ -215,7 +215,22 @@ def mock_ssm():
     runtime = (datetime.datetime.now() - datetime.timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
     ssm.put_parameter(Name="/service/hydrocron/track-ingest-runtime/SWOT_L2_HR_RiverSP_reach_2.0", Value=runtime, Type="String")
    
-    yield mock_aws
+    yield ssm
+
+    mock_aws.stop()
+
+@pytest.fixture()
+def mock_sns():
+
+    mock_aws = moto.mock_aws()
+    mock_aws.start()
+
+    os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
+
+    sns = boto3.client("sns")
+    sns.create_topic(Name="svc-hydrocron-test-cnm-response")
+
+    yield sns
 
     mock_aws.stop()
 
@@ -335,3 +350,11 @@ def track_ingest_fixture(track_ingest_dynamo_instance, dynamo_test_proc, mock_ss
     import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
     hydrocron.utils.connection._dynamodb_resource = track_ingest_dynamo_instance
     hydrocron.utils.connection._s3_resource = mock_s3
+
+@pytest.fixture()
+def track_ingest_cnm_fixture(dynamo_test_proc, mock_sns):
+    os.environ['HYDROCRON_ENV'] = 'test'
+    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"    
+    import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
+    
+    hydrocron.utils.connection._sns_client = mock_sns

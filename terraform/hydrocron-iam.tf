@@ -27,6 +27,20 @@ data "aws_iam_policy_document" "assume_role_authorizer" {
 }
 
 
+data "aws_iam_policy_document" "assume_role_schedule" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["scheduler.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+
 data "aws_iam_policy_document" "dynamo-read-policy" {
 
   statement {
@@ -258,6 +272,17 @@ data "aws_iam_policy_document" "sns-resource-policy" {
 }
 
 
+data "aws_iam_policy_document" "sns-resource-cnm-policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "sns:Publish"
+    ]
+    resources = [aws_sns_topic.hydrocron_sns_topic_cnm_response.arn]
+  }
+}
+
+
 data "aws_iam_policy_document" "apigw-resource-policy" {
   statement {
     effect = "Allow"
@@ -308,6 +333,15 @@ data "aws_iam_policy_document" "lambda-vpc" {
     effect    = "Allow"
     actions   = ["ec2:DescribeNetworkInterfaces"]
     resources = ["*"]
+  }
+}
+
+
+data "aws_iam_policy_document" "schedule-policy" {
+  statement {
+    effect    = "Allow"
+    actions   = ["lambda:InvokeFunction"]
+    resources = ["${aws_lambda_function.hydrocron_lambda_track_ingest.arn}"]
   }
 }
 
@@ -485,7 +519,22 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
     policy = data.aws_iam_policy_document.ssm-read-policy.json
   }
   inline_policy {
-    name = "HydrocronSSMPutTrack"
+    name   = "HydrocronSSMPutTrack"
     policy = data.aws_iam_policy_document.ssm-put-policy-track-ingest.json
+  }
+  inline_policy {
+    name   = "HydrocronSNSPublish"
+    policy = data.aws_iam_policy_document.sns-resource-cnm-policy.json
+  }
+}
+
+
+resource "aws_iam_role" "hydrocron_schedule_role" {
+  name                 = "${local.aws_resource_prefix}-track-ingest-schedule-role"
+  permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_schedule.json
+  inline_policy {
+    name   = "ScheduleInvokeLambda"
+    policy = data.aws_iam_policy_document.schedule-policy.json
   }
 }
