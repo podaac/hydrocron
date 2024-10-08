@@ -239,12 +239,7 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     hits = 0
 
     data_repository = DynamoDataRepository(connection.dynamodb_resource)
-    if feature.lower() == 'reach':
-        results = data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
-    if feature.lower() == 'node':
-        results = data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
-    if feature.lower() == 'priorlake':
-        results = data_repository.get_prior_lake_series_by_feature_id(feature_id, start_time, end_time)
+    results = data_repository.get_series_by_feature_id(feature, feature_id, start_time, end_time)
 
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
