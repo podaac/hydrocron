@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+    - Issue 243 - Fix cases where not all time steps were returned for a feature id
 ### Security
 
 ## [1.4.0]
