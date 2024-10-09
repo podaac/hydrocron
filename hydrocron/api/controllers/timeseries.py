@@ -213,7 +213,7 @@ def sanitize_time(start_time, end_time):
     return start_time, end_time
 
 
-def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
+def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-positional-arguments
     """Get Timeseries for a particular Reach, Node, or LakeID
 
     Get Timeseries for a particular Reach, Node, or LakeID # noqa: E501
@@ -339,7 +339,7 @@ def add_units(gdf, columns):
     return columns + unit_columns
 
 
-def get_response(results, hits, elapsed, return_type, output, compact):
+def get_response(results, hits, elapsed, return_type, output, compact):  # pylint: disable=too-many-positional-arguments
     """Create and return HTTP response based on results.
 
     :param results: Dictionary of SWOT timeseries results
