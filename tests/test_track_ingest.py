@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 
 from moto.core import DEFAULT_ACCOUNT_ID
 from moto.sns import sns_backends
+import pytest
 import vcr
 
 from hydrocron.utils import constants
@@ -316,3 +317,26 @@ def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
         expected = json.load(jf)
 
     assert actual == expected
+
+def test_track_ingest_mismatch():
+    """Test cases where incorrect combination of shortname and table names are
+    passed to track ingest operations."""
+
+    import hydrocron.db.track_ingest
+
+    class LambdaContext:
+        def __init__(self):
+            self.invoked_function_arn = "arn:aws:lambda:us-west-2:12345678910:function:svc-hydrocron-sit-track-ingest-lambda"
+
+    event = {
+        "collection_shortname": "SWOT_L2_HR_LakeSP_prior_2.0",
+        "hydrocron_table": "hydrocron-swot-prior-lake-table",
+        "hydrocron_track_table": "hydrocron-swot-reach-track-ingest-table",
+        "temporal": "",
+        "query_start": "2024-09-05T23:00:00",
+        "query_end": "2024-09-05T23:59:59"
+    }
+    context = LambdaContext()
+    with pytest.raises(hydrocron.db.track_ingest.TableMisMatch) as e:
+        hydrocron.db.track_ingest.track_ingest_handler(event, context)
+        assert str(e.value) == "Error: Cannot query prior lake data for tables: 'hydrocron-swot-prior-lake-table' and 'hydrocron-swot-reach-track-ingest-table'"
