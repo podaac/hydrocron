@@ -1,3 +1,5 @@
+import pytest
+
 """
 ==============
 test_create_table.py
@@ -72,3 +74,22 @@ def test_delete_item(hydrocron_dynamo_table):
         partition_key=constants.TEST_REACH_ID_VALUE,
         sort_key=constants.TEST_REACH_TIME_VALUE)
     assert hydrocron_dynamo_table.table.item_count == 686
+
+
+def test_track_table_mismatch():
+    """
+    Test track ingest table name mismatch with granule UR.
+    """
+    import hydrocron.db.load_data
+    
+    event = {
+        "body": {
+            "granule_path": "s3://podaac-swot-sit-cumulus-protected/SWOT_L2_HR_LakeSP_2.0/SWOT_L2_HR_LakeSP_Obs_020_150_EU_20240825T234434_20240825T235245_PIC0_01.zip",
+            "table_name": "hydrocron-swot-prior-lake-table",
+            "load_benchmarking_data": "False",
+            "track_table": "hydrocron-swot-prior-lake-track-ingest-table"
+        }
+    }
+    with pytest.raises(hydrocron.db.load_data.TableMisMatch) as e:
+        hydrocron.db.load_data.granule_handler(event, None)
+        assert str(e.value) == "Error: Cannot load Observed or Unassigned Lake data into table: 'hydrocron-swot-prior-lake-table'"

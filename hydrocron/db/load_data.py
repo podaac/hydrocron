@@ -133,6 +133,9 @@ def granule_handler(event, _):
     if ("LakeSP_Prior" in granule_path) & (table_name != constants.SWOT_PRIOR_LAKE_TABLE_NAME):
         raise TableMisMatch(f"Error: Cannot load Prior Lake data into table: '{table_name}'")
 
+    if ("LakeSP_Obs" in granule_path) | ("LakeSP_Unassigned" in granule_path):
+        raise TableMisMatch(f"Error: Cannot load Observed or Unassigned Lake data into table: '{table_name}'")
+
     logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
 
     obscure_data = "true" in os.getenv("OBSCURE_DATA").lower()
