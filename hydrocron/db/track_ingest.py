@@ -360,16 +360,16 @@ def track_ingest_handler(event, context):
     hydrocron_track_table = event["hydrocron_track_table"]
     temporal = "temporal" in event.keys()
 
-    if ("reach" in collection_shortname) and ((hydrocron_table != constants.SWOT_REACH_TABLE_NAME) \
-        or (hydrocron_track_table != constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)):
+    if ("reach" in collection_shortname) and ((hydrocron_table != constants.SWOT_REACH_TABLE_NAME)
+                                              or (hydrocron_track_table != constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)):
         raise TableMisMatch(f"Error: Cannot query reach data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
 
-    if ("node" in collection_shortname) and ((hydrocron_table != constants.SWOT_NODE_TABLE_NAME) \
-        or (hydrocron_track_table != constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME)):
+    if ("node" in collection_shortname) and ((hydrocron_table != constants.SWOT_NODE_TABLE_NAME)
+                                             or (hydrocron_track_table != constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME)):
         raise TableMisMatch(f"Error: Cannot query node data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
 
-    if ("prior" in collection_shortname) and ((hydrocron_table != constants.SWOT_PRIOR_LAKE_TABLE_NAME) \
-        or (hydrocron_track_table != constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME)):
+    if ("prior" in collection_shortname) and ((hydrocron_table != constants.SWOT_PRIOR_LAKE_TABLE_NAME)
+                                              or (hydrocron_track_table != constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME)):
         raise TableMisMatch(f"Error: Cannot query prior lake data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
 
     if temporal:
