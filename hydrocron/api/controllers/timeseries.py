@@ -213,7 +213,7 @@ def sanitize_time(start_time, end_time):
     return start_time, end_time
 
 
-def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # noqa: E501
+def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-positional-arguments
     """Get Timeseries for a particular Reach, Node, or LakeID
 
     Get Timeseries for a particular Reach, Node, or LakeID # noqa: E501
@@ -239,12 +239,7 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     hits = 0
 
     data_repository = DynamoDataRepository(connection.dynamodb_resource)
-    if feature.lower() == 'reach':
-        results = data_repository.get_reach_series_by_feature_id(feature_id, start_time, end_time)
-    if feature.lower() == 'node':
-        results = data_repository.get_node_series_by_feature_id(feature_id, start_time, end_time)
-    if feature.lower() == 'priorlake':
-        results = data_repository.get_prior_lake_series_by_feature_id(feature_id, start_time, end_time)
+    results = data_repository.get_series_by_feature_id(feature, feature_id, start_time, end_time)
 
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
@@ -344,7 +339,7 @@ def add_units(gdf, columns):
     return columns + unit_columns
 
 
-def get_response(results, hits, elapsed, return_type, output, compact):
+def get_response(results, hits, elapsed, return_type, output, compact):  # pylint: disable=too-many-positional-arguments
     """Create and return HTTP response based on results.
 
     :param results: Dictionary of SWOT timeseries results
