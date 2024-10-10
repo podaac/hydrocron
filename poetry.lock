@@ -342,13 +342,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.36"
-description = "Type annotations for boto3 1.35.36 generated with mypy-boto3-builder 8.1.2"
+version = "1.35.37"
+description = "Type annotations for boto3 1.35.37 generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.36-py3-none-any.whl", hash = "sha256:2d5395cca1c9cbf996e5e15435a8934939b95cf4d5306dbd06e280875ded299d"},
-    {file = "boto3_stubs-1.35.36.tar.gz", hash = "sha256:ab22817be7861f8e2edcde64b2b1a5324f770fd7ea4d8e7a826c7aedd1261da6"},
+    {file = "boto3_stubs-1.35.37-py3-none-any.whl", hash = "sha256:32b70602af1c34ddd244bbdafcc7f32b9824135c2f14dcf41d8e5a33b914b19a"},
+    {file = "boto3_stubs-1.35.37.tar.gz", hash = "sha256:dc12838481a10d65802f75b4ca1e4eb334e06dbb2f0d5c565f43e0363c2037d6"},
 ]
 
 [package.dependencies]
@@ -400,7 +400,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.36)", "botocore (==1.35.36)"]
+boto3 = ["boto3 (==1.35.37)", "botocore (==1.35.37)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -771,13 +771,13 @@ crt = ["awscrt (==0.22.0)"]
 
 [[package]]
 name = "botocore-stubs"
-version = "1.35.36"
+version = "1.35.37"
 description = "Type annotations and code completion for botocore"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore_stubs-1.35.36-py3-none-any.whl", hash = "sha256:bb02ed31bcaf6a239494d747a474e47e84fd2ff5ca226b9e6e77f604ba67e8b5"},
-    {file = "botocore_stubs-1.35.36.tar.gz", hash = "sha256:0ac480692328879fd260b51c92e326428d26d60be6fb06bb606fcc2add9b162d"},
+    {file = "botocore_stubs-1.35.37-py3-none-any.whl", hash = "sha256:0fd4ce53636196fcb72b8dad1c67cb774f2f1941891a9c5293f91401ff6d8589"},
+    {file = "botocore_stubs-1.35.37.tar.gz", hash = "sha256:834f1d55c8e8a815bbb446fe9a7d3da09c4402312ff1a8fcf13fb6b4b894ab92"},
 ]
 
 [package.dependencies]
@@ -4997,13 +4997,13 @@ files = [
 
 [[package]]
 name = "xmltodict"
-version = "0.14.0"
+version = "0.14.1"
 description = "Makes working with XML feel like you are working with JSON"
 optional = false
-python-versions = ">=3.4"
+python-versions = ">=3.6"
 files = [
-    {file = "xmltodict-0.14.0-py2.py3-none-any.whl", hash = "sha256:6dd20b8de8d0eb84d175ec706cc17b53df236615b0980de33537736319e5ee85"},
-    {file = "xmltodict-0.14.0.tar.gz", hash = "sha256:8b39b25b564fd466be566c9e8a869cc4b5083c2fec7f98665f47bf0853f6cc77"},
+    {file = "xmltodict-0.14.1-py2.py3-none-any.whl", hash = "sha256:3ef4a7b71c08f19047fcbea572e1d7f4207ab269da1565b5d40e9823d3894e63"},
+    {file = "xmltodict-0.14.1.tar.gz", hash = "sha256:338c8431e4fc554517651972d62f06958718f6262b04316917008e8fd677a6b0"},
 ]
 
 [[package]]
