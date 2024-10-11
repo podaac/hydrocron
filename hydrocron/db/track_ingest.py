@@ -109,7 +109,6 @@ class Track:
                 bearer_token = self._get_bearer_token()
                 granules = query.short_name(self.SHORTNAME[self.collection_shortname]) \
                     .temporal(self.query_start, self.query_end) \
-                    .format("umm_json") \
                     .mode(CMR_UAT) \
                     .bearer_token(bearer_token) \
                     .get(query.hits())
@@ -117,7 +116,6 @@ class Track:
             else:
                 granules = query.short_name(self.collection_shortname) \
                     .temporal(self.query_start, self.query_end) \
-                    .format("umm_json") \
                     .get(query.hits())
         else:
             logging.info("Querying CMR revision_date range: %s to %s.", self.query_start, self.query_end)
@@ -125,7 +123,6 @@ class Track:
                 bearer_token = self._get_bearer_token()
                 granules = query.short_name(self.SHORTNAME[self.collection_shortname]) \
                     .revision_date(self.query_start, self.query_end) \
-                    .format("umm_json") \
                     .mode(CMR_UAT) \
                     .bearer_token(bearer_token) \
                     .get(query.hits())
@@ -133,7 +130,6 @@ class Track:
             else:
                 granules = query.short_name(self.collection_shortname) \
                     .revision_date(self.query_start, self.query_end) \
-                    .format("umm_json") \
                     .get(query.hits())
 
         cmr_granules = {}
@@ -295,7 +291,15 @@ class Track:
         """
 
         query = GranuleQuery()
-        granules = query.short_name(self.collection_shortname).readable_granule_name(granule_ur).format("umm_json").get_all()
+        query = query.short_name(self.collection_shortname).readable_granule_name(granule_ur).format("umm_json")
+
+        if self.ENV in ("sit", "uat"):
+            bearer_token = self._get_bearer_token()
+            query = query.bearer_token(bearer_token) \
+                .mode(CMR_UAT) \
+                .short_name(self.SHORTNAME[self.collection_shortname])
+
+        granules = query.get_all()
         cnm_files = []
         for granule in granules:
             granule_json = json.loads(granule)
