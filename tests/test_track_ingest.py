@@ -31,7 +31,8 @@ def test_query_cmr(mock_ssm):
 
     vcr_cassette = pathlib.Path(os.path.dirname(os.path.realpath(__file__))) \
         .joinpath('vcr_cassettes').joinpath('cmr_query.yaml')
-    with vcr.use_cassette(vcr_cassette):
+    with vcr.use_cassette(vcr_cassette, decode_compressed_response=True):
+        track.query_cmr(False)
         actual_data = track.query_cmr(False)
         
     expected_file = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
@@ -305,7 +306,7 @@ def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
 
     vcr_cassette = pathlib.Path(os.path.dirname(os.path.realpath(__file__))) \
         .joinpath('vcr_cassettes').joinpath('publish_cnm.yaml')
-    with vcr.use_cassette(vcr_cassette):
+    with vcr.use_cassette(vcr_cassette, decode_compressed_response=True):
         track.publish_cnm_ingest(DEFAULT_ACCOUNT_ID)
 
     sns_backend = sns_backends[DEFAULT_ACCOUNT_ID]["us-west-2"]
