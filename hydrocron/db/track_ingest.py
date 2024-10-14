@@ -317,7 +317,7 @@ class Track:
                 for granule_url in granule_item["umm"]["RelatedUrls"]:
                     if granule_url["Type"] == "GET DATA VIA DIRECT ACCESS":
                         if self.ENV in ("sit", "uat"):
-                            cnm_file["uri"] = granule_url["URL"].replace("ops", "uat")
+                            cnm_file["uri"] = granule_url["URL"].replace("sit", "uat")
                         else:
                             cnm_file["uri"] = granule_url["URL"]
             cnm_files.append(cnm_file)
