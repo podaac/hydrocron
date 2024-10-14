@@ -20,14 +20,14 @@ def test_query_cmr(mock_ssm):
     
     Uses vcrpy to record CMR API response.
     """
+    os.environ['HYDROCRON_ENV'] = 'OPS'
     from hydrocron.db.track_ingest import Track
-    
+
     collection_shortname = "SWOT_L2_HR_RiverSP_reach_2.0"
     collection_start_date = datetime.datetime.strptime("20240630", "%Y%m%d").replace(tzinfo=datetime.timezone.utc)
     track = Track(collection_shortname, collection_start_date)
     track.query_start = datetime.datetime(2024, 6, 30, 0, 0, 0, tzinfo=datetime.timezone.utc)
     track.query_end = datetime.datetime(2024, 6, 30, 12, 0, 0, tzinfo=datetime.timezone.utc)
-    track.ENV = "OPS"
 
     vcr_cassette = pathlib.Path(os.path.dirname(os.path.realpath(__file__))) \
         .joinpath('vcr_cassettes').joinpath('cmr_query.yaml')
