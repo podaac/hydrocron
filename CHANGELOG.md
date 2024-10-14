@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+    - Issue 235 - Track ingest table can be populated with granules that aren't loaded into Hydrocron
 ### Security
 
 ## [1.4.1]
