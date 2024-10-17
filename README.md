@@ -1,10 +1,12 @@
 ## Overview
 
-Hydrocron API is a new tool that implements functionalities that will allow 
-hydrologists to have direct access to filtered data from our newest satellites. 
-This innovative tool will provide an effortless way to filter data by feature ID, 
-date range, polygonal area, and more. This data will be returned in formats such 
-as CSV and geoJSON.
+Hydrocron is an API that repackages hydrology datasets from the Surface Water and Ocean Topography (SWOT) satellite into formats that make time-series analysis easier, including GeoJSON and CSV. To use Hydrocron, see the official documentation with examples and tutorials here: [https://podaac.github.io/hydrocron/intro.html](https://podaac.github.io/hydrocron/intro.html)
+
+The following sections of this readme describe how to install and run a development version of Hydrocron locally on your own computer. This is not recommended if you just want to access SWOT data through Hydrocron. To access data, see the documentation linked above.
+
+To contribute to the development of Hydrocron, see the [contributing guidelines](https://github.com/podaac/hydrocron/blob/develop/CONTRIBUTING.md) and browse the open issues.
+
+***NOTE: the following instructions for installing and running a local version of Hydrocron are out of date, and may result in a broken install. We are aware of the issue and working on restoring local development functionality. Please open a new issue or ask a question on the [PO.DAAC forum](https://podaac.jpl.nasa.gov/forum/viewforum.php?f=6) if you need to run a local installation.***
 
 ## Requirements
 
