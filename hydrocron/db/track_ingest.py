@@ -16,8 +16,8 @@ from cmr import CMR_UAT
 
 # Application Imports
 from hydrocron.api.data_access.db import DynamoDataRepository
-from hydrocron.db.load_data import load_data
-from hydrocron.utils import connection
+from hydrocron.db.load_data import load_data, TableMisMatch
+from hydrocron.utils import connection, constants
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -109,7 +109,6 @@ class Track:
                 bearer_token = self._get_bearer_token()
                 granules = query.short_name(self.SHORTNAME[self.collection_shortname]) \
                     .temporal(self.query_start, self.query_end) \
-                    .format("umm_json") \
                     .mode(CMR_UAT) \
                     .bearer_token(bearer_token) \
                     .get(query.hits())
@@ -117,7 +116,6 @@ class Track:
             else:
                 granules = query.short_name(self.collection_shortname) \
                     .temporal(self.query_start, self.query_end) \
-                    .format("umm_json") \
                     .get(query.hits())
         else:
             logging.info("Querying CMR revision_date range: %s to %s.", self.query_start, self.query_end)
@@ -125,7 +123,6 @@ class Track:
                 bearer_token = self._get_bearer_token()
                 granules = query.short_name(self.SHORTNAME[self.collection_shortname]) \
                     .revision_date(self.query_start, self.query_end) \
-                    .format("umm_json") \
                     .mode(CMR_UAT) \
                     .bearer_token(bearer_token) \
                     .get(query.hits())
@@ -133,7 +130,6 @@ class Track:
             else:
                 granules = query.short_name(self.collection_shortname) \
                     .revision_date(self.query_start, self.query_end) \
-                    .format("umm_json") \
                     .get(query.hits())
 
         cmr_granules = {}
@@ -295,7 +291,15 @@ class Track:
         """
 
         query = GranuleQuery()
-        granules = query.short_name(self.collection_shortname).readable_granule_name(granule_ur).format("umm_json").get_all()
+        query = query.short_name(self.collection_shortname).readable_granule_name(granule_ur).format("umm_json")
+
+        if self.ENV in ("sit", "uat"):
+            bearer_token = self._get_bearer_token()
+            query = query.bearer_token(bearer_token) \
+                .mode(CMR_UAT) \
+                .short_name(self.SHORTNAME[self.collection_shortname])
+
+        granules = query.get_all()
         cnm_files = []
         for granule in granules:
             granule_json = json.loads(granule)
@@ -313,7 +317,7 @@ class Track:
                 for granule_url in granule_item["umm"]["RelatedUrls"]:
                     if granule_url["Type"] == "GET DATA VIA DIRECT ACCESS":
                         if self.ENV in ("sit", "uat"):
-                            cnm_file["uri"] = granule_url["URL"].replace("ops", "uat")
+                            cnm_file["uri"] = granule_url["URL"].replace("sit", "uat")
                         else:
                             cnm_file["uri"] = granule_url["URL"]
             cnm_files.append(cnm_file)
@@ -359,6 +363,19 @@ def track_ingest_handler(event, context):
     hydrocron_table = event["hydrocron_table"]
     hydrocron_track_table = event["hydrocron_track_table"]
     temporal = "temporal" in event.keys()
+
+    if ("reach" in collection_shortname) and ((hydrocron_table != constants.SWOT_REACH_TABLE_NAME)
+                                              or (hydrocron_track_table != constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)):
+        raise TableMisMatch(f"Error: Cannot query reach data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
+
+    if ("node" in collection_shortname) and ((hydrocron_table != constants.SWOT_NODE_TABLE_NAME)
+                                             or (hydrocron_track_table != constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME)):
+        raise TableMisMatch(f"Error: Cannot query node data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
+
+    if ("prior" in collection_shortname) and ((hydrocron_table != constants.SWOT_PRIOR_LAKE_TABLE_NAME)
+                                              or (hydrocron_track_table != constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME)):
+        raise TableMisMatch(f"Error: Cannot query prior lake data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
+
     if temporal:
         query_start = datetime.datetime.strptime(event["query_start"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
         query_end = datetime.datetime.strptime(event["query_end"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)

@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 
 from moto.core import DEFAULT_ACCOUNT_ID
 from moto.sns import sns_backends
+import pytest
 import vcr
 
 from hydrocron.utils import constants
@@ -19,14 +20,14 @@ def test_query_cmr(mock_ssm):
     
     Uses vcrpy to record CMR API response.
     """
+    os.environ['HYDROCRON_ENV'] = 'OPS'
     from hydrocron.db.track_ingest import Track
-    
+
     collection_shortname = "SWOT_L2_HR_RiverSP_reach_2.0"
     collection_start_date = datetime.datetime.strptime("20240630", "%Y%m%d").replace(tzinfo=datetime.timezone.utc)
     track = Track(collection_shortname, collection_start_date)
     track.query_start = datetime.datetime(2024, 6, 30, 0, 0, 0, tzinfo=datetime.timezone.utc)
     track.query_end = datetime.datetime(2024, 6, 30, 12, 0, 0, tzinfo=datetime.timezone.utc)
-    track.ENV = "OPS"
 
     vcr_cassette = pathlib.Path(os.path.dirname(os.path.realpath(__file__))) \
         .joinpath('vcr_cassettes').joinpath('cmr_query.yaml')
@@ -301,7 +302,7 @@ def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
         "actual_feature_count": 0,
         "status": "to_ingest"
     }]
-    track.ENV = "sit"
+    track.ENV = "test"
 
     vcr_cassette = pathlib.Path(os.path.dirname(os.path.realpath(__file__))) \
         .joinpath('vcr_cassettes').joinpath('publish_cnm.yaml')
@@ -309,7 +310,7 @@ def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
         track.publish_cnm_ingest(DEFAULT_ACCOUNT_ID)
 
     sns_backend = sns_backends[DEFAULT_ACCOUNT_ID]["us-west-2"]
-    actual = json.loads(sns_backend.topics[f"arn:aws:sns:us-west-2:{DEFAULT_ACCOUNT_ID}:svc-hydrocron-sit-cnm-response"].sent_notifications[0][1])
+    actual = json.loads(sns_backend.topics[f"arn:aws:sns:us-west-2:{DEFAULT_ACCOUNT_ID}:svc-hydrocron-test-cnm-response"].sent_notifications[0][1])
 
     expected_file = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
                 .joinpath('test_data').joinpath('track_ingest_cnm_message.json'))
@@ -317,3 +318,26 @@ def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
         expected = json.load(jf)
 
     assert actual == expected
+
+def test_track_ingest_mismatch():
+    """Test cases where incorrect combination of shortname and table names are
+    passed to track ingest operations."""
+
+    import hydrocron.db.track_ingest
+
+    class LambdaContext:
+        def __init__(self):
+            self.invoked_function_arn = "arn:aws:lambda:us-west-2:12345678910:function:svc-hydrocron-sit-track-ingest-lambda"
+
+    event = {
+        "collection_shortname": "SWOT_L2_HR_LakeSP_prior_2.0",
+        "hydrocron_table": "hydrocron-swot-prior-lake-table",
+        "hydrocron_track_table": "hydrocron-swot-reach-track-ingest-table",
+        "temporal": "",
+        "query_start": "2024-09-05T23:00:00",
+        "query_end": "2024-09-05T23:59:59"
+    }
+    context = LambdaContext()
+    with pytest.raises(hydrocron.db.track_ingest.TableMisMatch) as e:
+        hydrocron.db.track_ingest.track_ingest_handler(event, context)
+        assert str(e.value) == "Error: Cannot query prior lake data for tables: 'hydrocron-swot-prior-lake-table' and 'hydrocron-swot-reach-track-ingest-table'"

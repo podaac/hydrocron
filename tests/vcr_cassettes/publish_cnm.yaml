@@ -14,7 +14,7 @@ interactions:
     uri: https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=SWOT_L2_HR_RiverSP_reach_2.0&readable_granule_name%5B%5D=SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip&options%5Breadable_granule_name%5D%5Bpattern%5D=true&page_size=0
   response:
     body:
-      string: '{"hits":1,"took":105,"items":[]}'
+      string: '{"hits":1,"took":95,"items":[]}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
@@ -24,19 +24,19 @@ interactions:
       CMR-Hits:
       - '1'
       CMR-Request-Id:
-      - e3986cbe-e92f-4f66-9d3a-135846d23a3c
+      - 9f40c39a-12cc-4033-b67a-cb8fee448bc5
       CMR-Took:
-      - '106'
+      - '95'
       Connection:
       - keep-alive
       Content-MD5:
-      - efb24cae14e6d340937153b1c3fcd8e7
+      - 461384cf862923b25d050408730eacc0
       Content-SHA1:
-      - 5f45a4e901063718301c91a36cdd34550fb0ca50
+      - c6ee7948f5b33a1d02a79d1cd64cecafb8a78d11
       Content-Type:
       - application/vnd.nasa.cmr.umm_results+json;version=1.6.6; charset=utf-8
       Date:
-      - Thu, 10 Oct 2024 21:05:46 GMT
+      - Fri, 11 Oct 2024 20:42:19 GMT
       Server:
       - ServerTokens ProductOnly
       Strict-Transport-Security:
@@ -46,11 +46,11 @@ interactions:
       Vary:
       - Accept-Encoding, User-Agent
       Via:
-      - 1.1 27b5e48b551f58a537d4366486948250.cloudfront.net (CloudFront)
+      - 1.1 c4e50e26fcbefa29d8d1be685a1f4242.cloudfront.net (CloudFront)
       X-Amz-Cf-Id:
-      - -dGCq9LYLoXF9oC5tqf6ZHugYJRfeqrk1uQw1IIpqRc8mTdbvzKVkA==
+      - OGrkgQzrwmJ_wu5tuaqCMCdg3rdW0DUZHyOoAZG4qphS18EuJmrEcA==
       X-Amz-Cf-Pop:
-      - LAX54-P3
+      - LAX50-C1
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
@@ -58,11 +58,11 @@ interactions:
       X-Frame-Options:
       - SAMEORIGIN
       X-Request-Id:
-      - -dGCq9LYLoXF9oC5tqf6ZHugYJRfeqrk1uQw1IIpqRc8mTdbvzKVkA==
+      - OGrkgQzrwmJ_wu5tuaqCMCdg3rdW0DUZHyOoAZG4qphS18EuJmrEcA==
       X-XSS-Protection:
       - 1; mode=block
       content-length:
-      - '32'
+      - '31'
     status:
       code: 200
       message: OK
@@ -81,7 +81,7 @@ interactions:
     uri: https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=SWOT_L2_HR_RiverSP_reach_2.0&readable_granule_name%5B%5D=SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip&options%5Breadable_granule_name%5D%5Bpattern%5D=true&page_size=1
   response:
     body:
-      string: '{"hits":1,"took":74,"items":[{"meta":{"concept-type":"granule","concept-id":"G3232820892-POCLOUD","revision-id":1,"native-id":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01_swot","collection-concept-id":"C2799438303-POCLOUD","provider-id":"POCLOUD","format":"application/vnd.nasa.cmr.umm+json","revision-date":"2024-09-09T02:57:10.684Z"},"umm":{"TemporalExtent":{"RangeDateTime":{"EndingDateTime":"2024-09-05T23:31:35.589Z","BeginningDateTime":"2024-09-05T23:31:34.815Z"}},"GranuleUR":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01_swot","AdditionalAttributes":[{"Values":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"],"Name":"TILE"}],"MeasuredParameters":[{"QAStats":{"QAPercentMissingData":0,"QAPercentOutOfBoundsData":0},"ParameterName":"N/A"}],"SpatialExtent":{"HorizontalSpatialDomain":{"Geometry":{"BoundingRectangles":[{"WestBoundingCoordinate":-130.8307934819651,"SouthBoundingCoordinate":52.93360004865338,"EastBoundingCoordinate":-125.58639150138737,"NorthBoundingCoordinate":58.82204893062929}]},"Track":{"Cycle":20,"Passes":[{"Pass":457,"Tiles":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"]}]}}},"ProviderDates":[{"Type":"Insert","Date":"2024-09-09T01:25:25.739Z"},{"Type":"Update","Date":"2024-09-09T01:25:25.739Z"}],"CollectionReference":{"Version":"2.0","ShortName":"SWOT_L2_HR_RiverSP_reach_2.0"},"PGEVersionClass":{"PGEName":"PGE_L2_HR_RiverSP","PGEVersion":"5.0.4"},"RelatedUrls":[{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/podaac-swot-ops-cumulus-public/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Description":"Download
+      string: '{"hits":1,"took":92,"items":[{"meta":{"concept-type":"granule","concept-id":"G3232820892-POCLOUD","revision-id":1,"native-id":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01_swot","collection-concept-id":"C2799438303-POCLOUD","provider-id":"POCLOUD","format":"application/vnd.nasa.cmr.umm+json","revision-date":"2024-09-09T02:57:10.684Z"},"umm":{"TemporalExtent":{"RangeDateTime":{"EndingDateTime":"2024-09-05T23:31:35.589Z","BeginningDateTime":"2024-09-05T23:31:34.815Z"}},"GranuleUR":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01_swot","AdditionalAttributes":[{"Values":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"],"Name":"TILE"}],"MeasuredParameters":[{"QAStats":{"QAPercentMissingData":0,"QAPercentOutOfBoundsData":0},"ParameterName":"N/A"}],"SpatialExtent":{"HorizontalSpatialDomain":{"Geometry":{"BoundingRectangles":[{"WestBoundingCoordinate":-130.8307934819651,"SouthBoundingCoordinate":52.93360004865338,"EastBoundingCoordinate":-125.58639150138737,"NorthBoundingCoordinate":58.82204893062929}]},"Track":{"Cycle":20,"Passes":[{"Pass":457,"Tiles":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"]}]}}},"ProviderDates":[{"Type":"Insert","Date":"2024-09-09T01:25:25.739Z"},{"Type":"Update","Date":"2024-09-09T01:25:25.739Z"}],"CollectionReference":{"Version":"2.0","ShortName":"SWOT_L2_HR_RiverSP_reach_2.0"},"PGEVersionClass":{"PGEName":"PGE_L2_HR_RiverSP","PGEVersion":"5.0.4"},"RelatedUrls":[{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/podaac-swot-ops-cumulus-public/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Description":"Download
         SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Type":"EXTENDED
         METADATA"},{"URL":"s3://podaac-swot-ops-cumulus-public/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Description":"This
         link provides direct download access via S3 to the granule","Type":"EXTENDED
@@ -114,21 +114,21 @@ interactions:
       CMR-Hits:
       - '1'
       CMR-Request-Id:
-      - 21ec8088-e6d8-4bbe-b659-fd9a86915dc8
+      - f3bd451b-250e-464f-aca3-261d20a36ae4
       CMR-Search-After:
       - '["pocloud",1725579094815,3232820892]'
       CMR-Took:
-      - '75'
+      - '93'
       Connection:
       - keep-alive
       Content-MD5:
-      - 77046ee32e3289cf25ac89b8a8f2e431
+      - 544062937074509d57e9507aa95f44a3
       Content-SHA1:
-      - dab6e5694fc519744720a256a21ea1c522f2218f
+      - 4df473f06f2f0b28ee0e328160064de80869bf4f
       Content-Type:
       - application/vnd.nasa.cmr.umm_results+json;version=1.6.6; charset=utf-8
       Date:
-      - Thu, 10 Oct 2024 21:05:46 GMT
+      - Fri, 11 Oct 2024 20:42:20 GMT
       Server:
       - ServerTokens ProductOnly
       Strict-Transport-Security:
@@ -138,11 +138,11 @@ interactions:
       Vary:
       - Accept-Encoding, User-Agent
       Via:
-      - 1.1 e4cf17e75928ca088d52aecb26f1f1da.cloudfront.net (CloudFront)
+      - 1.1 92dd5512d5f290fe351674f3051d6d82.cloudfront.net (CloudFront)
       X-Amz-Cf-Id:
-      - YohmjCui14QWvPVi2hcsgadZt5eKbVh6WQscK946z7WnDuV74O2BRg==
+      - n2l1zw3GXkohQmQItnRDXs5Rh3HPLrSzLvWEeWDpaCjBvUH5Dm7_fw==
       X-Amz-Cf-Pop:
-      - LAX54-P3
+      - LAX50-C1
       X-Cache:
       - Miss from cloudfront
       X-Content-Type-Options:
@@ -150,7 +150,7 @@ interactions:
       X-Frame-Options:
       - SAMEORIGIN
       X-Request-Id:
-      - YohmjCui14QWvPVi2hcsgadZt5eKbVh6WQscK946z7WnDuV74O2BRg==
+      - n2l1zw3GXkohQmQItnRDXs5Rh3HPLrSzLvWEeWDpaCjBvUH5Dm7_fw==
       X-XSS-Protection:
       - 1; mode=block
       content-length:
