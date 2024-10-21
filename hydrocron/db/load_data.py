@@ -30,86 +30,6 @@ class TableMisMatch(Exception):
     """
 
 
-def get_collection_info_by_table(table_name):
-    """
-    Returns the collection name, feature type, track ingest table name, and feature id
-    for the given table
-
-    Parameters
-    ----------
-    table_name : string
-        the name of the hydrocron db table
-
-    Returns
-    -------
-    collection_shortname : string
-        the collection shortname
-
-    track_table : string
-        the track ingest table associated with the feature table
-
-    feature_type : string
-        the type of feature in the table
-
-    feature_id : string
-        the feature id field for the feature type in the table
-    """
-    collection_shortname = ''
-    table_name = ''
-    feature_type = ''
-
-    try:
-        row = constants.TABLE_COLLECTION_INFO[constants.TABLE_COLLECTION_INFO['table_name'] == table_name]
-        collection_shortname = row['collection_name']
-        track_table = row['track_table']
-        feature_type = row['feature_type']
-        feature_id = row['feature_id']
-    except MissingTable as exc:
-        raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from exc
-
-    return collection_shortname, track_table, feature_type, feature_id
-
-
-def get_table_info_by_granule(granule_uri):
-    """
-    Returns the table name and type, track ingest table name for
-    the given granule
-
-    Parameters
-    ----------
-    granule_uri : string
-        the uri to the granule being proccessed
-    
-    Returns
-    -------
-    table_name : string
-        the hydrocron feature table name 
-
-    track_table : string
-        the track ingest table associated with the feature table
-
-    """
-    collection_shortnames = constants.TABLE_COLLECTION_INFO['collection_name']
-    feature_types = constants.TABLE_COLLECTION_INFO['feature_type']
-    table_name = ''
-    track_table = ''
-
-    for shortname in collection_shortnames:
-        if shortname in granule_uri:
-            for feature in feature_types:
-                if feature in granule_uri:
-                    try:
-                        row = constants.TABLE_COLLECTION_INFO[
-                            (constants.TABLE_COLLECTION_INFO['collection_name'] == shortname) &
-                            (constants.TABLE_COLLECTION_INFO['feature_type'] == feature)]
-                        table_name = row['table_name']
-                        track_table = row['track_table']
-                    except MissingTable as exc:
-                        raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from exc
-
-    return table_name, track_table
-
-
 def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     """
     Lambda entrypoint for loading the database
@@ -253,11 +173,11 @@ def cnm_handler(event, _):
                 table_name, track_table = get_table_info_by_granule(granule_uri)
 
                 event2 = ('{"body": {"granule_path": "' + granule_uri
-                            + '","table_name": "' + table_name
-                            + '","track_table": "' + track_table
-                            + '","checksum": "' + checksum
-                            + '","revisionDate": "' + revision_date
-                            + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
+                          + '","table_name": "' + table_name
+                          + '","track_table": "' + track_table
+                          + '","checksum": "' + checksum
+                          + '","revisionDate": "' + revision_date
+                          + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
                 logging.info("Invoking granule load lambda with event json %s", str(event2))
 
@@ -265,6 +185,86 @@ def cnm_handler(event, _):
                     FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
                     InvocationType='Event',
                     Payload=event2)
+
+
+def get_collection_info_by_table(table_name):
+    """
+    Returns the collection name, feature type, track ingest table name, and feature id
+    for the given table
+
+    Parameters
+    ----------
+    table_name : string
+        the name of the hydrocron db table
+
+    Returns
+    -------
+    collection_shortname : string
+        the collection shortname
+
+    track_table : string
+        the track ingest table associated with the feature table
+
+    feature_type : string
+        the type of feature in the table
+
+    feature_id : string
+        the feature id field for the feature type in the table
+    """
+    collection_shortname = ''
+    table_name = ''
+    feature_type = ''
+
+    try:
+        row = constants.TABLE_COLLECTION_INFO[constants.TABLE_COLLECTION_INFO['table_name'] == table_name]
+        collection_shortname = row['collection_name']
+        track_table = row['track_table']
+        feature_type = row['feature_type']
+        feature_id = row['feature_id']
+    except MissingTable as exc:
+        raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from exc
+
+    return collection_shortname, track_table, feature_type, feature_id
+
+
+def get_table_info_by_granule(granule_uri):
+    """
+    Returns the table name and type, track ingest table name for
+    the given granule
+
+    Parameters
+    ----------
+    granule_uri : string
+        the uri to the granule being proccessed
+
+    Returns
+    -------
+    table_name : string
+        the hydrocron feature table name
+
+    track_table : string
+        the track ingest table associated with the feature table
+
+    """
+    collection_shortnames = constants.TABLE_COLLECTION_INFO['collection_name']
+    feature_types = constants.TABLE_COLLECTION_INFO['feature_type']
+    table_name = ''
+    track_table = ''
+
+    for shortname in collection_shortnames:
+        if shortname in granule_uri:
+            for feature in feature_types:
+                if feature in granule_uri:
+                    try:
+                        row = constants.TABLE_COLLECTION_INFO[
+                            (constants.TABLE_COLLECTION_INFO['collection_name'] == shortname) &
+                            (constants.TABLE_COLLECTION_INFO['feature_type'] == feature)]
+                        table_name = row['table_name']
+                        track_table = row['track_table']
+                    except MissingTable as exc:
+                        raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from exc
+
+    return table_name, track_table
 
 
 def find_new_granules(collection_shortname, start_date, end_date):
