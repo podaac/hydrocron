@@ -3,6 +3,7 @@ Constants used throughout API and DB modules
 
 """
 import os.path
+import pandas as pd
 
 # ----------------- #
 # TESTING CONSTANTS #
@@ -125,6 +126,41 @@ TEST_PLAKE_UNITS = 'km^2'
 # ------------ #
 # PROD CONSTANTS #
 # ------------ #
+TABLE_COLLECTION_INFO = pd.DataFrame(
+    {
+        'table_name': ['hydrocron-swot-reach-table',
+                       'hydrocron-swot-node-table',
+                       'hydrocron-swot-prior-lake-table',
+                       'hydrocron-SWOT_L2_HR_RiverSP_D-reach-table',
+                       'hydrocron-SWOT_L2_HR_RiverSP_D-node-table',
+                       'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table'],
+        'track_table': ['hydrocron-swot-reach-track-ingest-table',
+                        'hydrocron-swot-node-track-ingest-table',
+                        'hydrocron-swot-prior-lake-track-ingest-table',
+                        'hydrocron-SWOT_L2_HR_RiverSP_D-reach-track-ingest',
+                        'hydrocron-SWOT_L2_HR_RiverSP_D-node-track-ingest',
+                        'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-track-ingest'],
+        'collection_name': ['SWOT_L2_HR_RiverSP_2.0',
+                            'SWOT_L2_HR_RiverSP_2.0',
+                            'SWOT_L2_HR_LakeSP_2.0',
+                            'SWOT_L2_HR_RiverSP_D',
+                            'SWOT_L2_HR_RiverSP_D',
+                            'SWOT_L2_HR_LakeSP_D'],
+        'feature_type': ['Reach',
+                         'Node',
+                         'LakeSP_Prior',
+                         'Reach',
+                         'Node',
+                         'LakeSP_Prior'],
+        'feature_id': ['reach_id',
+                       'node_id',
+                       'lake_id',
+                       'reach_id',
+                       'node_id',
+                       'lake_id']
+    }
+)
+
 SWOT_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
 SWOT_NODE_TABLE_NAME = "hydrocron-swot-node-table"
 SWOT_PRIOR_LAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"

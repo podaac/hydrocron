@@ -30,6 +30,86 @@ class TableMisMatch(Exception):
     """
 
 
+def get_collection_info_by_table(table_name):
+    """
+    Returns the collection name, feature type, track ingest table name, and feature id
+    for the given table
+
+    Parameters
+    ----------
+    table_name : string
+        the name of the hydrocron db table
+
+    Returns
+    -------
+    collection_shortname : string
+        the collection shortname
+
+    track_table : string
+        the track ingest table associated with the feature table
+
+    feature_type : string
+        the type of feature in the table
+
+    feature_id : string
+        the feature id field for the feature type in the table
+    """
+    collection_shortname = ''
+    table_name = ''
+    feature_type = ''
+
+    try:
+        row = constants.TABLE_COLLECTION_INFO[constants.TABLE_COLLECTION_INFO['table_name'] == table_name]
+        collection_shortname = row['collection_name']
+        track_table = row['track_table']
+        feature_type = row['feature_type']
+        feature_id = row['feature_id']
+    except MissingTable as exc:
+        raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from exc
+
+    return collection_shortname, track_table, feature_type, feature_id
+
+
+def get_table_info_by_granule(granule_uri):
+    """
+    Returns the table name and type, track ingest table name for
+    the given granule
+
+    Parameters
+    ----------
+    granule_uri : string
+        the uri to the granule being proccessed
+    
+    Returns
+    -------
+    table_name : string
+        the hydrocron feature table name 
+
+    track_table : string
+        the track ingest table associated with the feature table
+
+    """
+    collection_shortnames = constants.TABLE_COLLECTION_INFO['collection_name']
+    feature_types = constants.TABLE_COLLECTION_INFO['feature_type']
+    table_name = ''
+    track_table = ''
+
+    for shortname in collection_shortnames:
+        if shortname in granule_uri:
+            for feature in feature_types:
+                if feature in granule_uri:
+                    try:
+                        row = constants.TABLE_COLLECTION_INFO[
+                            (constants.TABLE_COLLECTION_INFO['collection_name'] == shortname) &
+                            (constants.TABLE_COLLECTION_INFO['feature_type'] == feature)]
+                        table_name = row['table_name']
+                        track_table = row['track_table']
+                    except MissingTable as exc:
+                        raise MissingTable(f"Hydrocron table '{table_name}' does not exist.") from exc
+
+    return table_name, track_table
+
+
 def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     """
     Lambda entrypoint for loading the database
@@ -42,26 +122,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
     end_date = event['body']['end_date']
     load_benchmarking_data = event['body']['load_benchmarking_data']
 
-    match table_name:
-        case constants.SWOT_REACH_TABLE_NAME:
-            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
-            track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
-            feature_type = 'Reach'
-        case constants.SWOT_NODE_TABLE_NAME:
-            collection_shortname = constants.SWOT_NODE_COLLECTION_NAME
-            track_table = constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME
-            feature_type = 'Node'
-        case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
-            collection_shortname = constants.SWOT_PRIOR_LAKE_COLLECTION_NAME
-            track_table = constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME
-            feature_type = 'LakeSP_Prior'
-        case constants.DB_TEST_TABLE_NAME:
-            collection_shortname = constants.SWOT_REACH_COLLECTION_NAME
-            track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
-            feature_type = 'Reach'
-        case _:
-            raise MissingTable(f"Hydrocron table '{table_name}' does not exist.")
-
+    collection_shortname, track_table, feature_type, _ = get_collection_info_by_table(table_name)
     logging.info("Searching for granules in collection %s", collection_shortname)
 
     new_granules = find_new_granules(
@@ -189,50 +250,21 @@ def cnm_handler(event, _):
                 granule_uri = files['uri']
                 checksum = files['checksum']
 
-                if 'Reach' in granule_uri:
-                    event2 = ('{"body": {"granule_path": "' + granule_uri
-                              + '","table_name": "' + constants.SWOT_REACH_TABLE_NAME
-                              + '","track_table": "' + constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
-                              + '","checksum": "' + checksum
-                              + '","revisionDate": "' + revision_date
-                              + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
+                table_name, track_table = get_table_info_by_granule(granule_uri)
 
-                    logging.info("Invoking granule load lambda with event json %s", str(event2))
+                event2 = ('{"body": {"granule_path": "' + granule_uri
+                            + '","table_name": "' + table_name
+                            + '","track_table": "' + track_table
+                            + '","checksum": "' + checksum
+                            + '","revisionDate": "' + revision_date
+                            + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
 
-                    lambda_client.invoke(
-                        FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
-                        InvocationType='Event',
-                        Payload=event2)
+                logging.info("Invoking granule load lambda with event json %s", str(event2))
 
-                if 'Node' in granule_uri:
-                    event2 = ('{"body": {"granule_path": "' + granule_uri
-                              + '","table_name": "' + constants.SWOT_NODE_TABLE_NAME
-                              + '","track_table": "' + constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME
-                              + '","checksum": "' + checksum
-                              + '","revisionDate": "' + revision_date
-                              + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
-
-                    logging.info("Invoking granule load lambda with event json %s", str(event2))
-
-                    lambda_client.invoke(
-                        FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
-                        InvocationType='Event',
-                        Payload=event2)
-
-                if 'LakeSP_Prior' in granule_uri:
-                    event2 = ('{"body": {"granule_path": "' + granule_uri
-                              + '","table_name": "' + constants.SWOT_PRIOR_LAKE_TABLE_NAME
-                              + '","track_table": "' + constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME
-                              + '","checksum": "' + checksum
-                              + '","revisionDate": "' + revision_date
-                              + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
-
-                    logging.info("Invoking granule load lambda with event json %s", str(event2))
-
-                    lambda_client.invoke(
-                        FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
-                        InvocationType='Event',
-                        Payload=event2)
+                lambda_client.invoke(
+                    FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
+                    InvocationType='Event',
+                    Payload=event2)
 
 
 def find_new_granules(collection_shortname, start_date, end_date):
@@ -338,15 +370,6 @@ def load_data(dynamo_resource, table_name, items):
         raise err
 
     match hydrocron_table.table_name:
-        case constants.SWOT_REACH_TABLE_NAME:
-            feature_name = 'reach'
-            feature_id = feature_name + '_id'
-        case constants.SWOT_NODE_TABLE_NAME:
-            feature_name = 'node'
-            feature_id = feature_name + '_id'
-        case constants.SWOT_PRIOR_LAKE_TABLE_NAME:
-            feature_name = 'prior_lake'
-            feature_id = 'lake_id'
         case constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME:
             feature_name = 'track ingest reaches'
             feature_id = 'granuleUR'
@@ -357,7 +380,10 @@ def load_data(dynamo_resource, table_name, items):
             feature_name = 'track ingest prior lakes'
             feature_id = 'granuleUR'
         case _:
-            logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
+            try:
+                _, _, feature_name, feature_id = get_collection_info_by_table(hydrocron_table.table_name)
+            except MissingTable:
+                logging.warning('Items cannot be parsed, file reader not implemented for table %s', hydrocron_table.table_name)
 
     if len(items) > 5:
         logging.info("Batch adding %s %s items. First 5 feature ids in batch: ", len(items), feature_name)
