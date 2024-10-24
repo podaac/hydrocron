@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 212 - Update track ingest table with granule status
     - Issue 203 - Construct CNM to trigger load data operations and ingest granule
     - Issue 236 - Allow UAT query of CMR to support querying in different venues
+    - Issue 250 - Handle overlapping times with unique CRIDS
 ### Changed
     - Issue 251 - Add note to readme to point to documentation
 ### Deprecated
