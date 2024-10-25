@@ -2,7 +2,6 @@
 Unpacks SWOT Shapefiles
 """
 import os.path
-import json
 import tempfile
 from datetime import datetime, timezone
 from importlib import resources
