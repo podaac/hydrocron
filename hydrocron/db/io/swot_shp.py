@@ -193,16 +193,9 @@ def assemble_attributes(geodf, attributes):
     """
 
     items = []
-    # rework to use dataframe instead of file as string
-    for _index, row in geodf.iterrows():
 
-        shp_attrs = json.loads(
-            row.to_json(default_handler=str))
-
-        item_attrs = shp_attrs | attributes
-
-        item_attrs = {key: str(item_attrs[key]) for key in item_attrs.keys()}
-        items.append(item_attrs)
+    geodf.assign(**attributes)
+    items = geodf.to_dict('records')
 
     return items
 
