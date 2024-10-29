@@ -13,7 +13,8 @@ resource "aws_scheduler_schedule" "aws_schedule_reach" {
       "collection_shortname" : "SWOT_L2_HR_RiverSP_reach_2.0",
       "hydrocron_table" : "${aws_dynamodb_table.hydrocron-swot-reach-table.name}",
       "hydrocron_track_table" : "${aws_dynamodb_table.hydrocron-reach-track-ingest-table.name}",
-      "collection_start_date" : "2022-12-16T00:00:00"
+      "collection_start_date" : "2022-12-16T00:00:00",
+      "reprocessed_crid": "PGC0"
     })
   }
 }
@@ -34,7 +35,8 @@ resource "aws_scheduler_schedule" "aws_schedule_node" {
       "collection_shortname" : "SWOT_L2_HR_RiverSP_node_2.0",
       "hydrocron_table" : "${aws_dynamodb_table.hydrocron-swot-node-table.name}",
       "hydrocron_track_table" : "${aws_dynamodb_table.hydrocron-node-track-ingest-table.name}",
-      "collection_start_date" : "2022-12-16T00:00:00"
+      "collection_start_date" : "2022-12-16T00:00:00",
+      "reprocessed_crid": "PGC0"
     })
   }
 }
@@ -55,7 +57,8 @@ resource "aws_scheduler_schedule" "aws_schedule_prior_lake" {
       "collection_shortname" : "SWOT_L2_HR_LakeSP_prior_2.0",
       "hydrocron_table" : "${aws_dynamodb_table.hydrocron-swot-prior-lake-table.name}",
       "hydrocron_track_table" : "${aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.name}",
-      "collection_start_date" : "2022-12-16T00:00:00"
+      "collection_start_date" : "2022-12-16T00:00:00",
+      "reprocessed_crid": "PGC0"
     })
   }
 }
