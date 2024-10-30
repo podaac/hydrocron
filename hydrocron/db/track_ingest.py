@@ -242,10 +242,13 @@ class Track:
         removed_list = []
         for item in duplicate_dict.values():
             if len(item.keys()) == 2:
-                removed_list.append(item[reprocessed_crid])
+                if reprocessed_crid in item.keys():
+                    removed_list.append(item[reprocessed_crid])
+                else:
+                    sorted_crids = dict(sorted(item.items(), reverse=True))
+                    removed_list.append(item[next(iter(sorted_crids))])
             if len(item.keys()) == 1:
                 removed_list.append(item[next(iter(item))])
-
         self.to_ingest = removed_list
 
     def query_track_ingest(self, hydrocron_track_table, hydrocron_table):
