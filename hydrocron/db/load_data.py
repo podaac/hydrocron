@@ -48,7 +48,7 @@ def lambda_handler(event, _):  # noqa: E501 # pylint: disable=W0613
             track_table = table_info['track_table']
             feature_type = table_info['feature_type']
             break
-    else: 
+    else:
         raise MissingTable(f"Error: Table does not exist: {table_name}")
 
     logging.info("Searching for granules in collection %s", collection_shortname)
@@ -305,7 +305,7 @@ def load_data(dynamo_resource, table_name, items):
             feature_name = 'track ingest ' + str.lower(table_info['feature_type'])
             feature_id = 'granuleUR'
             break
-        elif hydrocron_table.table_name in table_info['table_name']:
+        if hydrocron_table.table_name in table_info['table_name']:
             feature_name = table_info['feature_type']
             feature_id = table_info['feature_id']
             break
