@@ -2,7 +2,6 @@
 Unpacks SWOT Shapefiles
 """
 import os.path
-import json
 import tempfile
 from datetime import datetime, timezone
 from importlib import resources
@@ -109,7 +108,7 @@ def handle_null_geometries(geodf):
     geodf_no_nulls : geopandas.GeoDataFrame
         the geodataframe with null geometries handled
     """
-
+    logging.info('Starting handle null geometries')
     geodf['geometry'].fillna(
         value=Polygon(constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS),
         inplace=True)
@@ -131,6 +130,8 @@ def convert_polygon_to_centerpoint(geodf_polygon):
     geodf_centerpoint : geopandas.GeoDataFrame
         the geodataframe with point feature types and calculated centerpoint geometries
     """
+    logging.info('Starting convert polygon to centerpoint')
+
     geodf_centerpoint = geodf_polygon
     geodf_centerpoint['geometry'] = geodf_polygon['geometry'].centroid
 
@@ -152,6 +153,7 @@ def parse_metadata_from_shpxml(xml_elem):
     metadata_attrs : dict
         a dictionary of metadata attributes to add to record
     """
+    logging.info('Starting parse metadata from shpfile')
     # get SWORD version
     for globs in xml_elem.findall('global_attributes'):
         prior_db_files = globs.find('xref_prior_river_db_files').text
@@ -191,18 +193,13 @@ def assemble_attributes(geodf, attributes):
     attributes : dict
         A dictionary of attributes to concatenate
     """
+    logging.info('Starting assemble attributes')
 
     items = []
-    # rework to use dataframe instead of file as string
-    for _index, row in geodf.iterrows():
 
-        shp_attrs = json.loads(
-            row.to_json(default_handler=str))
-
-        item_attrs = shp_attrs | attributes
-
-        item_attrs = {key: str(item_attrs[key]) for key in item_attrs.keys()}
-        items.append(item_attrs)
+    geodf = geodf.astype(str)
+    geodf = geodf.assign(**attributes)
+    items = geodf.to_dict('records')
 
     return items
 
@@ -222,7 +219,7 @@ def parse_from_filename(filename):
     filename_attrs : dict
         A dictionary of attributes from the filename
     """
-
+    logging.info('Starting parse attributes from filename')
     filename_components = filename.split("_")
 
     collection = ""
