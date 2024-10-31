@@ -33,6 +33,12 @@ TEST_SHAPEFILE_PATH_LAKE = os.path.join(
     'SWOT_L2_HR_LakeSP_Prior_018_100_GR_20240713T111741_20240713T112027_PIC0_01.zip'  # noqa
 )
 
+TEST_SHAPEFILE_PATH_REACH_CRID = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_RiverSP_Reach_009_499_AF_20240121T225107_20240121T225110_PIC0_01.zip'  # noqa
+)
+
 dynamo_test_proc = factories.dynamodb_proc(
     dynamodb_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),
                               'dynamodb_local'), port=8000)
@@ -214,6 +220,7 @@ def mock_ssm():
     ssm = boto3.client("ssm")
     runtime = (datetime.datetime.now() - datetime.timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S")
     ssm.put_parameter(Name="/service/hydrocron/track-ingest-runtime/SWOT_L2_HR_RiverSP_reach_2.0", Value=runtime, Type="String")
+    ssm.put_parameter(Name="/service/hydrocron/track-ingest-runtime/SWOT_L2_HR_LakeSP_prior_2.0", Value=runtime, Type="String")
    
     yield ssm
 
@@ -276,6 +283,12 @@ def track_ingest_dynamo_instance(request, dynamo_test_proc):
         columns=constants.REACH_DATA_COLUMNS)
     for item_attrs in reach_items:
         reach_hydro_table.add_data(**item_attrs)
+    reach_items = swot_shp.read_shapefile(
+        TEST_SHAPEFILE_PATH_REACH_CRID,
+        obscure_data=False,
+        columns=constants.REACH_DATA_COLUMNS)
+    for item_attrs in reach_items:
+        reach_hydro_table.add_data(**item_attrs)
     
     # track table
     dynamo_db.create_table(
@@ -333,6 +346,14 @@ def track_ingest_dynamo_instance(request, dynamo_test_proc):
         "status": "to_ingest"
         }]
     track_reach_table.batch_fill_table(track_ingest_record)
+    track_ingest_record = [{
+        "granuleUR": os.path.basename(TEST_SHAPEFILE_PATH_REACH_CRID),
+        "revision_date": "2024-07-17T06:06:42.102Z",
+        "expected_feature_count": 682,
+        "actual_feature_count": 682,
+        "checksum": "7620183b46f90758241a5eac86c4efb3"
+        }]
+    track_reach_table.batch_fill_table(track_ingest_record)
     
     try:
         request.cls.dynamo_db = dynamo_db
@@ -346,7 +367,7 @@ def track_ingest_dynamo_instance(request, dynamo_test_proc):
 @pytest.fixture()
 def track_ingest_fixture(track_ingest_dynamo_instance, dynamo_test_proc, mock_ssm, mock_s3):
     os.environ['HYDROCRON_ENV'] = 'test'
-    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"    
+    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"
     import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
     hydrocron.utils.connection._dynamodb_resource = track_ingest_dynamo_instance
     hydrocron.utils.connection._s3_resource = mock_s3
@@ -354,7 +375,7 @@ def track_ingest_fixture(track_ingest_dynamo_instance, dynamo_test_proc, mock_ss
 @pytest.fixture()
 def track_ingest_cnm_fixture(dynamo_test_proc, mock_sns):
     os.environ['HYDROCRON_ENV'] = 'test'
-    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"    
+    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"
     import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
     
     hydrocron.utils.connection._sns_client = mock_sns
