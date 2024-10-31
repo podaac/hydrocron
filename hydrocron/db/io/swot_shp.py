@@ -84,7 +84,7 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
             np.random.default_rng().integers(low=2, high=10)*shp_file[numeric_columns],
             shp_file[numeric_columns])
 
-    filename_attrs = parse_from_filename(filename)
+    filename_attrs = parse_from_filename(filepath)
 
     xml_attrs = parse_metadata_from_shpxml(shp_xml_tree)
 
@@ -204,15 +204,15 @@ def assemble_attributes(geodf, attributes):
     return items
 
 
-def parse_from_filename(filename):
+def parse_from_filename(filepath):
     """
     Parses the cycle, pass, start and end time from
     the shapefile name and add to each item
 
     Parameters
     ----------
-    filename :  string
-        The string to parse
+    filepath :  string
+        The full uri of the granule to parse
 
     Returns
     -------
@@ -220,22 +220,16 @@ def parse_from_filename(filename):
         A dictionary of attributes from the filename
     """
     logging.info('Starting parse attributes from filename')
+
+    filename = os.path.basename(filepath)
     filename_components = filename.split("_")
 
     collection = ""
     collection_version = ""
 
-    if 'RiverSP_Reach' in filename:
-        collection = constants.SWOT_REACH_COLLECTION_NAME
-        collection_version = constants.SWOT_REACH_COLLECTION_VERSION
-
-    if 'RiverSP_Node' in filename:
-        collection = constants.SWOT_NODE_COLLECTION_NAME
-        collection_version = constants.SWOT_NODE_COLLECTION_VERSION
-
-    if 'LakeSP_Prior' in filename:
-        collection = constants.SWOT_PRIOR_LAKE_COLLECTION_NAME
-        collection_version = constants.SWOT_PRIOR_LAKE_COLLECTION_VERSION
+    for table_info in constants.TABLE_COLLECTION_INFO:
+        if (table_info['feature_type'] in filename) & (table_info['collection_name'] in filepath):
+            collection = table_info['collection_name']
 
     filename_attrs = {
         'cycle_id': filename_components[5],
@@ -283,7 +277,7 @@ def load_benchmarking_data():
             'continent_id': 'XX',
             'range_end_time': '2024-12-31T23:59:00Z',
             'crid': 'TEST',
-            'collection_shortname': constants.SWOT_REACH_COLLECTION_NAME
+            'collection_shortname': constants.TABLE_COLLECTION_INFO[0]['collection_name']
             }
 
         items = assemble_attributes(csv_file, filename_attrs)

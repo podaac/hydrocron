@@ -20,7 +20,7 @@ def test_parse_from_filename_reach():
     Tests parsing cycle, pass, and time ranges from filename
     """
     filename_attrs = swot_shp.parse_from_filename(
-        constants.TEST_REACH_FILENAME)
+        constants.TEST_REACH_PATHNAME)
 
     assert filename_attrs['cycle_id'] == "548"
     assert filename_attrs['pass_id'] == "011"
@@ -28,8 +28,8 @@ def test_parse_from_filename_reach():
     assert filename_attrs['range_start_time'] == "2023-06-10T19:33:37Z"
     assert filename_attrs['range_end_time'] == "2023-06-10T19:33:44Z"
     assert filename_attrs['crid'] == "PIA1"
-    assert filename_attrs['collection_shortname'] == constants.SWOT_REACH_COLLECTION_NAME
-    assert filename_attrs['collection_version'] == constants.SWOT_REACH_COLLECTION_VERSION
+    assert filename_attrs['collection_shortname'] == constants.TEST_REACH_COLLECTION_NAME
+    assert filename_attrs['collection_version'] == ""
     assert filename_attrs['granuleUR'] == constants.TEST_REACH_FILENAME
     assert datetime.strptime(filename_attrs['ingest_time'], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc) - datetime.now(timezone.utc) <= timedelta(minutes=5)
 
@@ -39,7 +39,7 @@ def test_parse_from_filename_lake():
     Tests parsing cycle, pass, and time ranges from filename
     """
     filename_attrs = swot_shp.parse_from_filename(
-        constants.TEST_PLAKE_FILENAME)
+        constants.TEST_PLAKE_PATHNAME)
 
     assert filename_attrs['cycle_id'] == "018"
     assert filename_attrs['pass_id'] == "100"
@@ -47,8 +47,8 @@ def test_parse_from_filename_lake():
     assert filename_attrs['range_start_time'] == "2024-07-13T11:17:41Z"
     assert filename_attrs['range_end_time'] == "2024-07-13T11:20:27Z"
     assert filename_attrs['crid'] == "PIC0"
-    assert filename_attrs['collection_shortname'] == constants.SWOT_PRIOR_LAKE_COLLECTION_NAME
-    assert filename_attrs['collection_version'] == constants.SWOT_PRIOR_LAKE_COLLECTION_VERSION
+    assert filename_attrs['collection_shortname'] == constants.TEST_PLAKE_COLLECTION_NAME
+    assert filename_attrs['collection_version'] == ""
     assert filename_attrs['granuleUR'] == constants.TEST_PLAKE_FILENAME
     assert datetime.strptime(filename_attrs['ingest_time'], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc) - datetime.now(timezone.utc) <= timedelta(minutes=5)
 

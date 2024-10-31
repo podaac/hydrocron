@@ -3,7 +3,6 @@ Constants used throughout API and DB modules
 
 """
 import os.path
-import pandas as pd
 
 # ----------------- #
 # TESTING CONSTANTS #
@@ -15,6 +14,8 @@ TEST_REACH_SHAPEFILE_PATH = os.path.abspath(os.path.join(
     '../..', 'tests', 'data',
     'SWOT_L2_HR_RiverSP_Reach_548_011_NA_20230610T193337_20230610T193344_PIA1_01.zip'  # noqa E501
 ))
+TEST_REACH_PATHNAME = (
+    "SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_548_011_NA_20230610T193337_20230610T193344_PIA1_01.zip")
 
 TEST_REACH_FILENAME = (
     "SWOT_L2_HR_RiverSP_Reach_548_011_NA_"
@@ -32,6 +33,9 @@ TEST_REACH_ITEM_DICT = {
 
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 API_TEST_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
+API_TEST_NODE_TABLE_NAME = "hydrocron-swot-node-table"
+TEST_REACH_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
+TEST_REACH_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-reach-track-ingest-table"
 TEST_REACH_PARTITION_KEY_NAME = 'reach_id'
 TEST_REACH_SORT_KEY_NAME = 'range_start_time'
 TEST_REACH_ID_VALUE = '71224100223'
@@ -47,6 +51,9 @@ TEST_PLAKE_SHAPEFILE_PATH = os.path.abspath(os.path.join(
     '../..', 'tests', 'data',
     'SWOT_L2_HR_LakeSP_Prior_018_100_GR_20240713T111741_20240713T112027_PIC0_01.zip'  # noqa E501
 ))
+
+TEST_PLAKE_PATHNAME = (
+    "SWOT_L2_HR_LakeSP_2.0/SWOT_L2_HR_LakeSP_Prior_018_100_GR_20240713T111741_20240713T112027_PIC0_01.zip")
 
 TEST_PLAKE_FILENAME = (
     "SWOT_L2_HR_LakeSP_Prior_018_100_GR_20240713T111741_20240713T112027_PIC0_01.zip")
@@ -114,6 +121,7 @@ TEST_PLAKE_ITEM_NO_GEO_DICT = {
 
 DB_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-testlake-table"
 API_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"
+TEST_PLAKE_COLLECTION_NAME = "SWOT_L2_HR_LakeSP_2.0"
 TEST_PLAKE_PARTITION_KEY_NAME = 'lake_id'
 TEST_PLAKE_SORT_KEY_NAME = 'range_start_time'
 TEST_PLAKE_ID_VALUE = '9130047472'
@@ -126,54 +134,48 @@ TEST_PLAKE_UNITS = 'km^2'
 # ------------ #
 # PROD CONSTANTS #
 # ------------ #
-TABLE_COLLECTION_INFO = pd.DataFrame(
-    {
-        'table_name': ['hydrocron-swot-reach-table',
-                       'hydrocron-swot-node-table',
-                       'hydrocron-swot-prior-lake-table',
-                       'hydrocron-SWOT_L2_HR_RiverSP_D-reach-table',
-                       'hydrocron-SWOT_L2_HR_RiverSP_D-node-table',
-                       'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table'],
-        'track_table': ['hydrocron-swot-reach-track-ingest-table',
-                        'hydrocron-swot-node-track-ingest-table',
-                        'hydrocron-swot-prior-lake-track-ingest-table',
-                        'hydrocron-SWOT_L2_HR_RiverSP_D-reach-track-ingest',
-                        'hydrocron-SWOT_L2_HR_RiverSP_D-node-track-ingest',
-                        'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-track-ingest'],
-        'collection_name': ['SWOT_L2_HR_RiverSP_2.0',
-                            'SWOT_L2_HR_RiverSP_2.0',
-                            'SWOT_L2_HR_LakeSP_2.0',
-                            'SWOT_L2_HR_RiverSP_D',
-                            'SWOT_L2_HR_RiverSP_D',
-                            'SWOT_L2_HR_LakeSP_D'],
-        'feature_type': ['Reach',
-                         'Node',
-                         'LakeSP_Prior',
-                         'Reach',
-                         'Node',
-                         'LakeSP_Prior'],
-        'feature_id': ['reach_id',
-                       'node_id',
-                       'lake_id',
-                       'reach_id',
-                       'node_id',
-                       'lake_id']
-    }
-)
+TABLE_COLLECTION_INFO = [
+    {'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
+     'table_name': 'hydrocron-swot-reach-table',
+     'track_table': 'hydrocron-swot-reach-track-ingest-table',
+     'feature_type': 'Reach',
+     'feature_id': 'reach_id'
+     },
+    {'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
+     'table_name': 'hydrocron-swot-node-table',
+     'track_table': 'hydrocron-swot-node-track-ingest-table',
+     'feature_type': 'Node',
+     'feature_id': 'node_id'
+     },
+    {'collection_name': 'SWOT_L2_HR_LakeSP_2.0',
+     'table_name': 'hydrocron-swot-prior-lake-table',
+     'track_table': 'hydrocron-swot-prior-lake-track-ingest-table',
+     'feature_type': 'LakeSP_Prior',
+     'feature_id': 'lake_id'
+     },
+    {'collection_name': 'SWOT_L2_HR_RiverSP_D',
+     'table_name': 'hydrocron-SWOT_L2_HR_RiverSP_D-reach-table',
+     'track_table': 'hydrocron-SWOT_L2_HR_RiverSP_D-reach-track-ingest',
+     'feature_type': 'Reach',
+     'feature_id': 'reach_id'
+     },
+    {'collection_name': 'SWOT_L2_HR_RiverSP_D',
+     'table_name': 'hydrocron-SWOT_L2_HR_RiverSP_D-node-table',
+     'track_table': 'hydrocron-SWOT_L2_HR_RiverSP_D-node-track-ingest',
+     'feature_type': 'Node',
+     'feature_id': 'node_id'
+     },
+    {'collection_name': 'SWOT_L2_HR_LakeSP_D',
+     'table_name': 'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table',
+     'track_table': 'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-track-ingest',
+     'feature_type': 'LakeSP_Prior',
+     'feature_id': 'lake_id'
+     }
+]
+SWOT_REACH_TABLE_NAME = 'hydrocron-swot-reach-table'
+SWOT_NODE_TABLE_NAME = 'hydrocron-swot-node-table'
+SWOT_PRIOR_LAKE_TABLE_NAME = 'hydrocron-swot-prior-lake-table'
 
-SWOT_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
-SWOT_NODE_TABLE_NAME = "hydrocron-swot-node-table"
-SWOT_PRIOR_LAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"
-SWOT_REACH_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-reach-track-ingest-table"
-SWOT_NODE_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-node-track-ingest-table"
-SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-prior-lake-track-ingest-table"
-
-SWOT_REACH_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
-SWOT_NODE_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
-SWOT_PRIOR_LAKE_COLLECTION_NAME = "SWOT_L2_HR_LakeSP_2.0"
-SWOT_REACH_COLLECTION_VERSION = SWOT_REACH_COLLECTION_NAME[19:]
-SWOT_NODE_COLLECTION_VERSION = SWOT_NODE_COLLECTION_NAME[19:]
-SWOT_PRIOR_LAKE_COLLECTION_VERSION = SWOT_PRIOR_LAKE_COLLECTION_NAME[18:]
 SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS = (
         (-31.286028054129474, -27.207309600925463),
         (-22.19117572552625, -28.812946226841383),
