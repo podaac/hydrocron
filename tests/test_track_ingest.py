@@ -83,7 +83,7 @@ def test_query_hydrocron(track_ingest_fixture):
         }
     }
     hydrocron_table = "hydrocron-swot-reach-table"
-    track.query_hydrocron(hydrocron_table, cmr_granules)
+    track.query_hydrocron(hydrocron_table, cmr_granules, "PGC0")
     actual_data = track.to_ingest
 
     expected = [{
@@ -94,6 +94,35 @@ def test_query_hydrocron(track_ingest_fixture):
         "actual_feature_count": 0,
         "status": "to_ingest"
     }]
+    assert actual_data == expected
+
+
+def test_query_hydrocron_reprocessed(track_ingest_fixture):
+    """Test cases where reprocessed CRID comes in after forward stream."""
+    from hydrocron.db.track_ingest import Track
+
+    collection_shortname = "SWOT_L2_HR_RiverSP_reach_2.0"
+    collection_start_date = datetime.datetime.strptime("20231201", "%Y%m%d").replace(tzinfo=datetime.timezone.utc)
+    track = Track(collection_shortname, collection_start_date)
+    cmr_granules = {
+        "SWOT_L2_HR_RiverSP_Reach_009_499_AF_20240121T225107_20240121T225110_PGC0_01.zip": {
+            "revision_date": "2024-07-17T06:06:42.102Z",
+            "checksum": "7620183b46f90758241a5eac86c4efb3"
+        }
+    }
+    hydrocron_table = "hydrocron-swot-reach-table"
+    track.query_hydrocron(hydrocron_table, cmr_granules, "PGC0")
+    actual_data = track.to_ingest
+
+    expected = [{
+        "granuleUR": "SWOT_L2_HR_RiverSP_Reach_009_499_AF_20240121T225107_20240121T225110_PGC0_01.zip",
+        "revision_date": "2024-07-17T06:06:42.102Z",
+        "checksum": "7620183b46f90758241a5eac86c4efb3",
+        "expected_feature_count": -1,
+        "actual_feature_count": 0,
+        "status": "to_ingest"
+    }]
+
     assert actual_data == expected
 
 
@@ -248,6 +277,7 @@ def test_update_track_to_ingest(track_ingest_fixture):
     )
     assert actual_item["Items"] == track.to_ingest
 
+
 def test_update_track_ingested(track_ingest_fixture):
     """Test query_ingest function for require ingest.
     
@@ -279,6 +309,7 @@ def test_update_track_ingested(track_ingest_fixture):
         KeyConditionExpression=(Key("granuleUR").eq("SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"))
     )
     assert actual_item["Items"] == track.ingested
+
 
 def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
     """Test publish_cnm function.
@@ -319,6 +350,7 @@ def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
 
     assert actual == expected
 
+
 def test_track_ingest_mismatch():
     """Test cases where incorrect combination of shortname and table names are
     passed to track ingest operations."""
@@ -335,7 +367,8 @@ def test_track_ingest_mismatch():
         "hydrocron_track_table": "hydrocron-swot-reach-track-ingest-table",
         "temporal": "",
         "query_start": "2024-09-05T23:00:00",
-        "query_end": "2024-09-05T23:59:59"
+        "query_end": "2024-09-05T23:59:59",
+        "reprocessed_crid": "PGC0"
     }
     context = LambdaContext()
     with pytest.raises(hydrocron.db.track_ingest.TableMisMatch) as e:

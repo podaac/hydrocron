@@ -47,6 +47,7 @@ class Track:
     }
     CNM_VERSION = "1.6.0"
     PROVIDER = "JPL-SWOT"
+    SSM_CLIENT = connection.ssm_client
     URS_UAT_TOKEN = "https://uat.urs.earthdata.nasa.gov/api/users/tokens"
 
     def __init__(self, collection_shortname, collection_start_date=None, query_start=None, query_end=None):
@@ -64,7 +65,6 @@ class Track:
         self.data_repository = DynamoDataRepository(connection.dynamodb_resource)
         self.ingested = []
         self.to_ingest = []
-        self.ssm_client = connection.ssm_client
         if collection_start_date:
             self.query_start = self._get_query_start(collection_start_date)
             self.query_end = datetime.datetime.now(timezone.utc) - datetime.timedelta(hours=1)
@@ -80,7 +80,7 @@ class Track:
         :type collection_start_date: datetime
         """
 
-        last_run = self.ssm_client.get_parameter(Name=f"/service/hydrocron/track-ingest-runtime/{self.collection_shortname}")["Parameter"]["Value"]
+        last_run = self.SSM_CLIENT.get_parameter(Name=f"/service/hydrocron/track-ingest-runtime/{self.collection_shortname}")["Parameter"]["Value"]
         if last_run != "no_data":
             query_start = datetime.datetime.strptime(last_run, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
         else:
@@ -102,40 +102,26 @@ class Track:
         """
 
         query = GranuleQuery()
-        query = query.format("umm_json")
+        query = query.format("umm_json").short_name(self.SHORTNAME[self.collection_shortname])
         if temporal:
             logging.info("Querying CMR temporal range: %s to %s.", self.query_start, self.query_end)
-            if self.ENV in ("sit", "uat"):
-                bearer_token = self._get_bearer_token()
-                granules = query.short_name(self.SHORTNAME[self.collection_shortname]) \
-                    .temporal(self.query_start, self.query_end) \
-                    .mode(CMR_UAT) \
-                    .bearer_token(bearer_token) \
-                    .get(query.hits())
-                granules = self._filter_granules(granules)
-            else:
-                granules = query.short_name(self.collection_shortname) \
-                    .temporal(self.query_start, self.query_end) \
-                    .get(query.hits())
+            query = query.temporal(self.query_start, self.query_end)
         else:
             logging.info("Querying CMR revision_date range: %s to %s.", self.query_start, self.query_end)
-            if self.ENV in ("sit", "uat"):
-                bearer_token = self._get_bearer_token()
-                granules = query.short_name(self.SHORTNAME[self.collection_shortname]) \
-                    .revision_date(self.query_start, self.query_end) \
-                    .mode(CMR_UAT) \
-                    .bearer_token(bearer_token) \
-                    .get(query.hits())
-                granules = self._filter_granules(granules)
-            else:
-                granules = query.short_name(self.collection_shortname) \
-                    .revision_date(self.query_start, self.query_end) \
-                    .get(query.hits())
+            query = query.revision_date(self.query_start, self.query_end)
+
+        if self.ENV in ("sit", "uat"):
+            bearer_token = self._get_bearer_token()
+            query = query.mode(CMR_UAT).bearer_token(bearer_token)
+
+        granules = query.get(query.hits())
+        granules = self._filter_granules(granules)
 
         cmr_granules = {}
         for granule in granules:
             granule_json = json.loads(granule)
             cmr_granules.update(self._get_granule_ur_list(granule_json))
+
         logging.info("Located %s granules in CMR.", len(cmr_granules.keys()))
         return cmr_granules
 
@@ -195,17 +181,30 @@ class Track:
             }
         return granule_dict
 
-    def query_hydrocron(self, hydrocron_table, cmr_granules):
+    def query_hydrocron(self, hydrocron_table, cmr_granules, reprocessed_crid):
         """Query Hydrocron for time range and gather GranuleURs that do NOT exist in the Hydrocron table.
 
         :param hydrocron_table: Name of hydrocron table to query
         :type hydrocron_table: str
         :param cmr_granules: List of CMR granules to query for
         :type cmr_granules: list
+        :param reprocessed_crid: Collection CRID
+        :type reprocessed_crid: string
         """
 
         for granule_ur, data in cmr_granules.items():
-            items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
+            crid = granule_ur.split("_")[-2]
+            if crid != reprocessed_crid:    # Cases where forward stream CRID arrives after reprocessed CRID
+                reprocessed_granule_ur = granule_ur.replace(crid, reprocessed_crid)
+                items = self.data_repository.get_granule_ur(hydrocron_table, reprocessed_granule_ur)
+                logging.info("Located %s items for reprocessed granule %s.", len(items["Items"]), reprocessed_granule_ur)
+                if len(items["Items"]) == 0:    # Check for forward stream CRID
+                    items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
+                    logging.info("Located %s items for forward stream granule %s.", len(items["Items"]), granule_ur)
+            else:
+                items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
+                logging.info("Located %s items for reprocessed granule %s.", len(items["Items"]), granule_ur)
+
             if len(items["Items"]) == 0:
                 self.to_ingest.append({
                     "granuleUR": granule_ur,
@@ -216,6 +215,41 @@ class Track:
                     "status": "to_ingest"
                 })
         logging.info("Located %s granules NOT in Hydrocron.", len(self.to_ingest))
+
+        self._remove_duplicates(reprocessed_crid)    # Cases where granules with both CRIDs arrive at the same time
+        logging.info("Located %s unique CRID granules NOT in Hydrocron.", len(self.to_ingest))
+
+    def _remove_duplicates(self, reprocessed_crid):
+        """Detect duplicate granules with different CRIDs.
+
+        :param reprocessed_crid: Collection CRID
+        :type reprocessed_crid: string
+        """
+
+        # Detect duplicates
+        duplicate_dict = {}
+        for item in self.to_ingest:
+            key = "_".join(item["granuleUR"].split("_")[5:8])
+            crid = item["granuleUR"].split("_")[-2]
+            if key not in duplicate_dict:
+                duplicate_dict[key] = {
+                    crid: item
+                }
+            else:
+                duplicate_dict[key][crid] = item
+
+        # Remove duplicates
+        removed_list = []
+        for item in duplicate_dict.values():
+            if len(item.keys()) == 2:
+                if reprocessed_crid in item.keys():
+                    removed_list.append(item[reprocessed_crid])
+                else:
+                    sorted_crids = dict(sorted(item.items(), reverse=True))
+                    removed_list.append(item[next(iter(sorted_crids))])
+            if len(item.keys()) == 1:
+                removed_list.append(item[next(iter(item))])
+        self.to_ingest = removed_list
 
     def query_track_ingest(self, hydrocron_track_table, hydrocron_table):
         """Query track status table for granules with "to_ingest" status.
@@ -256,7 +290,11 @@ class Track:
         logging.info("Located %s granules that are already ingested.", len(self.ingested))
 
     def publish_cnm_ingest(self, account_id):
-        """Publish CNM message to trigger granule ingestion."""
+        """Publish CNM message to trigger granule ingestion.
+
+        :param account_id: Account number of SNS topic to send CNM
+        :type account_id: int
+        """
 
         cnm_messages = []
         for granule in self.to_ingest:
@@ -291,13 +329,11 @@ class Track:
         """
 
         query = GranuleQuery()
-        query = query.short_name(self.collection_shortname).readable_granule_name(granule_ur).format("umm_json")
+        query = query.short_name(self.SHORTNAME[self.collection_shortname]).readable_granule_name(granule_ur).format("umm_json")
 
         if self.ENV in ("sit", "uat"):
             bearer_token = self._get_bearer_token()
-            query = query.bearer_token(bearer_token) \
-                .mode(CMR_UAT) \
-                .short_name(self.SHORTNAME[self.collection_shortname])
+            query = query.mode(CMR_UAT).bearer_token(bearer_token)
 
         granules = query.get_all()
         cnm_files = []
@@ -339,7 +375,7 @@ class Track:
     def update_runtime(self):
         """Update SSM parameter runtime for next execution."""
 
-        self.ssm_client.put_parameter(Name=f"/service/hydrocron/track-ingest-runtime/{self.collection_shortname}",
+        self.SSM_CLIENT.put_parameter(Name=f"/service/hydrocron/track-ingest-runtime/{self.collection_shortname}",
                                       Value=self.query_end.strftime("%Y-%m-%dT%H:%M:%S"),
                                       Overwrite=True)
 
@@ -362,6 +398,7 @@ def track_ingest_handler(event, context):
     collection_shortname = event["collection_shortname"]
     hydrocron_table = event["hydrocron_table"]
     hydrocron_track_table = event["hydrocron_track_table"]
+    reprocessed_crid = event["reprocessed_crid"]
     temporal = "temporal" in event.keys()
 
     if ("reach" in collection_shortname) and ((hydrocron_table != constants.SWOT_REACH_TABLE_NAME)
@@ -393,10 +430,11 @@ def track_ingest_handler(event, context):
         logging.info("Temporal end date: %s", query_end)
     else:
         logging.info("Collection start date: %s", collection_start_date)
+    logging.info("Reprocessed CRID: %s", reprocessed_crid)
     logging.info("Environment: %s", track.ENV.upper())
 
     cmr_granules = track.query_cmr(temporal)
-    track.query_hydrocron(hydrocron_table, cmr_granules)
+    track.query_hydrocron(hydrocron_table, cmr_granules, reprocessed_crid)
     track.query_track_ingest(hydrocron_track_table, hydrocron_table)
     track.publish_cnm_ingest(account_id)
     track.update_track_ingest(hydrocron_track_table)
