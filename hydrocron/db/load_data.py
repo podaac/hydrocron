@@ -391,8 +391,12 @@ def load_data(dynamo_resource, table_name, items):
             logging.info("Item %s: %s", feature_id, items[i][feature_id])
         hydrocron_table.batch_fill_table(items)
 
+        logging.info("Finished loading %s items", len(items))
+
     else:
         logging.info("Adding %s items to table individually", feature_name)
         for item_attrs in items:
             logging.info("Item %s: %s", feature_id, item_attrs[feature_id])
             hydrocron_table.add_data(**item_attrs)
+
+        logging.info("Finished loading %s items", len(items))

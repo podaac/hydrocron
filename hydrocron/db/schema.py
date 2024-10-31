@@ -115,11 +115,6 @@ class HydrocronTable:
         try:
             with table.batch_writer() as writer:
                 for item in items:
-                    logger.info(
-                        "Item %s size: %s",
-                        item[self.partition_key_name],
-                        str(sys.getsizeof(item))
-                    )
                     if sys.getsizeof(item) < 300000:
                         writer.put_item(Item=item)
                     else:
