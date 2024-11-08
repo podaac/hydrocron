@@ -126,6 +126,58 @@ def test_query_hydrocron_reprocessed(track_ingest_fixture):
     assert actual_data == expected
 
 
+def test_query_hydrocron_product_counter_increment(track_ingest_fixture):
+    """Test cases where product counter is incremented."""
+    from hydrocron.db.track_ingest import Track
+
+    collection_shortname = "SWOT_L2_HR_RiverSP_reach_2.0"
+    collection_start_date = datetime.datetime.strptime("20231201", "%Y%m%d").replace(tzinfo=datetime.timezone.utc)
+    track = Track(collection_shortname, collection_start_date)
+    cmr_granules = {
+        "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_02.zip": {
+            "revision_date": "2024-01-01T06:06:42.102Z",
+            "checksum": "abc1234"
+        }
+    }
+    hydrocron_table = "hydrocron-swot-reach-table"
+    track.query_hydrocron(hydrocron_table, cmr_granules, "PGC0")
+    actual_data = track.to_ingest
+
+    expected = [{
+        "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_02.zip",
+        "revision_date": "2024-01-01T06:06:42.102Z",
+        "checksum": "abc1234",
+        "expected_feature_count": -1,
+        "actual_feature_count": 0,
+        "status": "to_ingest"
+    }]
+
+    assert actual_data == expected
+
+
+def test_query_hydrocron_product_counter_previous(track_ingest_fixture):
+    """Test cases where previous product counter arrives after increment."""
+    from hydrocron.db.track_ingest import Track
+
+    collection_shortname = "SWOT_L2_HR_RiverSP_reach_2.0"
+    collection_start_date = datetime.datetime.strptime("20231201", "%Y%m%d").replace(tzinfo=datetime.timezone.utc)
+    track = Track(collection_shortname, collection_start_date)
+    cmr_granules = {
+        "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_00.zip": {
+            "revision_date": "2024-01-01T06:06:42.102Z",
+            "checksum": "abc1234"
+        }
+    }
+    hydrocron_table = "hydrocron-swot-reach-table"
+    track.query_hydrocron(hydrocron_table, cmr_granules, "PGC0")
+    actual_data = track.to_ingest
+
+    print(actual_data)
+
+    expected = []
+    assert actual_data == expected
+
+
 def test_get_status(track_ingest_fixture):
     """Test get_status function.
     
