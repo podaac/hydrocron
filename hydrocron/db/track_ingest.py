@@ -32,6 +32,7 @@ class Track:
     newly discovered granules for Hydrocron database ingestion.
     """
 
+    BATCH_STATUS = int(os.getenv("BATCH_STATUS")) if os.getenv("BATCH_STATUS") else None
     CMR_API = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
     DEBUG_LOGS = bool(int(os.getenv("DEBUG_LOGS")))
     ENV = os.getenv("HYDROCRON_ENV").lower()
@@ -269,7 +270,10 @@ class Track:
         :type hydrocron_table: str
         """
 
-        items = self.data_repository.get_status(hydrocron_track_table, "to_ingest")
+        if self.BATCH_STATUS:
+            items = self.data_repository.get_status(hydrocron_track_table, "to_ingest", limit=self.BATCH_STATUS)
+        else:
+            items = self.data_repository.get_status(hydrocron_track_table, "to_ingest")
         logging.info("Located %s granules with 'to_ingest' status.", len(items))
         if self.DEBUG_LOGS == True:
             logging.info("Items located as 'to_ingest' in track ingest: %s", items)

@@ -150,11 +150,12 @@ class DynamoDataRepository:
         )
         return items
 
-    def get_status(self, table_name, status):
+    def get_status(self, table_name, status, limit=None):
         """
 
         @param table_name: str - Hydrocron table to query
         @param status: str - Status to query for
+        @param limit: str - Return items up to and including the limit
         """
 
         hydrocron_table = self._dynamo_instance.Table(table_name)
@@ -162,6 +163,12 @@ class DynamoDataRepository:
             IndexName="statusIndex",
             KeyConditionExpression=(Key("status").eq(status))
         )
+
+        if limit and items["Count"] >= limit:
+            items["Items"] = items["Items"][:limit]
+            if "LastEvaluatedKey" in items.keys():
+                items.pop("LastEvaluatedKey")
+
         last_key_evaluated = ""
         if "LastEvaluatedKey" in items.keys():
             last_key_evaluated = items["LastEvaluatedKey"]
@@ -172,9 +179,17 @@ class DynamoDataRepository:
                 IndexName="statusIndex",
                 KeyConditionExpression=(Key("status").eq(status))
             )
+
             items["Items"].extend(next_items["Items"])
+            if limit and items["Count"] >= limit:
+                items["Items"] = items["Items"][:limit]
+                break
+
             last_key_evaluated = ""
             if "LastEvaluatedKey" in next_items.keys():
                 last_key_evaluated = next_items["LastEvaluatedKey"]
+
+        if limit and len(items["Items"]) >= limit:
+            items["Items"] = items["Items"][:limit]
 
         return items["Items"]
