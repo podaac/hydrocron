@@ -129,7 +129,7 @@ class Track:
             cmr_granules.update(self._get_granule_ur_list(granule_json))
 
         logging.info("Located %s granules in CMR.", len(cmr_granules.keys()))
-        if self.DEBUG_LOGS == True:
+        if self.DEBUG_LOGS is True:
             logging.info("CMR granules located: %s", list(cmr_granules.keys()))
         return cmr_granules
 
@@ -222,7 +222,7 @@ class Track:
         self._remove_duplicates(reprocessed_crid)    # Cases where granules with both CRIDs arrive at the same time
         logging.info("Located %s unique CRID granules NOT in Hydrocron.", len(self.to_ingest))
 
-        if self.DEBUG_LOGS == True:
+        if self.DEBUG_LOGS is True:
             logging.info("Hydrocron granules located: %s", self.to_ingest)
 
     def _query_crid(self, hydrocron_table, granule_ur, reprocessed_crid):
@@ -237,20 +237,20 @@ class Track:
 
         :rtype: list
         """
-    
+
         crid = granule_ur.split("_")[-2]
         if crid != reprocessed_crid:    # Cases where forward stream CRID arrives after reprocessed CRID
             reprocessed_granule_ur = granule_ur.replace(crid, reprocessed_crid)
             items = self.data_repository.get_granule_ur(hydrocron_table, reprocessed_granule_ur)
-            if self.DEBUG_LOGS == True:
+            if self.DEBUG_LOGS is True:
                 logging.info("Forward stream: located %s items for reprocessed granule %s.", len(items["Items"]), reprocessed_granule_ur)
             if len(items["Items"]) == 0:    # Check for forward stream CRID
                 items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
-                if self.DEBUG_LOGS == True:
+                if self.DEBUG_LOGS is True:
                     logging.info("Forward stream: located %s items for forward stream granule %s.", len(items["Items"]), granule_ur)
         else:    # Cases where reprocessing stream CRID arrives
             items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
-            if self.DEBUG_LOGS == True:
+            if self.DEBUG_LOGS is True:
                 logging.info("Reprocessed: located %s items for reprocessed granule %s.", len(items["Items"]), granule_ur)
         return items
 
@@ -320,7 +320,7 @@ class Track:
         else:
             items = self.data_repository.get_status(hydrocron_track_table, "to_ingest")
         logging.info("Located %s granules with 'to_ingest' status.", len(items))
-        if self.DEBUG_LOGS == True:
+        if self.DEBUG_LOGS is True:
             logging.info("Items located as 'to_ingest' in track ingest: %s", items)
 
         for item in items:
@@ -383,7 +383,7 @@ class Track:
                 TopicArn=f"arn:aws:sns:us-west-2:{account_id}:svc-hydrocron-{self.ENV}-cnm-response",
                 Message=json.dumps(cnm_message)
             )
-            if self.DEBUG_LOGS == True:
+            if self.DEBUG_LOGS is True:
                 logging.info("%s message published to SNS Topic: svc-hydrocron-%s-cnm-response", cnm_message['identifier'], self.ENV)
 
     def _query_granule_files(self, granule_ur):
@@ -508,7 +508,7 @@ def track_ingest_handler(event, context):
     if not temporal:
         track.update_runtime()
 
-    if track.DEBUG_LOGS == True:
+    if track.DEBUG_LOGS is True:
         logging.info("To Ingest: %s", track.to_ingest)
         logging.info("Ingested: %s", track.ingested)
 
