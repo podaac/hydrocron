@@ -244,7 +244,9 @@ def mock_sns():
 @pytest.fixture()
 def hydrocron_api(hydrocron_dynamo_instance, dynamo_test_proc, mock_ssm):
     os.environ['HYDROCRON_ENV'] = 'test'
-    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"    
+    os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"
+    os.environ['BATCH_STATUS'] = '500'
+    os.environ['DEBUG_LOGS'] = '0'
     import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
     hydrocron.utils.connection._dynamodb_resource = hydrocron_dynamo_instance
 
@@ -368,6 +370,8 @@ def track_ingest_dynamo_instance(request, dynamo_test_proc):
 def track_ingest_fixture(track_ingest_dynamo_instance, dynamo_test_proc, mock_ssm, mock_s3):
     os.environ['HYDROCRON_ENV'] = 'test'
     os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"
+    os.environ['BATCH_STATUS'] = '500'
+    os.environ['DEBUG_LOGS'] = '0'
     import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
     hydrocron.utils.connection._dynamodb_resource = track_ingest_dynamo_instance
     hydrocron.utils.connection._s3_resource = mock_s3
@@ -376,6 +380,8 @@ def track_ingest_fixture(track_ingest_dynamo_instance, dynamo_test_proc, mock_ss
 def track_ingest_cnm_fixture(dynamo_test_proc, mock_sns):
     os.environ['HYDROCRON_ENV'] = 'test'
     os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"
+    os.environ['BATCH_STATUS'] = '500'
+    os.environ['DEBUG_LOGS'] = '0'
     import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
     
     hydrocron.utils.connection._sns_client = mock_sns
