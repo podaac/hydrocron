@@ -80,6 +80,8 @@ class Track:
 
         :param collection_start_date: Date to begin revision_date query in CMR
         :type collection_start_date: datetime
+
+        :rtype datetime.datetime
         """
 
         last_run = self.SSM_CLIENT.get_parameter(Name=f"/service/hydrocron/track-ingest-runtime/{self.collection_shortname}")["Parameter"]["Value"]
@@ -101,6 +103,8 @@ class Track:
 
         :param temporal: Indicates if temporal search should be conducted
         :type temporal: boolean
+
+        :rtype: dict
         """
 
         query = GranuleQuery()
@@ -130,7 +134,10 @@ class Track:
         return cmr_granules
 
     def _get_bearer_token(self):
-        """Get bearer authorizatino token."""
+        """Get bearer authorizatino token.
+
+        rtype: str
+        """
 
         username = os.getenv("EARTHDATA_USERNAME")
         password = os.getenv("EARTHDATA_PASSWORD")
@@ -144,9 +151,10 @@ class Track:
     def _filter_granules(self, granules):
         """Filter granules for collection.
 
-        Parameters:
         :param granules: List of granules to filter
         :type granules: dict
+
+        :rtype: list
         """
 
         data_type = self.collection_shortname.split("_")[4].capitalize()
@@ -197,30 +205,18 @@ class Track:
         """
 
         for granule_ur, data in cmr_granules.items():
-            crid = granule_ur.split("_")[-2]
-            if crid != reprocessed_crid:    # Cases where forward stream CRID arrives after reprocessed CRID
-                reprocessed_granule_ur = granule_ur.replace(crid, reprocessed_crid)
-                items = self.data_repository.get_granule_ur(hydrocron_table, reprocessed_granule_ur)
-                if self.DEBUG_LOGS == True:
-                    logging.info("Forward stream: located %s items for reprocessed granule %s.", len(items["Items"]), reprocessed_granule_ur)
-                if len(items["Items"]) == 0:    # Check for forward stream CRID
-                    items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
-                    if self.DEBUG_LOGS == True:
-                        logging.info("Forward stream: located %s items for forward stream granule %s.", len(items["Items"]), granule_ur)
-            else:
-                items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
-                if self.DEBUG_LOGS == True:
-                    logging.info("Reprocessed: located %s items for reprocessed granule %s.", len(items["Items"]), granule_ur)
-
+            items = self._query_crid(hydrocron_table, granule_ur, reprocessed_crid)
             if len(items["Items"]) == 0:
-                self.to_ingest.append({
-                    "granuleUR": granule_ur,
-                    "revision_date": data["revision_date"],
-                    "checksum": data["checksum"],
-                    "expected_feature_count": -1,
-                    "actual_feature_count": 0,
-                    "status": "to_ingest"
-                })
+                items = self._query_product_counter(hydrocron_table, granule_ur)
+                if len(items["Items"]) == 0:    # Incremented product counter not found
+                    self.to_ingest.append({
+                        "granuleUR": granule_ur,
+                        "revision_date": data["revision_date"],
+                        "checksum": data["checksum"],
+                        "expected_feature_count": -1,
+                        "actual_feature_count": 0,
+                        "status": "to_ingest"
+                    })
         logging.info("Located %s granules NOT in Hydrocron.", len(self.to_ingest))
 
         self._remove_duplicates(reprocessed_crid)    # Cases where granules with both CRIDs arrive at the same time
@@ -228,6 +224,55 @@ class Track:
 
         if self.DEBUG_LOGS == True:
             logging.info("Hydrocron granules located: %s", self.to_ingest)
+
+    def _query_crid(self, hydrocron_table, granule_ur, reprocessed_crid):
+        """Determine if reprocessing CRID exists and prioritize.
+
+        :param hydrocron_table: Name of hydrocron table to query
+        :type hydrocron_table: str
+        :param granule_ur: Granule UR
+        :type granule_ur: string
+        :param reprocessed_crid: Collection CRID
+        :type reprocessed_crid: string
+
+        :rtype: list
+        """
+    
+        crid = granule_ur.split("_")[-2]
+        if crid != reprocessed_crid:    # Cases where forward stream CRID arrives after reprocessed CRID
+            reprocessed_granule_ur = granule_ur.replace(crid, reprocessed_crid)
+            items = self.data_repository.get_granule_ur(hydrocron_table, reprocessed_granule_ur)
+            if self.DEBUG_LOGS == True:
+                logging.info("Forward stream: located %s items for reprocessed granule %s.", len(items["Items"]), reprocessed_granule_ur)
+            if len(items["Items"]) == 0:    # Check for forward stream CRID
+                items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
+                if self.DEBUG_LOGS == True:
+                    logging.info("Forward stream: located %s items for forward stream granule %s.", len(items["Items"]), granule_ur)
+        else:    # Cases where reprocessing stream CRID arrives
+            items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
+            if self.DEBUG_LOGS == True:
+                logging.info("Reprocessed: located %s items for reprocessed granule %s.", len(items["Items"]), granule_ur)
+        return items
+
+    def _query_product_counter(self, hydrocron_table, granule_ur):
+        """Determine if reprocessing CRID exists and prioritize.
+
+        :param hydrocron_table: Name of hydrocron table to query
+        :type hydrocron_table: str
+        :param granule_ur: Granule UR
+        :type granule_ur: string
+
+        :rtype: list
+        """
+
+        product_counter = granule_ur.split("_")[-1].split(".")[0]
+        padding = ['0'] * (len(product_counter) - 1)
+        incremented_counter = f"{''.join(padding)}{str(int(product_counter) + 1)}"
+        incremented_granule = granule_ur.replace(f"{product_counter}.zip", f"{incremented_counter}.zip")
+        items = self.data_repository.get_granule_ur(hydrocron_table, incremented_granule)
+        if len(items["Items"]) > 0:
+            logging.info("Located incremented product counter: %s.", incremented_granule)
+        return items
 
     def _remove_duplicates(self, reprocessed_crid):
         """Detect duplicate granules with different CRIDs.
@@ -280,6 +325,9 @@ class Track:
 
         for item in items:
             granule_ur = item["granuleUR"]
+            items = self._query_product_counter(hydrocron_table, granule_ur)
+            if len(items["Items"]) > 0:
+                continue    # Located granule with higher product counter no need to ingest older granule
             features = self.data_repository.get_series_granule_ur(
                 hydrocron_table,
                 self.FEATURE_ID[self.collection_shortname],
@@ -343,6 +391,8 @@ class Track:
 
         :param granule: Name of granule to query for
         :param granule: str
+
+        :rtype: list
         """
 
         query = GranuleQuery()
