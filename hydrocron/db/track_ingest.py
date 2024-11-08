@@ -33,6 +33,7 @@ class Track:
     """
 
     CMR_API = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
+    DEBUG_LOGS = bool(int(os.getenv("DEBUG_LOGS")))
     ENV = os.getenv("HYDROCRON_ENV").lower()
     PAGE_SIZE = 2000
     FEATURE_ID = {
@@ -123,6 +124,8 @@ class Track:
             cmr_granules.update(self._get_granule_ur_list(granule_json))
 
         logging.info("Located %s granules in CMR.", len(cmr_granules.keys()))
+        if self.DEBUG_LOGS == True:
+            logging.info("CMR granules located: %s", list(cmr_granules.keys()))
         return cmr_granules
 
     def _get_bearer_token(self):
@@ -197,13 +200,16 @@ class Track:
             if crid != reprocessed_crid:    # Cases where forward stream CRID arrives after reprocessed CRID
                 reprocessed_granule_ur = granule_ur.replace(crid, reprocessed_crid)
                 items = self.data_repository.get_granule_ur(hydrocron_table, reprocessed_granule_ur)
-                logging.info("Located %s items for reprocessed granule %s.", len(items["Items"]), reprocessed_granule_ur)
+                if self.DEBUG_LOGS == True:
+                    logging.info("Forward stream: located %s items for reprocessed granule %s.", len(items["Items"]), reprocessed_granule_ur)
                 if len(items["Items"]) == 0:    # Check for forward stream CRID
                     items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
-                    logging.info("Located %s items for forward stream granule %s.", len(items["Items"]), granule_ur)
+                    if self.DEBUG_LOGS == True:
+                        logging.info("Forward stream: located %s items for forward stream granule %s.", len(items["Items"]), granule_ur)
             else:
                 items = self.data_repository.get_granule_ur(hydrocron_table, granule_ur)
-                logging.info("Located %s items for reprocessed granule %s.", len(items["Items"]), granule_ur)
+                if self.DEBUG_LOGS == True:
+                    logging.info("Reprocessed: located %s items for reprocessed granule %s.", len(items["Items"]), granule_ur)
 
             if len(items["Items"]) == 0:
                 self.to_ingest.append({
@@ -218,6 +224,9 @@ class Track:
 
         self._remove_duplicates(reprocessed_crid)    # Cases where granules with both CRIDs arrive at the same time
         logging.info("Located %s unique CRID granules NOT in Hydrocron.", len(self.to_ingest))
+
+        if self.DEBUG_LOGS == True:
+            logging.info("Hydrocron granules located: %s", self.to_ingest)
 
     def _remove_duplicates(self, reprocessed_crid):
         """Detect duplicate granules with different CRIDs.
@@ -262,6 +271,8 @@ class Track:
 
         items = self.data_repository.get_status(hydrocron_track_table, "to_ingest")
         logging.info("Located %s granules with 'to_ingest' status.", len(items))
+        if self.DEBUG_LOGS == True:
+            logging.info("Items located as 'to_ingest' in track ingest: %s", items)
 
         for item in items:
             granule_ur = item["granuleUR"]
@@ -280,6 +291,7 @@ class Track:
             }
             if number_features == item["expected_feature_count"]:
                 self.ingested.append(ingest_item)
+                logging.info("Granule has been ingested: %s - %s features.", ingest_item["granuleUR"], ingest_item["actual_feature_count"])
             else:
                 ingest_item["status"] = "to_ingest"
                 if ingest_item in self.to_ingest:
@@ -319,7 +331,8 @@ class Track:
                 TopicArn=f"arn:aws:sns:us-west-2:{account_id}:svc-hydrocron-{self.ENV}-cnm-response",
                 Message=json.dumps(cnm_message)
             )
-            logging.info("%s message published to SNS Topic: svc-hydrocron-%s-cnm-response", cnm_message['identifier'], self.ENV)
+            if self.DEBUG_LOGS == True:
+                logging.info("%s message published to SNS Topic: svc-hydrocron-%s-cnm-response", cnm_message['identifier'], self.ENV)
 
     def _query_granule_files(self, granule_ur):
         """Query for files metadata.
@@ -441,8 +454,9 @@ def track_ingest_handler(event, context):
     if not temporal:
         track.update_runtime()
 
-    logging.info("To Ingest: %s", track.to_ingest)
-    logging.info("Ingested: %s", track.ingested)
+    if track.DEBUG_LOGS == True:
+        logging.info("To Ingest: %s", track.to_ingest)
+        logging.info("Ingested: %s", track.ingested)
 
     end = datetime.datetime.now()
     logging.info("Elapsed: %s", (end - start))

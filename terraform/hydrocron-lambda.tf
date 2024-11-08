@@ -223,6 +223,7 @@ resource "aws_lambda_function" "hydrocron_lambda_track_ingest" {
       HYDROCRON_ENV                = local.environment
       EARTHDATA_USERNAME           = data.aws_ssm_parameter.edl_username.value
       EARTHDATA_PASSWORD           = data.aws_ssm_parameter.edl_password.value
+      DEBUG_LOGS                   = 0
     }
   }
 }
