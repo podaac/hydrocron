@@ -155,8 +155,8 @@ resource "aws_lambda_function" "hydrocron_lambda_load_granule" {
   }
   function_name = local.load_granule_function_name
   role          = aws_iam_role.hydrocron-lambda-load-granule-role.arn
-  timeout       = 600
-  memory_size   = 2048
+  timeout       = 900
+  memory_size   = 8192
   vpc_config {
     subnet_ids         = data.aws_subnets.private_application_subnets.ids
     security_group_ids = data.aws_security_groups.vpc_default_sg.ids
@@ -213,7 +213,7 @@ resource "aws_lambda_function" "hydrocron_lambda_track_ingest" {
   }
   function_name = local.track_ingest_function_name
   role          = aws_iam_role.hydrocron_lambda_track_ingest_role.arn
-  timeout       = 300
+  timeout       = 900
   memory_size   = 512
 
   tags = var.default_tags
