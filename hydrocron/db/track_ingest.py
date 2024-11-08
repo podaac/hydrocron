@@ -34,7 +34,7 @@ class Track:
 
     BATCH_STATUS = int(os.getenv("BATCH_STATUS")) if os.getenv("BATCH_STATUS") else None
     CMR_API = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
-    DEBUG_LOGS = bool(int(os.getenv("DEBUG_LOGS")))
+    DEBUG_LOGS = bool(int(os.getenv("DEBUG_LOGS"))) if os.getenv("DEBUG_LOGS") else False
     ENV = os.getenv("HYDROCRON_ENV").lower()
     PAGE_SIZE = 2000
     FEATURE_ID = {
