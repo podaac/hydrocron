@@ -395,8 +395,27 @@ class Track:
                 self.to_ingest.append(ingest_item)
                 logging.info("Granule needs to be ingested: %s.", ingest_item["granuleUR"])
 
+        if self.DEBUG_LOGS:
+            logging.info("Located %s granules that require ingestion before de-duplication.", len(self.to_ingest))
+        self.remove_overlap()    # Occurs with granules that have 0 features
         logging.info("Located %s granules that require ingestion.", len(self.to_ingest))
         logging.info("Located %s granules that are already ingested.", len(self.ingested))
+
+    def remove_overlap(self):
+        """Remove overlap between to_ingest and ingested.
+
+        This can occur when there are 0 features in a granule and the same
+        temporal range is executed on.
+        """
+
+        ingested_urs = [granule["granuleUR"] for granule in self.ingested]
+        to_ingest = []
+        for granule in self.to_ingest:
+            if granule["granuleUR"] not in ingested_urs:
+                to_ingest.append(granule)
+            else:
+                logging.info("Removed duplicate that has been ingested: %s.", granule["granuleUR"])
+        self.to_ingest = to_ingest
 
     def publish_cnm_ingest(self, account_id):
         """Publish CNM message to trigger granule ingestion.
@@ -548,6 +567,7 @@ def track_ingest_handler(event, context):
     cmr_granules = track.query_cmr(temporal)
     track.query_hydrocron(hydrocron_table, cmr_granules, reprocessed_crid)
     track.query_track_ingest(hydrocron_track_table, hydrocron_table, reprocessed_crid)
+    track.remove_overlap()
     track.publish_cnm_ingest(account_id)
     track.update_track_ingest(hydrocron_track_table)
     if not temporal:
