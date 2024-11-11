@@ -236,7 +236,7 @@ def test_query_ingest(track_ingest_fixture):
     
     hydrocron_track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
     hydrocron_table = constants.SWOT_REACH_TABLE_NAME
-    track.query_track_ingest(hydrocron_track_table, hydrocron_table)
+    track.query_track_ingest(hydrocron_track_table, hydrocron_table, "PGC0")
     
     expected = [{
         "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip",
@@ -284,7 +284,7 @@ def test_query_ingest_to_ingest(track_ingest_fixture):
 
     hydrocron_track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
     hydrocron_table = constants.SWOT_REACH_TABLE_NAME
-    track.query_track_ingest(hydrocron_track_table, hydrocron_table)
+    track.query_track_ingest(hydrocron_track_table, hydrocron_table, "PGC0")
     
     expected = [{
         "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip",
