@@ -225,6 +225,7 @@ resource "aws_lambda_function" "hydrocron_lambda_track_ingest" {
       EARTHDATA_PASSWORD           = data.aws_ssm_parameter.edl_password.value
       DEBUG_LOGS                   = 0
       BATCH_STATUS                 = 500
+      COUNTER_RANGE                = 10
     }
   }
 }

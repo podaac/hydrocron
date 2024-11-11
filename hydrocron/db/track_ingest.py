@@ -34,6 +34,7 @@ class Track:
 
     BATCH_STATUS = int(os.getenv("BATCH_STATUS")) if os.getenv("BATCH_STATUS") else None
     CMR_API = "https://cmr.earthdata.nasa.gov/search/granules.umm_json"
+    COUNTER_RANGE = int(os.getenv("COUNTER_RANGE")) if os.getenv("COUNTER_RANGE") else 1
     DEBUG_LOGS = bool(int(os.getenv("DEBUG_LOGS"))) if os.getenv("DEBUG_LOGS") else False
     ENV = os.getenv("HYDROCRON_ENV").lower()
     PAGE_SIZE = 2000
@@ -207,7 +208,6 @@ class Track:
         for granule_ur, data in cmr_granules.items():
             items = self._query_crid(hydrocron_table, granule_ur, reprocessed_crid)
             if len(items["Items"]) == 0:
-                items = self._query_product_counter(hydrocron_table, granule_ur)
                 if len(items["Items"]) == 0:    # Incremented product counter not found
                     self.to_ingest.append({
                         "granuleUR": granule_ur,
@@ -219,8 +219,11 @@ class Track:
                     })
         logging.info("Located %s granules NOT in Hydrocron.", len(self.to_ingest))
 
-        self._remove_duplicates(reprocessed_crid)    # Cases where granules with both CRIDs arrive at the same time
-        logging.info("Located %s unique CRID granules NOT in Hydrocron.", len(self.to_ingest))
+        self.to_ingest = self._remove_duplicates(reprocessed_crid, self.to_ingest)    # Cases where granules with both CRIDs arrive at the same time
+        logging.info("Located %s unique CRID granules NOT in Hydrocron after removing duplicates.", len(self.to_ingest))
+
+        self._remove_old_products(hydrocron_table)    # Cases where there are incremented product counters
+        logging.info("Located %s final granules NOT in Hydrocron after product counter filter.", len(self.to_ingest))
 
         if self.DEBUG_LOGS is True:
             logging.info("Hydrocron granules located: %s", self.to_ingest)
@@ -254,36 +257,22 @@ class Track:
                 logging.info("Reprocessed: located %s items for reprocessed granule %s.", len(items["Items"]), granule_ur)
         return items
 
-    def _query_product_counter(self, hydrocron_table, granule_ur):
-        """Determine if reprocessing CRID exists and prioritize.
-
-        :param hydrocron_table: Name of hydrocron table to query
-        :type hydrocron_table: str
-        :param granule_ur: Granule UR
-        :type granule_ur: string
-
-        :rtype: list
-        """
-
-        product_counter = granule_ur.split("_")[-1].split(".")[0]
-        padding = ['0'] * (len(product_counter) - 1)
-        incremented_counter = f"{''.join(padding)}{str(int(product_counter) + 1)}"
-        incremented_granule = granule_ur.replace(f"{product_counter}.zip", f"{incremented_counter}.zip")
-        items = self.data_repository.get_granule_ur(hydrocron_table, incremented_granule)
-        if len(items["Items"]) > 0:
-            logging.info("Located incremented product counter: %s.", incremented_granule)
-        return items
-
-    def _remove_duplicates(self, reprocessed_crid):
+    @staticmethod
+    def _remove_duplicates(reprocessed_crid, granules_list):
         """Detect duplicate granules with different CRIDs.
 
         :param reprocessed_crid: Collection CRID
         :type reprocessed_crid: string
+        :param granules_list: List of granules to remove duplicates from
+        :type granules_list: list
         """
+
+        # Sort to grab most recent product counter
+        granules_list = sorted(granules_list, key=lambda g: g["granuleUR"])
 
         # Detect duplicates
         duplicate_dict = {}
-        for item in self.to_ingest:
+        for item in granules_list:
             key = "_".join(item["granuleUR"].split("_")[5:8])
             crid = item["granuleUR"].split("_")[-2]
             if key not in duplicate_dict:
@@ -304,9 +293,53 @@ class Track:
                     removed_list.append(item[next(iter(sorted_crids))])
             if len(item.keys()) == 1:
                 removed_list.append(item[next(iter(item))])
-        self.to_ingest = removed_list
+        return removed_list
 
-    def query_track_ingest(self, hydrocron_track_table, hydrocron_table):
+    def _remove_old_products(self, hydrocron_table):
+        """
+        Remove previous product counters from to_ingest list.
+
+        :param hydrocron_table: Name of hydrocron table to query
+        :type hydrocron_table: str
+        """
+
+        for granule in self.to_ingest:
+            items = self._query_product_counter(hydrocron_table, granule["granuleUR"])
+            if len(items["Items"]) > 0:
+                self.to_ingest.remove(granule)
+                if self.DEBUG_LOGS is True:
+                    logging.info("Removed old product from to_ingest: %s.", granule["granuleUR"])
+
+    def _query_product_counter(self, hydrocron_table, granule_ur):
+        """Determine if reprocessing CRID exists and prioritize.
+
+        If a higher product counter exists, that item is returned indicating the
+        older product counter should not be ingested. Otherwise an empty
+        list is returned indicating no higher product counters exist.
+
+        :param hydrocron_table: Name of hydrocron table to query
+        :type hydrocron_table: str
+        :param granule_ur: Granule UR
+        :type granule_ur: string
+
+        :rtype: list
+        """
+
+        product_counter = granule_ur.split("_")[-1].split(".")[0]
+        padding = ['0'] * (len(product_counter) - 1)
+        items = {
+            "Items": []
+        }
+        for counter in range(int(product_counter), self.COUNTER_RANGE + 1):
+            incremented_counter = f"{''.join(padding)}{str(int(counter) + 1)}"
+            incremented_granule = granule_ur.replace(f"{product_counter}.zip", f"{incremented_counter}.zip")
+            items = self.data_repository.get_granule_ur(hydrocron_table, incremented_granule)
+            if len(items["Items"]) > 0:
+                logging.info("Located incremented product counter: %s.", incremented_granule)
+                break
+        return items
+
+    def query_track_ingest(self, hydrocron_track_table, hydrocron_table, reprocessed_crid):
         """Query track status table for granules with "to_ingest" status.
 
         :param hydrocron_track_table: Name of hydrocron track table to query
@@ -322,6 +355,9 @@ class Track:
         logging.info("Located %s granules with 'to_ingest' status.", len(items))
         if self.DEBUG_LOGS is True:
             logging.info("Items located as 'to_ingest' in track ingest: %s", items)
+
+        items = self._remove_duplicates(reprocessed_crid, items)
+        logging.info("Located %s unique granules with 'to_ingest' status.", len(items))
 
         for item in items:
             granule_ur = item["granuleUR"]
@@ -349,6 +385,7 @@ class Track:
                 if ingest_item in self.to_ingest:
                     continue    # Skip if not found in Hydrocron table
                 self.to_ingest.append(ingest_item)
+                logging.info("Granule needs to be ingested: %s.", ingest_item["granuleUR"])
 
         logging.info("Located %s granules that require ingestion.", len(self.to_ingest))
         logging.info("Located %s granules that are already ingested.", len(self.ingested))
@@ -502,7 +539,7 @@ def track_ingest_handler(event, context):
 
     cmr_granules = track.query_cmr(temporal)
     track.query_hydrocron(hydrocron_table, cmr_granules, reprocessed_crid)
-    track.query_track_ingest(hydrocron_track_table, hydrocron_table)
+    track.query_track_ingest(hydrocron_track_table, hydrocron_table, reprocessed_crid)
     track.publish_cnm_ingest(account_id)
     track.update_track_ingest(hydrocron_track_table)
     if not temporal:
