@@ -14,7 +14,7 @@ from hydrocron.utils import constants
 
 
 hydrocron.db.load_data.load_data(
-    HydrocronTable(hydrocron.api.hydrocron.data_repository._dynamo_instance, constants.SWOT_REACH_TABLE_NAME),
+    HydrocronTable(hydrocron.api.hydrocron.data_repository._dynamo_instance, constants.API_TEST_REACH_TABLE_NAME),
     os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
         'data',
@@ -22,7 +22,7 @@ hydrocron.db.load_data.load_data(
     ), True)
 
 hydrocron.db.load_data.load_data(HydrocronTable(
-    hydrocron.api.hydrocron.data_repository._dynamo_instance, constants.SWOT_NODE_TABLE_NAME), os.path.join(
+    hydrocron.api.hydrocron.data_repository._dynamo_instance, constants.API_TEST_NODE_TABLE_NAME), os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     'data',
     'SWOT_L2_HR_RiverSP_Node_540_010_AS_20230602T193520_20230602T193521_PIA1_01.zip'  # noqa

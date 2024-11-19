@@ -90,6 +90,6 @@ def test_track_table_mismatch():
             "track_table": "hydrocron-swot-prior-lake-track-ingest-table"
         }
     }
-    with pytest.raises(hydrocron.db.load_data.TableMisMatch) as e:
+    with pytest.raises(hydrocron.db.load_data.MissingTable) as e:
         hydrocron.db.load_data.granule_handler(event, None)
-        assert str(e.value) == "Error: Cannot load Observed or Unassigned Lake data into table: 'hydrocron-swot-prior-lake-table'"
+        assert str(e.value) == "Error: Cannot load Observed or Unassigned Lake data"

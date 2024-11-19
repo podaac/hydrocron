@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 229 - Create new database tables for version d collections
 ### Changed
 ### Deprecated
 ### Removed

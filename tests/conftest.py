@@ -45,9 +45,10 @@ dynamo_test_proc = factories.dynamodb_proc(
 
 dynamo_db_resource = factories.dynamodb("dynamo_test_proc")
 
+
 def create_tables(dynamo_db, table_name, feature_id, non_key_atts):
     """Create DynamoDB tables for testing."""
-    
+
     dynamo_db.create_table(
         TableName=table_name,
         AttributeDefinitions=[
@@ -112,20 +113,20 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
     
     create_tables(
         dynamo_db, 
-        constants.SWOT_REACH_TABLE_NAME, 
+        constants.API_TEST_REACH_TABLE_NAME, 
         'reach_id', 
         ['reach_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
     )
     
     create_tables(
         dynamo_db, 
-        constants.SWOT_PRIOR_LAKE_TABLE_NAME, 
+        constants.API_TEST_PLAKE_TABLE_NAME, 
         'lake_id', 
         ['lake_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
     )
     
     # load reach table
-    reach_hydro_table = HydrocronTable(dynamo_db, constants.SWOT_REACH_TABLE_NAME)
+    reach_hydro_table = HydrocronTable(dynamo_db, constants.API_TEST_REACH_TABLE_NAME)
     reach_items = swot_shp.read_shapefile(
         TEST_SHAPEFILE_PATH_REACH,
         obscure_data=False,
@@ -134,7 +135,7 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         reach_hydro_table.add_data(**item_attrs)
     
     # load lake table
-    lake_hydro_table = HydrocronTable(dynamo_db, constants.SWOT_PRIOR_LAKE_TABLE_NAME)
+    lake_hydro_table = HydrocronTable(dynamo_db, constants.API_TEST_PLAKE_TABLE_NAME)
     lake_items = swot_shp.read_shapefile(
         TEST_SHAPEFILE_PATH_LAKE,
         obscure_data=False,
@@ -272,11 +273,11 @@ def track_ingest_dynamo_instance(request, dynamo_test_proc):
     # reach table
     create_tables(
         dynamo_db, 
-        constants.SWOT_REACH_TABLE_NAME, 
+        constants.API_TEST_REACH_TABLE_NAME, 
         'reach_id', 
         ['reach_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
     )
-    reach_hydro_table = HydrocronTable(dynamo_db, constants.SWOT_REACH_TABLE_NAME)
+    reach_hydro_table = HydrocronTable(dynamo_db, constants.API_TEST_REACH_TABLE_NAME)
     reach_items = swot_shp.read_shapefile(
         TEST_SHAPEFILE_PATH_REACH_TRACK,
         obscure_data=False,
@@ -292,7 +293,7 @@ def track_ingest_dynamo_instance(request, dynamo_test_proc):
     
     # track table
     dynamo_db.create_table(
-        TableName=constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME,
+        TableName=constants.TEST_REACH_TRACK_INGEST_TABLE_NAME,
         AttributeDefinitions=[
             {'AttributeName': 'granuleUR', 'AttributeType': 'S'},
             {'AttributeName': 'revision_date', 'AttributeType': 'S'},
@@ -332,7 +333,7 @@ def track_ingest_dynamo_instance(request, dynamo_test_proc):
             }
         ]
     )
-    track_reach_table = HydrocronTable(dynamo_db, constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
+    track_reach_table = HydrocronTable(dynamo_db, constants.TEST_REACH_TRACK_INGEST_TABLE_NAME)
     track_items = swot_shp.read_shapefile(
         TEST_SHAPEFILE_PATH_REACH_TRACK,
         obscure_data=False,
