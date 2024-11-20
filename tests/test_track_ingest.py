@@ -56,7 +56,7 @@ def test_get_granule_ur(track_ingest_fixture):
     
     data_repository = DynamoDataRepository(connection.dynamodb_resource)
     
-    table_name = constants.API_TEST_REACH_TABLE_NAME
+    table_name = constants.SWOT_REACH_TABLE_NAME
     granule_ur = "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
     actual_data = data_repository.get_granule_ur(table_name, granule_ur)
         
@@ -137,7 +137,7 @@ def test_get_status(track_ingest_fixture):
     from hydrocron.api.data_access.db import DynamoDataRepository
     
     hydrocron_table = DynamoDataRepository(hydrocron.utils.connection._dynamodb_resource)
-    items = hydrocron_table.get_status(constants.TEST_REACH_TRACK_INGEST_TABLE_NAME, "to_ingest")
+    items = hydrocron_table.get_status(constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME, "to_ingest")
     expected = [{
         "granuleUR": "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip",
         "revision_date": "2024-05-22T19:15:44.572Z",
@@ -161,7 +161,7 @@ def test_get_series_granule_ur(track_ingest_fixture):
     from hydrocron.api.data_access.db import DynamoDataRepository
     
     hydrocron_table = DynamoDataRepository(hydrocron.utils.connection._dynamodb_resource)
-    table_name = constants.API_TEST_REACH_TABLE_NAME
+    table_name = constants.SWOT_REACH_TABLE_NAME
     feature_name = "reach_id"
     granule_ur = "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
     items = hydrocron_table.get_series_granule_ur(table_name, feature_name, granule_ur)
@@ -182,8 +182,8 @@ def test_query_ingest(track_ingest_fixture):
     track._query_for_granule_ur = MagicMock(name="_query_for_granule_ur")
     track._query_for_granule_ur.return_value = "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
     
-    hydrocron_track_table = constants.TEST_REACH_TRACK_INGEST_TABLE_NAME
-    hydrocron_table = constants.API_TEST_REACH_TABLE_NAME
+    hydrocron_track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
+    hydrocron_table = constants.SWOT_REACH_TABLE_NAME
     track.query_track_ingest(hydrocron_track_table, hydrocron_table)
     
     expected = [{
@@ -213,7 +213,7 @@ def test_query_ingest_to_ingest(track_ingest_fixture):
         "SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
     )
     
-    track_reach_table = HydrocronTable(hydrocron.utils.connection._dynamodb_resource, constants.TEST_REACH_TRACK_INGEST_TABLE_NAME)
+    track_reach_table = HydrocronTable(hydrocron.utils.connection._dynamodb_resource, constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
     track_ingest_record = [{
         "granuleUR": os.path.basename(TEST_SHAPEFILE_PATH_REACH_TRACK),
         "revision_date": "2024-05-22T19:15:44.572Z",
@@ -230,8 +230,8 @@ def test_query_ingest_to_ingest(track_ingest_fixture):
     track._query_for_granule_ur = MagicMock(name="_query_for_granule_ur")
     track._query_for_granule_ur.return_value = "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"
 
-    hydrocron_track_table = constants.TEST_REACH_TRACK_INGEST_TABLE_NAME
-    hydrocron_table = constants.API_TEST_REACH_TABLE_NAME
+    hydrocron_track_table = constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME
+    hydrocron_table = constants.SWOT_REACH_TABLE_NAME
     track.query_track_ingest(hydrocron_track_table, hydrocron_table)
     
     expected = [{
@@ -267,10 +267,10 @@ def test_update_track_to_ingest(track_ingest_fixture):
         "actual_feature_count": 0,
         "status": "to_ingest"
     }]
-    track.update_track_ingest(constants.TEST_REACH_TRACK_INGEST_TABLE_NAME)
+    track.update_track_ingest(constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
 
     dynamodb = hydrocron.utils.connection._dynamodb_resource
-    table = dynamodb.Table(constants.TEST_REACH_TRACK_INGEST_TABLE_NAME)
+    table = dynamodb.Table(constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
     table.load()
     actual_item = table.query(
         KeyConditionExpression=(Key("granuleUR").eq("SWOT_L2_HR_RiverSP_Reach_010_177_NA_20240131T074748_20240131T074759_PIC0_01.zip"))
@@ -300,10 +300,10 @@ def test_update_track_ingested(track_ingest_fixture):
         "expected_feature_count":664,
         "actual_feature_count": 664,
     }]
-    track.update_track_ingest(constants.TEST_REACH_TRACK_INGEST_TABLE_NAME)
+    track.update_track_ingest(constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
 
     dynamodb = hydrocron.utils.connection._dynamodb_resource
-    table = dynamodb.Table(constants.TEST_REACH_TRACK_INGEST_TABLE_NAME)
+    table = dynamodb.Table(constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)
     table.load()
     actual_item = table.query(
         KeyConditionExpression=(Key("granuleUR").eq("SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip"))

@@ -401,13 +401,17 @@ def track_ingest_handler(event, context):
     reprocessed_crid = event["reprocessed_crid"]
     temporal = "temporal" in event.keys()
 
-    for table_info in constants.TABLE_COLLECTION_INFO:
-        if (table_info['collection_name'] in collection_shortname) & (str.lower(table_info['feature_type']) in collection_shortname):
-            hydrocron_table = table_info['table_name']
-            hydrocron_track_table = table_info['track_table']
-            break
-    else:
-        raise TableMisMatch(f"Error: Cannot query data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
+    if ("reach" in collection_shortname) and ((hydrocron_table != constants.SWOT_REACH_TABLE_NAME)
+                                              or (hydrocron_track_table != constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)):
+        raise TableMisMatch(f"Error: Cannot query reach data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
+
+    if ("node" in collection_shortname) and ((hydrocron_table != constants.SWOT_NODE_TABLE_NAME)
+                                             or (hydrocron_track_table != constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME)):
+        raise TableMisMatch(f"Error: Cannot query node data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
+
+    if ("prior" in collection_shortname) and ((hydrocron_table != constants.SWOT_PRIOR_LAKE_TABLE_NAME)
+                                              or (hydrocron_track_table != constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME)):
+        raise TableMisMatch(f"Error: Cannot query prior lake data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
 
     if temporal:
         query_start = datetime.datetime.strptime(event["query_start"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
