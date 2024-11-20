@@ -1,0 +1,161 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.3
+    method: GET
+    uri: https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=SWOT_L2_HR_RiverSP_2.0&readable_granule_name%5B%5D=SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip&options%5Breadable_granule_name%5D%5Bpattern%5D=true&page_size=0
+  response:
+    body:
+      string: '{"hits":1,"took":2179,"items":[]}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - CMR-Hits, CMR-Request-Id, X-Request-Id, CMR-Scroll-Id, CMR-Search-After, CMR-Timed-Out,
+        CMR-Shapefile-Original-Point-Count, CMR-Shapefile-Simplified-Point-Count
+      CMR-Hits:
+      - '1'
+      CMR-Request-Id:
+      - 2a8cc30a-67aa-43f5-a5a2-b4e142811e5a
+      CMR-Took:
+      - '2180'
+      Connection:
+      - keep-alive
+      Content-MD5:
+      - e3c0b5ef7f4e8e04a2ff0a3ba79fcb17
+      Content-SHA1:
+      - e687b3ace7e66d18f30f858e37ff8e29bb59d56b
+      Content-Type:
+      - application/vnd.nasa.cmr.umm_results+json;version=1.6.6; charset=utf-8
+      Date:
+      - Thu, 24 Oct 2024 15:07:02 GMT
+      Server:
+      - ServerTokens ProductOnly
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding, User-Agent
+      Via:
+      - 1.1 fc48013403578d683e0591243fa02952.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - 8csUtKjVlqIJxXP5nEY-ipc-OksC_dOh08EQafx5fD7fWBUGT7jHpA==
+      X-Amz-Cf-Pop:
+      - LAX50-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Request-Id:
+      - 8csUtKjVlqIJxXP5nEY-ipc-OksC_dOh08EQafx5fD7fWBUGT7jHpA==
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '33'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.3
+    method: GET
+    uri: https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=SWOT_L2_HR_RiverSP_2.0&readable_granule_name%5B%5D=SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip&options%5Breadable_granule_name%5D%5Bpattern%5D=true&page_size=1
+  response:
+    body:
+      string: '{"hits":1,"took":1578,"items":[{"meta":{"concept-type":"granule","concept-id":"G3232692178-POCLOUD","revision-id":1,"native-id":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01","collection-concept-id":"C2799438299-POCLOUD","provider-id":"POCLOUD","format":"application/vnd.nasa.cmr.umm+json","revision-date":"2024-09-09T01:25:31.585Z"},"umm":{"TemporalExtent":{"RangeDateTime":{"EndingDateTime":"2024-09-05T23:31:35.589Z","BeginningDateTime":"2024-09-05T23:31:34.815Z"}},"GranuleUR":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01","AdditionalAttributes":[{"Values":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"],"Name":"TILE"}],"MeasuredParameters":[{"QAStats":{"QAPercentMissingData":0,"QAPercentOutOfBoundsData":0},"ParameterName":"N/A"}],"SpatialExtent":{"HorizontalSpatialDomain":{"Geometry":{"BoundingRectangles":[{"WestBoundingCoordinate":-130.8307934819651,"SouthBoundingCoordinate":52.93360004865338,"EastBoundingCoordinate":-125.58639150138737,"NorthBoundingCoordinate":58.82204893062929}]},"Track":{"Cycle":20,"Passes":[{"Pass":457,"Tiles":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"]}]}}},"ProviderDates":[{"Type":"Insert","Date":"2024-09-09T01:25:25.739Z"},{"Type":"Update","Date":"2024-09-09T01:25:25.739Z"}],"CollectionReference":{"Version":"2.0","ShortName":"SWOT_L2_HR_RiverSP_2.0"},"PGEVersionClass":{"PGEName":"PGE_L2_HR_RiverSP","PGEVersion":"5.0.4"},"RelatedUrls":[{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/podaac-swot-ops-cumulus-public/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Description":"Download
+        SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Type":"EXTENDED
+        METADATA"},{"URL":"s3://podaac-swot-ops-cumulus-public/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Description":"This
+        link provides direct download access via S3 to the granule","Type":"EXTENDED
+        METADATA"},{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.rc.xml","Description":"Download
+        SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.rc.xml","Type":"EXTENDED
+        METADATA"},{"URL":"s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.rc.xml","Description":"This
+        link provides direct download access via S3 to the granule","Type":"EXTENDED
+        METADATA"},{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip","Description":"Download
+        SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip","Type":"GET
+        DATA"},{"URL":"s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip","Description":"This
+        link provides direct download access via S3 to the granule","Type":"GET DATA
+        VIA DIRECT ACCESS"},{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.met.json","Description":"Download
+        SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.met.json","Type":"EXTENDED
+        METADATA"},{"URL":"s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.met.json","Description":"This
+        link provides direct download access via S3 to the granule","Type":"EXTENDED
+        METADATA"},{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.log","Description":"Download
+        SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.log","Type":"EXTENDED
+        METADATA"},{"URL":"s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.log","Description":"This
+        link provides direct download access via S3 to the granule","Type":"EXTENDED
+        METADATA"},{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/s3credentials","Description":"api
+        endpoint to retrieve temporary credentials valid for same-region direct s3
+        access","Type":"VIEW RELATED INFORMATION"}],"InputGranules":["SWOT_GranulePolygons_Nom_20230921T225100_v06.json","SWOT_L2_HR_RiverTile_Node_020_457_248L_20240905T233134_20240905T233135_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_248R_20240905T233134_20240905T233135_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_249L_20240905T233134_20240905T233145_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_249R_20240905T233134_20240905T233145_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_250L_20240905T233144_20240905T233155_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_250R_20240905T233144_20240905T233155_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_251L_20240905T233154_20240905T233203_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_251R_20240905T233154_20240905T233203_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_252L_20240905T233204_20240905T233215_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_252R_20240905T233204_20240905T233215_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_253L_20240905T233214_20240905T233225_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_253R_20240905T233214_20240905T233225_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_254L_20240905T233224_20240905T233235_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_254R_20240905T233224_20240905T233235_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_255L_20240905T233234_20240905T233245_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_255R_20240905T233234_20240905T233245_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_256L_20240905T233244_20240905T233255_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_256R_20240905T233244_20240905T233255_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_257L_20240905T233254_20240905T233305_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_257R_20240905T233254_20240905T233305_PIC0_01.zip","SWOT_L2_HR_RiverTile_Node_020_457_258L_20240905T233304_20240905T233315_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_248L_20240905T233134_20240905T233135_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_248R_20240905T233134_20240905T233135_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_249L_20240905T233134_20240905T233145_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_249R_20240905T233134_20240905T233145_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_250L_20240905T233144_20240905T233155_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_250R_20240905T233144_20240905T233155_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_251L_20240905T233154_20240905T233203_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_251R_20240905T233154_20240905T233203_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_252L_20240905T233204_20240905T233215_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_252R_20240905T233204_20240905T233215_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_253L_20240905T233214_20240905T233225_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_253R_20240905T233214_20240905T233225_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_254L_20240905T233224_20240905T233235_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_254R_20240905T233224_20240905T233235_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_255L_20240905T233234_20240905T233245_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_255R_20240905T233234_20240905T233245_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_256L_20240905T233244_20240905T233255_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_256R_20240905T233244_20240905T233255_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_257L_20240905T233254_20240905T233305_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_257R_20240905T233254_20240905T233305_PIC0_01.zip","SWOT_L2_HR_RiverTile_Reach_020_457_258L_20240905T233304_20240905T233315_PIC0_01.zip","SWOT_ORF_AXXCNE20240908_103500_20230720_200750_20240923_075859"],"DataGranule":{"ArchiveAndDistributionInformation":[{"SizeUnit":"MB","Size":0.006846427917480469,"Checksum":{"Value":"03123d26081a7b4111b57f296cd665f5","Algorithm":"MD5"},"SizeInBytes":7179,"Name":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.rc.xml"},{"SizeUnit":"MB","Size":2.689361572265625E-4,"Checksum":{"Value":"ec08049792dbbfb1f5de78215a4e0488","Algorithm":"MD5"},"SizeInBytes":282,"Name":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.met.json"},{"SizeUnit":"MB","Size":0.010951042175292969,"Checksum":{"Value":"a8fac11f9f348eeacc5e2d444385d6c6","Algorithm":"MD5"},"SizeInBytes":11483,"Name":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.log"},{"SizeUnit":"MB","Size":0.7113246917724609,"Checksum":{"Value":"6ce27e868bd90055252de186f554759f","Algorithm":"MD5"},"SizeInBytes":745878,"Name":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip"},{"SizeUnit":"MB","Size":0.16765594482421875,"Checksum":{"Value":"bf3bae203f30e2441ef701ebe6638038","Algorithm":"MD5"},"SizeInBytes":175800,"Name":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml"}],"DayNightFlag":"Unspecified","Identifiers":[{"Identifier":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip","IdentifierType":"ProducerGranuleId"},{"Identifier":"PIC0","IdentifierType":"CRID"},{"Identifier":"1.1","IdentifierType":"Other","IdentifierName":"SASVersionId"},{"Identifier":"5.0.4","IdentifierType":"Other","IdentifierName":"PGEVersionId"},{"Identifier":"ICV01
+        CollectionVersion filler","IdentifierType":"Other","IdentifierName":"ScienceAlgorithmVersionId"},{"Identifier":"01","IdentifierType":"Other","IdentifierName":"ProductCounter"}],"ReprocessingPlanned":"None","ProductionDateTime":"2024-09-09T01:19:51.468Z"},"Platforms":[{"Instruments":[{"ShortName":"KaRIn"}],"ShortName":"SWOT"}],"MetadataSpecification":{"Version":"1.6.6","URL":"https://cdn.earthdata.nasa.gov/umm/granule/v1.6.6","Name":"UMM-G"}}}]}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - CMR-Hits, CMR-Request-Id, X-Request-Id, CMR-Scroll-Id, CMR-Search-After, CMR-Timed-Out,
+        CMR-Shapefile-Original-Point-Count, CMR-Shapefile-Simplified-Point-Count
+      CMR-Hits:
+      - '1'
+      CMR-Request-Id:
+      - 48ad845f-7c44-4d09-a947-b5e69d75e3e6
+      CMR-Search-After:
+      - '["pocloud",1725579094815,3232692178]'
+      CMR-Took:
+      - '1579'
+      Connection:
+      - keep-alive
+      Content-MD5:
+      - d7e576c914b4d6bbb473bc86a3a9d028
+      Content-SHA1:
+      - c4c33f50fa63cdaed4ab4693802b749e3d93385b
+      Content-Type:
+      - application/vnd.nasa.cmr.umm_results+json;version=1.6.6; charset=utf-8
+      Date:
+      - Thu, 24 Oct 2024 15:07:04 GMT
+      Server:
+      - ServerTokens ProductOnly
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding, User-Agent
+      Via:
+      - 1.1 ff59c1cd74c841ab9a3ebd5370e3b24a.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - -h7ViK40xc6Etm936-QljHsgYyIxWC8fFoJscwiLHdHd1fXm-a7pjA==
+      X-Amz-Cf-Pop:
+      - LAX50-C1
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Request-Id:
+      - -h7ViK40xc6Etm936-QljHsgYyIxWC8fFoJscwiLHdHd1fXm-a7pjA==
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '10682'
+    status:
+      code: 200
+      message: OK
+version: 1

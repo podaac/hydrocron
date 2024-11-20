@@ -13,6 +13,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [1.5.0]
+
+### Added
+    - Issue 211 - Query track ingest table for granules with "to_ingest" status
+    - Issue 212 - Update track ingest table with granule status
+    - Issue 203 - Construct CNM to trigger load data operations and ingest granule
+    - Issue 236 - Allow UAT query of CMR to support querying in different venues
+    - Issue 250 - Handle overlapping times with unique CRIDS
+### Changed
+    - Issue 251 - Add note to readme to point to documentation
+### Deprecated
+### Removed
+### Fixed
+    - Issue 258 - Granules with very large feature counts cannot be added to hydrocron
+    - Issue 235 - Track ingest table can be populated with granules that aren't loaded into Hydrocron
+    - Issue 248 - Track ingest operations need to query UAT for granule files if track ingest is running in SIT or UAT
+### Security
+
 ## [1.4.1]
 
 ### Added

@@ -133,6 +133,9 @@ def granule_handler(event, _):
     if ("LakeSP_Prior" in granule_path) & (table_name != constants.SWOT_PRIOR_LAKE_TABLE_NAME):
         raise TableMisMatch(f"Error: Cannot load Prior Lake data into table: '{table_name}'")
 
+    if ("LakeSP_Obs" in granule_path) | ("LakeSP_Unassigned" in granule_path):
+        raise TableMisMatch(f"Error: Cannot load Observed or Unassigned Lake data into table: '{table_name}'")
+
     logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
 
     obscure_data = "true" in os.getenv("OBSCURE_DATA").lower()
@@ -362,8 +365,12 @@ def load_data(dynamo_resource, table_name, items):
             logging.info("Item %s: %s", feature_id, items[i][feature_id])
         hydrocron_table.batch_fill_table(items)
 
+        logging.info("Finished loading %s items", len(items))
+
     else:
         logging.info("Adding %s items to table individually", feature_name)
         for item_attrs in items:
             logging.info("Item %s: %s", feature_id, item_attrs[feature_id])
             hydrocron_table.add_data(**item_attrs)
+
+        logging.info("Finished loading %s items", len(items))
