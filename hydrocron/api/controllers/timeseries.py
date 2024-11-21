@@ -6,6 +6,7 @@ Hydrocron API timeseries controller
 import datetime
 import json
 import logging
+import os
 import sys
 import time
 
@@ -23,6 +24,9 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 ACCEPT_TYPES = ['application/json', 'text/csv', 'application/geo+json']
+DEFAULT_RIVER_COLLECTION = os.environ['DEFAULT_RIVER_COLLECTION']
+DEFAULT_LAKE_COLLECTION = os.environ['DEFAULT_LAKE_COLLECTION']
+DEFAULT_COLLECTION_VERSION = os.environ['DEFAULT_COLLECTION_VERSION']
 
 
 class RequestError(Exception):
@@ -71,15 +75,41 @@ def get_request_parameters(event, accept_header):
         parameters['compact'] = 'false' if 'compact' not in event['body'].keys() else event['body']['compact']
         if accept_header == 'application/geo+json':   # Default is different for geo+json
             parameters['compact'] = 'true' if 'compact' not in event['body'].keys() else event['body']['compact']
+        parameters['collection_name'] = get_collection_name(event)
     except KeyError as e:
         logging.error('Error encountered with request parameters: %s', e)
         raise RequestError(f'400: This required parameter is missing: {e}') from e
+
+    if not parameters['collection_name']:
+        raise RequestError(f'400: feature parameter should be Reach, Node, or PriorLake, not: {parameters["feature"]}')
 
     error_message = validate_parameters(parameters)
     if error_message:
         raise RequestError(error_message)
 
     return parameters
+
+
+def get_collection_name(event):
+    """Return request parameters from event object.
+
+    :param event: Request data dictionary
+    :type event: dict
+
+    :rtype: str
+    """
+
+    feature = event['body']['feature'].lower()
+    if 'collection_name' not in event['body'].keys():
+        if feature == 'reach' or feature == 'node':
+            collection_name = f'{DEFAULT_RIVER_COLLECTION}_{DEFAULT_COLLECTION_VERSION}'
+        elif feature == 'priorlake':
+            collection_name = f'{DEFAULT_LAKE_COLLECTION}_{DEFAULT_COLLECTION_VERSION}'
+        else:
+            collection_name = ''
+    else:
+        collection_name = event['body']['collection_name']
+    return collection_name
 
 
 def get_return_type(accept_header, output):
@@ -147,6 +177,9 @@ def validate_parameters(parameters):
 
     elif parameters['compact'] not in ('true', 'false'):
         error_message = f'400: compact parameter should be true or false, not {parameters["compact"]}'
+
+    elif parameters['collection_name'] not in constants.COLLECTIONS_LIST:
+        error_message = f'400: collection_name parameter should be one of the following: {", ".join(constants.COLLECTIONS_LIST)}'
 
     else:
         parameters['start_time'], parameters['end_time'] = sanitize_time(parameters['start_time'], parameters['end_time'])
