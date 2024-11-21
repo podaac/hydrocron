@@ -180,6 +180,18 @@ TABLE_COLLECTION_INFO = [
      }
 ]
 
+FEATURE_ID = {
+    "SWOT_L2_HR_RiverSP_reach_2.0": "reach_id",
+    "SWOT_L2_HR_RiverSP_node_2.0": "node_id",
+    "SWOT_L2_HR_LakeSP_prior_2.0": "lake_id"
+}
+
+SHORTNAME = {
+    "SWOT_L2_HR_RiverSP_reach_2.0": "SWOT_L2_HR_RiverSP_2.0",
+    "SWOT_L2_HR_RiverSP_node_2.0": "SWOT_L2_HR_RiverSP_2.0",
+    "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0"
+}
+
 SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS = (
         (-31.286028054129474, -27.207309600925463),
         (-22.19117572552625, -28.812946226841383),
