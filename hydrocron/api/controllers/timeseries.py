@@ -475,6 +475,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
             return {}
         logging.info('user_ip: %s', headers['user_ip'])
         parameters = get_request_parameters(event, headers['accept'])
+        logging.info('collection_name: %s', parameters['collection_name'])
         return_type, output = get_return_type(headers['accept'], parameters['output'])
     except RequestError as e:
         raise e

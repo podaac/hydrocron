@@ -36,8 +36,8 @@ class DynamoDataRepository:
                 partition_key = table_info['partition_key']
                 sort_key = table_info['sort_key']
                 break
-            else:
-                return {'Items': []}
+        else:
+            return {'Items': []}
 
         hydrocron_table = self._dynamo_instance.Table(table_name)
         hydrocron_table.load()
