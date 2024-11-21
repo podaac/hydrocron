@@ -134,6 +134,13 @@ TEST_PLAKE_UNITS = 'km^2'
 # ------------ #
 # PROD CONSTANTS #
 # ------------ #
+SWOT_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
+SWOT_NODE_TABLE_NAME = "hydrocron-swot-node-table"
+SWOT_PRIOR_LAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"
+SWOT_REACH_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-reach-track-ingest-table"
+SWOT_NODE_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-node-track-ingest-table"
+SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-prior-lake-track-ingest-table"
+
 TABLE_COLLECTION_INFO = [
     {'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
      'table_name': 'hydrocron-swot-reach-table',
@@ -172,9 +179,6 @@ TABLE_COLLECTION_INFO = [
      'feature_id': 'lake_id'
      }
 ]
-SWOT_REACH_TABLE_NAME = 'hydrocron-swot-reach-table'
-SWOT_NODE_TABLE_NAME = 'hydrocron-swot-node-table'
-SWOT_PRIOR_LAKE_TABLE_NAME = 'hydrocron-swot-prior-lake-table'
 
 SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS = (
         (-31.286028054129474, -27.207309600925463),

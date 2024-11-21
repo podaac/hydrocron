@@ -122,6 +122,9 @@ def granule_handler(event, _):
     else:
         raise MissingTable(f"Error: Cannot load granule: {granule_path}, no support for this collection")
 
+    if ("LakeSP_Obs" in granule_path) | ("LakeSP_Unassigned" in granule_path):
+        raise TableMisMatch(f"Error: Cannot load Observed or Unassigned Lake data into table: '{table_name}'")
+
     logging.info("Value of load_benchmarking_data is: %s", load_benchmarking_data)
 
     obscure_data = "true" in os.getenv("OBSCURE_DATA").lower()
