@@ -159,7 +159,14 @@ def validate_parameters(parameters):
 
     error_message = ''
 
-    if parameters['feature'] not in ('Node', 'Reach', 'PriorLake'):
+    collections_list = []
+    for version in constants.CURRENT_VERSION_LIST:
+        collections_list.extend([f"{collection}_{version}" for collection in constants.COLLECTIONS_LIST])
+
+    if parameters['collection_name'] not in collections_list:
+        error_message = f'400: collection_name parameter should be one of the following: {", ".join(collections_list)}'
+
+    elif parameters['feature'] not in ('Node', 'Reach', 'PriorLake'):
         error_message = f'400: feature parameter should be Reach, Node, or PriorLake, not: {parameters["feature"]}'
 
     elif not parameters['feature_id'].isdigit():
@@ -177,9 +184,6 @@ def validate_parameters(parameters):
 
     elif parameters['compact'] not in ('true', 'false'):
         error_message = f'400: compact parameter should be true or false, not {parameters["compact"]}'
-
-    elif parameters['collection_name'] not in constants.COLLECTIONS_LIST:
-        error_message = f'400: collection_name parameter should be one of the following: {", ".join(constants.COLLECTIONS_LIST)}'
 
     else:
         parameters['start_time'], parameters['end_time'] = sanitize_time(parameters['start_time'], parameters['end_time'])
@@ -246,11 +250,13 @@ def sanitize_time(start_time, end_time):
     return start_time, end_time
 
 
-def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-positional-arguments
+def timeseries_get(collection_name, feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-positional-arguments
     """Get Timeseries for a particular Reach, Node, or LakeID
 
     Get Timeseries for a particular Reach, Node, or LakeID # noqa: E501
 
+    :param collection_name: Name of collection to query data for
+    :type collection_name: str
     :param feature: Data requested for Reach or Node or Lake
     :type feature: str
     :param feature_id: ID of the feature to retrieve
@@ -272,7 +278,7 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     hits = 0
 
     data_repository = DynamoDataRepository(connection.dynamodb_resource)
-    results = data_repository.get_series_by_feature_id(feature, feature_id, start_time, end_time)
+    results = data_repository.get_series_by_feature_id(collection_name, feature, feature_id, start_time, end_time)
 
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
@@ -474,6 +480,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         raise e
 
     results, hits = timeseries_get(
+        parameters['collection_name'],
         parameters['feature'],
         parameters['feature_id'],
         parameters['start_time'],

@@ -141,42 +141,61 @@ SWOT_REACH_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-reach-track-ingest-table"
 SWOT_NODE_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-node-track-ingest-table"
 SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-prior-lake-track-ingest-table"
 
+SWOT_REACH_PARTITION_KEY = "reach_id"
+SWOT_NODE_PARTITION_KEY = "node_id"
+SWOT_PRIOR_LAKE_PARTITION_KEY = "lake_id"
+SWOT_REACH_SORT_KEY = "range_start_time"
+SWOT_NODE_SORT_KEY = "range_start_time"
+SWOT_PRIOR_LAKE_SORT_KEY = "range_start_time"
+
 TABLE_COLLECTION_INFO = [
     {'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
      'table_name': 'hydrocron-swot-reach-table',
      'track_table': 'hydrocron-swot-reach-track-ingest-table',
      'feature_type': 'Reach',
-     'feature_id': 'reach_id'
+     'feature_id': 'reach_id',
+     'partition_key': SWOT_REACH_PARTITION_KEY,
+     'sort_key': SWOT_REACH_SORT_KEY
      },
     {'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
      'table_name': 'hydrocron-swot-node-table',
      'track_table': 'hydrocron-swot-node-track-ingest-table',
      'feature_type': 'Node',
-     'feature_id': 'node_id'
+     'feature_id': 'node_id',
+     'partition_key': SWOT_NODE_PARTITION_KEY,
+     'sort_key': SWOT_NODE_SORT_KEY
      },
     {'collection_name': 'SWOT_L2_HR_LakeSP_2.0',
      'table_name': 'hydrocron-swot-prior-lake-table',
      'track_table': 'hydrocron-swot-prior-lake-track-ingest-table',
      'feature_type': 'LakeSP_Prior',
-     'feature_id': 'lake_id'
+     'feature_id': 'lake_id',
+     'partition_key': SWOT_PRIOR_LAKE_PARTITION_KEY,
+     'sort_key': SWOT_PRIOR_LAKE_SORT_KEY
      },
     {'collection_name': 'SWOT_L2_HR_RiverSP_D',
      'table_name': 'hydrocron-SWOT_L2_HR_RiverSP_D-reach-table',
      'track_table': 'hydrocron-SWOT_L2_HR_RiverSP_D-reach-track-ingest',
      'feature_type': 'Reach',
-     'feature_id': 'reach_id'
+     'feature_id': 'reach_id',
+     'partition_key': SWOT_REACH_PARTITION_KEY,
+     'sort_key': SWOT_REACH_SORT_KEY
      },
     {'collection_name': 'SWOT_L2_HR_RiverSP_D',
      'table_name': 'hydrocron-SWOT_L2_HR_RiverSP_D-node-table',
      'track_table': 'hydrocron-SWOT_L2_HR_RiverSP_D-node-track-ingest',
      'feature_type': 'Node',
-     'feature_id': 'node_id'
+     'feature_id': 'node_id',
+     'partition_key': SWOT_NODE_PARTITION_KEY,
+     'sort_key': SWOT_NODE_SORT_KEY
      },
     {'collection_name': 'SWOT_L2_HR_LakeSP_D',
      'table_name': 'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table',
      'track_table': 'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-track-ingest',
      'feature_type': 'LakeSP_Prior',
-     'feature_id': 'lake_id'
+     'feature_id': 'lake_id',
+     'partition_key': SWOT_PRIOR_LAKE_PARTITION_KEY,
+     'sort_key': SWOT_PRIOR_LAKE_SORT_KEY
      }
 ]
 
@@ -198,6 +217,11 @@ COLLECTIONS_LIST = [
     "SWOT_L2_HR_RiverSP_node",
     "SWOT_L2_HR_LakeSP",
     "SWOT_L2_HR_LakeSP_prior"
+]
+
+CURRENT_VERSION_LIST = [
+    "2.0",
+    "D"
 ]
 
 SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS = (
@@ -222,13 +246,6 @@ SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS = (
         (-25.61120124377038, -25.40631583584434),
         (-31.032731158967948, -24.810351227750644),
         (-31.286028054129474, -27.207309600925463))
-
-SWOT_REACH_PARTITION_KEY = "reach_id"
-SWOT_NODE_PARTITION_KEY = "node_id"
-SWOT_PRIOR_LAKE_PARTITION_KEY = "lake_id"
-SWOT_REACH_SORT_KEY = "range_start_time"
-SWOT_NODE_SORT_KEY = "range_start_time"
-SWOT_PRIOR_LAKE_SORT_KEY = "range_start_time"
 
 FIELDNAME_REACH_ID = 'reach_id'
 FIELDNAME_LAKE_ID = 'lake_id'
