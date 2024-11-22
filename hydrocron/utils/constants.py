@@ -153,6 +153,7 @@ TABLE_COLLECTION_INFO = [
      'table_name': 'hydrocron-swot-reach-table',
      'track_table': 'hydrocron-swot-reach-track-ingest-table',
      'feature_type': 'Reach',
+     'api_feature_type': 'reach',
      'feature_id': 'reach_id',
      'partition_key': SWOT_REACH_PARTITION_KEY,
      'sort_key': SWOT_REACH_SORT_KEY
@@ -161,6 +162,7 @@ TABLE_COLLECTION_INFO = [
      'table_name': 'hydrocron-swot-node-table',
      'track_table': 'hydrocron-swot-node-track-ingest-table',
      'feature_type': 'Node',
+     'api_feature_type': 'node',
      'feature_id': 'node_id',
      'partition_key': SWOT_NODE_PARTITION_KEY,
      'sort_key': SWOT_NODE_SORT_KEY
@@ -169,6 +171,7 @@ TABLE_COLLECTION_INFO = [
      'table_name': 'hydrocron-swot-prior-lake-table',
      'track_table': 'hydrocron-swot-prior-lake-track-ingest-table',
      'feature_type': 'LakeSP_Prior',
+     'api_feature_type': 'priorlake',
      'feature_id': 'lake_id',
      'partition_key': SWOT_PRIOR_LAKE_PARTITION_KEY,
      'sort_key': SWOT_PRIOR_LAKE_SORT_KEY
@@ -177,6 +180,7 @@ TABLE_COLLECTION_INFO = [
      'table_name': 'hydrocron-SWOT_L2_HR_RiverSP_D-reach-table',
      'track_table': 'hydrocron-SWOT_L2_HR_RiverSP_D-reach-track-ingest',
      'feature_type': 'Reach',
+     'api_feature_type': 'reach',
      'feature_id': 'reach_id',
      'partition_key': SWOT_REACH_PARTITION_KEY,
      'sort_key': SWOT_REACH_SORT_KEY
@@ -185,6 +189,7 @@ TABLE_COLLECTION_INFO = [
      'table_name': 'hydrocron-SWOT_L2_HR_RiverSP_D-node-table',
      'track_table': 'hydrocron-SWOT_L2_HR_RiverSP_D-node-track-ingest',
      'feature_type': 'Node',
+     'api_feature_type': 'node',
      'feature_id': 'node_id',
      'partition_key': SWOT_NODE_PARTITION_KEY,
      'sort_key': SWOT_NODE_SORT_KEY
@@ -193,6 +198,7 @@ TABLE_COLLECTION_INFO = [
      'table_name': 'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table',
      'track_table': 'hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-track-ingest',
      'feature_type': 'LakeSP_Prior',
+     'api_feature_type': 'priorlake',
      'feature_id': 'lake_id',
      'partition_key': SWOT_PRIOR_LAKE_PARTITION_KEY,
      'sort_key': SWOT_PRIOR_LAKE_SORT_KEY

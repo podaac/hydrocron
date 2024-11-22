@@ -31,7 +31,7 @@ class DynamoDataRepository:
         """
 
         for table_info in constants.TABLE_COLLECTION_INFO:
-            if (table_info['collection_name'] in collection_name) & (table_info['feature_type'].lower() == feature_type.lower()):
+            if (table_info['collection_name'] in collection_name) & (table_info['api_feature_type'].lower() == feature_type.lower()):
                 table_name = table_info['table_name']
                 partition_key = table_info['partition_key']
                 sort_key = table_info['sort_key']
