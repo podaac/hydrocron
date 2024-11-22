@@ -101,7 +101,7 @@ def get_collection_name(event):
 
     feature = event['body']['feature'].lower()
     if 'collection_name' not in event['body'].keys():
-        if feature == 'reach' or feature == 'node':
+        if feature in ('reach', 'node'):
             collection_name = f'{DEFAULT_RIVER_COLLECTION}_{DEFAULT_COLLECTION_VERSION}'
         elif feature == 'priorlake':
             collection_name = f'{DEFAULT_LAKE_COLLECTION}_{DEFAULT_COLLECTION_VERSION}'
@@ -250,7 +250,7 @@ def sanitize_time(start_time, end_time):
     return start_time, end_time
 
 
-def timeseries_get(collection_name, feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-positional-arguments
+def timeseries_get(collection_name, feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-arguments,too-many-positional-arguments
     """Get Timeseries for a particular Reach, Node, or LakeID
 
     Get Timeseries for a particular Reach, Node, or LakeID # noqa: E501

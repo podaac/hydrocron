@@ -19,7 +19,7 @@ class DynamoDataRepository:
         self._dynamo_instance = dynamo_resource
         self._logger = logging.getLogger('hydrocron.api.data_access.db.DynamoDataRepository')
 
-    def get_series_by_feature_id(self, collection_name:str, feature_type: str, feature_id: str, start_time: str, end_time: str):  # noqa: E501 # pylint: disable=W0613
+    def get_series_by_feature_id(self, collection_name: str, feature_type: str, feature_id: str, start_time: str, end_time: str):  # pylint: disable=too-many-positional-arguments
         """
 
         @param collection_name:
