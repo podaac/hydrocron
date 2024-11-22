@@ -116,7 +116,7 @@ def granule_handler(event, _):
 
     for table_info in constants.TABLE_COLLECTION_INFO:
         if (table_info['collection_name'] in granule_path) & (table_info['feature_type'] in granule_path):
-            table_name = table_info['table']
+            table_name = table_info['table_name']
             track_table = table_info['track_table']
             break
     else:
