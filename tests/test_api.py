@@ -760,3 +760,72 @@ def test_timeseries_lambda_handler_geojson_accept_compact(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result == expected
+
+
+def test_get_collection_name():
+    """Test API get_collection_name function.
+    """
+    os.environ['HYDROCRON_ENV'] = 'test'
+    os.environ['HYDROCRON_dynamodb_endpoint_url'] = 'http://localhost:8000'
+    os.environ['DEFAULT_RIVER_COLLECTION'] = 'SWOT_L2_HR_RiverSP'
+    os.environ['DEFAULT_LAKE_COLLECTION'] = 'SWOT_L2_HR_LakeSP'
+    os.environ['DEFAULT_COLLECTION_VERSION'] = '2.0'
+    import hydrocron.api.controllers.timeseries
+
+    # Default
+    event = {
+        "headers": {
+            "Accept": "text/csv",
+            "User-Agent": "me",
+            "X-Forwarded-For": "123.456.789"
+        },
+        "body": {
+            "feature": "Reach",
+            "feature_id": "78322700021",
+            "start_time": "2024-05-16T00:00:00-00:00",
+            "end_time": "2024-06-26T23:59:59-00:00",
+            "fields": "reach_id,time_str,wse,width,slope,slope2,sword_version,collection_shortname,crid"
+        }
+    }
+
+    collection_name = hydrocron.api.controllers.timeseries.get_collection_name(event)
+    assert collection_name == "SWOT_L2_HR_RiverSP_2.0"
+
+    # Current version
+    event = {
+        "headers": {
+            "Accept": "text/csv",
+            "User-Agent": "me",
+            "X-Forwarded-For": "123.456.789"
+        },
+        "body": {
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "feature": "Reach",
+            "feature_id": "78322700021",
+            "start_time": "2024-05-16T00:00:00-00:00",
+            "end_time": "2024-06-26T23:59:59-00:00",
+            "fields": "reach_id,time_str,wse,width,slope,slope2,sword_version,collection_shortname,crid"
+        }
+    }
+
+    collection_name = hydrocron.api.controllers.timeseries.get_collection_name(event)
+    assert collection_name == "SWOT_L2_HR_RiverSP_2.0"
+
+    # Next version
+    event = {
+        "headers": {
+            "Accept": "text/csv",
+            "User-Agent": "me",
+            "X-Forwarded-For": "123.456.789"
+        },
+        "body": {
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "feature": "Reach",
+            "feature_id": "78322700021",
+            "start_time": "2024-05-16T00:00:00-00:00",
+            "end_time": "2024-06-26T23:59:59-00:00",
+            "fields": "reach_id,time_str,wse,width,slope,slope2,sword_version,collection_shortname,crid"
+        }
+    }
+    collection_name = hydrocron.api.controllers.timeseries.get_collection_name(event)
+    assert collection_name == "SWOT_L2_HR_RiverSP_D"
