@@ -9,6 +9,11 @@ parts:
 - caption: GETTING STARTED
   chapters:
   - file: overview
+  - file: user-guide/start
+    sections:
+    - file: user-guide/fields
+    - file: user-guide/time
+    - file: user-guide/versioning
   - file: examples
   - file: hydrocron_tutorial
 - caption: API ENDPOINTS
