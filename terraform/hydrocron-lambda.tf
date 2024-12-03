@@ -72,6 +72,13 @@ resource "aws_lambda_function" "hydrocron_lambda_timeseries" {
     subnet_ids         = data.aws_subnets.private_application_subnets.ids
     security_group_ids = data.aws_security_groups.vpc_default_sg.ids
   }
+  environment {
+    variables = {
+      DEFAULT_COLLECTION_VERSION = "2.0"
+      DEFAULT_LAKE_COLLECTION = "SWOT_L2_HR_LakeSP"
+      DEFAULT_RIVER_COLLECTION = "SWOT_L2_HR_RiverSP"
+    }
+  }
   tags = var.default_tags
 }
 

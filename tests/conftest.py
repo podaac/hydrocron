@@ -246,8 +246,9 @@ def mock_sns():
 def hydrocron_api(hydrocron_dynamo_instance, dynamo_test_proc, mock_ssm):
     os.environ['HYDROCRON_ENV'] = 'test'
     os.environ['HYDROCRON_dynamodb_endpoint_url'] = f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}"
-    os.environ['BATCH_STATUS'] = '500'
-    os.environ['DEBUG_LOGS'] = '0'
+    os.environ['DEFAULT_RIVER_COLLECTION'] = 'SWOT_L2_HR_RiverSP'
+    os.environ['DEFAULT_LAKE_COLLECTION'] = 'SWOT_L2_HR_LakeSP'
+    os.environ['DEFAULT_COLLECTION_VERSION'] = '2.0'
     import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
     hydrocron.utils.connection._dynamodb_resource = hydrocron_dynamo_instance
 
