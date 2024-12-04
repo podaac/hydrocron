@@ -137,7 +137,7 @@ The default for header `Accept: application/geo+json` is to set compact to `true
 (collection_name)=
 ### collection_name: string, required: no
 
-The name of the collection to return. Allows users to explicitly request data from a particular version the data.
+The name of the collection to return. Allows users to explicitly request data from a particular version of the data.
 Supported collection names include:
 
 Version C/2.0 (default):

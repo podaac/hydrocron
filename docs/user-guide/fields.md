@@ -11,7 +11,7 @@ We strongly recommend returning and using the quality flags on the fields that h
 
 For each feature type, the full list of currently supported fields is below. Full descriptions of what these fields are and how to use them are available in the SWOT Product Description Documents available on the PO.DAAC collection landing pages for [Rivers](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_RiverSP_2.0) and [Lakes](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_LakeSP_2.0)
 
-Occasionally new fields may be added to the SWOT data products. If there are fields you find in the SWOT shapefiles that are not returned from Hydrocron, please open an issue on the [Hydrocron GitHub repository](https://github.com/podaac/hydrocron).
+Occasionally new fields may be added to the SWOT data products. If there are fields you find in the SWOT shapefiles that are not returned from Hydrocron, please open an issue on the [Hydrocron GitHub repository](https://github.com/podaac/hydrocron/issues).
 
 **Reach fields**
 

@@ -43,7 +43,7 @@ Specifying sub collections in requests to Hydrocron is not necessary to distingu
 
 Note that if you mix feature types in the [](feature) and [](collection_name) parameters, the [](collection_name) parameter takes precedence. If you request [](feature_id) for a feature type that is different that what you request in [](collection_name), you will get an error.
 
-For example, here we request feature=Reach with a feature_id= a reach feature, but collection_name=SWOT_L2_HR_LakeSP_2.0. In this case you will get an error because Hydrocron will try to query the Lakes table for the reach_id.
+For example, here we request feature=Reach with feature_id=78340600051 (a reach feature), but collection_name=SWOT_L2_HR_LakeSP_2.0. In this case you will get an error because Hydrocron will try to query the Lakes table for the given reach_id.
 
 [https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00Z&end_time=2024-03-29T00:00:00Z&collection_name=SWOT_L2_HR_LakeSP_2.0&fields=reach_id,time_str,wse,slope](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00Z&end_time=2024-03-29T00:00:00Z&collection_name=SWOT_L2_HR_LakeSP_2.0&fields=reach_id,time_str,wse,slope)
 
