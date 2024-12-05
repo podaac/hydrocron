@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
     - Issue 229 - Create new database tables for version d collections
     - Issue 233 - Create new API parameter for user to specify data version
+    - Issue 267 - Modify track ingest operations to support new collection versions
 ### Changed
 ### Deprecated
 ### Removed
