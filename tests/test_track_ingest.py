@@ -415,8 +415,6 @@ def test_track_ingest_mismatch():
 
     event = {
         "collection_shortname": "SWOT_L2_HR_LakeSP_prior_2.0",
-        "hydrocron_table": "hydrocron-swot-prior-lake-table",
-        "hydrocron_track_table": "hydrocron-swot-reach-track-ingest-table",
         "temporal": "",
         "query_start": "2024-09-05T23:00:00",
         "query_end": "2024-09-05T23:59:59",

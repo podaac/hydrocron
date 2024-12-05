@@ -527,7 +527,7 @@ def track_ingest_handler(event, context):
             hydrocron_track_table = table_info['track_table']
             break
     else:
-        raise TableMisMatch(f"Error: Cannot query data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
+        raise TableMisMatch(f"Error: Cannot query data for collection: '{collection_shortname}'")
 
     if temporal:
         query_start = datetime.datetime.strptime(event["query_start"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
