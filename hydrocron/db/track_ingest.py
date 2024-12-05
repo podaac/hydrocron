@@ -517,8 +517,6 @@ def track_ingest_handler(event, context):
 
     account_id = context.invoked_function_arn.split(":")[4]
     collection_shortname = event["collection_shortname"]
-    hydrocron_table = event["hydrocron_table"]
-    hydrocron_track_table = event["hydrocron_track_table"]
     reprocessed_crid = event["reprocessed_crid"]
     temporal = "temporal" in event.keys()
 
@@ -554,7 +552,6 @@ def track_ingest_handler(event, context):
     cmr_granules = track.query_cmr(temporal)
     track.query_hydrocron(hydrocron_table, cmr_granules, reprocessed_crid)
     track.query_track_ingest(hydrocron_track_table, hydrocron_table, reprocessed_crid)
-    track.remove_overlap()
     track.publish_cnm_ingest(account_id)
     track.update_track_ingest(hydrocron_track_table)
     if not temporal:
