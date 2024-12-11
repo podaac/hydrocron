@@ -497,7 +497,7 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         data = get_response(results, hits, elapsed, return_type, output, parameters['compact'])
     except RequestError as e:
         raise e
-    logging.info('response: %s', json.dumps(data))
+    logging.info('response: %s', json.dumps({'status': results['http_code'], 'time': elapsed, 'hits': hits}))
     logging.info('response_size: %s', str(sys.getsizeof(data)))
 
     return data
