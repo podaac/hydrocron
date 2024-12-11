@@ -171,7 +171,7 @@ def cnm_handler(event, _):
         cnm = json.loads(message['Sns']['Message'])
         revision_date = cnm['submissionTime']
 
-        logging.info("Begin processing message %s", str(cnm))
+        logging.info("Begin processing message %s", json.dumps(cnm))
 
         for files in cnm['product']['files']:
             if files['type'] == 'data':
