@@ -50,7 +50,6 @@ def get_request_headers(event):
         headers['user_ip'] = event['headers']['X-Forwarded-For'].split(',')[0]
         headers['accept'] = '*/*' if 'Accept' not in event['headers'].keys() else event['headers']['Accept']
     except KeyError as e:
-        logging.error('Error encountered with headers: %s', e)
         raise RequestError(f'400: Issue encountered with request header: {e}') from e
     return headers
 
@@ -77,7 +76,6 @@ def get_request_parameters(event, accept_header):
             parameters['compact'] = 'true' if 'compact' not in event['body'].keys() else event['body']['compact']
         parameters['collection_name'] = get_collection_name(event)
     except KeyError as e:
-        logging.error('Error encountered with request parameters: %s', e)
         raise RequestError(f'400: This required parameter is missing: {e}') from e
 
     if not parameters['collection_name']:
@@ -132,7 +130,6 @@ def get_return_type(accept_header, output):
 
     if output != 'default':
         if return_type != 'application/json':
-            logging.error('Error encountered with request Accept header: %s and output: %s', return_type, output)
             raise RequestError(f'400: Invalid combination of Accept header ({accept_header}) and '
                                + f'output request parameter ({output}). Remove output request parameter when '
                                + 'requesting application/geo+json or text/csv')
@@ -420,7 +417,6 @@ def get_response(results, hits, elapsed, return_type, output, compact):  # pylin
             data['results'][output] = results['response']
 
     else:
-        logging.error(results)
         raise RequestError(results['error_message'])
 
     return data
@@ -478,6 +474,8 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         logging.info('collection_name: %s', parameters['collection_name'])
         return_type, output = get_return_type(headers['accept'], parameters['output'])
     except RequestError as e:
+        error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
+        logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
 
     results, hits = timeseries_get(
@@ -496,6 +494,8 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     try:
         data = get_response(results, hits, elapsed, return_type, output, parameters['compact'])
     except RequestError as e:
+        error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
+        logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
     logging.info('response: %s', json.dumps({'status': results['http_code'], 'time': elapsed, 'hits': hits}))
     logging.info('response_size: %s', str(sys.getsizeof(data)))
