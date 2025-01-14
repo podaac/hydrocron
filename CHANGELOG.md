@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 229 - Create new database tables for version d collections
     - Issue 233 - Create new API parameter for user to specify data version
     - Issue 273 - Modify the logging of the timeseries Lambda response object to reduce the log statement size
+    - Issue 267 - Modify track ingest operations to support new collection versions
 ### Changed
 ### Deprecated
 ### Removed

@@ -517,8 +517,6 @@ def track_ingest_handler(event, context):
 
     account_id = context.invoked_function_arn.split(":")[4]
     collection_shortname = event["collection_shortname"]
-    hydrocron_table = event["hydrocron_table"]
-    hydrocron_track_table = event["hydrocron_track_table"]
     reprocessed_crid = event["reprocessed_crid"]
     temporal = "temporal" in event.keys()
 
@@ -529,7 +527,7 @@ def track_ingest_handler(event, context):
             hydrocron_track_table = table_info['track_table']
             break
     else:
-        raise TableMisMatch(f"Error: Cannot query data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
+        raise TableMisMatch(f"Error: Cannot query data for collection: '{collection_shortname}'")
 
     if temporal:
         query_start = datetime.datetime.strptime(event["query_start"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
@@ -554,7 +552,6 @@ def track_ingest_handler(event, context):
     cmr_granules = track.query_cmr(temporal)
     track.query_hydrocron(hydrocron_table, cmr_granules, reprocessed_crid)
     track.query_track_ingest(hydrocron_track_table, hydrocron_table, reprocessed_crid)
-    track.remove_overlap()
     track.publish_cnm_ingest(account_id)
     track.update_track_ingest(hydrocron_track_table)
     if not temporal:
