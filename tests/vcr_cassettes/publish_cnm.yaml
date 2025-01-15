@@ -14,7 +14,7 @@ interactions:
     uri: https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=SWOT_L2_HR_RiverSP_2.0&readable_granule_name%5B%5D=SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip&options%5Breadable_granule_name%5D%5Bpattern%5D=true&page_size=0
   response:
     body:
-      string: '{"hits":1,"took":2179,"items":[]}'
+      string: '{"hits":1,"took":24,"items":[]}'
     headers:
       Access-Control-Allow-Origin:
       - '*'
@@ -24,19 +24,19 @@ interactions:
       CMR-Hits:
       - '1'
       CMR-Request-Id:
-      - 2a8cc30a-67aa-43f5-a5a2-b4e142811e5a
+      - 57535264-7625-4400-816b-74ce7ca2b5da
       CMR-Took:
-      - '2180'
+      - '24'
       Connection:
       - keep-alive
       Content-MD5:
-      - e3c0b5ef7f4e8e04a2ff0a3ba79fcb17
+      - 0d29d19ca12d3e0acd646bed56423f2a
       Content-SHA1:
-      - e687b3ace7e66d18f30f858e37ff8e29bb59d56b
+      - 4f3f31f8b885d5ff9f58566612cad48751f6ff31
       Content-Type:
       - application/vnd.nasa.cmr.umm_results+json;version=1.6.6; charset=utf-8
       Date:
-      - Thu, 24 Oct 2024 15:07:02 GMT
+      - Wed, 15 Jan 2025 21:13:05 GMT
       Server:
       - ServerTokens ProductOnly
       Strict-Transport-Security:
@@ -46,9 +46,9 @@ interactions:
       Vary:
       - Accept-Encoding, User-Agent
       Via:
-      - 1.1 fc48013403578d683e0591243fa02952.cloudfront.net (CloudFront)
+      - 1.1 ecceab4d19fbcb3c610e6bd7359fd0d2.cloudfront.net (CloudFront)
       X-Amz-Cf-Id:
-      - 8csUtKjVlqIJxXP5nEY-ipc-OksC_dOh08EQafx5fD7fWBUGT7jHpA==
+      - Sy3LzZNgfA7HnT3FMVAthOBqB6VAhnenRbfciLDOmoG8MdBE2iC4ow==
       X-Amz-Cf-Pop:
       - LAX50-C1
       X-Cache:
@@ -58,11 +58,11 @@ interactions:
       X-Frame-Options:
       - SAMEORIGIN
       X-Request-Id:
-      - 8csUtKjVlqIJxXP5nEY-ipc-OksC_dOh08EQafx5fD7fWBUGT7jHpA==
+      - Sy3LzZNgfA7HnT3FMVAthOBqB6VAhnenRbfciLDOmoG8MdBE2iC4ow==
       X-XSS-Protection:
       - 1; mode=block
       content-length:
-      - '33'
+      - '31'
     status:
       code: 200
       message: OK
@@ -81,7 +81,7 @@ interactions:
     uri: https://cmr.earthdata.nasa.gov/search/granules.umm_json?short_name=SWOT_L2_HR_RiverSP_2.0&readable_granule_name%5B%5D=SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip&options%5Breadable_granule_name%5D%5Bpattern%5D=true&page_size=1
   response:
     body:
-      string: '{"hits":1,"took":1578,"items":[{"meta":{"concept-type":"granule","concept-id":"G3232692178-POCLOUD","revision-id":1,"native-id":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01","collection-concept-id":"C2799438299-POCLOUD","provider-id":"POCLOUD","format":"application/vnd.nasa.cmr.umm+json","revision-date":"2024-09-09T01:25:31.585Z"},"umm":{"TemporalExtent":{"RangeDateTime":{"EndingDateTime":"2024-09-05T23:31:35.589Z","BeginningDateTime":"2024-09-05T23:31:34.815Z"}},"GranuleUR":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01","AdditionalAttributes":[{"Values":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"],"Name":"TILE"}],"MeasuredParameters":[{"QAStats":{"QAPercentMissingData":0,"QAPercentOutOfBoundsData":0},"ParameterName":"N/A"}],"SpatialExtent":{"HorizontalSpatialDomain":{"Geometry":{"BoundingRectangles":[{"WestBoundingCoordinate":-130.8307934819651,"SouthBoundingCoordinate":52.93360004865338,"EastBoundingCoordinate":-125.58639150138737,"NorthBoundingCoordinate":58.82204893062929}]},"Track":{"Cycle":20,"Passes":[{"Pass":457,"Tiles":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"]}]}}},"ProviderDates":[{"Type":"Insert","Date":"2024-09-09T01:25:25.739Z"},{"Type":"Update","Date":"2024-09-09T01:25:25.739Z"}],"CollectionReference":{"Version":"2.0","ShortName":"SWOT_L2_HR_RiverSP_2.0"},"PGEVersionClass":{"PGEName":"PGE_L2_HR_RiverSP","PGEVersion":"5.0.4"},"RelatedUrls":[{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/podaac-swot-ops-cumulus-public/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Description":"Download
+      string: '{"hits":1,"took":37,"items":[{"meta":{"concept-type":"granule","concept-id":"G3232692178-POCLOUD","revision-id":1,"native-id":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01","collection-concept-id":"C2799438299-POCLOUD","provider-id":"POCLOUD","format":"application/vnd.nasa.cmr.umm+json","revision-date":"2024-09-09T01:25:31.585Z"},"umm":{"TemporalExtent":{"RangeDateTime":{"EndingDateTime":"2024-09-05T23:31:35.589Z","BeginningDateTime":"2024-09-05T23:31:34.815Z"}},"GranuleUR":"SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01","AdditionalAttributes":[{"Values":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"],"Name":"TILE"}],"MeasuredParameters":[{"QAStats":{"QAPercentMissingData":0,"QAPercentOutOfBoundsData":0},"ParameterName":"N/A"}],"SpatialExtent":{"HorizontalSpatialDomain":{"Geometry":{"BoundingRectangles":[{"WestBoundingCoordinate":-130.8307934819651,"SouthBoundingCoordinate":52.93360004865338,"EastBoundingCoordinate":-125.58639150138737,"NorthBoundingCoordinate":58.82204893062929}]},"Track":{"Cycle":20,"Passes":[{"Pass":457,"Tiles":["246L","247L","248L","249L","250L","251L","252L","253L","254L","255L","256L","257L","258L","246R","247R","248R","249R","250R","251R","252R","253R","254R","255R","256R","257R","258R"]}]}}},"ProviderDates":[{"Type":"Insert","Date":"2024-09-09T01:25:25.739Z"},{"Type":"Update","Date":"2024-09-09T01:25:25.739Z"}],"CollectionReference":{"Version":"2.0","ShortName":"SWOT_L2_HR_RiverSP_2.0"},"PGEVersionClass":{"PGEName":"PGE_L2_HR_RiverSP","PGEVersion":"5.0.4"},"RelatedUrls":[{"URL":"https://archive.swot.podaac.earthdata.nasa.gov/podaac-swot-ops-cumulus-public/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Description":"Download
         SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Type":"EXTENDED
         METADATA"},{"URL":"s3://podaac-swot-ops-cumulus-public/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_457_NA_20240905T233134_20240905T233135_PIC0_01.zip.iso.xml","Description":"This
         link provides direct download access via S3 to the granule","Type":"EXTENDED
@@ -114,21 +114,21 @@ interactions:
       CMR-Hits:
       - '1'
       CMR-Request-Id:
-      - 48ad845f-7c44-4d09-a947-b5e69d75e3e6
+      - e71d7d1e-2c36-42e4-9958-661368f4997f
       CMR-Search-After:
       - '["pocloud",1725579094815,3232692178]'
       CMR-Took:
-      - '1579'
+      - '37'
       Connection:
       - keep-alive
       Content-MD5:
-      - d7e576c914b4d6bbb473bc86a3a9d028
+      - 8d53a691834754258e1f05ae44004fdc
       Content-SHA1:
-      - c4c33f50fa63cdaed4ab4693802b749e3d93385b
+      - 028be643c0a947e6d7d0939a1a5e5137be0ba655
       Content-Type:
       - application/vnd.nasa.cmr.umm_results+json;version=1.6.6; charset=utf-8
       Date:
-      - Thu, 24 Oct 2024 15:07:04 GMT
+      - Wed, 15 Jan 2025 21:13:06 GMT
       Server:
       - ServerTokens ProductOnly
       Strict-Transport-Security:
@@ -138,9 +138,9 @@ interactions:
       Vary:
       - Accept-Encoding, User-Agent
       Via:
-      - 1.1 ff59c1cd74c841ab9a3ebd5370e3b24a.cloudfront.net (CloudFront)
+      - 1.1 0931eacdfabebfd9816e3573b4bf15b4.cloudfront.net (CloudFront)
       X-Amz-Cf-Id:
-      - -h7ViK40xc6Etm936-QljHsgYyIxWC8fFoJscwiLHdHd1fXm-a7pjA==
+      - oLKkk22TQo4zIjyac-EhYLQ3Reo8vP9gQ6CiblDsBUHAxjmhMFpFjQ==
       X-Amz-Cf-Pop:
       - LAX50-C1
       X-Cache:
@@ -150,11 +150,11 @@ interactions:
       X-Frame-Options:
       - SAMEORIGIN
       X-Request-Id:
-      - -h7ViK40xc6Etm936-QljHsgYyIxWC8fFoJscwiLHdHd1fXm-a7pjA==
+      - oLKkk22TQo4zIjyac-EhYLQ3Reo8vP9gQ6CiblDsBUHAxjmhMFpFjQ==
       X-XSS-Protection:
       - 1; mode=block
       content-length:
-      - '10682'
+      - '10680'
     status:
       code: 200
       message: OK
