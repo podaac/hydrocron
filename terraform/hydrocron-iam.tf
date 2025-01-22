@@ -60,7 +60,13 @@ data "aws_iam_policy_document" "dynamo-read-policy" {
       aws_dynamodb_table.hydrocron-swot-reach-table.arn,
       "${aws_dynamodb_table.hydrocron-swot-reach-table.arn}/index/*",
       aws_dynamodb_table.hydrocron-swot-prior-lake-table.arn,
-      "${aws_dynamodb_table.hydrocron-swot-prior-lake-table.arn}/index/*"
+      "${aws_dynamodb_table.hydrocron-swot-prior-lake-table.arn}/index/*",
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-node-table.arn,
+      "${aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-node-table.arn}/index/*",
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-reach-table.arn,
+      "${aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-reach-table.arn}/index/*",
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table.arn,
+      "${aws_dynamodb_table.hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table.arn}/index/*"
     ]
   }
 
@@ -87,6 +93,12 @@ data "aws_iam_policy_document" "dynamo-read-policy-track-ingest" {
       "${aws_dynamodb_table.hydrocron-node-track-ingest-table.arn}/index/*",
       aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.arn,
       "${aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.arn}/index/*",
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-reach-track-ingest-table.arn,
+      "${aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-reach-track-ingest-table.arn}/index/*",
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-node-track-ingest-table.arn,
+      "${aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-node-track-ingest-table.arn}/index/*",
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-track-ingest-table.arn,
+      "${aws_dynamodb_table.hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-track-ingest-table.arn}/index/*"
     ]
   }
 
@@ -113,7 +125,10 @@ data "aws_iam_policy_document" "dynamo-write-policy" {
     resources = [
       aws_dynamodb_table.hydrocron-swot-node-table.arn,
       aws_dynamodb_table.hydrocron-swot-reach-table.arn,
-      aws_dynamodb_table.hydrocron-swot-prior-lake-table.arn
+      aws_dynamodb_table.hydrocron-swot-prior-lake-table.arn,
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-node-table.arn,
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-reach-table.arn,
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table.arn
     ]
   }
 
@@ -141,6 +156,9 @@ data "aws_iam_policy_document" "dynamo-write-policy-track-ingest" {
       aws_dynamodb_table.hydrocron-reach-track-ingest-table.arn,
       aws_dynamodb_table.hydrocron-node-track-ingest-table.arn,
       aws_dynamodb_table.hydrocron-priorlake-track-ingest-table.arn,
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-reach-track-ingest-table.arn,
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_RiverSP_D-node-track-ingest-table.arn,
+      aws_dynamodb_table.hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-track-ingest-table.arn
     ]
   }
 
