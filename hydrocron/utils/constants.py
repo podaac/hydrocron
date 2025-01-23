@@ -206,15 +206,15 @@ TABLE_COLLECTION_INFO = [
 ]
 
 FEATURE_ID = {
-    "SWOT_L2_HR_RiverSP_reach_2.0": "reach_id",
-    "SWOT_L2_HR_RiverSP_node_2.0": "node_id",
-    "SWOT_L2_HR_LakeSP_prior_2.0": "lake_id"
+    "SWOT_L2_HR_RiverSP_reach_D": "reach_id",
+    "SWOT_L2_HR_RiverSP_node_D": "node_id",
+    "SWOT_L2_HR_LakeSP_prior_D": "lake_id"
 }
 
 SHORTNAME = {
-    "SWOT_L2_HR_RiverSP_reach_2.0": "SWOT_L2_HR_RiverSP_2.0",
-    "SWOT_L2_HR_RiverSP_node_2.0": "SWOT_L2_HR_RiverSP_2.0",
-    "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0"
+    "SWOT_L2_HR_RiverSP_reach_D": "SWOT_L2_HR_RiverSP_D",
+    "SWOT_L2_HR_RiverSP_node_D": "SWOT_L2_HR_RiverSP_D",
+    "SWOT_L2_HR_LakeSP_prior_D": "SWOT_L2_HR_LakeSP_D"
 }
 
 COLLECTIONS_LIST = [

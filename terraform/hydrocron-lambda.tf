@@ -74,7 +74,7 @@ resource "aws_lambda_function" "hydrocron_lambda_timeseries" {
   }
   environment {
     variables = {
-      DEFAULT_COLLECTION_VERSION = "2.0"
+      DEFAULT_COLLECTION_VERSION = "D"
       DEFAULT_LAKE_COLLECTION    = "SWOT_L2_HR_LakeSP"
       DEFAULT_RIVER_COLLECTION   = "SWOT_L2_HR_RiverSP"
     }
