@@ -12,7 +12,7 @@ resource "aws_scheduler_schedule" "aws_schedule_reach" {
     input = jsonencode({
       "collection_shortname" : "SWOT_L2_HR_RiverSP_reach_D",
       "collection_start_date" : "2024-11-01T00:00:00",
-      "reprocessed_crid" : "PID0"
+      "reprocessed_crid" : ""
     })
   }
 }
@@ -32,7 +32,7 @@ resource "aws_scheduler_schedule" "aws_schedule_node" {
     input = jsonencode({
       "collection_shortname" : "SWOT_L2_HR_RiverSP_node_D",
       "collection_start_date" : "2024-11-01T00:00:00",
-      "reprocessed_crid" : "PID0"
+      "reprocessed_crid" : ""
     })
   }
 }
@@ -52,7 +52,7 @@ resource "aws_scheduler_schedule" "aws_schedule_prior_lake" {
     input = jsonencode({
       "collection_shortname" : "SWOT_L2_HR_LakeSP_prior_D",
       "collection_start_date" : "2024-11-01T00:00:00",
-      "reprocessed_crid" : "PID0"
+      "reprocessed_crid" : ""
     })
   }
 }
