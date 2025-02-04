@@ -26,7 +26,7 @@ resource "aws_ssm_parameter" "trusted-user-parameter" {
 
 
 resource "aws_ssm_parameter" "hydrocron-reach-track-ingest-runtime" {
-  name        = "/service/${var.app_name}/track-ingest-runtime/SWOT_L2_HR_RiverSP_reach_2.0"
+  name        = "/service/${var.app_name}/track-ingest-runtime/SWOT_L2_HR_RiverSP_reach_D"
   description = "Hydrocron track ingest last time executed on reaches"
   type        = "String"
   value       = "no_data"
@@ -34,7 +34,7 @@ resource "aws_ssm_parameter" "hydrocron-reach-track-ingest-runtime" {
 
 
 resource "aws_ssm_parameter" "hydrocron-node-track-ingest-runtime" {
-  name        = "/service/${var.app_name}/track-ingest-runtime/SWOT_L2_HR_RiverSP_node_2.0"
+  name        = "/service/${var.app_name}/track-ingest-runtime/SWOT_L2_HR_RiverSP_node_D"
   description = "Hydrocron track ingest last time executed on nodes"
   type        = "String"
   value       = "no_data"
@@ -42,7 +42,7 @@ resource "aws_ssm_parameter" "hydrocron-node-track-ingest-runtime" {
 
 
 resource "aws_ssm_parameter" "hydrocron-priorlake-track-ingest-runtime" {
-  name        = "/service/${var.app_name}/track-ingest-runtime/SWOT_L2_HR_LakeSP_prior_2.0"
+  name        = "/service/${var.app_name}/track-ingest-runtime/SWOT_L2_HR_LakeSP_prior_D"
   description = "Hydrocron track ingest last time executed on lakes"
   type        = "String"
   value       = "no_data"
