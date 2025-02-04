@@ -7,6 +7,7 @@ import json
 import os
 import pathlib
 from unittest.mock import MagicMock
+from unittest.mock import patch
 
 from moto.core import DEFAULT_ACCOUNT_ID
 from moto.sns import sns_backends
@@ -15,6 +16,49 @@ import vcr
 
 from hydrocron.utils import constants
 
+FEATURE_ID = {
+    "SWOT_L2_HR_RiverSP_reach_2.0": "reach_id",
+    "SWOT_L2_HR_RiverSP_node_2.0": "node_id",
+    "SWOT_L2_HR_LakeSP_prior_2.0": "lake_id"
+}
+
+SHORTNAME = {
+    "SWOT_L2_HR_RiverSP_reach_2.0": "SWOT_L2_HR_RiverSP_2.0",
+    "SWOT_L2_HR_RiverSP_node_2.0": "SWOT_L2_HR_RiverSP_2.0",
+    "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0"
+}
+
+TABLE_COLLECTION_INFO = [
+    {'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
+     'table_name': 'hydrocron-swot-reach-table',
+     'track_table': 'hydrocron-swot-reach-track-ingest-table',
+     'feature_type': 'Reach',
+     'api_feature_type': 'reach',
+     'feature_id': 'reach_id',
+     'partition_key': constants.SWOT_REACH_PARTITION_KEY,
+     'sort_key': constants.SWOT_REACH_SORT_KEY
+     },
+    {'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
+     'table_name': 'hydrocron-swot-node-table',
+     'track_table': 'hydrocron-swot-node-track-ingest-table',
+     'feature_type': 'Node',
+     'api_feature_type': 'node',
+     'feature_id': 'node_id',
+     'partition_key': constants.SWOT_NODE_PARTITION_KEY,
+     'sort_key': constants.SWOT_NODE_SORT_KEY
+     },
+    {'collection_name': 'SWOT_L2_HR_LakeSP_2.0',
+     'table_name': 'hydrocron-swot-prior-lake-table',
+     'track_table': 'hydrocron-swot-prior-lake-track-ingest-table',
+     'feature_type': 'LakeSP_Prior',
+     'api_feature_type': 'priorlake',
+     'feature_id': 'lake_id',
+     'partition_key': constants.SWOT_PRIOR_LAKE_PARTITION_KEY,
+     'sort_key': constants.SWOT_PRIOR_LAKE_SORT_KEY
+     }
+]
+
+@patch("hydrocron.utils.constants.SHORTNAME", SHORTNAME)
 def test_query_cmr(mock_ssm):
     """Test the query_cmr function.
     
@@ -219,6 +263,8 @@ def test_get_series_granule_ur(track_ingest_fixture):
     items = hydrocron_table.get_series_granule_ur(table_name, feature_name, granule_ur)
     assert len(items) == 664
 
+
+@patch("hydrocron.utils.constants.FEATURE_ID", FEATURE_ID)
 def test_query_ingest(track_ingest_fixture):
     """Test query_ingest function.
     
@@ -248,6 +294,7 @@ def test_query_ingest(track_ingest_fixture):
     assert track.ingested == expected
 
 
+@patch("hydrocron.utils.constants.FEATURE_ID", FEATURE_ID)
 def test_query_ingest_to_ingest(track_ingest_fixture):
     """Test query_ingest function for require ingest.
     
@@ -297,6 +344,7 @@ def test_query_ingest_to_ingest(track_ingest_fixture):
     assert track.to_ingest == expected
 
 
+@patch("hydrocron.utils.constants.TABLE_COLLECTION_INFO", TABLE_COLLECTION_INFO)
 def test_update_track_to_ingest(track_ingest_fixture):
     """Test query_ingest function for require ingest.
     
@@ -330,6 +378,7 @@ def test_update_track_to_ingest(track_ingest_fixture):
     assert actual_item["Items"] == track.to_ingest
 
 
+@patch("hydrocron.utils.constants.TABLE_COLLECTION_INFO", TABLE_COLLECTION_INFO)
 def test_update_track_ingested(track_ingest_fixture):
     """Test query_ingest function for require ingest.
     
@@ -363,6 +412,7 @@ def test_update_track_ingested(track_ingest_fixture):
     assert actual_item["Items"] == track.ingested
 
 
+@patch("hydrocron.utils.constants.SHORTNAME", SHORTNAME)
 def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
     """Test publish_cnm function.
 
@@ -403,7 +453,9 @@ def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
     assert actual == expected
 
 
-def test_track_ingest_mismatch():
+@patch("hydrocron.utils.constants.SHORTNAME", SHORTNAME)
+@patch("hydrocron.utils.constants.TABLE_COLLECTION_INFO", TABLE_COLLECTION_INFO)
+def test_track_ingest_mismatch(track_ingest_fixture):
     """Test cases where incorrect combination of shortname and table names are
     passed to track ingest operations."""
 
@@ -415,8 +467,6 @@ def test_track_ingest_mismatch():
 
     event = {
         "collection_shortname": "SWOT_L2_HR_LakeSP_prior_2.0",
-        "hydrocron_table": "hydrocron-swot-prior-lake-table",
-        "hydrocron_track_table": "hydrocron-swot-reach-track-ingest-table",
         "temporal": "",
         "query_start": "2024-09-05T23:00:00",
         "query_end": "2024-09-05T23:59:59",

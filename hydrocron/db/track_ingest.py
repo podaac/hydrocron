@@ -38,16 +38,6 @@ class Track:
     DEBUG_LOGS = bool(int(os.getenv("DEBUG_LOGS"))) if os.getenv("DEBUG_LOGS") else False
     ENV = os.getenv("HYDROCRON_ENV").lower()
     PAGE_SIZE = 2000
-    FEATURE_ID = {
-        "SWOT_L2_HR_RiverSP_reach_2.0": "reach_id",
-        "SWOT_L2_HR_RiverSP_node_2.0": "node_id",
-        "SWOT_L2_HR_LakeSP_prior_2.0": "lake_id"
-    }
-    SHORTNAME = {
-        "SWOT_L2_HR_RiverSP_reach_2.0": "SWOT_L2_HR_RiverSP_2.0",
-        "SWOT_L2_HR_RiverSP_node_2.0": "SWOT_L2_HR_RiverSP_2.0",
-        "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0"
-    }
     CNM_VERSION = "1.6.0"
     PROVIDER = "JPL-SWOT"
     SSM_CLIENT = connection.ssm_client
@@ -109,7 +99,7 @@ class Track:
         """
 
         query = GranuleQuery()
-        query = query.format("umm_json").short_name(self.SHORTNAME[self.collection_shortname])
+        query = query.format("umm_json").short_name(constants.SHORTNAME[self.collection_shortname])
         if temporal:
             logging.info("Querying CMR temporal range: %s to %s.", self.query_start, self.query_end)
             query = query.temporal(self.query_start, self.query_end)
@@ -374,7 +364,7 @@ class Track:
                 continue    # Located granule with higher product counter no need to ingest older granule
             features = self.data_repository.get_series_granule_ur(
                 hydrocron_table,
-                self.FEATURE_ID[self.collection_shortname],
+                constants.FEATURE_ID[self.collection_shortname],
                 granule_ur
             )
             number_features = len(features)
@@ -429,7 +419,7 @@ class Track:
             granule_ur = granule["granuleUR"]
             cnm_messages.append({
                 "identifier": granule_ur.replace(".zip", ""),
-                "collection": self.SHORTNAME[self.collection_shortname],
+                "collection": constants.SHORTNAME[self.collection_shortname],
                 "provider": self.PROVIDER,
                 "version": self.CNM_VERSION,
                 "submissionTime": granule["revision_date"],
@@ -460,7 +450,7 @@ class Track:
         """
 
         query = GranuleQuery()
-        query = query.short_name(self.SHORTNAME[self.collection_shortname]).readable_granule_name(granule_ur).format("umm_json")
+        query = query.short_name(constants.SHORTNAME[self.collection_shortname]).readable_granule_name(granule_ur).format("umm_json")
 
         if self.ENV in ("sit", "uat"):
             bearer_token = self._get_bearer_token()
@@ -527,22 +517,17 @@ def track_ingest_handler(event, context):
 
     account_id = context.invoked_function_arn.split(":")[4]
     collection_shortname = event["collection_shortname"]
-    hydrocron_table = event["hydrocron_table"]
-    hydrocron_track_table = event["hydrocron_track_table"]
     reprocessed_crid = event["reprocessed_crid"]
     temporal = "temporal" in event.keys()
 
-    if ("reach" in collection_shortname) and ((hydrocron_table != constants.SWOT_REACH_TABLE_NAME)
-                                              or (hydrocron_track_table != constants.SWOT_REACH_TRACK_INGEST_TABLE_NAME)):
-        raise TableMisMatch(f"Error: Cannot query reach data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
-
-    if ("node" in collection_shortname) and ((hydrocron_table != constants.SWOT_NODE_TABLE_NAME)
-                                             or (hydrocron_track_table != constants.SWOT_NODE_TRACK_INGEST_TABLE_NAME)):
-        raise TableMisMatch(f"Error: Cannot query node data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
-
-    if ("prior" in collection_shortname) and ((hydrocron_table != constants.SWOT_PRIOR_LAKE_TABLE_NAME)
-                                              or (hydrocron_track_table != constants.SWOT_PRIOR_LAKE_TRACK_INGEST_TABLE_NAME)):
-        raise TableMisMatch(f"Error: Cannot query prior lake data for tables: '{hydrocron_table}' and '{hydrocron_track_table}'")
+    parent_collection = constants.SHORTNAME[collection_shortname]
+    for table_info in constants.TABLE_COLLECTION_INFO:
+        if (table_info['collection_name'] in parent_collection) & (str.lower(table_info['feature_type']) in collection_shortname):
+            hydrocron_table = table_info['table_name']
+            hydrocron_track_table = table_info['track_table']
+            break
+    else:
+        raise TableMisMatch(f"Error: Cannot query data for collection: '{collection_shortname}'")
 
     if temporal:
         query_start = datetime.datetime.strptime(event["query_start"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
@@ -567,7 +552,6 @@ def track_ingest_handler(event, context):
     cmr_granules = track.query_cmr(temporal)
     track.query_hydrocron(hydrocron_table, cmr_granules, reprocessed_crid)
     track.query_track_ingest(hydrocron_track_table, hydrocron_table, reprocessed_crid)
-    track.remove_overlap()
     track.publish_cnm_ingest(account_id)
     track.update_track_ingest(hydrocron_track_table)
     if not temporal:
