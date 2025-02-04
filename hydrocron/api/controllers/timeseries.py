@@ -6,6 +6,7 @@ Hydrocron API timeseries controller
 import datetime
 import json
 import logging
+import os
 import sys
 import time
 
@@ -23,6 +24,9 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 ACCEPT_TYPES = ['application/json', 'text/csv', 'application/geo+json']
+DEFAULT_RIVER_COLLECTION = os.environ['DEFAULT_RIVER_COLLECTION']
+DEFAULT_LAKE_COLLECTION = os.environ['DEFAULT_LAKE_COLLECTION']
+DEFAULT_COLLECTION_VERSION = os.environ['DEFAULT_COLLECTION_VERSION']
 
 
 class RequestError(Exception):
@@ -46,7 +50,6 @@ def get_request_headers(event):
         headers['user_ip'] = event['headers']['X-Forwarded-For'].split(',')[0]
         headers['accept'] = '*/*' if 'Accept' not in event['headers'].keys() else event['headers']['Accept']
     except KeyError as e:
-        logging.error('Error encountered with headers: %s', e)
         raise RequestError(f'400: Issue encountered with request header: {e}') from e
     return headers
 
@@ -71,15 +74,40 @@ def get_request_parameters(event, accept_header):
         parameters['compact'] = 'false' if 'compact' not in event['body'].keys() else event['body']['compact']
         if accept_header == 'application/geo+json':   # Default is different for geo+json
             parameters['compact'] = 'true' if 'compact' not in event['body'].keys() else event['body']['compact']
+        parameters['collection_name'] = get_collection_name(event)
     except KeyError as e:
-        logging.error('Error encountered with request parameters: %s', e)
         raise RequestError(f'400: This required parameter is missing: {e}') from e
+
+    if not parameters['collection_name']:
+        raise RequestError(f'400: feature parameter should be Reach, Node, or PriorLake, not: {parameters["feature"]}')
 
     error_message = validate_parameters(parameters)
     if error_message:
         raise RequestError(error_message)
 
     return parameters
+
+
+def get_collection_name(event):
+    """Return request parameters from event object.
+
+    :param event: Request data dictionary
+    :type event: dict
+
+    :rtype: str
+    """
+
+    feature = event['body']['feature'].lower()
+    if 'collection_name' not in event['body'].keys():
+        if feature in ('reach', 'node'):
+            collection_name = f'{DEFAULT_RIVER_COLLECTION}_{DEFAULT_COLLECTION_VERSION}'
+        elif feature == 'priorlake':
+            collection_name = f'{DEFAULT_LAKE_COLLECTION}_{DEFAULT_COLLECTION_VERSION}'
+        else:
+            collection_name = ''
+    else:
+        collection_name = event['body']['collection_name']
+    return collection_name
 
 
 def get_return_type(accept_header, output):
@@ -102,7 +130,6 @@ def get_return_type(accept_header, output):
 
     if output != 'default':
         if return_type != 'application/json':
-            logging.error('Error encountered with request Accept header: %s and output: %s', return_type, output)
             raise RequestError(f'400: Invalid combination of Accept header ({accept_header}) and '
                                + f'output request parameter ({output}). Remove output request parameter when '
                                + 'requesting application/geo+json or text/csv')
@@ -129,7 +156,14 @@ def validate_parameters(parameters):
 
     error_message = ''
 
-    if parameters['feature'] not in ('Node', 'Reach', 'PriorLake'):
+    collections_list = []
+    for version in constants.CURRENT_VERSION_LIST:
+        collections_list.extend([f"{collection}_{version}" for collection in constants.COLLECTIONS_LIST])
+
+    if parameters['collection_name'] not in collections_list:
+        error_message = f'400: collection_name parameter should be one of the following: {", ".join(collections_list)}'
+
+    elif parameters['feature'] not in ('Node', 'Reach', 'PriorLake'):
         error_message = f'400: feature parameter should be Reach, Node, or PriorLake, not: {parameters["feature"]}'
 
     elif not parameters['feature_id'].isdigit():
@@ -213,11 +247,13 @@ def sanitize_time(start_time, end_time):
     return start_time, end_time
 
 
-def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-positional-arguments
+def timeseries_get(collection_name, feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-arguments,too-many-positional-arguments
     """Get Timeseries for a particular Reach, Node, or LakeID
 
     Get Timeseries for a particular Reach, Node, or LakeID # noqa: E501
 
+    :param collection_name: Name of collection to query data for
+    :type collection_name: str
     :param feature: Data requested for Reach or Node or Lake
     :type feature: str
     :param feature_id: ID of the feature to retrieve
@@ -239,7 +275,7 @@ def timeseries_get(feature, feature_id, start_time, end_time, output, fields):  
     hits = 0
 
     data_repository = DynamoDataRepository(connection.dynamodb_resource)
-    results = data_repository.get_series_by_feature_id(feature, feature_id, start_time, end_time)
+    results = data_repository.get_series_by_feature_id(collection_name, feature, feature_id, start_time, end_time)
 
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
@@ -381,7 +417,6 @@ def get_response(results, hits, elapsed, return_type, output, compact):  # pylin
             data['results'][output] = results['response']
 
     else:
-        logging.error(results)
         raise RequestError(results['error_message'])
 
     return data
@@ -436,11 +471,15 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
             return {}
         logging.info('user_ip: %s', headers['user_ip'])
         parameters = get_request_parameters(event, headers['accept'])
+        logging.info('collection_name: %s', parameters['collection_name'])
         return_type, output = get_return_type(headers['accept'], parameters['output'])
     except RequestError as e:
+        error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
+        logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
 
     results, hits = timeseries_get(
+        parameters['collection_name'],
         parameters['feature'],
         parameters['feature_id'],
         parameters['start_time'],
@@ -455,8 +494,10 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     try:
         data = get_response(results, hits, elapsed, return_type, output, parameters['compact'])
     except RequestError as e:
+        error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
+        logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
-    logging.info('response: %s', json.dumps(data))
+    logging.info('response: %s', json.dumps({'status': results['http_code'], 'time': elapsed, 'hits': hits}))
     logging.info('response_size: %s', str(sys.getsizeof(data)))
 
     return data

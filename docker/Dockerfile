@@ -11,7 +11,7 @@ WORKDIR $BUILD_DIR
 COPY ./hydrocron ./hydrocron
 
 COPY poetry.lock pyproject.toml README.md ./
-RUN ~/.local/bin/poetry lock --no-update
+RUN ~/.local/bin/poetry lock
 RUN mkdir -p "${FUNCTION_DIR}" && \
     ~/.local/bin/poetry install --only main --sync && \
     cp -r $(~/.local/bin/poetry env list --full-path | awk '{print $1}')/lib/python*/site-packages/* ${FUNCTION_DIR} && \

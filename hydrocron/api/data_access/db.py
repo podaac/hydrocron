@@ -19,9 +19,10 @@ class DynamoDataRepository:
         self._dynamo_instance = dynamo_resource
         self._logger = logging.getLogger('hydrocron.api.data_access.db.DynamoDataRepository')
 
-    def get_series_by_feature_id(self, feature_type: str, feature_id: str, start_time: str, end_time: str):  # noqa: E501 # pylint: disable=W0613
+    def get_series_by_feature_id(self, collection_name: str, feature_type: str, feature_id: str, start_time: str, end_time: str):  # pylint: disable=too-many-positional-arguments
         """
 
+        @param collection_name:
         @param feature_type:
         @param feature_id:
         @param start_time:
@@ -29,34 +30,22 @@ class DynamoDataRepository:
         @return:
         """
 
-        if feature_type.lower() == 'reach':
-            table_name = constants.SWOT_REACH_TABLE_NAME
-            partition_key = constants.SWOT_REACH_PARTITION_KEY
-            sort_key = constants.SWOT_REACH_SORT_KEY
-        elif feature_type.lower() == 'node':
-            table_name = constants.SWOT_NODE_TABLE_NAME
-            partition_key = constants.SWOT_NODE_PARTITION_KEY
-            sort_key = constants.SWOT_NODE_SORT_KEY
-        elif feature_type.lower() == 'priorlake':
-            table_name = constants.SWOT_PRIOR_LAKE_TABLE_NAME
-            partition_key = constants.SWOT_PRIOR_LAKE_PARTITION_KEY
-            sort_key = constants.SWOT_PRIOR_LAKE_SORT_KEY
+        for table_info in constants.TABLE_COLLECTION_INFO:
+            if (table_info['collection_name'] in collection_name) & (table_info['api_feature_type'].lower() == feature_type.lower()):
+                table_name = table_info['table_name']
+                partition_key = table_info['partition_key']
+                sort_key = table_info['sort_key']
+                break
         else:
-            table_name = ''
-            partition_key = ''
-            sort_key = ''
+            return {'Items': []}
 
-        if table_name:
-            hydrocron_table = self._dynamo_instance.Table(table_name)
-            hydrocron_table.load()
-            key_condition_expression = (
-                Key(partition_key).eq(feature_id) &
-                Key(sort_key).between(start_time, end_time)
-            )
-            items = self._query_hydrocron_table(hydrocron_table, key_condition_expression)
-        else:
-            items = {'Items': []}
-
+        hydrocron_table = self._dynamo_instance.Table(table_name)
+        hydrocron_table.load()
+        key_condition_expression = (
+            Key(partition_key).eq(feature_id) &
+            Key(sort_key).between(start_time, end_time)
+        )
+        items = self._query_hydrocron_table(hydrocron_table, key_condition_expression)
         return items
 
     def _query_hydrocron_table(self, hydrocron_table: str, key_condition_expression: And):

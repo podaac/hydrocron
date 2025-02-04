@@ -78,7 +78,3 @@ curl --location 'http://localhost:9000/2015-03-31/functions/function/invocations
     }
 }'
 ```
-
-## Loading the Database from CMR
-
-Instructions for loading the database with data from CMR instead of the single test granule, are described in hydrocron_db/LOAD_DATA_README.md
