@@ -2,7 +2,7 @@
 
 ## Get time series GeoJSON for river reach
 
-Search for a single river reach by reach ID.
+Search for a single river reach by reach ID:
 
 [https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00Z&end_time=2024-03-29T00:00:00Z&fields=reach_id,time_str,wse,slope](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00Z&end_time=2024-03-29T00:00:00Z&fields=reach_id,time_str,wse,slope)
 
@@ -86,7 +86,7 @@ Will return GeoJSON:
 
 ## Get time series GeoJSON for river node
 
-Search for a single river node by ID.
+Search for a single river node by ID:
 
 [https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=12228200110861&start_time=2024-01-25T00:00:00Z&end_time=2024-03-30T00:00:00Z&output=geojson&fields=reach_id,node_id,time_str,wse](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=12228200110861&start_time=2024-01-25T00:00:00Z&end_time=2024-03-30T00:00:00Z&output=geojson&fields=reach_id,node_id,time_str,wse)
 
