@@ -10,9 +10,9 @@ resource "aws_scheduler_schedule" "aws_schedule_reach" {
     arn      = aws_lambda_function.hydrocron_lambda_track_ingest.arn
     role_arn = aws_iam_role.hydrocron_schedule_role.arn
     input = jsonencode({
-      "collection_shortname" : "SWOT_L2_HR_RiverSP_reach_2.0",
+      "collection_shortname" : "SWOT_L2_HR_RiverSP_reach_D",
       "collection_start_date" : "2024-11-01T00:00:00",
-      "reprocessed_crid" : "PGC0"
+      "reprocessed_crid" : ""
     })
   }
 }
@@ -30,9 +30,9 @@ resource "aws_scheduler_schedule" "aws_schedule_node" {
     arn      = aws_lambda_function.hydrocron_lambda_track_ingest.arn
     role_arn = aws_iam_role.hydrocron_schedule_role.arn
     input = jsonencode({
-      "collection_shortname" : "SWOT_L2_HR_RiverSP_node_2.0",
+      "collection_shortname" : "SWOT_L2_HR_RiverSP_node_D",
       "collection_start_date" : "2024-11-01T00:00:00",
-      "reprocessed_crid" : "PGC0"
+      "reprocessed_crid" : ""
     })
   }
 }
@@ -50,9 +50,9 @@ resource "aws_scheduler_schedule" "aws_schedule_prior_lake" {
     arn      = aws_lambda_function.hydrocron_lambda_track_ingest.arn
     role_arn = aws_iam_role.hydrocron_schedule_role.arn
     input = jsonencode({
-      "collection_shortname" : "SWOT_L2_HR_LakeSP_prior_2.0",
+      "collection_shortname" : "SWOT_L2_HR_LakeSP_prior_D",
       "collection_start_date" : "2024-11-01T00:00:00",
-      "reprocessed_crid" : "PGC0"
+      "reprocessed_crid" : ""
     })
   }
 }
