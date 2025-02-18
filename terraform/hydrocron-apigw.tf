@@ -136,8 +136,8 @@ resource "aws_api_gateway_usage_plan_key" "default-user-usage-key" {
 }
 
 
-resource "aws_api_gateway_usage_plan" "trusted-user-usage-plan" {
-  name        = "${local.aws_resource_prefix}-usage-plan-trusted"
+resource "aws_api_gateway_usage_plan" "confluence-user-usage-plan" {
+  name        = "${local.aws_resource_prefix}-usage-plan-confluence"
   description = "Hydrocron trusted user usage plan"
   api_stages {
     api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
@@ -157,12 +157,30 @@ resource "aws_api_gateway_usage_plan" "trusted-user-usage-plan" {
 resource "aws_api_gateway_usage_plan_key" "confluence-user-usage-key" {
   key_id        = aws_api_gateway_api_key.confluence-user-key.id
   key_type      = "API_KEY"
-  usage_plan_id = aws_api_gateway_usage_plan.trusted-user-usage-plan.id
+  usage_plan_id = aws_api_gateway_usage_plan.confluence-user-usage-plan.id
+}
+
+
+resource "aws_api_gateway_usage_plan" "fathom-user-usage-plan" {
+  name        = "${local.aws_resource_prefix}-usage-plan-fathom"
+  description = "Hydrocron trusted user usage plan"
+  api_stages {
+    api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
+    stage  = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
+  }
+  quota_settings {
+    limit  = 11200000
+    period = "MONTH"
+  }
+  throttle_settings {
+    burst_limit = 200
+    rate_limit  = 2000
+  }
 }
 
 
 resource "aws_api_gateway_usage_plan_key" "fathom-user-usage-key" {
   key_id        = aws_api_gateway_api_key.fathom-user-key.id
   key_type      = "API_KEY"
-  usage_plan_id = aws_api_gateway_usage_plan.trusted-user-usage-plan.id
+  usage_plan_id = aws_api_gateway_usage_plan.fathom-user-usage-plan.id
 }
