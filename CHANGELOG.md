@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [1.6.1]
+ 
+### Added
+    - Issue 282 - API Key request for bulk download (Fathom API key)
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
 ## [1.6.0]
 
 ### Added
