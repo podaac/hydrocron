@@ -105,6 +105,11 @@ resource "aws_api_gateway_api_key" "confluence-user-key" {
 }
 
 
+resource "aws_api_gateway_api_key" "fathom-user-key" {
+  name = "${local.aws_resource_prefix}-api-key-fathom"
+}
+
+
 # Usage Plans
 resource "aws_api_gateway_usage_plan" "default-user-usage-plan" {
   name        = "${local.aws_resource_prefix}-usage-plan-default"
@@ -151,6 +156,13 @@ resource "aws_api_gateway_usage_plan" "trusted-user-usage-plan" {
 
 resource "aws_api_gateway_usage_plan_key" "confluence-user-usage-key" {
   key_id        = aws_api_gateway_api_key.confluence-user-key.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.trusted-user-usage-plan.id
+}
+
+
+resource "aws_api_gateway_usage_plan_key" "fathom-user-usage-key" {
+  key_id        = aws_api_gateway_api_key.fathom-user-key.id
   key_type      = "API_KEY"
   usage_plan_id = aws_api_gateway_usage_plan.trusted-user-usage-plan.id
 }
