@@ -19,7 +19,8 @@ resource "aws_ssm_parameter" "trusted-user-parameter" {
   type        = "SecureString"
   value = jsonencode(
     [
-      "${aws_api_gateway_api_key.confluence-user-key.value}"
+      "${aws_api_gateway_api_key.confluence-user-key.value}",
+      "${aws_api_gateway_api_key.fathom-user-key.value}"
     ]
   )
 }
