@@ -148,7 +148,7 @@ resource "aws_api_gateway_usage_plan" "confluence-user-usage-plan" {
     stage  = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
   }
   quota_settings {
-    limit  = 12107815
+    limit  = 15000000
     period = "MONTH"
   }
   throttle_settings {
