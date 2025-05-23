@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+    - Issue 254 - granuleUR field can only be returned for reaches, fails for nodes and prior lakes
 ### Security
 
 ## [1.6.1]
