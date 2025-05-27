@@ -20,7 +20,8 @@ resource "aws_ssm_parameter" "trusted-user-parameter" {
   value = jsonencode(
     [
       "${aws_api_gateway_api_key.confluence-user-key.value}",
-      "${aws_api_gateway_api_key.fathom-user-key.value}"
+      "${aws_api_gateway_api_key.fathom-user-key.value}",
+      "${aws_api_gateway_api_key.umass-user-key.value}"
     ]
   )
 }
