@@ -466,7 +466,7 @@ def test_track_ingest_mismatch(track_ingest_fixture):
             self.invoked_function_arn = "arn:aws:lambda:us-west-2:12345678910:function:svc-hydrocron-sit-track-ingest-lambda"
 
     event = {
-        "collection_shortname": "SWOT_L2_HR_LakeSP_prior_2.0",
+        "collection_shortname": "SWOT_L2_HR_LakeSP_stream_2.0",
         "temporal": "",
         "query_start": "2024-09-05T23:00:00",
         "query_end": "2024-09-05T23:59:59",
@@ -475,4 +475,4 @@ def test_track_ingest_mismatch(track_ingest_fixture):
     context = LambdaContext()
     with pytest.raises(hydrocron.db.track_ingest.TableMisMatch) as e:
         hydrocron.db.track_ingest.track_ingest_handler(event, context)
-        assert str(e.value) == "Error: Cannot query prior lake data for tables: 'hydrocron-swot-prior-lake-table' and 'hydrocron-swot-reach-track-ingest-table'"
+        assert str(e.value) == "Error: Cannot query data for collection: 'SWOT_L2_HR_LakeSP_stream_2.0'"
