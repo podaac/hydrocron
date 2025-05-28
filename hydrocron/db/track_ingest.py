@@ -522,7 +522,7 @@ def track_ingest_handler(event, context):
 
     parent_collection = constants.SHORTNAME[collection_shortname]
     for table_info in constants.TABLE_COLLECTION_INFO:
-        if (table_info['collection_name'] in parent_collection) & (str.lower(table_info['feature_type']) in collection_shortname):
+        if (table_info['collection_name'] in parent_collection) & (str.lower(table_info['feature_type']) in str.lower(collection_shortname)):
             hydrocron_table = table_info['table_name']
             hydrocron_track_table = table_info['track_table']
             break
