@@ -109,6 +109,10 @@ resource "aws_api_gateway_api_key" "fathom-user-key" {
   name = "${local.aws_resource_prefix}-api-key-fathom"
 }
 
+resource "aws_api_gateway_api_key" "umass-user-key" {
+  name = "${local.aws_resource_prefix}-api-key-umass"
+}
+
 
 # Usage Plans
 resource "aws_api_gateway_usage_plan" "default-user-usage-plan" {
@@ -144,7 +148,7 @@ resource "aws_api_gateway_usage_plan" "confluence-user-usage-plan" {
     stage  = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
   }
   quota_settings {
-    limit  = 12107815
+    limit  = 15000000
     period = "MONTH"
   }
   throttle_settings {
@@ -183,4 +187,28 @@ resource "aws_api_gateway_usage_plan_key" "fathom-user-usage-key" {
   key_id        = aws_api_gateway_api_key.fathom-user-key.id
   key_type      = "API_KEY"
   usage_plan_id = aws_api_gateway_usage_plan.fathom-user-usage-plan.id
+}
+
+resource "aws_api_gateway_usage_plan" "umass-user-usage-plan" {
+  name        = "${local.aws_resource_prefix}-usage-plan-umass"
+  description = "Hydrocron trusted user usage plan"
+  api_stages {
+    api_id = aws_api_gateway_rest_api.hydrocron-api-gateway.id
+    stage  = aws_api_gateway_stage.hydrocron-api-gateway-stage.stage_name
+  }
+  quota_settings {
+    limit  = 15000000
+    period = "MONTH"
+  }
+  throttle_settings {
+    burst_limit = 100
+    rate_limit  = 500
+  }
+}
+
+
+resource "aws_api_gateway_usage_plan_key" "umass-user-usage-key" {
+  key_id        = aws_api_gateway_api_key.umass-user-key.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.umass-user-usage-plan.id
 }
