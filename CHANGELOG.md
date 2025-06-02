@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
- 
+
 ### Added
 ### Changed
 ### Deprecated
@@ -14,8 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Issue 208 - Using spaces in requested fields provides default fields instead of requested
 ### Security
 
+## [1.6.2]
+
+### Added
+    - Issue 289 - API key request for UMass 
+### Changed
+    - Issue 278 - Increase monthly request quota for Confluence global pull
+### Deprecated
+### Removed
+### Fixed
+### Security
+
 ## [1.6.1]
- 
+
 ### Added
     - Issue 282 - API Key request for bulk download (Fathom API key)
 ### Changed
