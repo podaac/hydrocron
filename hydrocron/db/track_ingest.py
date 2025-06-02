@@ -520,9 +520,13 @@ def track_ingest_handler(event, context):
     reprocessed_crid = event["reprocessed_crid"]
     temporal = "temporal" in event.keys()
 
-    parent_collection = constants.SHORTNAME[collection_shortname]
+    try:
+        parent_collection = constants.SHORTNAME[collection_shortname]
+    except KeyError as e:
+        raise TableMisMatch(f"Error: Cannot query data for collection: '{collection_shortname}'") from e
+
     for table_info in constants.TABLE_COLLECTION_INFO:
-        if (table_info['collection_name'] in parent_collection) & (str.lower(table_info['feature_type']) in collection_shortname):
+        if (table_info['collection_name'] in parent_collection) & (str.lower(table_info['feature_type']) in str.lower(collection_shortname)):
             hydrocron_table = table_info['table_name']
             hydrocron_track_table = table_info['track_table']
             break
