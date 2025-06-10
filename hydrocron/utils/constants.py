@@ -359,14 +359,15 @@ NODE_ALL_COLUMNS = [
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u', 'area_wse',
     'layovr_val', 'node_dist', 'xtrk_dist',
     'flow_angle', 'node_q', 'node_q_b',
-    'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f', 'n_good_pix',
+    'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'n_good_pix',
     'xovr_cal_q', 'rdr_sig0', 'rdr_sig0_u', 'rdr_pol',
     'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c',
     'p_wse', 'p_wse_var', 'p_width', 'p_wid_var', 'p_dist_out', 'p_length',
     'p_dam_id', 'p_n_ch_max', 'p_n_ch_mod',
     'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
-    'crid', 'geometry', 'sword_version', 'collection_shortname', 'crid'
+    'crid', 'geometry', 'sword_version', 'collection_shortname', 'collection_version',
+    'granuleUR', 'ingest_time'
 ]
 
 PRIOR_LAKE_ALL_COLUMNS = [
@@ -380,5 +381,6 @@ PRIOR_LAKE_ALL_COLUMNS = [
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c', 'lake_name', 'p_res_id',
     'p_lon', 'p_lat', 'p_ref_wse', 'p_ref_area', 'p_date_t0', 'p_ds_t0', 'p_storage',
     'cycle_id', 'pass_id', 'continent_id', 'range_start_time', 'range_end_time',
-    'crid', 'geometry', 'PLD_version', 'collection_shortname', 'crid'
+    'crid', 'geometry', 'PLD_version', 'collection_shortname', 'collection_version',
+    'granuleUR', 'ingest_time'
 ]

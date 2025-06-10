@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
-- Issue 208 - Using spaces in requested fields provides default fields instead of requested
+    - Issue 254 - granuleUR field can only be returned for reaches, fails for nodes and prior lakes
+    - Issue 208 - Using spaces in requested fields provides default fields instead of requested
 ### Security
 
 ## [1.6.2]
