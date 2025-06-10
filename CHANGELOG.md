@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 208 - Using spaces in requested fields provides default fields instead of requested
 ### Security
 
+## [1.6.3]
+
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+    - Issue 279 Release SWOT River Version D, track ingest collection name validation
+### Security
+
 ## [1.6.2]
 
 ### Added
