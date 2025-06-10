@@ -143,18 +143,12 @@ Supported collection names include:
 Version C/2.0 (default):
 
 - SWOT_L2_HR_RiverSP_2.0,
-- SWOT_L2_HR_RiverSP_reach_2.0,
-- SWOT_L2_HR_RiverSP_node_2.0,
-- SWOT_L2_HR_LakeSP_2.0,
-- SWOT_L2_HR_LakeSP_prior_2.0,
+- SWOT_L2_HR_LakeSP_2.0
 
 Version D:
 
 - SWOT_L2_HR_RiverSP_D,
-- SWOT_L2_HR_RiverSP_reach_D,
-- SWOT_L2_HR_RiverSP_node_D,
-- SWOT_L2_HR_LakeSP_D,
-- SWOT_L2_HR_LakeSP_prior_D
+- SWOT_L2_HR_LakeSP_D
 
 (fields)=
 ### fields : string, required: yes
