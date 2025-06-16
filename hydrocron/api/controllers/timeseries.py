@@ -82,7 +82,7 @@ def get_request_parameters(event, accept_header):
         raise RequestError(f'400: feature parameter should be Reach, Node, or PriorLake, not: {parameters["feature"]}')
 
     # remove spaces from fields list
-    parameters['fields'] = [field.strip() for field in parameters['fields'].split(',')]
+    parameters['fields'] = [field.strip() for field in parameters['fields'].split(',') if field.strip()]
     parameters['fields'] = ','.join(parameters['fields'])
 
     error_message = validate_parameters(parameters)
