@@ -57,6 +57,7 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 'reach_id', 'node_id', 'time', 'time_tai', 'time_str',
 'lat', 'lon', 'lat_u', 'lon_u', 'river_name',
 'wse', 'wse_u', 'wse_r_u',
+'wse_sm', 'wse_sm_u', 'wse_sm_q', 'wse_sm_q_b',
 'width', 'width_u',
 'area_total', 'area_tot_u', 'area_detct', 'area_det_u', 'area_wse',
 'layovr_val', 'node_dist', 'xtrk_dist',

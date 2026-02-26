@@ -34,6 +34,7 @@ TEST_REACH_ITEM_DICT = {
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 API_TEST_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
 API_TEST_NODE_TABLE_NAME = "hydrocron-swot-node-table"
+API_TEST_NODE_TABLE_NAME_D = "hydrocron-SWOT_L2_HR_RiverSP_D-node-table"
 TEST_REACH_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
 TEST_REACH_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-reach-track-ingest-table"
 TEST_REACH_PARTITION_KEY_NAME = 'reach_id'
@@ -355,6 +356,7 @@ NODE_ALL_COLUMNS = [
     'reach_id', 'node_id', 'time', 'time_tai', 'time_str',
     'lat', 'lon', 'lat_u', 'lon_u', 'river_name',
     'wse', 'wse_u', 'wse_r_u',
+    'wse_sm', 'wse_sm_u', 'wse_sm_q', 'wse_sm_q_b',
     'width', 'width_u',
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u', 'area_wse',
     'layovr_val', 'node_dist', 'xtrk_dist',
