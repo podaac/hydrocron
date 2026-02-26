@@ -15,37 +15,37 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 six = "^1.16.0"
 boto3 = "^1.28.2"
 pymysql = "^1.1.1"
 geopandas = "0.14.4"
-earthaccess = "0.11.0"
+earthaccess = "^0.16.0"
 shapely = "^2.0.1"
 cryptography = "^46.0.0"
 python-dotenv = "^1.0.0"
 geojson = "^3.1.0"
 accept-types = "^0.4.1"
 moto = "^5.0.9"
-vcrpy = "^7.0.0"
+vcrpy = "^8.0.0"
 python-cmr = "^0.13.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
+pytest = "^9.0.0"
 pytest-dynamodb = "^2.2.3"
-pylint = "^3.2.5"
+pylint = "^4.0.0"
 flake8 = "^7.1.0"
-pytest-cov = "^4.1.0"
+pytest-cov = "^7.0.0"
 
 
 [tool.poetry.group.docs.dependencies]
-jupyter-book = "^0.15.1"
+jupyter-book = "^2.1.2"
 folium = "^0.16.0"
 matplotlib = "^3.8.3"
 
 
 [tool.poetry.group.test.dependencies]
-pytz = "^2024.1"
+pytz = "^2025.2"
 
 [tool.coverage.run]
 source = ['hydrocron']

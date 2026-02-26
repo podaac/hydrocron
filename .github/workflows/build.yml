@@ -35,7 +35,7 @@ concurrency:
 
 env:
   POETRY_VERSION: "2.3.2"
-  PYTHON_VERSION: "3.10"
+  PYTHON_VERSION: "3.12"
   TERRAFORM_VERSION: "1.9.3"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -177,7 +177,7 @@ jobs:
             -Dsonar.tests=tests/
             -Dsonar.projectName=${{ github.repository }}
             -Dsonar.projectVersion=${{ env.software_version }}
-            -Dsonar.python.version=3.8,3.9,3.10
+            -Dsonar.python.version=3.8,3.9,3.10,3.12
       - name: Run Snyk as a blocking step
         uses: snyk/actions/python-3.9@master
         env:
