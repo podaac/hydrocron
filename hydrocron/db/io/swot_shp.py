@@ -109,9 +109,8 @@ def handle_null_geometries(geodf):
         the geodataframe with null geometries handled
     """
     logging.info('Starting handle null geometries')
-    geodf['geometry'].fillna(
-        value=Polygon(constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS),
-        inplace=True)
+    geodf['geometry'] = geodf['geometry'].fillna(
+        value=Polygon(constants.SWOT_PRIOR_LAKE_FILL_GEOMETRY_COORDS))
 
     return geodf
 

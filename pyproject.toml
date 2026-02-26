@@ -19,7 +19,7 @@ python = "^3.12"
 six = "^1.16.0"
 boto3 = "^1.28.2"
 pymysql = "^1.1.1"
-geopandas = "0.14.4"
+geopandas = "^1.1.2"
 earthaccess = "^0.16.0"
 shapely = "^2.0.1"
 cryptography = "^46.0.0"
@@ -37,6 +37,8 @@ pylint = "^4.0.0"
 flake8 = "^7.1.0"
 pytest-cov = "^7.0.0"
 
+[tool.poetry.group.docs]
+optional = true
 
 [tool.poetry.group.docs.dependencies]
 jupyter-book = "^2.1.2"
