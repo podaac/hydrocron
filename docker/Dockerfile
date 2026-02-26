@@ -1,7 +1,7 @@
 # Define global args
 ARG FUNCTION_DIR="/function"
 
-FROM public.ecr.aws/lambda/python:3.12 as build_image
+FROM public.ecr.aws/lambda/python:3.12 AS build_image
 ARG FUNCTION_DIR
 ENV BUILD_DIR=/hydrocron
 
