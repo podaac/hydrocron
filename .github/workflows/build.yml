@@ -91,12 +91,15 @@ jobs:
         id: manual
         run: |
           echo "TARGET_ENV_UPPERCASE=${{ github.event.inputs.venue }}" >> $GITHUB_ENV
+          new_ver="${{ steps.get-version.outputs.current_version }}+$(git rev-parse --short ${GITHUB_SHA})"
+          poetry version $new_ver
       - name: Bump pre-alpha version
         # If triggered by push to a non-tracked branch
         if: |
           github.ref != 'refs/heads/develop' &&
           github.ref != 'refs/heads/main' &&
-          !startsWith(github.ref, 'refs/heads/release/')
+          !startsWith(github.ref, 'refs/heads/release/') &&
+          steps.manual.conclusion == 'skipped'
         run: |
           new_ver="${{ steps.get-version.outputs.current_version }}+$(git rev-parse --short ${GITHUB_SHA})"
           poetry version $new_ver
