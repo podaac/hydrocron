@@ -1,0 +1,79 @@
+# Regression tests workflow - runs tests against deployed API endpoints
+name: Regression Tests
+
+on:
+  # Allow manual trigger with environment selection
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Environment to test'
+        required: true
+        options:
+          - uat
+          - ops
+
+  # Can be called by other workflows after deployment
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment to test (uat or ops)'
+        required: true
+        type: string
+
+jobs:
+  regression-tests:
+    name: Run Regression Tests
+    runs-on: ubuntu-latest
+    env:
+      POETRY_VERSION: "2.3.2"
+      PYTHON_VERSION: "3.12"
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository }}
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v4
+        with:
+          poetry-version: ${{ env.POETRY_VERSION }}
+
+      - name: Setup a local virtual environment
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+
+      - uses: actions/cache@v5
+        name: Cache dependencies
+        with:
+          path: ./.venv
+          key: venv-regression-${{ hashFiles('poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install --with test
+
+      - name: Run Regression Tests
+        env:
+          HYDROCRON_ENV: ${{ inputs.environment }}
+        run: |
+          poetry run pytest tests/regression/ -v --tb=short --junit-xml=regression-test-results.xml
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: regression-test-results-${{ inputs.environment }}
+          path: regression-test-results.xml
+
+      - name: Test Report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Regression Tests - ${{ inputs.environment }}
+          path: regression-test-results.xml
+          reporter: java-junit

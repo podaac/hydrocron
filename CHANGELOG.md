@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
     - Issue 304 - Add wse_sm, wse_sm_u, wse_sm_q, wse_sm_q_b (smoothed WSE) fields for Version D Node features
+    - Issue 261 - Add qual_f_b for Version D Lake features
 ### Changed
     - Updated default collection version to "D"
     - Updated Python to 3.12

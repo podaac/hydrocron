@@ -122,6 +122,7 @@ TEST_PLAKE_ITEM_NO_GEO_DICT = {
 
 DB_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-testlake-table"
 API_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"
+API_TEST_PLAKE_TABLE_NAME_D = "hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table"
 TEST_PLAKE_COLLECTION_NAME = "SWOT_L2_HR_LakeSP_2.0"
 TEST_PLAKE_PARTITION_KEY_NAME = 'lake_id'
 TEST_PLAKE_SORT_KEY_NAME = 'range_start_time'
@@ -378,7 +379,7 @@ PRIOR_LAKE_ALL_COLUMNS = [
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
     'layovr_val', 'xtrk_dist', 'ds1_l', 'ds1_l_u', 'ds1_q', 'ds1_q_u',
     'ds2_l', 'ds2_l_u', 'ds2_q', 'ds2_q_u',
-    'quality_f', 'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f',
+    'qual_f_b', 'quality_f', 'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f',
     'xovr_cal_q', 'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c', 'lake_name', 'p_res_id',
     'p_lon', 'p_lat', 'p_ref_wse', 'p_ref_area', 'p_date_t0', 'p_ds_t0', 'p_storage',

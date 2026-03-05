@@ -180,9 +180,9 @@ jobs:
             -Dsonar.tests=tests/
             -Dsonar.projectName=${{ github.repository }}
             -Dsonar.projectVersion=${{ env.software_version }}
-            -Dsonar.python.version=3.8,3.9,3.10,3.12
+            -Dsonar.python.version=3.10,3.12
       - name: Run Snyk as a blocking step
-        uses: snyk/actions/python-3.9@master
+        uses: snyk/actions/python-3.12@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -193,7 +193,7 @@ jobs:
             --severity-threshold=high
             --fail-on=all
       - name: Run Snyk on Python
-        uses: snyk/actions/python-3.9@master
+        uses: snyk/actions/python-3.12@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
