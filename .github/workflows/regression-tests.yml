@@ -12,6 +12,15 @@ on:
         options:
           - uat
           - ops
+      test_suite:
+        type: choice
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        options:
+          - smoke
+          - all
+          - version_d
 
   # Can be called by other workflows after deployment
   workflow_call:
@@ -20,21 +29,28 @@ on:
         description: 'Environment to test (uat or ops)'
         required: true
         type: string
+      test_suite:
+        description: 'Test suite to run (smoke, all, version_d)'
+        required: false
+        type: string
+        default: 'smoke'
 
 jobs:
-  regression-tests:
-    name: Run Regression Tests
+  smoke-tests:
+    name: Smoke Tests (${{ inputs.environment }})
     runs-on: ubuntu-latest
     env:
       POETRY_VERSION: "2.3.2"
       PYTHON_VERSION: "3.12"
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
           repository: ${{ github.repository }}
 
-      - uses: actions/setup-python@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
@@ -43,13 +59,13 @@ jobs:
         with:
           poetry-version: ${{ env.POETRY_VERSION }}
 
-      - name: Setup a local virtual environment
+      - name: Setup virtual environment
         run: |
           poetry config virtualenvs.create true --local
           poetry config virtualenvs.in-project true --local
 
-      - uses: actions/cache@v5
-        name: Cache dependencies
+      - name: Cache dependencies
+        uses: actions/cache@v5
         with:
           path: ./.venv
           key: venv-regression-${{ hashFiles('poetry.lock') }}
@@ -57,23 +73,159 @@ jobs:
       - name: Install dependencies
         run: poetry install --with test
 
-      - name: Run Regression Tests
+      - name: Run Smoke Tests
         env:
           HYDROCRON_ENV: ${{ inputs.environment }}
         run: |
-          poetry run pytest tests/regression/ -v --tb=short --junit-xml=regression-test-results.xml
+          poetry run pytest tests/regression/test_smoke.py -v -m smoke \
+            --tb=short \
+            --junit-xml=smoke-test-results.xml
+
+      - name: Upload Smoke Test Results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: smoke-test-results-${{ inputs.environment }}
+          path: smoke-test-results.xml
+
+      - name: Smoke Test Report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Smoke Tests - ${{ inputs.environment }}
+          path: smoke-test-results.xml
+          reporter: java-junit
+
+  full-regression-tests:
+    name: Full Regression Tests (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    needs: smoke-tests
+    # Only run full suite if explicitly requested or if smoke tests passed
+    if: |
+      always() &&
+      (inputs.test_suite == 'all' || inputs.test_suite == 'version_d') &&
+      needs.smoke-tests.result == 'success'
+    env:
+      POETRY_VERSION: "2.3.2"
+      PYTHON_VERSION: "3.12"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v4
+        with:
+          poetry-version: ${{ env.POETRY_VERSION }}
+
+      - name: Setup virtual environment
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ./.venv
+          key: venv-regression-${{ hashFiles('poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install --with test
+
+      - name: Run Full Regression Suite
+        if: inputs.test_suite == 'all'
+        env:
+          HYDROCRON_ENV: ${{ inputs.environment }}
+        run: |
+          poetry run pytest tests/regression/ -v \
+            --tb=short \
+            --junit-xml=regression-test-results.xml \
+            --html=regression-report.html \
+            --self-contained-html
+
+      - name: Run Version D Tests Only
+        if: inputs.test_suite == 'version_d'
+        env:
+          HYDROCRON_ENV: ${{ inputs.environment }}
+        run: |
+          poetry run pytest tests/regression/ -v -m version_d \
+            --tb=short \
+            --junit-xml=regression-test-results.xml \
+            --html=regression-report.html \
+            --self-contained-html
 
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: regression-test-results-${{ inputs.environment }}
-          path: regression-test-results.xml
+          name: full-regression-results-${{ inputs.environment }}
+          path: |
+            regression-test-results.xml
+            regression-report.html
 
-      - name: Test Report
+      - name: Full Regression Test Report
         if: always()
         uses: dorny/test-reporter@v1
         with:
-          name: Regression Tests - ${{ inputs.environment }}
+          name: Full Regression Tests - ${{ inputs.environment }}
           path: regression-test-results.xml
           reporter: java-junit
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const testResult = '${{ job.status }}' === 'success' ? '✅ PASSED' : '❌ FAILED';
+            const environment = '${{ inputs.environment }}'.toUpperCase();
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Regression Tests ${testResult}\n\n**Environment:** ${environment}\n**Test Suite:** ${{ inputs.test_suite }}\n\nSee workflow run for details: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            })
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [smoke-tests, full-regression-tests]
+    if: always()
+
+    steps:
+      - name: Check Results
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Suite:** ${{ inputs.test_suite || 'smoke' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.smoke-tests.result }}" == "success" ]; then
+            echo "- ✅ Smoke Tests: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Smoke Tests: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.full-regression-tests.result }}" == "success" ]; then
+            echo "- ✅ Full Regression: PASSED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.full-regression-tests.result }}" == "skipped" ]; then
+            echo "- ⏭️ Full Regression: SKIPPED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Full Regression: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if tests failed
+        if: |
+          needs.smoke-tests.result == 'failure' ||
+          (needs.full-regression-tests.result == 'failure' && inputs.test_suite != 'smoke')
+        run: |
+          echo "::error::Regression tests failed"
+          exit 1
