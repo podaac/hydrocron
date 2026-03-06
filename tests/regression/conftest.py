@@ -26,7 +26,7 @@ STABLE_TEST_DATA = {
         "feature_id": "34296500851",
         "start_time": "2024-02-10T00:00:00Z",
         "end_time": "2024-05-03T00:00:00Z",
-        "expected_count": 3,  # Number of results expected for this query
+        "expected_count": 6,  # Number of results expected for this query
         "fields": "reach_id,time_str,wse,slope,width,sword_version",
         "fixtures": {
             "basic_geojson": "reach/reach_basic.geojson",

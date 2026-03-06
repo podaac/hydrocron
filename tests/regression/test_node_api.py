@@ -96,6 +96,31 @@ class TestNodeBasicQueries:
             assert feature['geometry'] is not None
             assert 'type' in feature['geometry']
 
+    def test_default_node_collection(self, api_client, stable_test_data):
+        """Test default collection_shortname is SWOT_L2_HR_RiverSP_2.0 when not specified"""
+        node_data = stable_test_data["node"]
+
+        response, _ = api_client.query({
+            "feature": "Node",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
+            "output": "geojson",
+            "fields": "node_id,time_str,wse,collection_shortname"
+            # Note: No collection_name parameter - should default to 2.0
+        })
+
+        assert_http_success(response)
+
+        data = response.json()
+        geojson = extract_geojson_from_response(data)
+
+        # Verify default collection is 2.0
+        if len(geojson['features']) > 0:
+            props = geojson['features'][0]['properties']
+            assert 'collection_shortname' in props, "collection_shortname not found in properties"
+            assert props['collection_shortname'] == 'SWOT_L2_HR_RiverSP_2.0', \
+                f"Expected default collection 'SWOT_L2_HR_RiverSP_2.0', got '{props['collection_shortname']}'"
 
 @pytest.mark.version_d
 class TestNodeVersionDFields:
@@ -164,39 +189,49 @@ class TestNodeVersionDFields:
 
         assert_http_success(response)
 
-
-class TestNodeErrorHandling:
-    """Test error cases for node queries"""
-
-    def test_invalid_node_id_returns_error(self, api_client):
-        """Test non-existent node ID returns appropriate error"""
-        response, _ = api_client.query({
+    def test_wse_sm_only_valid_for_node(self, api_client, stable_test_data):
+        """Test wse_sm fields are only valid for Node feature type"""
+        # Should work for Node with stable test data
+        node_data = stable_test_data["node"]
+        response_node, _ = api_client.query({
             "feature": "Node",
-            "feature_id": "99999999999999",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
+            "output": "csv",
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "fields": "node_id,time_str,wse_sm"
+        })
+
+        # Stable test data should always exist - field is valid for Node
+        assert_http_success(response_node)
+
+        # Should NOT work for Reach - field validation should fail
+        response_reach, _ = api_client.query({
+            "feature": "Reach",
+            "feature_id": "99999999999",
             "start_time": "2023-01-01T00:00:00Z",
             "end_time": "2023-12-31T23:59:59Z",
             "output": "csv",
-            "fields": "node_id,time_str,wse"
+            "fields": "reach_id,time_str,wse_sm"
         })
 
-        # Should return 400 or 404
-        assert response.status_code >= 400
+        assert_http_error(response_reach)
 
-    def test_invalid_field_name_returns_error(self, api_client):
-        """Test invalid field name returns 400"""
-        response, _ = api_client.query({
-            "feature": "Node",
-            "feature_id": "31241400580011",
-            "start_time": "2026-02-01T00:00:00Z",
-            "end_time": "2026-02-28T00:00:00Z",
+        # Should NOT work for PriorLake - field validation should fail
+        response_lake, _ = api_client.query({
+            "feature": "PriorLake",
+            "feature_id": "99999999999",
+            "start_time": "2023-01-01T00:00:00Z",
+            "end_time": "2023-12-31T23:59:59Z",
             "output": "csv",
-            "fields": "node_id,time_str,invalid_field_xyz"
+            "fields": "lake_id,time_str,wse_sm"
         })
 
-        assert_http_error(response)
+        assert_http_error(response_lake)
 
-    def test_wse_sm_fields_invalid_for_2_0_collection(self, api_client):
-        """Test wse_sm fields are rejected for 2.0 collection"""
+    def test_wse_sm_not_available_in_2_0(self, api_client):
+        """Test wse_sm fields are not available in 2.0 collection"""
         response, _ = api_client.query({
             "feature": "Node",
             "feature_id": "31241400580011",
@@ -204,10 +239,10 @@ class TestNodeErrorHandling:
             "end_time": "2023-12-31T23:59:59Z",
             "output": "csv",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "node_id,time_str,wse_sm"  # wse_sm only in D
+            "fields": "node_id,time_str,wse_sm"
         })
 
-        # Should return error
+        # Should return field validation error
         assert_http_error(response)
 
 

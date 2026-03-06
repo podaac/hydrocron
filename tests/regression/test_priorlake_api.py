@@ -7,6 +7,7 @@ geometry validation, and collection version handling.
 import pytest
 from .utils import (
     assert_http_success,
+    assert_http_error,
     validate_geojson_structure,
     validate_csv_structure,
     extract_geojson_from_response,
@@ -94,6 +95,32 @@ class TestPriorLakeBasicQueries:
             feature = geojson['features'][0]
             assert 'geometry' in feature
             assert feature['geometry'] is not None
+
+    def test_default_lake_collection(self, api_client, stable_test_data):
+        """Test default collection_shortname is SWOT_L2_HR_LakeSP_2.0 when not specified"""
+        lake_data = stable_test_data["priorlake"]
+
+        response, _ = api_client.query({
+            "feature": "PriorLake",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
+            "output": "geojson",
+            "fields": "lake_id,time_str,wse,collection_shortname"
+            # Note: No collection_name parameter - should default to 2.0
+        })
+
+        assert_http_success(response)
+
+        data = response.json()
+        geojson = extract_geojson_from_response(data)
+
+        # Verify default collection is 2.0
+        if len(geojson['features']) > 0:
+            props = geojson['features'][0]['properties']
+            assert 'collection_shortname' in props, "collection_shortname not found in properties"
+            assert props['collection_shortname'] == 'SWOT_L2_HR_LakeSP_2.0', \
+                f"Expected default collection 'SWOT_L2_HR_LakeSP_2.0', got '{props['collection_shortname']}'"
 
 
 class TestPriorLakeDrainageFields:
@@ -225,6 +252,111 @@ class TestPriorLakeCollectionVersions:
             "output": "csv",
             # No collection_name specified - should use default
             "fields": "lake_id,time_str,wse"
+        })
+
+        assert_http_success(response)
+
+
+@pytest.mark.version_d
+class TestPriorLakeVersionDFields:
+    """Test Version D specific PriorLake fields (qual_f_b, etc.)"""
+
+    def test_qual_f_b_accessible(self, api_client, test_env, stable_test_data):
+        """Test qual_f_b field is accessible for PriorLake"""
+        if test_env == "ops":
+            pytest.skip("Version D fields may not be available in OPS yet")
+
+        lake_data = stable_test_data["priorlake"]
+
+        response, _ = api_client.query({
+            "feature": "PriorLake",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
+            "output": "csv",
+            "collection_name": "SWOT_L2_HR_LakeSP_D",
+            "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b"
+        })
+
+        assert_http_success(response)
+
+        rows = validate_csv_structure(
+            response.text,
+            expected_fields=["lake_id", "qual_f_b"]
+        )
+
+        assert len(rows) > 0, "Should return data rows"
+
+    def test_qual_f_b_only_valid_for_priorlake(self, api_client, stable_test_data):
+        """Test qual_f_b field is only valid for PriorLake feature type"""
+        # Should work for PriorLake with stable test data
+        lake_data = stable_test_data["priorlake"]
+        response_lake, _ = api_client.query({
+            "feature": "PriorLake",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
+            "output": "csv",
+            "collection_name": "SWOT_L2_HR_LakeSP_D",
+            "fields": "lake_id,time_str,qual_f_b"
+        })
+
+        # Stable test data should always exist - field is valid for PriorLake
+        assert_http_success(response_lake)
+
+        # Should NOT work for Reach - field validation should fail
+        response_reach, _ = api_client.query({
+            "feature": "Reach",
+            "feature_id": "99999999999",
+            "start_time": "2023-01-01T00:00:00Z",
+            "end_time": "2023-12-31T23:59:59Z",
+            "output": "csv",
+            "fields": "reach_id,time_str,qual_f_b"
+        })
+
+        assert_http_error(response_reach)
+
+        # Should NOT work for Node - field validation should fail
+        response_node, _ = api_client.query({
+            "feature": "Node",
+            "feature_id": "99999999999",
+            "start_time": "2023-01-01T00:00:00Z",
+            "end_time": "2023-12-31T23:59:59Z",
+            "output": "csv",
+            "fields": "node_id,time_str,qual_f_b"
+        })
+
+        assert_http_error(response_node)
+
+    def test_qual_f_b_not_available_in_2_0(self, api_client, stable_test_data):
+        """Test qual_f_b field is not available in 2.0 collection"""
+        lake_data = stable_test_data["priorlake"]
+
+        response, _ = api_client.query({
+            "feature": "PriorLake",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
+            "output": "csv",
+            "collection_name": "SWOT_L2_HR_LakeSP_2.0",
+            "fields": "lake_id,time_str,qual_f_b"
+        })
+
+        # Should return field validation error
+        assert_http_error(response)
+
+    def test_priorlake_backward_compatibility(self, api_client, stable_test_data):
+        """Test queries without new Version D fields still work for PriorLake"""
+        lake_data = stable_test_data["priorlake"]
+
+        response, _ = api_client.query({
+            "feature": "PriorLake",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
+            "output": "csv",
+            "collection_name": "SWOT_L2_HR_LakeSP_D",
+            "fields": "lake_id,time_str,wse,area_total"  # No qual_f_b
         })
 
         assert_http_success(response)

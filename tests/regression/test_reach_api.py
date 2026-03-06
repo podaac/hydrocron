@@ -33,7 +33,7 @@ class TestReachBasicQueries:
         })
 
         assert_http_success(response)
-        assert_response_time(elapsed, max_seconds=30)
+        assert_response_time(elapsed, max_seconds=2)
         assert_result_count(response, reach_data["expected_count"], output_format="geojson")
 
         data = response.json()
@@ -46,6 +46,11 @@ class TestReachBasicQueries:
             expected_fields = ['reach_id', 'wse', 'slope', 'width', 'area_total', 'sword_version']
             for field in expected_fields:
                 assert field in props, f"Expected field '{field}' not found in properties"
+
+            # Verify collection name is 2.0 (default)
+            assert 'collection_shortname' in props, "collection_shortname not found in properties"
+            assert props['collection_shortname'] == 'SWOT_L2_HR_RiverSP_2.0', \
+                f"Expected collection_shortname 'SWOT_L2_HR_RiverSP_2.0', got '{props['collection_shortname']}'"
 
     def test_reach_csv_basic(self, api_client, stable_test_data):
         """Test basic reach CSV query"""
@@ -254,8 +259,8 @@ class TestReachCollectionVersions:
         # Stable test data should always exist - 404 is a failure
         assert_http_success(response)
 
-    def test_default_collection_used_when_not_specified(self, api_client, stable_test_data):
-        """Test that default collection is used when collection_name not specified"""
+    def test_default_reach_collection(self, api_client, stable_test_data):
+        """Test that default collection is SWOT_L2_HR_RiverSP_2.0 when collection_name not specified"""
         reach_data = stable_test_data["reach"]
 
         response, _ = api_client.query({
@@ -264,11 +269,21 @@ class TestReachCollectionVersions:
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "csv",
-            # No collection_name specified - should use default
-            "fields": "reach_id,time_str,wse"
+            # No collection_name specified - should use default 2.0
+            "fields": "reach_id,time_str,wse,collection_shortname"
         })
 
         assert_http_success(response)
+
+        # Verify default collection is 2.0
+        rows = validate_csv_structure(
+            response.text,
+            expected_fields=["reach_id", "collection_shortname"]
+        )
+
+        assert len(rows) > 0, "Should return at least one row"
+        assert rows[0]['collection_shortname'] == 'SWOT_L2_HR_RiverSP_2.0', \
+            f"Expected default collection 'SWOT_L2_HR_RiverSP_2.0', got '{rows[0]['collection_shortname']}'"
 
 
 @pytest.mark.golden
