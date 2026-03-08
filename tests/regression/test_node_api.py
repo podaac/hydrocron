@@ -11,6 +11,7 @@ from .utils import (
     validate_csv_structure,
     assert_response_time,
     extract_geojson_from_response,
+    extract_csv_from_response,
     assert_matches_reference,
     assert_result_count
 )
@@ -60,17 +61,13 @@ class TestNodeBasicQueries:
         })
 
         assert_http_success(response)
-        assert_response_time(elapsed, max_seconds=30)
+        assert_response_time(elapsed, max_seconds=2)
         assert_result_count(response, node_data["expected_count"], output_format="csv")
 
-        # Validate CSV structure
-        rows = validate_csv_structure(
-            response.text,
-            expected_fields=["node_id", "time_str", "wse", "width", "lat", "lon"]
-        )
-
-        assert len(rows) == node_data["expected_count"], \
-            f"Expected {node_data['expected_count']} rows, got {len(rows)}"
+        # Extract and validate CSV structure
+        data = response.json()
+        csv_text = extract_csv_from_response(data)
+        validate_csv_structure(csv_text, expected_fields=["node_id", "time_str", "wse", "width", "lat", "lon"])
 
     def test_node_with_geometry(self, api_client, stable_test_data):
         """Test node query includes geometry"""
@@ -126,42 +123,48 @@ class TestNodeBasicQueries:
 class TestNodeVersionDFields:
     """Test Version D specific node fields (wse_sm, etc.)"""
 
-    def test_node_wse_sm_fields_available(self, api_client, test_env):
+    def test_node_wse_sm_fields_available(self, api_client, stable_test_data, test_env):
         """Test wse_sm smoothed fields are accessible in Version D"""
         # Skip if not in UAT (Version D might not be in OPS yet)
         if test_env == "ops":
             pytest.skip("Version D fields may not be available in OPS yet")
 
+        node_data = stable_test_data["node_d"]
+
         response, _ = api_client.query({
             "feature": "Node",
-            "feature_id": "31241400580011",
-            "start_time": "2026-02-01T00:00:00Z",
-            "end_time": "2026-02-28T00:00:00Z",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
             "output": "csv",
-            "collection_name": "SWOT_L2_HR_RiverSP_D",
-            "fields": "node_id,time_str,wse,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b"
+            "collection_name": node_data["collection_name"],
+            "fields": node_data["fields"]
         })
 
         assert_http_success(response)
 
         # Verify wse_sm fields are in response
-        assert 'wse_sm' in response.text
-        assert 'wse_sm_u' in response.text
-        assert 'wse_sm_q' in response.text
-        assert 'wse_sm_q_b' in response.text
+        data = response.json()
+        csv_text = extract_csv_from_response(data)
+        assert 'wse_sm' in csv_text
+        assert 'wse_sm_u' in csv_text
+        assert 'wse_sm_q' in csv_text
+        assert 'wse_sm_q_b' in csv_text
 
-    def test_node_wse_sm_fields_in_geojson(self, api_client, test_env):
+    def test_node_wse_sm_fields_in_geojson(self, api_client, stable_test_data, test_env):
         """Test wse_sm fields appear in GeoJSON output"""
         if test_env == "ops":
             pytest.skip("Version D fields may not be available in OPS yet")
 
+        node_data = stable_test_data["node_d"]
+
         response, _ = api_client.query({
             "feature": "Node",
-            "feature_id": "31241400580011",
-            "start_time": "2026-02-01T00:00:00Z",
-            "end_time": "2026-02-28T00:00:00Z",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
             "output": "geojson",
-            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "collection_name": node_data["collection_name"],
             "fields": "node_id,time_str,wse_sm,wse_sm_u"
         })
 
@@ -175,15 +178,18 @@ class TestNodeVersionDFields:
             assert 'wse_sm' in props
             assert 'wse_sm_u' in props
 
-    def test_node_backward_compatibility(self, api_client):
+    def test_node_backward_compatibility(self, api_client, stable_test_data):
         """Test queries without new Version D fields still work"""
+        node_data = stable_test_data["node_d"]
+
         # Old-style query without Version D fields should work
         response, _ = api_client.query({
             "feature": "Node",
-            "feature_id": "31241400580011",
-            "start_time": "2026-02-01T00:00:00Z",
-            "end_time": "2026-02-28T00:00:00Z",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
             "output": "csv",
+            "collection_name": node_data["collection_name"],
             "fields": "node_id,time_str,wse,width"  # No wse_sm fields
         })
 
@@ -192,7 +198,7 @@ class TestNodeVersionDFields:
     def test_wse_sm_only_valid_for_node(self, api_client, stable_test_data):
         """Test wse_sm fields are only valid for Node feature type"""
         # Should work for Node with stable test data
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data["node_d"]
         response_node, _ = api_client.query({
             "feature": "Node",
             "feature_id": node_data["feature_id"],
@@ -207,11 +213,12 @@ class TestNodeVersionDFields:
         assert_http_success(response_node)
 
         # Should NOT work for Reach - field validation should fail
+        reach_data = stable_test_data["reach"]
         response_reach, _ = api_client.query({
             "feature": "Reach",
-            "feature_id": "99999999999",
-            "start_time": "2023-01-01T00:00:00Z",
-            "end_time": "2023-12-31T23:59:59Z",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
             "output": "csv",
             "fields": "reach_id,time_str,wse_sm"
         })
@@ -219,27 +226,30 @@ class TestNodeVersionDFields:
         assert_http_error(response_reach)
 
         # Should NOT work for PriorLake - field validation should fail
+        lake_data = stable_test_data["priorlake"]
         response_lake, _ = api_client.query({
             "feature": "PriorLake",
-            "feature_id": "99999999999",
-            "start_time": "2023-01-01T00:00:00Z",
-            "end_time": "2023-12-31T23:59:59Z",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
             "output": "csv",
             "fields": "lake_id,time_str,wse_sm"
         })
 
         assert_http_error(response_lake)
 
-    def test_wse_sm_not_available_in_2_0(self, api_client):
+    def test_wse_sm_not_available_in_2_0(self, api_client, stable_test_data):
         """Test wse_sm fields are not available in 2.0 collection"""
+        node_data = stable_test_data["node"]  # Use 2.0 node data
+
         response, _ = api_client.query({
             "feature": "Node",
-            "feature_id": "31241400580011",
-            "start_time": "2023-01-01T00:00:00Z",
-            "end_time": "2023-12-31T23:59:59Z",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
             "output": "csv",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "node_id,time_str,wse_sm"
+            "fields": "node_id,time_str,wse_sm"  # wse_sm not valid for 2.0
         })
 
         # Should return field validation error
@@ -263,9 +273,10 @@ class TestNodePerformance:
         })
 
         assert_http_success(response)
-        assert_response_time(elapsed, max_seconds=30)
+        assert_response_time(elapsed, max_seconds=2)
 
     @pytest.mark.slow
+    @pytest.mark.skip(reason="Requires known large dataset - update feature_id before enabling")
     def test_large_time_range_performs_acceptably(self, api_client):
         """Test query with large time range"""
         response, elapsed = api_client.query({

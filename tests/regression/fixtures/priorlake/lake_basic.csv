@@ -1,0 +1,1 @@
+{"status":"200 OK","time":404.47,"hits":3,"results":{"csv":"lake_id,time_str,wse,area_total,quality_f,wse_units,area_total_units\n8223592002,2024-08-16T11:36:02Z,0.492,0.200569,0,m,km^2\n8223592002,no_data,-999999999999.0,-999999999999.0,-999,m,km^2\n8223592002,no_data,-999999999999.0,-999999999999.0,-999,m,km^2\n","geojson":{}}}

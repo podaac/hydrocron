@@ -11,6 +11,7 @@ from .utils import (
     validate_geojson_structure,
     validate_csv_structure,
     extract_geojson_from_response,
+    extract_csv_from_response,
     assert_response_time,
     assert_matches_reference,
     assert_result_count
@@ -34,7 +35,7 @@ class TestPriorLakeBasicQueries:
         })
 
         assert_http_success(response)
-        assert_response_time(elapsed, max_seconds=30)
+        assert_response_time(elapsed, max_seconds=2)
         assert_result_count(response, lake_data["expected_count"], output_format="geojson")
 
         data = response.json()
@@ -52,7 +53,7 @@ class TestPriorLakeBasicQueries:
         """Test prior lake query with CSV output"""
         lake_data = stable_test_data["priorlake"]
 
-        response, _ = api_client.query({
+        response, elapsed = api_client.query({
             "feature": "PriorLake",
             "feature_id": lake_data["feature_id"],
             "start_time": lake_data["start_time"],
@@ -62,16 +63,13 @@ class TestPriorLakeBasicQueries:
         })
 
         assert_http_success(response)
+        assert_response_time(elapsed, max_seconds=2)
         assert_result_count(response, lake_data["expected_count"], output_format="csv")
-        assert "text/csv" in response.headers.get("Content-Type", "")
 
-        rows = validate_csv_structure(
-            response.text,
-            expected_fields=["lake_id", "time_str", "wse", "area_total", "quality_f"]
-        )
-
-        assert len(rows) == lake_data["expected_count"], \
-            f"Expected {lake_data['expected_count']} rows, got {len(rows)}"
+        # Extract and validate CSV structure
+        data = response.json()
+        csv_text = extract_csv_from_response(data)
+        validate_csv_structure(csv_text, expected_fields=["lake_id", "time_str", "wse", "area_total", "quality_f"])
 
     def test_lake_with_geometry(self, api_client, stable_test_data):
         """Test prior lake query includes geometry"""
@@ -177,8 +175,12 @@ class TestPriorLakeQualityFields:
 
         assert_http_success(response)
 
+        # Extract CSV from JSON-wrapped response
+        data = response.json()
+        csv_text = extract_csv_from_response(data)
+
         rows = validate_csv_structure(
-            response.text,
+            csv_text,
             expected_fields=["lake_id", "quality_f", "dark_frac"]
         )
 
@@ -225,7 +227,7 @@ class TestPriorLakeCollectionVersions:
         if test_env == "ops":
             pytest.skip("Version D may not be in OPS yet")
 
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -266,7 +268,7 @@ class TestPriorLakeVersionDFields:
         if test_env == "ops":
             pytest.skip("Version D fields may not be available in OPS yet")
 
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -274,14 +276,17 @@ class TestPriorLakeVersionDFields:
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "csv",
-            "collection_name": "SWOT_L2_HR_LakeSP_D",
-            "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b"
+            "collection_name": lake_data["collection_name"],
+            "fields": lake_data["fields"]
         })
 
         assert_http_success(response)
 
+        # Extract and validate CSV structure
+        data = response.json()
+        csv_text = extract_csv_from_response(data)
         rows = validate_csv_structure(
-            response.text,
+            csv_text,
             expected_fields=["lake_id", "qual_f_b"]
         )
 
@@ -290,7 +295,7 @@ class TestPriorLakeVersionDFields:
     def test_qual_f_b_only_valid_for_priorlake(self, api_client, stable_test_data):
         """Test qual_f_b field is only valid for PriorLake feature type"""
         # Should work for PriorLake with stable test data
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
         response_lake, _ = api_client.query({
             "feature": "PriorLake",
             "feature_id": lake_data["feature_id"],
@@ -330,7 +335,7 @@ class TestPriorLakeVersionDFields:
 
     def test_qual_f_b_not_available_in_2_0(self, api_client, stable_test_data):
         """Test qual_f_b field is not available in 2.0 collection"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake"]  # Use 2.0 lake data
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -339,7 +344,7 @@ class TestPriorLakeVersionDFields:
             "end_time": lake_data["end_time"],
             "output": "csv",
             "collection_name": "SWOT_L2_HR_LakeSP_2.0",
-            "fields": "lake_id,time_str,qual_f_b"
+            "fields": "lake_id,time_str,qual_f_b"  # qual_f_b not valid for 2.0
         })
 
         # Should return field validation error
@@ -347,7 +352,7 @@ class TestPriorLakeVersionDFields:
 
     def test_priorlake_backward_compatibility(self, api_client, stable_test_data):
         """Test queries without new Version D fields still work for PriorLake"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",

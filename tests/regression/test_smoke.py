@@ -14,13 +14,15 @@ from .utils import assert_http_success, validate_geojson_structure, validate_csv
 class TestAPIHealth:
     """Basic API health checks"""
 
-    def test_api_responds(self, api_client):
+    def test_api_responds(self, api_client, stable_test_data):
         """Test API is up and responding"""
+        reach_data = stable_test_data["reach"]
+
         response, elapsed = api_client.query({
             "feature": "Reach",
-            "feature_id": "34296500851",
-            "start_time": "2024-02-10T00:00:00Z",
-            "end_time": "2024-02-10T00:01:00Z",  # Very short range
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
             "output": "geojson",
             "fields": "reach_id,time_str"
         })
@@ -30,46 +32,50 @@ class TestAPIHealth:
 
 
 @pytest.mark.smoke
-@pytest.mark.parametrize("feature,feature_id,start_time,end_time", [
-    ("Reach", "34296500851", "2024-02-10T00:00:00Z", "2024-02-11T00:00:00Z"),
-    ("Node", "31241400580011", "2026-02-01T00:00:00Z", "2026-02-02T00:00:00Z"),
-    ("PriorLake", "9120274662", "2024-06-22T00:00:00Z", "2024-06-23T00:00:00Z"),
+@pytest.mark.parametrize("feature_key,feature_name", [
+    ("reach", "Reach"),
+    ("node", "Node"),
+    ("priorlake", "PriorLake"),
 ])
 class TestBasicQueryPerFeature:
     """Test basic query for each feature type"""
 
-    def test_feature_type_works(self, api_client, feature, feature_id, start_time, end_time):
+    def test_feature_type_works(self, api_client, stable_test_data, feature_key, feature_name):
         """Test each feature type returns 200 OK"""
+        # Get test data from stable_test_data
+        test_data = stable_test_data[feature_key]
+
         # Determine field name based on feature type
         id_field = {
             "Reach": "reach_id",
             "Node": "node_id",
             "PriorLake": "lake_id"
-        }[feature]
+        }[feature_name]
 
         response, _ = api_client.query({
-            "feature": feature,
-            "feature_id": feature_id,
-            "start_time": start_time,
-            "end_time": end_time,
+            "feature": feature_name,
+            "feature_id": test_data["feature_id"],
+            "start_time": test_data["start_time"],
+            "end_time": test_data["end_time"],
             "output": "csv",
             "fields": f"{id_field},time_str,wse"
         })
 
         assert_http_success(response)
-        assert len(response.text) > 0, f"{feature} query returned empty response"
+
+        # Verify response has data
+        data = response.json()
+        assert 'hits' in data, f"{feature_name} query returned no hits field"
+        assert data['hits'] > 0, f"{feature_name} query returned 0 results"
 
 
 @pytest.mark.smoke
-@pytest.mark.parametrize("output_format,content_type", [
-    ("csv", "text/csv"),
-    ("geojson", "application/json"),
-])
+@pytest.mark.parametrize("output_format", ["csv", "geojson"])
 class TestOutputFormats:
     """Test both output formats work"""
 
-    def test_output_format_works(self, api_client, output_format, content_type):
-        """Test output format produces correct content type"""
+    def test_output_format_works(self, api_client, output_format):
+        """Test output format returns valid data"""
         response, _ = api_client.query({
             "feature": "Reach",
             "feature_id": "34296500851",
@@ -81,20 +87,21 @@ class TestOutputFormats:
 
         assert_http_success(response)
 
-        # Check content type
-        response_content_type = response.headers.get("Content-Type", "")
-        assert content_type in response_content_type, \
-            f"Expected {content_type} in Content-Type, got {response_content_type}"
+        # Both formats are JSON-wrapped
+        data = response.json()
+        assert 'status' in data
+        assert 'results' in data
 
-        # Validate structure
+        # Validate structure based on output format
         if output_format == "geojson":
-            data = response.json()
-            # Handle wrapped response
-            if 'results' in data and 'geojson' in data['results']:
-                data = data['results']['geojson']
-            validate_geojson_structure(data)
+            assert 'geojson' in data['results']
+            geojson = data['results']['geojson']
+            validate_geojson_structure(geojson)
         elif output_format == "csv":
-            validate_csv_structure(response.text, expected_fields=["reach_id", "time_str", "wse"])
+            assert 'csv' in data['results']
+            from .utils import extract_csv_from_response
+            csv_text = extract_csv_from_response(data)
+            validate_csv_structure(csv_text, expected_fields=["reach_id", "time_str", "wse"])
 
 
 @pytest.mark.smoke

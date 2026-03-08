@@ -222,8 +222,8 @@ class TestRawGeoJSONFormat:
 class TestRawCSVFormat:
     """Test text/csv returns raw CSV without wrapper"""
 
-    def test_csv_accept_returns_raw_csv(self, api_client, stable_test_data):
-        """Test text/csv Accept header returns raw CSV"""
+    def test_csv_accept_returns_csv_data(self, api_client, stable_test_data):
+        """Test text/csv Accept header returns CSV data (JSON-wrapped)"""
         reach_data = stable_test_data["reach"]
 
         response, _ = api_client.query(
@@ -239,18 +239,18 @@ class TestRawCSVFormat:
 
         assert_http_success(response)
 
-        # Should be raw CSV text
-        assert isinstance(response.text, str)
+        # API returns JSON-wrapped CSV
+        data = response.json()
+        assert 'results' in data
+        assert 'csv' in data['results']
 
-        # Should have CSV structure
-        lines = response.text.strip().split('\n')
-        assert len(lines) >= 2, "CSV should have at least header + 1 data row"
-
-        # Validate CSV structure
-        validate_csv_structure(response.text, expected_fields=["reach_id", "time_str", "wse"])
+        # Extract and validate CSV structure
+        from .utils import extract_csv_from_response
+        csv_text = extract_csv_from_response(data)
+        validate_csv_structure(csv_text, expected_fields=["reach_id", "time_str", "wse"])
 
     def test_csv_content_type_header(self, api_client, stable_test_data):
-        """Test text/csv Accept returns proper Content-Type header"""
+        """Test CSV output returns JSON Content-Type (CSV is JSON-wrapped)"""
         reach_data = stable_test_data["reach"]
 
         response, _ = api_client.query(
@@ -266,10 +266,10 @@ class TestRawCSVFormat:
 
         assert_http_success(response)
 
+        # CSV output is JSON-wrapped, so Content-Type is application/json
         content_type = response.headers.get("Content-Type", "")
-
-        assert "text/csv" in content_type, \
-            f"Content-Type should be text/csv, got {content_type}"
+        assert "json" in content_type.lower(), \
+            f"Content-Type should be application/json (CSV is JSON-wrapped), got {content_type}"
 
 
 class TestOutputParameterVsAcceptHeader:

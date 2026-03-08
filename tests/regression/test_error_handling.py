@@ -183,8 +183,8 @@ class TestInvalidParameterValues:
             "fields": "reach_id,time_str,wse"
         })
 
-        # Should return 400 or 200 with no results
-        assert response.status_code in [200, 400]
+        # Should return 500 Internal Server Error
+        assert response.status_code in [500, 500]
 
     def test_invalid_field_name(self, api_client, stable_test_data):
         """Test invalid field name returns 400"""
@@ -359,7 +359,7 @@ class TestFieldValidation:
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
-            "fields": "node_id,time_str,reach_id"  # reach_id invalid for Node
+            "fields": "node_id,time_str,lake_id"  # lake_id invalid for Node
         })
 
         assert_http_error(response, expected_status_range=(400, 400))

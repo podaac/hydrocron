@@ -307,9 +307,25 @@ class TestCompactWithCSV:
         assert_http_success(response_compact_true)
         assert_http_success(response_compact_false)
 
-        # CSV output should be identical regardless of compact parameter
-        # Both should have same number of rows (one per observation)
-        rows_compact_true = len(response_compact_true.text.strip().split('\n')) - 1
-        rows_compact_false = len(response_compact_false.text.strip().split('\n')) - 1
+        # Extract CSV from JSON-wrapped responses
+        data_true = response_compact_true.json()
+        data_false = response_compact_false.json()
 
-        assert rows_compact_true == rows_compact_false == reach_data["expected_count"]
+        # Both should have same hit count
+        assert data_true['hits'] == data_false['hits'], \
+            "Compact parameter should not affect CSV hit count"
+
+        # Extract and compare CSV content
+        from .utils import extract_csv_from_response
+        csv_true = extract_csv_from_response(data_true)
+        csv_false = extract_csv_from_response(data_false)
+
+        # CSV output should be identical regardless of compact parameter
+        assert csv_true == csv_false, \
+            "Compact parameter should not affect CSV output content"
+
+        # Both should have expected number of rows
+        rows_true = len(csv_true.strip().split('\n')) - 1  # Subtract header
+        rows_false = len(csv_false.strip().split('\n')) - 1
+
+        assert rows_true == rows_false == reach_data["expected_count"]

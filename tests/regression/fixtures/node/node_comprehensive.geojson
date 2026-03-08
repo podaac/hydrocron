@@ -1,0 +1,97 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "0",
+      "type": "Feature",
+      "properties": {
+        "node_id": "81292900150551",
+        "time_str": "2024-02-06T09:44:00Z",
+        "wse": "774.29348",
+        "width": "128.070095",
+        "lat": "61.45074339",
+        "lon": "-139.1350912",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -139.134971,
+          61.450631
+        ]
+      }
+    },
+    {
+      "id": "1",
+      "type": "Feature",
+      "properties": {
+        "node_id": "81292900150551",
+        "time_str": "2024-02-06T18:33:21Z",
+        "wse": "-999999999999.0",
+        "width": "75.902891",
+        "lat": "-999999999999.0",
+        "lon": "-999999999999.0",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -139.134971,
+          61.450631
+        ]
+      }
+    },
+    {
+      "id": "2",
+      "type": "Feature",
+      "properties": {
+        "node_id": "81292900150551",
+        "time_str": "2024-02-16T08:06:17Z",
+        "wse": "774.12048",
+        "width": "101.655631",
+        "lat": "61.45083567",
+        "lon": "-139.134894",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -139.134971,
+          61.450631
+        ]
+      }
+    },
+    {
+      "id": "3",
+      "type": "Feature",
+      "properties": {
+        "node_id": "81292900150551",
+        "time_str": "no_data",
+        "wse": "-999999999999.0",
+        "width": "-999999999999.0",
+        "lat": "-999999999999.0",
+        "lon": "-999999999999.0",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -139.134971,
+          61.450631
+        ]
+      }
+    }
+  ]
+}

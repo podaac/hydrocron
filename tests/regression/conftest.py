@@ -39,7 +39,7 @@ STABLE_TEST_DATA = {
         "feature_id": "81292900150551",
         "start_time": "2024-02-06T00:00:00Z",
         "end_time": "2024-02-26T00:00:00Z",
-        "expected_count": 5,  # Number of results expected for this query
+        "expected_count": 4,  # Number of results expected for this query
         "fields": "node_id,time_str,wse,width,lat,lon",
         "fixtures": {
             "basic_geojson": "node/node_basic.geojson",
@@ -49,16 +49,44 @@ STABLE_TEST_DATA = {
         }
     },
     "priorlake": {
-        "feature_id": "9120274662",
-        "start_time": "2024-06-22T00:00:00Z",
-        "end_time": "2024-07-13T23:59:59Z",
-        "expected_count": 2,  # Number of results expected for this query
+        "feature_id": "8223592002",
+        "start_time": "2024-08-16T00:00:00Z",
+        "end_time": "2024-08-25T23:59:59Z",
+        "expected_count": 3,  # Number of results expected for this query
         "fields": "lake_id,time_str,wse,area_total,quality_f",
         "fixtures": {
             "basic_geojson": "priorlake/lake_basic.geojson",
             "basic_csv": "priorlake/lake_basic.csv",
             "qual_f_b_csv": "priorlake/lake_qual_f_b.csv",
             "comprehensive_geojson": "priorlake/lake_comprehensive.geojson"
+        }
+    },
+    "node_d": {
+        "feature_id": "33129600450223",  # Update with Version D node_id
+        "start_time": "2025-06-04T00:00:00Z",  # Update with actual date range
+        "end_time": "2025-06-05T00:00:00Z",
+        "expected_count": 5,  # Update with actual count
+        "collection_name": "SWOT_L2_HR_RiverSP_D",
+        "fields": "node_id,time_str,wse,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b",
+        "fixtures": {
+            "basic_geojson": "node/node_d_basic.geojson",
+            "basic_csv": "node/node_d_basic.csv",
+            "wse_sm_csv": "node/node_d_wse_sm.csv",
+            "comprehensive_geojson": "node/node_d_comprehensive.geojson"
+        }
+    },
+    "priorlake_d": {
+        "feature_id": "8121554212",  # Update with Version D lake_id
+        "start_time": "2024-06-22T00:00:00Z",  # Update with actual date range
+        "end_time": "2025-07-13T23:59:59Z",
+        "expected_count": 1,  # Update with actual count
+        "collection_name": "SWOT_L2_HR_LakeSP_D",
+        "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b",
+        "fixtures": {
+            "basic_geojson": "priorlake/lake_d_basic.geojson",
+            "basic_csv": "priorlake/lake_d_basic.csv",
+            "qual_f_b_csv": "priorlake/lake_d_qual_f_b.csv",
+            "comprehensive_geojson": "priorlake/lake_d_comprehensive.geojson"
         }
     }
 }

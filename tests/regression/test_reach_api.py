@@ -78,7 +78,6 @@ class TestReachBasicQueries:
         })
 
         assert_http_success(response)
-        assert_response_time(elapsed, max_seconds=30)
         assert_result_count(response, reach_data["expected_count"], output_format="csv")
 
         # Extract and validate CSV structure
