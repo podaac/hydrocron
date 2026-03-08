@@ -223,7 +223,7 @@ class TestRawCSVFormat:
     """Test text/csv returns raw CSV without wrapper"""
 
     def test_csv_accept_returns_csv_data(self, api_client, stable_test_data):
-        """Test text/csv Accept header returns CSV data (JSON-wrapped)"""
+        """Test text/csv Accept header returns CSV data"""
         reach_data = stable_test_data["reach"]
 
         response, _ = api_client.query(
@@ -239,18 +239,18 @@ class TestRawCSVFormat:
 
         assert_http_success(response)
 
-        # API returns JSON-wrapped CSV
-        data = response.json()
-        assert 'results' in data
-        assert 'csv' in data['results']
+        csv_text = response.text
 
-        # Extract and validate CSV structure
-        from .utils import extract_csv_from_response
-        csv_text = extract_csv_from_response(data)
+        # If response is a JSON string (starts with quote), parse it
+        if csv_text.strip().startswith('"'):
+            import json
+            csv_text = json.loads(csv_text)
+
+        # Validate CSV structure
         validate_csv_structure(csv_text, expected_fields=["reach_id", "time_str", "wse"])
 
     def test_csv_content_type_header(self, api_client, stable_test_data):
-        """Test CSV output returns JSON Content-Type (CSV is JSON-wrapped)"""
+        """Test CSV output returns text/csv Content-Type"""
         reach_data = stable_test_data["reach"]
 
         response, _ = api_client.query(
@@ -266,10 +266,10 @@ class TestRawCSVFormat:
 
         assert_http_success(response)
 
-        # CSV output is JSON-wrapped, so Content-Type is application/json
+        # Verify CSV-related content type
         content_type = response.headers.get("Content-Type", "")
-        assert "json" in content_type.lower(), \
-            f"Content-Type should be application/json (CSV is JSON-wrapped), got {content_type}"
+        assert "text/csv" in content_type.lower(), \
+            f"Content-Type should contain 'text/csv', got {content_type}"
 
 
 class TestOutputParameterVsAcceptHeader:
@@ -320,12 +320,8 @@ class TestOutputParameterVsAcceptHeader:
             headers={"Accept": "text/csv"}
         )
 
-        # Behavior depends on implementation:
-        # - Could honor output parameter and return GeoJSON
-        # - Could honor Accept header and return error
-        # - Could convert GeoJSON to CSV
-
-        assert response.status_code in [200, 400, 415]
+        # Should return error--invalid combination of Accept header and output parameter
+        assert response.status_code in [400, 400]
 
     def test_output_parameter_without_accept_header(self, api_client, stable_test_data):
         """Test output parameter works without explicit Accept header"""

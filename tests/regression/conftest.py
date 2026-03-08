@@ -35,6 +35,20 @@ STABLE_TEST_DATA = {
             "comprehensive_geojson": "reach/reach_comprehensive.geojson"
         }
     },
+    "reach_d": {
+        "feature_id": "35142800091",  # Update with Version D reach_id
+        "start_time": "2025-06-04T00:00:00Z",  # Update with actual date range
+        "end_time": "2025-06-05T00:00:00Z",
+        "expected_count": 1,  # Update with actual count
+        "collection_name": "SWOT_L2_HR_RiverSP_D",
+        "fields": "reach_id,time_str,wse,slope,width,sword_version",
+        "fixtures": {
+            "basic_geojson": "reach/reach_d_basic.geojson",
+            "basic_csv": "reach/reach_d_basic.csv",
+            "discharge_csv": "reach/reach_d_discharge.csv",
+            "comprehensive_geojson": "reach/reach_d_comprehensive.geojson"
+        }
+    },
     "node": {
         "feature_id": "81292900150551",
         "start_time": "2024-02-06T00:00:00Z",
@@ -46,19 +60,6 @@ STABLE_TEST_DATA = {
             "basic_csv": "node/node_basic.csv",
             "wse_sm_csv": "node/node_wse_sm.csv",
             "comprehensive_geojson": "node/node_comprehensive.geojson"
-        }
-    },
-    "priorlake": {
-        "feature_id": "8223592002",
-        "start_time": "2024-08-16T00:00:00Z",
-        "end_time": "2024-08-25T23:59:59Z",
-        "expected_count": 3,  # Number of results expected for this query
-        "fields": "lake_id,time_str,wse,area_total,quality_f",
-        "fixtures": {
-            "basic_geojson": "priorlake/lake_basic.geojson",
-            "basic_csv": "priorlake/lake_basic.csv",
-            "qual_f_b_csv": "priorlake/lake_qual_f_b.csv",
-            "comprehensive_geojson": "priorlake/lake_comprehensive.geojson"
         }
     },
     "node_d": {
@@ -73,6 +74,19 @@ STABLE_TEST_DATA = {
             "basic_csv": "node/node_d_basic.csv",
             "wse_sm_csv": "node/node_d_wse_sm.csv",
             "comprehensive_geojson": "node/node_d_comprehensive.geojson"
+        }
+    },
+    "priorlake": {
+        "feature_id": "8223592002",
+        "start_time": "2024-08-16T00:00:00Z",
+        "end_time": "2024-08-25T23:59:59Z",
+        "expected_count": 3,  # Number of results expected for this query
+        "fields": "lake_id,time_str,wse,area_total,quality_f",
+        "fixtures": {
+            "basic_geojson": "priorlake/lake_basic.geojson",
+            "basic_csv": "priorlake/lake_basic.csv",
+            "qual_f_b_csv": "priorlake/lake_qual_f_b.csv",
+            "comprehensive_geojson": "priorlake/lake_comprehensive.geojson"
         }
     },
     "priorlake_d": {

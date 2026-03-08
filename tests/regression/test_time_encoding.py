@@ -42,8 +42,8 @@ class TestBasicISO8601Formats:
             "fields": "reach_id,time_str,wse"
         })
 
-        # Should work (interpreted as UTC) or return error
-        assert response.status_code in [200, 400]
+        # Should return error
+        assert response.status_code in [400, 400]
 
     def test_timestamp_with_milliseconds(self, api_client, stable_test_data):
         """Test timestamp with millisecond precision"""
@@ -57,8 +57,8 @@ class TestBasicISO8601Formats:
             "fields": "reach_id,time_str,wse"
         })
 
-        # Should work or return error depending on implementation
-        assert response.status_code in [200, 400]
+        # Should return error
+        assert response.status_code in [400, 400]
 
 
 class TestUTCOffsets:
@@ -90,7 +90,7 @@ class TestUTCOffsets:
         response = requests.get(full_url, timeout=30)
 
         # Should work with proper URL encoding
-        assert response.status_code in [200, 400]
+        assert response.status_code in [200, 200]
 
     def test_negative_utc_offset(self, api_client, stable_test_data):
         """Test timestamp with negative UTC offset (-08:00)"""
@@ -105,7 +105,7 @@ class TestUTCOffsets:
         })
 
         # Negative offset doesn't need encoding, should work
-        assert response.status_code in [200, 400]
+        assert response.status_code in [200, 200]
 
     def test_zero_utc_offset(self, api_client, stable_test_data):
         """Test timestamp with +00:00 offset (equivalent to Z)"""
@@ -128,7 +128,7 @@ class TestUTCOffsets:
 
         response = requests.get(full_url, timeout=30)
 
-        assert response.status_code in [200, 400]
+        assert response.status_code in [200, 200]
 
 
 class TestURLEncoding:
@@ -169,8 +169,11 @@ class TestURLEncoding:
         # The correctly encoded version should work
         response_good = requests.get(f"{url}?{params_str_good}", timeout=30)
 
-        # Good encoding should succeed (or at least not fail worse than bad)
-        assert response_good.status_code in [200, 400]
+        # Bad encoding should fail
+        assert response_bad.status_code in [400, 400]
+
+        # Good encoding should succeed
+        assert response_good.status_code in [200, 200]
 
 
 class TestInvalidTimeFormats:
@@ -202,8 +205,8 @@ class TestInvalidTimeFormats:
             "fields": "reach_id,time_str,wse"
         })
 
-        # May accept date-only or require full timestamp
-        assert response.status_code in [200, 400]
+        # Should return error
+        assert response.status_code in [400, 400]
 
     def test_time_without_date(self, api_client, stable_test_data):
         """Test time-only format (invalid) returns error"""
@@ -279,8 +282,8 @@ class TestTimeRangeBehavior:
             "fields": "reach_id,time_str,wse"
         })
 
-        # Should return 200 with 0 or 1 results, or 400 error
-        assert response.status_code in [200, 400]
+        # Should return error
+        assert response.status_code in [400, 400]
 
     def test_very_narrow_time_range(self, api_client, stable_test_data):
         """Test query with very narrow time range (1 second)"""
@@ -294,8 +297,8 @@ class TestTimeRangeBehavior:
             "fields": "reach_id,time_str,wse"
         })
 
-        # Should work but probably return no results
-        assert response.status_code in [200, 400]
+        # Should return error
+        assert response.status_code in [400, 400]
 
     def test_very_wide_time_range(self, api_client, stable_test_data):
         """Test query with very wide time range (10 years)"""
@@ -310,7 +313,7 @@ class TestTimeRangeBehavior:
         }, timeout=60)
 
         # Should work but may return 413 if too much data
-        assert response.status_code in [200, 400, 413]
+        assert response.status_code in [200, 200]
 
 
 class TestTimeFormatConsistency:
@@ -373,7 +376,7 @@ class TestLeapYearAndDST:
         })
 
         # Should accept Feb 29 in leap year
-        assert response.status_code in [200, 400]
+        assert response.status_code in [200, 200]
 
     def test_invalid_leap_day_non_leap_year(self, api_client, stable_test_data):
         """Test invalid Feb 29 in non-leap year"""

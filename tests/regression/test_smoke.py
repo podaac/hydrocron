@@ -117,7 +117,7 @@ class TestErrorHandling:
             "end_time": "2024-01-02T00:00:00Z"
         })
 
-        assert response.status_code >= 400, \
+        assert response.status_code == 400, \
             f"Expected error status, got {response.status_code}"
 
     def test_invalid_feature_type_returns_error(self, api_client):
@@ -129,5 +129,5 @@ class TestErrorHandling:
             "end_time": "2024-01-02T00:00:00Z"
         })
 
-        assert response.status_code >= 400, \
+        assert response.status_code == 400, \
             f"Expected error status, got {response.status_code}"

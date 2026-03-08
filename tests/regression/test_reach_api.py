@@ -252,20 +252,22 @@ class TestReachCollectionVersions:
         if test_env == "ops":
             pytest.skip("Version D may not be in OPS yet")
 
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
-        response, _ = api_client.query({
+        response, elapsed = api_client.query({
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "csv",
-            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
-        # Stable test data should always exist - 404 is a failure
+        # Stable test data should always exist
         assert_http_success(response)
+        assert_response_time(elapsed, max_seconds=2)
+        assert_result_count(response, reach_data["expected_count"], output_format="csv")
 
     def test_default_reach_collection(self, api_client, stable_test_data):
         """Test that default collection is SWOT_L2_HR_RiverSP_2.0 when collection_name not specified"""

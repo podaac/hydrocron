@@ -154,8 +154,8 @@ class TestInvalidParameterValues:
             "fields": "reach_id,time_str,wse"
         })
 
-        # May return 400 or 200 with no results depending on implementation
-        assert response.status_code in [200, 400]
+        # Should return error--invalid date format
+        assert response.status_code in [400, 400]
 
     def test_malformed_date_format(self, api_client, stable_test_data):
         """Test malformed date returns 400"""
