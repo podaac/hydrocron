@@ -21,16 +21,49 @@ Unlike unit tests, these tests:
 
 ## Test Organization
 
-Tests are organized by purpose and feature type:
+Tests are organized by purpose and feature type.
+
+### Test Files
+
+```
+tests/regression/
+├── conftest.py                     # Fixtures and configuration
+├── utils.py                        # Shared utility functions
+│
+├── test_smoke.py                   # Quick smoke tests (< 30s)
+│
+├── test_reach_api.py               # Reach-specific tests
+├── test_node_api.py                # Node-specific tests (includes Version D)
+├── test_priorlake_api.py           # PriorLake-specific tests (includes Version D)
+│
+├── test_compact_parameter.py       # Compact parameter behavior
+├── test_error_handling.py          # Comprehensive error handling
+├── test_time_encoding.py           # Time format and encoding
+├── test_response_formats.py        # Response format negotiation
+├── test_api_features.py            # Additional API features
+│
+├── fixtures/                       # Golden reference files
+│   ├── reach/
+│   ├── node/
+│   └── priorlake/
+│
+└── dev-utils/                      # Developer utilities
+    └── capture_reference_files.py
+```
+
+### Key Files
 
 - **`test_smoke.py`** - Quick smoke tests (< 30 sec) - Run after every deployment
 - **`test_reach_api.py`** - Comprehensive Reach feature tests
-- **`test_node_api.py`** - Comprehensive Node feature tests
-- **`test_priorlake_api.py`** - Comprehensive PriorLake feature tests
-- **`test_version_d_fields.py`** - Version D specific fields (wse_sm, qual_f_b)
+- **`test_node_api.py`** - Comprehensive Node feature tests + Version D wse_sm fields
+- **`test_priorlake_api.py`** - Comprehensive PriorLake feature tests + Version D qual_f_b fields
+- **`test_compact_parameter.py`** - Compact parameter across all features
+- **`test_error_handling.py`** - Error handling and validation
+- **`test_time_encoding.py`** - Time format handling
+- **`test_response_formats.py`** - Response format negotiation (GeoJSON, CSV)
+- **`test_api_features.py`** - Additional API features and edge cases
 - **`conftest.py`** - Test configuration and fixtures
 - **`utils.py`** - Helper functions for common operations
-- **`scan-dynamodb.py`** - Utility script to scan and compare DynamoDB table schemas
 
 ## Running the Tests
 
@@ -88,9 +121,9 @@ Run only PriorLake tests:
 HYDROCRON_ENV=uat poetry run pytest tests/regression/test_priorlake_api.py -v
 ```
 
-Run only Version D field tests:
+Run only error handling tests:
 ```bash
-HYDROCRON_ENV=uat poetry run pytest tests/regression/test_version_d_fields.py -v
+HYDROCRON_ENV=uat poetry run pytest tests/regression/test_error_handling.py -v
 ```
 
 ### Run Specific Test Classes or Methods
@@ -121,14 +154,31 @@ poetry run pytest tests/
 
 ## Test Categories
 
-### Smoke Tests (`test_smoke.py`) - 8 tests
+### Test Suite Summary
+
+| File | Test Classes | Approx Tests | Purpose |
+|------|-------------|--------------|---------|
+| `test_smoke.py` | 4 | ~10 | Quick deployment validation |
+| `test_reach_api.py` | 6 | ~25 | Reach feature comprehensive tests |
+| `test_node_api.py` | 4 | ~20 | Node feature + Version D tests |
+| `test_priorlake_api.py` | 6 | ~25 | PriorLake feature + Version D tests |
+| `test_compact_parameter.py` | 5 | ~15 | Compact parameter testing |
+| `test_error_handling.py` | 8 | ~30 | Error cases and validation |
+| `test_time_encoding.py` | 7 | ~25 | Time format handling |
+| `test_response_formats.py` | 8 | ~25 | Response format negotiation |
+| `test_api_features.py` | 9 | ~25 | Additional features and edge cases |
+| **TOTAL** | **57** | **~200** | Full regression coverage |
+
+### Smoke Tests (`test_smoke.py`)
 - **Purpose**: Quick verification API is functioning
 - **Run time**: < 30 seconds
 - **When**: After every deployment
 - **Marker**: `@pytest.mark.smoke`
 - **Coverage**: API health, basic queries for all features, output formats, error handling
 
-### Reach Tests (`test_reach_api.py`) - 13 tests
+### Feature Tests
+
+#### Reach Tests (`test_reach_api.py`)
 - **Purpose**: Comprehensive Reach feature testing
 - **Coverage**:
   - Basic queries (GeoJSON, CSV)
@@ -137,44 +187,138 @@ poetry run pytest tests/
   - Units fields validation
   - Collection version testing (2.0, D)
   - Geometry validation
+  - Golden file comparisons
 
-### Node Tests (`test_node_api.py`) - 11 tests
-- **Purpose**: Comprehensive Node feature testing
+#### Node Tests (`test_node_api.py`)
+- **Purpose**: Comprehensive Node feature testing + Version D
 - **Coverage**:
   - Basic queries (GeoJSON, CSV)
-  - Version D wse_sm field tests
-  - Error handling
-  - Performance tests
+  - **Version D wse_sm field tests** (smoothed water surface elevation)
   - Backward compatibility
+  - Performance tests
+  - Golden file comparisons
 
-### PriorLake Tests (`test_priorlake_api.py`) - 8 tests
-- **Purpose**: Comprehensive PriorLake feature testing
+#### PriorLake Tests (`test_priorlake_api.py`)
+- **Purpose**: Comprehensive PriorLake feature testing + Version D
 - **Coverage**:
   - Basic queries (GeoJSON, CSV)
   - Drainage system fields (ds1/ds2)
   - Quality and metadata fields
+  - **Version D qual_f_b field tests** (quality flag)
   - Collection version testing (2.0, D)
   - Geometry validation
+  - Golden file comparisons
 
-### Version D Field Tests (`test_version_d_fields.py`) - 9 tests
-- **Purpose**: Test new fields added in Version D
-- **Fields tested**:
-  - Node: `wse_sm`, `wse_sm_u`, `wse_sm_q`, `wse_sm_q_b`
-  - PriorLake: `qual_f_b`
-- **Marker**: `@pytest.mark.version_d`
-- **When**: Before promoting UAT to OPS
-- **Coverage**: Field validation, feature-type restrictions, backward compatibility
+### API Behavior Tests
 
-**Total: 49 regression tests**
+#### Compact Parameter (`test_compact_parameter.py`)
+Tests the `compact` parameter that controls GeoJSON response format:
+- `compact=true` returns single feature with array values
+- `compact=false` returns multiple features (one per observation)
+- Default compaction behavior based on Accept header
+- Accept header (`application/geo+json` vs `application/json`) defaults
+- Explicit compact parameter overrides Accept header
+- Works across all feature types (Reach, Node, PriorLake)
+- No effect on CSV output
+
+#### Error Handling (`test_error_handling.py`)
+Comprehensive error handling and validation:
+- HTTP 415 errors for invalid Accept headers
+- HTTP 400 errors for missing required parameters (feature, feature_id, start_time, end_time, fields)
+- HTTP 400 errors for invalid parameter values (dates, field names, feature types)
+- Start time after end time validation
+- Non-existent feature IDs
+- Valid features with no data in time range
+- HTTP 413 errors for payloads exceeding 6MB
+- Field validation across feature types
+- Error message quality checks
+
+#### Time Encoding (`test_time_encoding.py`)
+Timestamp formats and URL encoding:
+- Basic ISO 8601 formats (YYYY-MM-DDTHH:MM:SSZ)
+- Timestamps with/without Z suffix
+- Millisecond precision timestamps
+- UTC offsets (+HH:MM, -HH:MM)
+- URL encoding of + as %2B (required)
+- Invalid time format error handling
+- Time range boundary conditions (start == end, narrow/wide ranges)
+- Leap year validation (Feb 29)
+- Time format consistency across feature types
+
+#### Response Formats (`test_response_formats.py`)
+Response format handling and content negotiation:
+- JSON wrapper structure (status, time, hits, results)
+- Raw GeoJSON format (application/geo+json)
+- Raw CSV format (text/csv)
+- Content-Type header validation
+- `output` parameter vs Accept header interaction
+- Units fields automatically included (wse_units, slope_units, etc.)
+- Response format consistency across all feature types
+
+#### API Features (`test_api_features.py`)
+Additional API features and edge cases:
+- Optional API key header (x-hydrocron-key) for rate limiting
+- Geometry field behavior by type:
+  - Reach returns LineString
+  - Node returns Point
+  - PriorLake returns Point (center coordinates)
+  - Geometry optional in queries, excluded from CSV
+- Field ordering in CSV responses matches request
+- Case sensitivity (feature names, field names, output parameter)
+- Special characters in parameters (spaces, duplicates)
+- No-data sentinel values (-999999999999.0)
+- Query performance characteristics
+- Multiple consecutive queries reliability
+
+## Test Coverage
+
+The regression test suite provides comprehensive coverage of the Hydrocron API as documented at:
+- https://podaac.github.io/hydrocron/examples.html
+- https://podaac.github.io/hydrocron/timeseries.html
+
+### Coverage Highlights
+
+**Feature-Specific Tests:**
+- ✅ All three feature types (Reach, Node, PriorLake)
+- ✅ Version D fields (wse_sm for Node, qual_f_b for PriorLake)
+- ✅ Collection version testing (2.0, D)
+- ✅ Feature-specific fields (discharge algorithms, drainage system, quality fields)
+- ✅ Backward compatibility
+
+**API Behavior:**
+- ✅ Compact parameter for GeoJSON responses
+- ✅ Accept header content negotiation
+- ✅ Time format handling (ISO 8601, UTC offsets, URL encoding)
+- ✅ Response format wrappers (JSON wrapper vs raw formats)
+- ✅ Units fields automatic inclusion
+- ✅ Geometry field handling by feature type
+- ✅ Field ordering in responses
+
+**Error Handling:**
+- ✅ HTTP 400 (missing/invalid parameters)
+- ✅ HTTP 413 (payload too large)
+- ✅ HTTP 415 (unsupported media type)
+- ✅ Non-existent features
+- ✅ Empty result sets
+- ✅ Invalid time ranges
+
+**Edge Cases:**
+- ✅ Special characters and encoding
+- ✅ Case sensitivity
+- ✅ Boundary conditions (narrow/wide time ranges, leap years)
+- ✅ No-data sentinel values
+- ✅ Multiple consecutive queries
+- ✅ Performance characteristics
 
 ## Test Markers
 
 Tests can be filtered using pytest markers:
 
 - `@pytest.mark.smoke` - Quick smoke tests
-- `@pytest.mark.slow` - Tests taking > 10 seconds
 - `@pytest.mark.version_d` - Version D specific features
-- `@pytest.mark.uat_only` - Only run in UAT environment
+- `@pytest.mark.golden` - Golden file comparison tests
+- `@pytest.mark.slow` - Tests that take > 10 seconds
+- `@pytest.mark.skip` - Skipped tests (require updates)
 
 ### Using Markers
 
@@ -195,31 +339,7 @@ pytest tests/regression/ -m version_d
 
 ## Configuring Test Data
 
-The tests use known feature IDs at the top of `test_api_regression.py`:
-
-```python
-TEST_REACH_ID = "71224100223"
-TEST_LAKE_ID = "9120274662"
-```
-
-If these features don't exist in your deployed environment, update these constants to use feature IDs that do exist.
-
-## Running Specific Tests
-
-Run only reach tests:
-```bash
-HYDROCRON_ENV=uat poetry run pytest tests/regression/test_api_regression.py::TestReachQueries -v
-```
-
-Run only error handling tests:
-```bash
-HYDROCRON_ENV=ops poetry run pytest tests/regression/test_api_regression.py::TestErrorHandling -v
-```
-
-Run a single test:
-```bash
-HYDROCRON_ENV=uat poetry run pytest tests/regression/test_api_regression.py::TestReachQueries::test_reach_geojson_query -v
-```
+Test data is configured in `conftest.py` using the `STABLE_TEST_DATA` dictionary. If features don't exist in your deployed environment, update these values to use feature IDs that do exist and have data available.
 
 ## Adding to CI/CD
 
@@ -254,8 +374,8 @@ HYDROCRON_ENV=uat poetry run pytest tests/regression/ -v
 
 **After Adding New Fields** (5-10 minutes):
 ```bash
-# Test new fields work and don't break existing functionality
-HYDROCRON_ENV=uat poetry run pytest tests/regression/test_version_d_fields.py -v
+# Test new Version D fields work and don't break existing functionality
+HYDROCRON_ENV=uat poetry run pytest tests/regression/ -v -m version_d
 ```
 
 **Scheduled Nightly** (15 minutes):
@@ -307,6 +427,14 @@ def test_my_new_field(api_client):
     assert 'my_new_field' in response.text
 ```
 
+### Skipped Tests and Known Issues
+
+Some tests are marked with `@pytest.mark.skip` and require updates:
+
+**Tests requiring real data:**
+- `test_large_payload_returns_413` - Needs a feature ID with dataset exceeding 6MB
+- `test_query_with_valid_api_key_succeeds` - Needs a valid API key for testing
+
 ## Deployment Workflow
 
 Recommended workflow for safe deployments:
@@ -343,7 +471,7 @@ Make sure `HYDROCRON_ENV` is set to `uat` or `ops`.
 - Verify the API is deployed and running
 
 ### Test timeouts
-- Default timeout is 30 seconds
+- Default timeout is 5 seconds
 - If API is slow, increase timeout in test code
 - Check API performance and logs
 
@@ -354,7 +482,6 @@ Make sure `HYDROCRON_ENV` is set to `uat` or `ops`.
 
 ### Version D tests failing in OPS
 - Version D might not be deployed to OPS yet
-- Tests marked `@pytest.mark.uat_only` will skip in OPS
 - Verify collection_name in test matches what's deployed
 
 ## Contributing

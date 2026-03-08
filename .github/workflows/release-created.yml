@@ -33,7 +33,7 @@ jobs:
       - name: Install Poetry
         uses: abatilo/actions-poetry@v4
         with:
-          poetry-version: 1.7.1
+          poetry-version: 2.3.2
       - name: Bump minor version
         run: |
           poetry version ${GITHUB_REF#refs/heads/release/}

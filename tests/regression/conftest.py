@@ -143,7 +143,7 @@ def api_client(api_url):
                 'User-Agent': 'hydrocron-regression-tests/1.0'
             })
 
-        def query(self, params, timeout=30, headers=None):
+        def query(self, params, timeout=5, headers=None):
             """
             Make API request with timing
 
@@ -194,5 +194,4 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "smoke: Quick smoke tests (run after every deployment)")
     config.addinivalue_line("markers", "slow: Slow tests that take > 10 seconds")
     config.addinivalue_line("markers", "version_d: Tests for Version D specific features")
-    config.addinivalue_line("markers", "uat_only: Tests that only run in UAT environment")
     config.addinivalue_line("markers", "golden: Tests that compare against golden reference files")

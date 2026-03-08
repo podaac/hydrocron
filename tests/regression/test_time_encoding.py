@@ -126,7 +126,7 @@ class TestUTCOffsets:
         )
         full_url = f"{url}?{params_str}"
 
-        response = requests.get(full_url, timeout=30)
+        response = requests.get(full_url, timeout=5)
 
         assert response.status_code in [200, 200]
 
