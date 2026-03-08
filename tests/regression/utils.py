@@ -87,6 +87,8 @@ def get_result_count(response, output_format: str = "geojson") -> int:
     """
     Get the number of results from API response
 
+    Handles both JSON-wrapped and raw responses.
+
     Args:
         response: requests.Response object
         output_format: "geojson" or "csv"
@@ -101,9 +103,24 @@ def get_result_count(response, output_format: str = "geojson") -> int:
             data = data['results']['geojson']
         return len(data.get('features', []))
     elif output_format == "csv":
+        # Try to parse as JSON first (CSV is often JSON-wrapped)
+        try:
+            data = response.json()
+            if 'hits' in data:
+                # Use hits field from JSON wrapper (most accurate)
+                return data['hits']
+            elif 'results' in data and 'csv' in data['results']:
+                # Extract CSV from wrapper and count rows
+                csv_text = data['results']['csv']
+                lines = csv_text.strip().split('\n')
+                return max(0, len(lines) - 1)  # Subtract header
+        except (ValueError, json.JSONDecodeError):
+            # Not JSON, treat as raw CSV
+            pass
+
+        # Handle raw CSV (fallback)
         lines = response.text.strip().split('\n')
-        # Subtract 1 for header row
-        return max(0, len(lines) - 1)
+        return max(0, len(lines) - 1)  # Subtract header
     else:
         raise ValueError(f"Unsupported output format: {output_format}")
 
@@ -144,6 +161,26 @@ def extract_geojson_from_response(response_data):
         return response_data
     else:
         raise ValueError("Could not find GeoJSON in response")
+
+
+def extract_csv_from_response(response_data):
+    """
+    Extract CSV from API response wrapper
+
+    Args:
+        response_data: Full API response dictionary (when output=csv)
+
+    Returns:
+        CSV text string
+    """
+    # Handle wrapped CSV response
+    if 'results' in response_data and 'csv' in response_data['results']:
+        return response_data['results']['csv']
+    # Handle raw CSV (if response is already a string)
+    elif isinstance(response_data, str):
+        return response_data
+    else:
+        raise ValueError("Could not find CSV in response")
 
 
 def compare_field_sets(actual_fields, expected_fields, ignore_fields=None):
@@ -235,7 +272,21 @@ def load_reference_file(fixtures_dir: Path, relative_path: str) -> Any:
             return json.load(f)
     elif file_path.suffix == '.csv':
         with open(file_path, 'r') as f:
-            return f.read()
+            content = f.read()
+
+            # Check if CSV file contains JSON-wrapped response
+            # (happens if captured file contains entire API response)
+            if content.strip().startswith('{'):
+                try:
+                    data = json.loads(content)
+                    # Extract CSV from JSON wrapper
+                    if 'results' in data and 'csv' in data['results']:
+                        return data['results']['csv']
+                except json.JSONDecodeError:
+                    pass
+
+            # Return as-is if not JSON-wrapped
+            return content
     else:
         raise ValueError(f"Unsupported file type: {file_path.suffix}")
 
@@ -422,7 +473,14 @@ def assert_matches_reference(
         actual_data = actual_response.json()
         is_match, diff_msg = compare_geojson_responses(actual_data, expected, ignore_fields)
     elif output_format == "csv":
-        actual_data = actual_response.text
+        # Extract CSV from JSON-wrapped response if needed
+        try:
+            response_data = actual_response.json()
+            actual_data = extract_csv_from_response(response_data)
+        except (ValueError, json.JSONDecodeError):
+            # Raw CSV response
+            actual_data = actual_response.text
+
         is_match, diff_msg = compare_csv_responses(actual_data, expected, ignore_fields)
     else:
         raise ValueError(f"Unsupported output format: {output_format}")

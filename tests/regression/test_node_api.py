@@ -33,7 +33,7 @@ class TestNodeBasicQueries:
         })
 
         assert_http_success(response)
-        assert_response_time(elapsed, max_seconds=30)
+        assert_response_time(elapsed, max_seconds=2)
         assert_result_count(response, node_data["expected_count"], output_format="geojson")
 
         data = response.json()
