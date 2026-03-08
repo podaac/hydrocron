@@ -277,8 +277,8 @@ class TestCaseSensitivity:
         # Should return error--case-sensitive
         assert response.status_code in [400, 400]
 
-    def test_output_parameter_case_insensitive(self, api_client, stable_test_data):
-        """Test output parameter may be case-insensitive"""
+    def test_output_parameter_case_sensitive(self, api_client, stable_test_data):
+        """Test output parameter is case-sensitive"""
         reach_data = stable_test_data["reach"]
 
         # Try uppercase 'CSV'

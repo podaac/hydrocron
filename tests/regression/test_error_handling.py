@@ -287,14 +287,7 @@ class TestNoDataInTimeRange:
             "fields": "reach_id,time_str,wse"
         })
 
-        # Could return 200 with empty results or 400
-        if response.status_code == 200:
-            # Verify empty results
-            if 'geojson' in response.json():
-                geojson = response.json()['results']['geojson']
-                assert len(geojson['features']) == 0
-        else:
-            assert_http_error(response, expected_status_range=(400, 400))
+        assert_http_error(response, expected_status_range=(400, 400))
 
     def test_valid_node_no_data_in_time_range(self, api_client, stable_test_data):
         """Test valid node ID with time range that has no data"""
@@ -309,14 +302,7 @@ class TestNoDataInTimeRange:
             "fields": "node_id,time_str,wse"
         })
 
-        # Could return 200 with empty results or 400
-        if response.status_code == 200:
-            # Verify empty results
-            if 'geojson' in response.json():
-                geojson = response.json()['results']['geojson']
-                assert len(geojson['features']) == 0
-        else:
-            assert_http_error(response, expected_status_range=(400, 400))
+        assert_http_error(response, expected_status_range=(400, 400))
 
 
 @pytest.mark.slow

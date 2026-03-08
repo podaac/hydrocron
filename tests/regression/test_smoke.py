@@ -28,7 +28,7 @@ class TestAPIHealth:
         })
 
         assert_http_success(response)
-        assert elapsed < 10, f"API response took {elapsed:.2f}s (expected < 10s)"
+        assert elapsed < 3, f"API response took {elapsed:.2f}s (expected < 3s)"
 
 
 @pytest.mark.smoke

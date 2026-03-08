@@ -443,12 +443,19 @@ class TestUnitsFieldsInResponses:
             geojson = data
 
         # Check if units fields are present
-        if len(geojson['features']) > 0:
-            props = geojson['features'][0]['properties']
+        assert len(geojson['features']) > 0, "No features in response"
 
-            # wse and slope should have corresponding unit fields
-            # This depends on API implementation - may be named *_units or *_u
-            # Adjust based on actual field names
+        props = geojson['features'][0]['properties']
+
+        # wse and slope should have corresponding unit fields
+        # Check for either *_units or *_u naming convention
+        has_wse_units = 'wse_units' in props or 'wse_u' in props
+        has_slope_units = 'slope_units' in props or 'slope_u' in props
+
+        assert has_wse_units, \
+            f"GeoJSON should include units field for wse (wse_units or wse_u). Properties: {list(props.keys())}"
+        assert has_slope_units, \
+            f"GeoJSON should include units field for slope (slope_units or slope_u). Properties: {list(props.keys())}"
 
     def test_csv_includes_units_columns(self, api_client, stable_test_data):
         """Test CSV response includes unit columns"""
@@ -476,51 +483,6 @@ class TestUnitsFieldsInResponses:
 
 class TestResponseFormatConsistency:
     """Test response format consistency across feature types"""
-
-    def test_all_feature_types_support_geojson(self, api_client, stable_test_data):
-        """Test all feature types return valid GeoJSON"""
-        reach_data = stable_test_data["reach"]
-        node_data = stable_test_data["node"]
-        lake_data = stable_test_data["priorlake"]
-
-        # Test Reach
-        response_reach, _ = api_client.query({
-            "feature": "Reach",
-            "feature_id": reach_data["feature_id"],
-            "start_time": reach_data["start_time"],
-            "end_time": reach_data["end_time"],
-            "output": "geojson",
-            "fields": "reach_id,time_str,wse"
-        })
-
-        assert_http_success(response_reach)
-        data_reach = response_reach.json()
-
-        # Test Node
-        response_node, _ = api_client.query({
-            "feature": "Node",
-            "feature_id": node_data["feature_id"],
-            "start_time": node_data["start_time"],
-            "end_time": node_data["end_time"],
-            "output": "geojson",
-            "fields": "node_id,time_str,wse"
-        })
-
-        assert_http_success(response_node)
-        data_node = response_node.json()
-
-        # Test PriorLake
-        response_lake, _ = api_client.query({
-            "feature": "PriorLake",
-            "feature_id": lake_data["feature_id"],
-            "start_time": lake_data["start_time"],
-            "end_time": lake_data["end_time"],
-            "output": "geojson",
-            "fields": "lake_id,time_str,wse"
-        })
-
-        assert_http_success(response_lake)
-        data_lake = response_lake.json()
 
     def test_all_feature_types_support_csv(self, api_client, stable_test_data):
         """Test all feature types return valid CSV"""

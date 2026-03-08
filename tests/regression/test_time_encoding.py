@@ -87,7 +87,7 @@ class TestUTCOffsets:
         params_str = "&".join([f"{k}={v}" for k, v in params.items()])
         full_url = f"{url}?{params_str}"
 
-        response = requests.get(full_url, timeout=30)
+        response = requests.get(full_url, timeout=3)
 
         # Should work with proper URL encoding
         assert response.status_code in [200, 200]
@@ -164,10 +164,10 @@ class TestURLEncoding:
         )
 
         # The incorrectly encoded version should fail or behave unexpectedly
-        response_bad = requests.get(f"{url}?{params_str_bad}", timeout=30)
+        response_bad = requests.get(f"{url}?{params_str_bad}", timeout=5)
 
         # The correctly encoded version should work
-        response_good = requests.get(f"{url}?{params_str_good}", timeout=30)
+        response_good = requests.get(f"{url}?{params_str_good}", timeout=5)
 
         # Bad encoding should fail
         assert response_bad.status_code in [400, 400]
