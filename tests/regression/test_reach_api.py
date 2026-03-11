@@ -249,8 +249,6 @@ class TestReachCollectionVersions:
     @pytest.mark.version_d
     def test_reach_d_collection(self, api_client, stable_test_data, test_env):
         """Test querying D collection explicitly"""
-        if test_env == "ops":
-            pytest.skip("Version D may not be in OPS yet")
 
         reach_data = stable_test_data["reach_d"]
 

@@ -365,11 +365,10 @@ class TestLeapYearAndDST:
 
     def test_leap_day_february_29(self, api_client, stable_test_data):
         """Test querying on leap day (Feb 29, 2024)"""
-        reach_data = stable_test_data["reach"]
 
         response, _ = api_client.query({
             "feature": "Reach",
-            "feature_id": reach_data["feature_id"],
+            "feature_id": "14306900121",  # hardcoded to reach_id that has data on Feb 29, 2024
             "start_time": "2024-02-29T00:00:00Z",  # 2024 is leap year
             "end_time": "2024-02-29T23:59:59Z",
             "fields": "reach_id,time_str,wse"

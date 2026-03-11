@@ -32,7 +32,7 @@ import requests
 # Add parent dir to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from tests.regression.conftest import API_URLS, STABLE_TEST_DATA
+from tests.regression.conftest import API_URLS, STABLE_TEST_DATA_UAT, STABLE_TEST_DATA_OPS
 
 
 def capture_geojson_response(api_url, params, output_file):
@@ -293,7 +293,12 @@ def main():
         sys.exit(1)
 
     api_url = API_URLS[env]
-    fixtures_dir = Path(__file__).parent.parent / "fixtures"
+
+    # Get environment-specific test data
+    stable_test_data = STABLE_TEST_DATA_UAT if env == "uat" else STABLE_TEST_DATA_OPS
+
+    # Fixtures directory is environment-specific
+    fixtures_dir = Path(__file__).parent.parent / "fixtures" / env
 
     print("=" * 80)
     print("Hydrocron API Reference File Capture")
@@ -308,13 +313,13 @@ def main():
 
     # Capture based on feature selection
     if args.feature in ['reach', 'all']:
-        capture_reach_fixtures(api_url, STABLE_TEST_DATA, fixtures_dir)
+        capture_reach_fixtures(api_url, stable_test_data, fixtures_dir)
 
     if args.feature in ['node', 'all']:
-        capture_node_fixtures(api_url, STABLE_TEST_DATA, fixtures_dir)
+        capture_node_fixtures(api_url, stable_test_data, fixtures_dir)
 
     if args.feature in ['priorlake', 'all']:
-        capture_priorlake_fixtures(api_url, STABLE_TEST_DATA, fixtures_dir)
+        capture_priorlake_fixtures(api_url, stable_test_data, fixtures_dir)
 
     print("\n" + "=" * 80)
     print("✓ Capture complete!")

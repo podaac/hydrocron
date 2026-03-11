@@ -20,18 +20,31 @@ from .utils import (
 class TestNodeBasicQueries:
     """Test basic node queries"""
 
-    def test_node_geojson_query(self, api_client, stable_test_data):
+    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    def test_node_geojson_query(self, api_client, stable_test_data, node_key):
         """Test node query with GeoJSON output"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data[node_key]
 
-        response, elapsed = api_client.query({
+        # Strip Version D specific fields for basic compatibility test
+        fields = node_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        # Remove wse_sm* fields
+        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
+
+        params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
-            "fields": node_data["fields"]
-        })
+            "fields": ",".join(basic_fields)
+        }
+
+        # Add collection_name if present (for Version D)
+        if "collection_name" in node_data:
+            params["collection_name"] = node_data["collection_name"]
+
+        response, elapsed = api_client.query(params)
 
         assert_http_success(response)
         assert_response_time(elapsed, max_seconds=2)
@@ -47,18 +60,31 @@ class TestNodeBasicQueries:
             assert 'node_id' in feature['properties']
             assert 'wse' in feature['properties']
 
-    def test_node_csv_query(self, api_client, stable_test_data):
+    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    def test_node_csv_query(self, api_client, stable_test_data, node_key):
         """Test node query with CSV output"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data[node_key]
 
-        response, elapsed = api_client.query({
+        # Strip Version D specific fields for basic compatibility test
+        fields = node_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        # Remove wse_sm* fields
+        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
+
+        params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "csv",
-            "fields": "node_id,time_str,wse,width,lat,lon"
-        })
+            "fields": ",".join(basic_fields)
+        }
+
+        # Add collection_name if present (for Version D)
+        if "collection_name" in node_data:
+            params["collection_name"] = node_data["collection_name"]
+
+        response, elapsed = api_client.query(params)
 
         assert_http_success(response)
         assert_response_time(elapsed, max_seconds=2)
@@ -125,9 +151,6 @@ class TestNodeVersionDFields:
 
     def test_node_wse_sm_fields_available(self, api_client, stable_test_data, test_env):
         """Test wse_sm smoothed fields are accessible in Version D"""
-        # Skip if not in UAT (Version D might not be in OPS yet)
-        if test_env == "ops":
-            pytest.skip("Version D fields may not be available in OPS yet")
 
         node_data = stable_test_data["node_d"]
 
@@ -153,8 +176,6 @@ class TestNodeVersionDFields:
 
     def test_node_wse_sm_fields_in_geojson(self, api_client, stable_test_data, test_env):
         """Test wse_sm fields appear in GeoJSON output"""
-        if test_env == "ops":
-            pytest.skip("Version D fields may not be available in OPS yet")
 
         node_data = stable_test_data["node_d"]
 
@@ -205,7 +226,7 @@ class TestNodeVersionDFields:
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "csv",
-            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "collection_name": node_data["collection_name"],
             "fields": "node_id,time_str,wse_sm"
         })
 

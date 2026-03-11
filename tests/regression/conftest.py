@@ -13,7 +13,7 @@ API_URLS = {
     "ops": "https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries",
 }
 
-# Known stable test data - feature IDs that MUST exist in both UAT and OPS
+# Known stable test data - feature IDs are for OPS only
 # These are used for regression testing and should always return data (200 OK)
 # If any stable test returns 404, it indicates a deployment or data ingestion problem
 # Update these if the feature IDs don't exist in your deployment
@@ -21,7 +21,99 @@ API_URLS = {
 # Reference files ("golden" responses) are stored in fixtures/ directory
 # Tests compare live API responses against these references to detect regressions
 # Use capture_reference_files.py to generate/update reference files
-STABLE_TEST_DATA = {
+STABLE_TEST_DATA_OPS = {
+    "reach": {
+        "feature_id": "18180900091",
+        "start_time": "2024-02-02T00:00:00Z",
+        "end_time": "2024-03-20T00:00:00Z",
+        "expected_count": 5,  # Number of results expected for this query
+        "fields": "reach_id,time_str,wse,slope,width,sword_version",
+        "fixtures": {
+            "basic_geojson": "reach/reach_basic.geojson",
+            "basic_csv": "reach/reach_basic.csv",
+            "discharge_csv": "reach/reach_discharge.csv",
+            "comprehensive_geojson": "reach/reach_comprehensive.geojson"
+        }
+    },
+    "reach_d": {
+        "feature_id": "72552000954",  # Update with Version D reach_id
+        "start_time": "2023-06-03T00:00:00Z",  # Update with actual date range
+        "end_time": "2023-06-06T00:00:00Z",
+        "expected_count": 3,  # Update with actual count
+        "collection_name": "SWOT_L2_HR_RiverSP_D",
+        "fields": "reach_id,time_str,wse,slope,width,sword_version",
+        "fixtures": {
+            "basic_geojson": "reach/reach_d_basic.geojson",
+            "basic_csv": "reach/reach_d_basic.csv",
+            "discharge_csv": "reach/reach_d_discharge.csv",
+            "comprehensive_geojson": "reach/reach_d_comprehensive.geojson"
+        }
+    },
+    "node": {
+        "feature_id": "45311101670065",
+        "start_time": "2023-09-17T00:00:00Z",
+        "end_time": "2023-10-30T00:00:00Z",
+        "expected_count": 5,  # Number of results expected for this query
+        "fields": "node_id,time_str,wse,width,lat,lon",
+        "fixtures": {
+            "basic_geojson": "node/node_basic.geojson",
+            "basic_csv": "node/node_basic.csv",
+            "wse_sm_csv": "node/node_wse_sm.csv",
+            "comprehensive_geojson": "node/node_comprehensive.geojson"
+        }
+    },
+    "node_d": {
+        "feature_id": "44404000150591",  # Update with Version D node_id
+        "start_time": "2024-01-02T00:00:00Z",  # Update with actual date range
+        "end_time": "2024-02-10T00:00:00Z",
+        "expected_count": 4,  # Update with actual count
+        "collection_name": "SWOT_L2_HR_RiverSP_D",
+        "fields": "node_id,time_str,wse,width,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b,lat,lon",
+        "fixtures": {
+            "basic_geojson": "node/node_d_basic.geojson",
+            "basic_csv": "node/node_d_basic.csv",
+            "wse_sm_csv": "node/node_d_wse_sm.csv",
+            "comprehensive_geojson": "node/node_d_comprehensive.geojson"
+        }
+    },
+    "priorlake": {
+        "feature_id": "8223592002",
+        "start_time": "2024-08-16T00:00:00Z",
+        "end_time": "2024-08-25T23:59:59Z",
+        "expected_count": 3,  # Number of results expected for this query
+        "fields": "lake_id,time_str,wse,area_total,quality_f",
+        "fixtures": {
+            "basic_geojson": "priorlake/lake_basic.geojson",
+            "basic_csv": "priorlake/lake_basic.csv",
+            "qual_f_b_csv": "priorlake/lake_qual_f_b.csv",
+            "comprehensive_geojson": "priorlake/lake_comprehensive.geojson"
+        }
+    },
+    "priorlake_d": {
+        "feature_id": "5630068642",  # Update with Version D lake_id
+        "start_time": "2024-01-03T00:00:00Z",  # Update with actual date range
+        "end_time": "2024-02-01T23:59:59Z",
+        "expected_count": 5,  # Update with actual count
+        "collection_name": "SWOT_L2_HR_LakeSP_D",
+        "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b",
+        "fixtures": {
+            "basic_geojson": "priorlake/lake_d_basic.geojson",
+            "basic_csv": "priorlake/lake_d_basic.csv",
+            "qual_f_b_csv": "priorlake/lake_d_qual_f_b.csv",
+            "comprehensive_geojson": "priorlake/lake_d_comprehensive.geojson"
+        }
+    }
+}
+
+# Known stable test data - feature IDs are for UAT only
+# These are used for regression testing and should always return data (200 OK)
+# If any stable test returns 404, it indicates a deployment or data ingestion problem
+# Update these if the feature IDs don't exist in your deployment
+#
+# Reference files ("golden" responses) are stored in fixtures/ directory
+# Tests compare live API responses against these references to detect regressions
+# Use capture_reference_files.py to generate/update reference files
+STABLE_TEST_DATA_UAT = {
     "reach": {
         "feature_id": "34296500851",
         "start_time": "2024-02-10T00:00:00Z",
@@ -65,10 +157,10 @@ STABLE_TEST_DATA = {
     "node_d": {
         "feature_id": "33129600450223",  # Update with Version D node_id
         "start_time": "2025-06-04T00:00:00Z",  # Update with actual date range
-        "end_time": "2025-06-05T00:00:00Z",
-        "expected_count": 5,  # Update with actual count
+        "end_time": "2025-06-05T20:00:00Z",
+        "expected_count": 2,  # Update with actual count
         "collection_name": "SWOT_L2_HR_RiverSP_D",
-        "fields": "node_id,time_str,wse,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b",
+        "fields": "node_id,time_str,wse,width,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b,lat,lon",
         "fixtures": {
             "basic_geojson": "node/node_d_basic.geojson",
             "basic_csv": "node/node_d_basic.csv",
@@ -104,7 +196,6 @@ STABLE_TEST_DATA = {
         }
     }
 }
-
 
 @pytest.fixture(scope="session")
 def api_url():
@@ -172,20 +263,25 @@ def api_client(api_url):
 
 
 @pytest.fixture
-def stable_test_data():
+def stable_test_data(test_env):
     """
-    Known stable test data for regression tests
+    Known stable test data for regression tests based on environment
     """
-    return STABLE_TEST_DATA
+    if test_env == "uat":
+        return STABLE_TEST_DATA_UAT
+    elif test_env == "ops":
+        return STABLE_TEST_DATA_OPS
+    else:
+        pytest.skip(f"No stable test data defined for environment: {test_env}")
 
 
 @pytest.fixture
-def fixtures_dir():
+def fixtures_dir(test_env):
     """
-    Get the fixtures directory path
+    Get the fixtures directory path for the current environment
     """
     import pathlib
-    return pathlib.Path(__file__).parent / "fixtures"
+    return pathlib.Path(__file__).parent / "fixtures" / test_env
 
 
 # Pytest markers

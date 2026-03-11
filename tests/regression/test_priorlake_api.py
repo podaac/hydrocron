@@ -21,18 +21,31 @@ from .utils import (
 class TestPriorLakeBasicQueries:
     """Test basic PriorLake queries"""
 
-    def test_lake_geojson_with_standard_fields(self, api_client, stable_test_data):
+    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    def test_lake_geojson_with_standard_fields(self, api_client, stable_test_data, lake_key):
         """Test prior lake query with standard fields"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data[lake_key]
 
-        response, elapsed = api_client.query({
+        # Strip Version D specific fields for basic compatibility test
+        fields = lake_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        # Remove qual_f_b field (Version D specific)
+        basic_fields = [f for f in fields_list if f != "qual_f_b"]
+
+        params = {
             "feature": "PriorLake",
             "feature_id": lake_data["feature_id"],
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
-            "fields": "lake_id,time_str,wse,area_total,quality_f,PLD_version"
-        })
+            "fields": ",".join(basic_fields)
+        }
+
+        # Add collection_name if present (for Version D)
+        if "collection_name" in lake_data:
+            params["collection_name"] = lake_data["collection_name"]
+
+        response, elapsed = api_client.query(params)
 
         assert_http_success(response)
         assert_response_time(elapsed, max_seconds=2)
@@ -49,18 +62,31 @@ class TestPriorLakeBasicQueries:
             assert 'wse' in props
             assert 'area_total' in props
 
-    def test_lake_csv_query(self, api_client, stable_test_data):
+    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    def test_lake_csv_query(self, api_client, stable_test_data, lake_key):
         """Test prior lake query with CSV output"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data[lake_key]
 
-        response, elapsed = api_client.query({
+        # Strip Version D specific fields for basic compatibility test
+        fields = lake_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        # Remove qual_f_b field (Version D specific)
+        basic_fields = [f for f in fields_list if f != "qual_f_b"]
+
+        params = {
             "feature": "PriorLake",
             "feature_id": lake_data["feature_id"],
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "csv",
-            "fields": "lake_id,time_str,wse,area_total,quality_f"
-        })
+            "fields": ",".join(basic_fields)
+        }
+
+        # Add collection_name if present (for Version D)
+        if "collection_name" in lake_data:
+            params["collection_name"] = lake_data["collection_name"]
+
+        response, elapsed = api_client.query(params)
 
         assert_http_success(response)
         assert_response_time(elapsed, max_seconds=2)
@@ -69,7 +95,7 @@ class TestPriorLakeBasicQueries:
         # Extract and validate CSV structure
         data = response.json()
         csv_text = extract_csv_from_response(data)
-        validate_csv_structure(csv_text, expected_fields=["lake_id", "time_str", "wse", "area_total", "quality_f"])
+        validate_csv_structure(csv_text, expected_fields=basic_fields)
 
     def test_lake_with_geometry(self, api_client, stable_test_data):
         """Test prior lake query includes geometry"""
@@ -220,12 +246,11 @@ class TestPriorLakeCollectionVersions:
 
         # Stable test data should always exist - 404 is a failure
         assert_http_success(response)
+        assert_result_count(response, lake_data["expected_count"], output_format="csv")
 
     @pytest.mark.version_d
     def test_lake_d_collection(self, api_client, stable_test_data, test_env):
         """Test querying D collection explicitly"""
-        if test_env == "ops":
-            pytest.skip("Version D may not be in OPS yet")
 
         lake_data = stable_test_data["priorlake_d"]
 
@@ -241,6 +266,7 @@ class TestPriorLakeCollectionVersions:
 
         # Stable test data should always exist - 404 is a failure
         assert_http_success(response)
+        assert_result_count(response, lake_data["expected_count"], output_format="csv")
 
     def test_default_lake_collection(self, api_client, stable_test_data):
         """Test that default collection is used when not specified"""
@@ -257,6 +283,7 @@ class TestPriorLakeCollectionVersions:
         })
 
         assert_http_success(response)
+        assert_result_count(response, lake_data["expected_count"], output_format="csv")
 
 
 @pytest.mark.version_d
@@ -265,8 +292,6 @@ class TestPriorLakeVersionDFields:
 
     def test_qual_f_b_accessible(self, api_client, test_env, stable_test_data):
         """Test qual_f_b field is accessible for PriorLake"""
-        if test_env == "ops":
-            pytest.skip("Version D fields may not be available in OPS yet")
 
         lake_data = stable_test_data["priorlake_d"]
 
@@ -365,6 +390,7 @@ class TestPriorLakeVersionDFields:
         })
 
         assert_http_success(response)
+        assert_result_count(response, lake_data["expected_count"], output_format="csv")
 
 
 @pytest.mark.golden
