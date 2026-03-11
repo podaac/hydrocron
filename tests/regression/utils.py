@@ -382,9 +382,11 @@ def compare_geojson_responses(
 
     if actual_features != expected_features:
         diff_msg += f"  ⚠️ Feature count differs!\n"
+        return False, diff_msg
 
-    # Check first feature for field differences
+    # Count matches but values differ - provide detailed comparison
     if actual_features > 0 and expected_features > 0:
+        # Check field schema
         actual_props = set(actual_norm['features'][0]['properties'].keys())
         expected_props = set(expected_norm['features'][0]['properties'].keys())
 
@@ -392,9 +394,55 @@ def compare_geojson_responses(
         extra = actual_props - expected_props
 
         if missing:
-            diff_msg += f"  Missing fields: {missing}\n"
+            diff_msg += f"  Missing fields: {sorted(missing)}\n"
         if extra:
-            diff_msg += f"  Extra fields: {extra}\n"
+            diff_msg += f"  Extra fields: {sorted(extra)}\n"
+
+        # Compare features to find differences
+        differing_features = []
+        for i, (actual_feat, expected_feat) in enumerate(zip(actual_norm['features'], expected_norm['features'])):
+            if actual_feat != expected_feat:
+                differing_features.append(i)
+
+        if differing_features:
+            diff_msg += f"\n  Features with differences: {len(differing_features)} of {actual_features}\n"
+            diff_msg += f"  Feature indices: {differing_features[:10]}"
+            if len(differing_features) > 10:
+                diff_msg += f" ... and {len(differing_features) - 10} more"
+            diff_msg += "\n"
+
+            # Show detailed diff for first differing feature
+            first_diff_idx = differing_features[0]
+            actual_feat = actual_norm['features'][first_diff_idx]
+            expected_feat = expected_norm['features'][first_diff_idx]
+
+            diff_msg += f"\n  First difference (feature {first_diff_idx}):\n"
+
+            # Compare properties
+            actual_props_dict = actual_feat.get('properties', {})
+            expected_props_dict = expected_feat.get('properties', {})
+
+            common_fields = set(actual_props_dict.keys()) & set(expected_props_dict.keys())
+            differing_fields = []
+
+            for field in sorted(common_fields):
+                actual_val = actual_props_dict[field]
+                expected_val = expected_props_dict[field]
+                if actual_val != expected_val:
+                    differing_fields.append((field, actual_val, expected_val))
+
+            if differing_fields:
+                diff_msg += f"    Differing fields ({len(differing_fields)}):\n"
+                for field, actual_val, expected_val in differing_fields[:5]:
+                    diff_msg += f"      {field}:\n"
+                    diff_msg += f"        Actual:   {actual_val}\n"
+                    diff_msg += f"        Expected: {expected_val}\n"
+                if len(differing_fields) > 5:
+                    diff_msg += f"      ... and {len(differing_fields) - 5} more differing fields\n"
+
+            # Check geometry differences
+            if actual_feat.get('geometry') != expected_feat.get('geometry'):
+                diff_msg += f"    Geometry differs\n"
 
     return False, diff_msg
 
@@ -428,9 +476,11 @@ def compare_csv_responses(
 
     if len(actual_rows) != len(expected_rows):
         diff_msg += f"  ⚠️ Row count differs!\n"
+        return False, diff_msg
 
-    # Check for column differences
+    # Count matches but values differ - provide detailed comparison
     if actual_rows and expected_rows:
+        # Check column schema
         actual_cols = set(actual_rows[0].keys())
         expected_cols = set(expected_rows[0].keys())
 
@@ -438,9 +488,48 @@ def compare_csv_responses(
         extra = actual_cols - expected_cols
 
         if missing:
-            diff_msg += f"  Missing columns: {missing}\n"
+            diff_msg += f"  Missing columns: {sorted(missing)}\n"
         if extra:
-            diff_msg += f"  Extra columns: {extra}\n"
+            diff_msg += f"  Extra columns: {sorted(extra)}\n"
+
+        # Compare rows to find differences
+        differing_rows = []
+        for i, (actual_row, expected_row) in enumerate(zip(actual_rows, expected_rows)):
+            if actual_row != expected_row:
+                differing_rows.append(i)
+
+        if differing_rows:
+            diff_msg += f"\n  Rows with differences: {len(differing_rows)} of {len(actual_rows)}\n"
+            diff_msg += f"  Row indices: {differing_rows[:10]}"
+            if len(differing_rows) > 10:
+                diff_msg += f" ... and {len(differing_rows) - 10} more"
+            diff_msg += "\n"
+
+            # Show detailed diff for first differing row
+            first_diff_idx = differing_rows[0]
+            actual_row = actual_rows[first_diff_idx]
+            expected_row = expected_rows[first_diff_idx]
+
+            diff_msg += f"\n  First difference (row {first_diff_idx}):\n"
+
+            # Compare columns
+            common_cols = set(actual_row.keys()) & set(expected_row.keys())
+            differing_cols = []
+
+            for col in sorted(common_cols):
+                actual_val = actual_row[col]
+                expected_val = expected_row[col]
+                if actual_val != expected_val:
+                    differing_cols.append((col, actual_val, expected_val))
+
+            if differing_cols:
+                diff_msg += f"    Differing columns ({len(differing_cols)}):\n"
+                for col, actual_val, expected_val in differing_cols[:5]:
+                    diff_msg += f"      {col}:\n"
+                    diff_msg += f"        Actual:   {actual_val}\n"
+                    diff_msg += f"        Expected: {expected_val}\n"
+                if len(differing_cols) > 5:
+                    diff_msg += f"      ... and {len(differing_cols) - 5} more differing columns\n"
 
     return False, diff_msg
 
