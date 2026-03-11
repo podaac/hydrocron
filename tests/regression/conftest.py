@@ -198,27 +198,25 @@ STABLE_TEST_DATA_UAT = {
 }
 
 @pytest.fixture(scope="session")
-def api_url():
+def test_env():
+    """
+    Get the test environment name
+    """
+    return os.environ.get("HYDROCRON_ENV", "").lower()
+
+
+@pytest.fixture(scope="session")
+def api_url(test_env):
     """
     Get the API URL to test against based on HYDROCRON_ENV environment variable.
 
     Set HYDROCRON_ENV to 'uat' or 'ops' before running tests.
     If not set, tests will be skipped.
     """
-    env = os.environ.get("HYDROCRON_ENV", "").lower()
+    if test_env not in API_URLS:
+        pytest.skip(f"HYDROCRON_ENV not set or invalid. Set to 'uat' or 'ops' to run regression tests. Current value: '{test_env}'")
 
-    if env not in API_URLS:
-        pytest.skip(f"HYDROCRON_ENV not set or invalid. Set to 'uat' or 'ops' to run regression tests. Current value: '{env}'")
-
-    return API_URLS[env]
-
-
-@pytest.fixture(scope="session")
-def test_env():
-    """
-    Get the test environment name
-    """
-    return os.environ.get("HYDROCRON_ENV", "").lower()
+    return API_URLS[test_env]
 
 
 @pytest.fixture
@@ -262,17 +260,15 @@ def api_client(api_url):
     return APIClient(api_url)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def stable_test_data(test_env):
     """
     Known stable test data for regression tests based on environment
     """
     if test_env == "uat":
         return STABLE_TEST_DATA_UAT
-    elif test_env == "ops":
-        return STABLE_TEST_DATA_OPS
-    else:
-        pytest.skip(f"No stable test data defined for environment: {test_env}")
+
+    return STABLE_TEST_DATA_OPS
 
 
 @pytest.fixture
