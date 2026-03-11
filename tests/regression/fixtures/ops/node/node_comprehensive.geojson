@@ -11,10 +11,14 @@
         "width": "1514.328515",
         "lat": "21.90799713",
         "lon": "90.6654643",
+        "area_total": "301678.3",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_2.0",
+        "crid": "PGC0",
         "wse_units": "m",
         "width_units": "m",
         "lat_units": "degrees_north",
-        "lon_units": "degrees_east"
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
       },
       "geometry": {
         "type": "Point",
@@ -34,10 +38,14 @@
         "width": "2965.188988",
         "lat": "21.9039225",
         "lon": "90.6676094",
+        "area_total": "590712.8",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_2.0",
+        "crid": "PGC0",
         "wse_units": "m",
         "width_units": "m",
         "lat_units": "degrees_north",
-        "lon_units": "degrees_east"
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
       },
       "geometry": {
         "type": "Point",
@@ -57,10 +65,14 @@
         "width": "7169.994766",
         "lat": "21.8926547",
         "lon": "90.6736323",
+        "area_total": "1428376.9",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_2.0",
+        "crid": "PGC0",
         "wse_units": "m",
         "width_units": "m",
         "lat_units": "degrees_north",
-        "lon_units": "degrees_east"
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
       },
       "geometry": {
         "type": "Point",
@@ -80,10 +92,14 @@
         "width": "7140.802882",
         "lat": "21.88956666",
         "lon": "90.6752802",
+        "area_total": "1422561.4",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_2.0",
+        "crid": "PGC0",
         "wse_units": "m",
         "width_units": "m",
         "lat_units": "degrees_north",
-        "lon_units": "degrees_east"
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
       },
       "geometry": {
         "type": "Point",
@@ -103,10 +119,14 @@
         "width": "3127.27212",
         "lat": "21.90312407",
         "lon": "90.6680282",
+        "area_total": "623002.3",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_2.0",
+        "crid": "PGC0",
         "wse_units": "m",
         "width_units": "m",
         "lat_units": "degrees_north",
-        "lon_units": "degrees_east"
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
       },
       "geometry": {
         "type": "Point",

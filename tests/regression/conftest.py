@@ -142,10 +142,10 @@ STABLE_TEST_DATA_UAT = {
         }
     },
     "node": {
-        "feature_id": "81292900150551",
-        "start_time": "2024-02-06T00:00:00Z",
-        "end_time": "2024-02-26T00:00:00Z",
-        "expected_count": 4,  # Number of results expected for this query
+        "feature_id": "28311800020621",
+        "start_time": "2024-01-28T00:00:00Z",
+        "end_time": "2024-02-01T00:00:00Z",
+        "expected_count": 2,  # Number of results expected for this query
         "fields": "node_id,time_str,wse,width,lat,lon,sword_version",
         "fixtures": {
             "basic_geojson": "node/node_basic.geojson",
@@ -154,9 +154,9 @@ STABLE_TEST_DATA_UAT = {
         }
     },
     "node_d": {
-        "feature_id": "33129600450223",  # Update with Version D node_id
+        "feature_id": "33122000170101",  # Update with Version D node_id
         "start_time": "2025-06-04T00:00:00Z",  # Update with actual date range
-        "end_time": "2025-06-05T20:00:00Z",
+        "end_time": "2025-06-06T20:00:00Z",
         "expected_count": 2,  # Update with actual count
         "collection_name": "SWOT_L2_HR_RiverSP_D",
         "fields": "node_id,time_str,wse,width,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b,lat,lon,sword_version",

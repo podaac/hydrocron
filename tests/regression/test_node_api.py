@@ -325,18 +325,30 @@ class TestNodeGoldenFiles:
         HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature node
     """
 
-    def test_node_basic_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    def test_node_basic_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
         """Test basic node GeoJSON matches reference file"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data[node_key]
 
-        response, _ = api_client.query({
+        # Strip Version D specific fields for basic captures
+        fields = node_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
+        basic_fields_str = ",".join(basic_fields)
+
+        params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
-            "fields": "node_id,time_str,wse,lat,lon"
-        })
+            "fields": basic_fields_str
+        }
+
+        if "collection_name" in node_data:
+            params["collection_name"] = node_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(
@@ -347,18 +359,30 @@ class TestNodeGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    def test_node_basic_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    def test_node_basic_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
         """Test basic node CSV matches reference file"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data[node_key]
 
-        response, _ = api_client.query({
+        # Strip Version D specific fields for basic captures
+        fields = node_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
+        basic_fields_str = ",".join(basic_fields)
+
+        params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "csv",
-            "fields": "node_id,time_str,wse,width,lat,lon"
-        })
+            "fields": basic_fields_str
+        }
+
+        if "collection_name" in node_data:
+            params["collection_name"] = node_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(
@@ -369,18 +393,30 @@ class TestNodeGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    def test_node_comprehensive_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    def test_node_comprehensive_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
         """Test comprehensive node GeoJSON matches reference file"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data[node_key]
 
-        response, _ = api_client.query({
+        # Strip Version D specific fields for basic captures
+        fields = node_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
+        basic_fields_str = ",".join(basic_fields)
+
+        params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
-            "fields": "node_id,time_str,wse,width,lat,lon,geometry"
-        })
+            "fields": f"{basic_fields_str},area_total,collection_shortname,crid,geometry"
+        }
+
+        if "collection_name" in node_data:
+            params["collection_name"] = node_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(

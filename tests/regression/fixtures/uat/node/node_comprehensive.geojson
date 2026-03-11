@@ -5,22 +5,27 @@
       "id": "0",
       "type": "Feature",
       "properties": {
-        "node_id": "81292900150551",
-        "time_str": "2024-02-06T09:44:00Z",
-        "wse": "774.29348",
-        "width": "128.070095",
-        "lat": "61.45074339",
-        "lon": "-139.1350912",
+        "node_id": "28311800020621",
+        "time_str": "2024-01-28T08:15:21Z",
+        "wse": "-15.54433",
+        "width": "197.950116",
+        "lat": "48.35478321",
+        "lon": "45.9494847",
+        "sword_version": "16",
+        "area_total": "46048.3",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_2.0",
+        "crid": "PIC0",
         "wse_units": "m",
         "width_units": "m",
         "lat_units": "degrees_north",
-        "lon_units": "degrees_east"
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -139.134971,
-          61.450631
+          45.949474,
+          48.354881
         ]
       }
     },
@@ -28,68 +33,27 @@
       "id": "1",
       "type": "Feature",
       "properties": {
-        "node_id": "81292900150551",
-        "time_str": "2024-02-06T18:33:21Z",
-        "wse": "-999999999999.0",
-        "width": "75.902891",
-        "lat": "-999999999999.0",
-        "lon": "-999999999999.0",
+        "node_id": "28311800020621",
+        "time_str": "2024-01-31T21:37:09Z",
+        "wse": "-15.63838",
+        "width": "141.288713",
+        "lat": "48.35369367",
+        "lon": "45.9497848",
+        "sword_version": "16",
+        "area_total": "32867.4",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_2.0",
+        "crid": "PIC0",
         "wse_units": "m",
         "width_units": "m",
         "lat_units": "degrees_north",
-        "lon_units": "degrees_east"
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -139.134971,
-          61.450631
-        ]
-      }
-    },
-    {
-      "id": "2",
-      "type": "Feature",
-      "properties": {
-        "node_id": "81292900150551",
-        "time_str": "2024-02-16T08:06:17Z",
-        "wse": "774.12048",
-        "width": "101.655631",
-        "lat": "61.45083567",
-        "lon": "-139.134894",
-        "wse_units": "m",
-        "width_units": "m",
-        "lat_units": "degrees_north",
-        "lon_units": "degrees_east"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -139.134971,
-          61.450631
-        ]
-      }
-    },
-    {
-      "id": "3",
-      "type": "Feature",
-      "properties": {
-        "node_id": "81292900150551",
-        "time_str": "no_data",
-        "wse": "-999999999999.0",
-        "width": "-999999999999.0",
-        "lat": "-999999999999.0",
-        "lon": "-999999999999.0",
-        "wse_units": "m",
-        "width_units": "m",
-        "lat_units": "degrees_north",
-        "lon_units": "degrees_east"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -139.134971,
-          61.450631
+          45.949474,
+          48.354881
         ]
       }
     }

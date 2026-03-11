@@ -255,7 +255,7 @@ def capture_node_fixtures(api_url, test_data, fixtures_dir):
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
-            "fields": f"{fields},geometry"
+            "fields": f"{fields},area_total,collection_shortname,crid,geometry"
         },
         fixtures_dir / "node" / "node_comprehensive.geojson"
     )
@@ -272,10 +272,6 @@ def capture_node_d_fixtures(api_url, test_data, fixtures_dir):
     fields_list = [f.strip() for f in fields.split(",")]
     basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
     basic_fields_str = ",".join(basic_fields)
-
-    # Get only wse_sm fields for specialized capture
-    wse_sm_fields = [f for f in fields_list if f in ["node_id", "time_str", "wse"] or f.startswith("wse_sm")]
-    wse_sm_fields_str = ",".join(wse_sm_fields)
 
     # Basic GeoJSON
     capture_geojson_response(
@@ -307,21 +303,6 @@ def capture_node_d_fixtures(api_url, test_data, fixtures_dir):
         fixtures_dir / "node" / "node_d_basic.csv"
     )
 
-    # wse_sm fields CSV (Version D specific)
-    capture_csv_response(
-        api_url,
-        {
-            "feature": "Node",
-            "feature_id": node_data["feature_id"],
-            "start_time": node_data["start_time"],
-            "end_time": node_data["end_time"],
-            "output": "csv",
-            "collection_name": node_data["collection_name"],
-            "fields": wse_sm_fields_str
-        },
-        fixtures_dir / "node" / "node_d_wse_sm.csv"
-    )
-
     # Comprehensive GeoJSON
     capture_geojson_response(
         api_url,
@@ -332,7 +313,7 @@ def capture_node_d_fixtures(api_url, test_data, fixtures_dir):
             "end_time": node_data["end_time"],
             "output": "geojson",
             "collection_name": node_data["collection_name"],
-            "fields": f"{fields},geometry"
+            "fields": f"{basic_fields_str},area_total,collection_shortname,crid,geometry"
         },
         fixtures_dir / "node" / "node_d_comprehensive.geojson"
     )

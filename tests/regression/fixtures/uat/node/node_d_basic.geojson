@@ -5,13 +5,13 @@
       "id": "0",
       "type": "Feature",
       "properties": {
-        "node_id": "28311800020621",
-        "time_str": "2024-01-28T08:15:21Z",
-        "wse": "-15.54433",
-        "width": "197.950116",
-        "lat": "48.35478321",
-        "lon": "45.9494847",
-        "sword_version": "16",
+        "node_id": "33122000170101",
+        "time_str": "2025-06-04T22:40:03Z",
+        "wse": "26.21814",
+        "width": "88.678801",
+        "lat": "72.43013941",
+        "lon": "84.8257224",
+        "sword_version": "7b",
         "wse_units": "m",
         "width_units": "m",
         "lat_units": "degrees_north",
@@ -20,8 +20,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          45.949474,
-          48.354881
+          84.826878,
+          72.430083
         ]
       }
     },
@@ -29,13 +29,13 @@
       "id": "1",
       "type": "Feature",
       "properties": {
-        "node_id": "28311800020621",
-        "time_str": "2024-01-31T21:37:09Z",
-        "wse": "-15.63838",
-        "width": "141.288713",
-        "lat": "48.35369367",
-        "lon": "45.9497848",
-        "sword_version": "16",
+        "node_id": "33122000170101",
+        "time_str": "2025-06-05T22:40:43Z",
+        "wse": "21.24329",
+        "width": "341.639489",
+        "lat": "72.43068659",
+        "lon": "84.8288465",
+        "sword_version": "7b",
         "wse_units": "m",
         "width_units": "m",
         "lat_units": "degrees_north",
@@ -44,8 +44,8 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          45.949474,
-          48.354881
+          84.826878,
+          72.430083
         ]
       }
     }
