@@ -77,10 +77,10 @@ STABLE_TEST_DATA_OPS = {
         }
     },
     "priorlake": {
-        "feature_id": "8223592002",
-        "start_time": "2024-08-16T00:00:00Z",
-        "end_time": "2024-08-25T23:59:59Z",
-        "expected_count": 3,  # Number of results expected for this query
+        "feature_id": "8510353162",
+        "start_time": "2024-09-12T00:00:00Z",
+        "end_time": "2024-09-18T23:59:59Z",
+        "expected_count": 2,  # Number of results expected for this query
         "fields": "lake_id,time_str,wse,area_total,quality_f",
         "fixtures": {
             "basic_geojson": "priorlake/lake_basic.geojson",
@@ -169,10 +169,10 @@ STABLE_TEST_DATA_UAT = {
         }
     },
     "priorlake": {
-        "feature_id": "8223592002",
-        "start_time": "2024-08-16T00:00:00Z",
-        "end_time": "2024-08-25T23:59:59Z",
-        "expected_count": 3,  # Number of results expected for this query
+        "feature_id": "7211251032",
+        "start_time": "2023-09-09T00:00:00Z",
+        "end_time": "2024-08-20T23:59:59Z",
+        "expected_count": 2,  # Number of results expected for this query
         "fields": "lake_id,time_str,wse,area_total,quality_f",
         "fixtures": {
             "basic_geojson": "priorlake/lake_basic.geojson",
