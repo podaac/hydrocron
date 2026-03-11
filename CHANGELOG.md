@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Added Regression Test Suite to test live API in UAT and OPS
 ### Changed
     - Updated Python to 3.12
+    - Minor doc updates
 ### Deprecated
 ### Removed
 ### Fixed
