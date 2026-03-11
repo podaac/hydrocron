@@ -139,4 +139,3 @@ These scripts are in `dev-utils/` to indicate they are:
 See:
 - `tests/regression/README.md` - Full regression testing guide
 - `tests/regression/fixtures/README.md` - Golden file documentation
-- `tests/regression/TESTING_GUIDE.md` - Quick reference

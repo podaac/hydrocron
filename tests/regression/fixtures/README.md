@@ -171,5 +171,4 @@ Review and update reference files:
 ## Questions?
 
 - See `tests/regression/README.md` for overall testing guide
-- See `tests/regression/TESTING_GUIDE.md` for quick reference
 - See `tests/regression/utils.py` for comparison logic
