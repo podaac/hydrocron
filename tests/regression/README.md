@@ -42,10 +42,15 @@ tests/regression/
 ├── test_response_formats.py        # Response format negotiation
 ├── test_api_features.py            # Additional API features
 │
-├── fixtures/                       # Golden reference files
-│   ├── reach/
-│   ├── node/
-│   └── priorlake/
+├── fixtures/                       # Golden reference files (environment-specific)
+│   ├── uat/                        # UAT environment fixtures
+│   │   ├── reach/
+│   │   ├── node/
+│   │   └── priorlake/
+│   └── ops/                        # OPS environment fixtures
+│       ├── reach/
+│       ├── node/
+│       └── priorlake/
 │
 └── dev-utils/                      # Developer utilities
     └── capture_reference_files.py
@@ -158,16 +163,16 @@ poetry run pytest tests/
 
 | File | Test Classes | Approx Tests | Purpose |
 |------|-------------|--------------|---------|
-| `test_smoke.py` | 4 | ~10 | Quick deployment validation |
-| `test_reach_api.py` | 6 | ~25 | Reach feature comprehensive tests |
-| `test_node_api.py` | 4 | ~20 | Node feature + Version D tests |
-| `test_priorlake_api.py` | 6 | ~25 | PriorLake feature + Version D tests |
-| `test_compact_parameter.py` | 5 | ~15 | Compact parameter testing |
-| `test_error_handling.py` | 8 | ~30 | Error cases and validation |
-| `test_time_encoding.py` | 7 | ~25 | Time format handling |
-| `test_response_formats.py` | 8 | ~25 | Response format negotiation |
-| `test_api_features.py` | 9 | ~25 | Additional features and edge cases |
-| **TOTAL** | **57** | **~200** | Full regression coverage |
+| `test_smoke.py` | 4 | ~8 | Quick deployment validation |
+| `test_reach_api.py` | 6 | ~15 | Reach feature tests (note: discharge tests skipped) |
+| `test_node_api.py` | 4 | ~20 | Node feature + Version D tests (parameterized) |
+| `test_priorlake_api.py` | 6 | ~25 | PriorLake feature + Version D tests (parameterized) |
+| `test_compact_parameter.py` | 5 | ~11 | Compact parameter testing |
+| `test_error_handling.py` | 8 | ~25 | Error cases and validation |
+| `test_time_encoding.py` | 7 | ~19 | Time format handling |
+| `test_response_formats.py` | 8 | ~18 | Response format negotiation |
+| `test_api_features.py` | 9 | ~19 | Additional features and edge cases |
+| **TOTAL** | **57** | **~160** | Full regression coverage |
 
 ### Smoke Tests (`test_smoke.py`)
 - **Purpose**: Quick verification API is functioning
@@ -180,9 +185,10 @@ poetry run pytest tests/
 
 #### Reach Tests (`test_reach_api.py`)
 - **Purpose**: Comprehensive Reach feature testing
+- **Note**: Discharge field tests are currently marked as `@pytest.mark.skip` - re-enable when needed
 - **Coverage**:
   - Basic queries (GeoJSON, CSV)
-  - Discharge fields (all algorithms: consensus, MetroMan, BAM, HiVDI)
+  - Discharge fields (all algorithms: consensus, MetroMan, BAM, HiVDI) - currently skipped
   - Content negotiation (Accept headers)
   - Units fields validation
   - Collection version testing (2.0, D)
@@ -191,8 +197,9 @@ poetry run pytest tests/
 
 #### Node Tests (`test_node_api.py`)
 - **Purpose**: Comprehensive Node feature testing + Version D
+- **Note**: Basic query tests are parameterized to run with both `node` (2.0) and `node_d` (Version D) data, automatically stripping Version D-specific fields for compatibility testing
 - **Coverage**:
-  - Basic queries (GeoJSON, CSV)
+  - Basic queries (GeoJSON, CSV) - parameterized for both 2.0 and D
   - **Version D wse_sm field tests** (smoothed water surface elevation)
   - Backward compatibility
   - Performance tests
@@ -200,8 +207,9 @@ poetry run pytest tests/
 
 #### PriorLake Tests (`test_priorlake_api.py`)
 - **Purpose**: Comprehensive PriorLake feature testing + Version D
+- **Note**: Basic query tests are parameterized to run with both `priorlake` (2.0) and `priorlake_d` (Version D) data, automatically stripping Version D-specific fields for compatibility testing
 - **Coverage**:
-  - Basic queries (GeoJSON, CSV)
+  - Basic queries (GeoJSON, CSV) - parameterized for both 2.0 and D
   - Drainage system fields (ds1/ds2)
   - Quality and metadata fields
   - **Version D qual_f_b field tests** (quality flag)
@@ -242,7 +250,7 @@ Timestamp formats and URL encoding:
 - URL encoding of + as %2B (required)
 - Invalid time format error handling
 - Time range boundary conditions (start == end, narrow/wide ranges)
-- Leap year validation (Feb 29)
+- Leap year validation (Feb 29) - uses hardcoded reach_id `14306900121` with known Leap Day data
 - Time format consistency across feature types
 
 #### Response Formats (`test_response_formats.py`)
@@ -339,7 +347,13 @@ pytest tests/regression/ -m version_d
 
 ## Configuring Test Data
 
-Test data is configured in `conftest.py` using the `STABLE_TEST_DATA` dictionary. If features don't exist in your deployed environment, update these values to use feature IDs that do exist and have data available.
+Test data is configured in `conftest.py` using environment-specific dictionaries:
+- `STABLE_TEST_DATA_UAT` - Test data for UAT environment
+- `STABLE_TEST_DATA_OPS` - Test data for OPS environment
+
+Each environment has its own feature IDs, time ranges, and expected counts. The `stable_test_data` fixture automatically selects the correct data based on the `HYDROCRON_ENV` variable.
+
+If features don't exist in your deployed environment, update the corresponding dictionary with feature IDs that exist and have data available.
 
 ## Adding to CI/CD
 
@@ -386,19 +400,37 @@ HYDROCRON_ENV=ops poetry run pytest tests/regression/ -v --html=report.html
 
 ### Updating Test Data
 
-If feature IDs don't exist in your environment, update `STABLE_TEST_DATA` in `conftest.py`:
+If feature IDs don't exist in your environment, update the appropriate environment-specific dictionary in `conftest.py`:
 
 ```python
-STABLE_TEST_DATA = {
+# For UAT environment
+STABLE_TEST_DATA_UAT = {
     "reach": {
-        "feature_id": "YOUR_REACH_ID",
+        "feature_id": "YOUR_UAT_REACH_ID",
         "start_time": "2024-01-01T00:00:00Z",
         "end_time": "2024-01-31T23:59:59Z",
+        "expected_count": 5,
+        "fields": "reach_id,time_str,wse,slope,width,sword_version",
+        ...
+    },
+    ...
+}
+
+# For OPS environment
+STABLE_TEST_DATA_OPS = {
+    "reach": {
+        "feature_id": "YOUR_OPS_REACH_ID",
+        "start_time": "2024-02-01T00:00:00Z",
+        "end_time": "2024-02-28T23:59:59Z",
+        "expected_count": 4,
+        "fields": "reach_id,time_str,wse,slope,width,sword_version",
         ...
     },
     ...
 }
 ```
+
+Both `reach_d`, `node_d`, and `priorlake_d` test data should also be configured for Version D collection testing.
 
 ### Adding New Tests
 
