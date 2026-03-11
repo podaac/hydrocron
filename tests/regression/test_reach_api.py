@@ -310,18 +310,24 @@ class TestReachGoldenFiles:
         HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature reach
     """
 
-    def test_reach_basic_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("reach_key", ["reach", "reach_d"])
+    def test_reach_basic_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, reach_key):
         """Test basic reach GeoJSON matches reference file"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data[reach_key]
 
-        response, _ = api_client.query({
+        params = {
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "geojson",
-            "fields": "reach_id,time_str,wse"
-        })
+            "fields": f"{reach_data['fields']},geometry"
+        }
+
+        if "collection_name" in reach_data:
+            params["collection_name"] = reach_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(
@@ -332,18 +338,24 @@ class TestReachGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    def test_reach_basic_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("reach_key", ["reach", "reach_d"])
+    def test_reach_basic_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir, reach_key):
         """Test basic reach CSV matches reference file"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data[reach_key]
 
-        response, _ = api_client.query({
+        params = {
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "csv",
-            "fields": "reach_id,time_str,wse,slope,width"
-        })
+            "fields": reach_data["fields"]
+        }
+
+        if "collection_name" in reach_data:
+            params["collection_name"] = reach_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(
@@ -354,18 +366,24 @@ class TestReachGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    def test_reach_discharge_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("reach_key", ["reach", "reach_d"])
+    def test_reach_discharge_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir, reach_key):
         """Test reach discharge fields CSV matches reference file"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data[reach_key]
 
-        response, _ = api_client.query({
+        params = {
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "csv",
             "fields": "reach_id,time_str,wse,dschg_c,dschg_c_u,dschg_c_q"
-        })
+        }
+
+        if "collection_name" in reach_data:
+            params["collection_name"] = reach_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(
@@ -376,18 +394,24 @@ class TestReachGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    def test_reach_comprehensive_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("reach_key", ["reach", "reach_d"])
+    def test_reach_comprehensive_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, reach_key):
         """Test comprehensive reach GeoJSON matches reference file"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data[reach_key]
 
-        response, _ = api_client.query({
+        params = {
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "geojson",
-            "fields": "reach_id,time_str,wse,slope,width,area_total,sword_version,collection_shortname,crid,geometry"
-        })
+            "fields": f"{reach_data['fields']},area_total,collection_shortname,crid,geometry"
+        }
+
+        if "collection_name" in reach_data:
+            params["collection_name"] = reach_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(

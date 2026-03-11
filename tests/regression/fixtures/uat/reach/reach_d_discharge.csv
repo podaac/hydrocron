@@ -1,0 +1,1 @@
+{"status":"200 OK","time":397.842,"hits":2,"results":{"csv":"reach_id,time_str,wse,dschg_c,dschg_c_u,dschg_c_q,wse_units,dschg_c_units,dschg_c_u_units\n33129200271,2025-06-05T15:40:52Z,149.9828,-999999999999.0,-999999999999.0,-999,m,m^3/s,m^3/s\n33129200271,2025-06-05T22:41:29Z,156.2466,-999999999999.0,-999999999999.0,-999,m,m^3/s,m^3/s\n","geojson":{}}}

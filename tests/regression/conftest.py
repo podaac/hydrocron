@@ -36,9 +36,9 @@ STABLE_TEST_DATA_OPS = {
         }
     },
     "reach_d": {
-        "feature_id": "72552000954",  # Update with Version D reach_id
-        "start_time": "2023-06-03T00:00:00Z",  # Update with actual date range
-        "end_time": "2023-06-06T00:00:00Z",
+        "feature_id": "18180900091",  # Update with Version D reach_id
+        "start_time": "2024-01-12T00:00:00Z",  # Update with actual date range
+        "end_time": "2024-02-03T00:00:00Z",
         "expected_count": 3,  # Update with actual count
         "collection_name": "SWOT_L2_HR_RiverSP_D",
         "fields": "reach_id,time_str,wse,slope,width,sword_version",
@@ -128,10 +128,10 @@ STABLE_TEST_DATA_UAT = {
         }
     },
     "reach_d": {
-        "feature_id": "35142800091",  # Update with Version D reach_id
+        "feature_id": "33129200271",  # Update with Version D reach_id
         "start_time": "2025-06-04T00:00:00Z",  # Update with actual date range
-        "end_time": "2025-06-05T00:00:00Z",
-        "expected_count": 1,  # Update with actual count
+        "end_time": "2025-06-06T00:00:00Z",
+        "expected_count": 2,  # Update with actual count
         "collection_name": "SWOT_L2_HR_RiverSP_D",
         "fields": "reach_id,time_str,wse,slope,width,sword_version",
         "fixtures": {
@@ -146,11 +146,10 @@ STABLE_TEST_DATA_UAT = {
         "start_time": "2024-02-06T00:00:00Z",
         "end_time": "2024-02-26T00:00:00Z",
         "expected_count": 4,  # Number of results expected for this query
-        "fields": "node_id,time_str,wse,width,lat,lon",
+        "fields": "node_id,time_str,wse,width,lat,lon,sword_version",
         "fixtures": {
             "basic_geojson": "node/node_basic.geojson",
             "basic_csv": "node/node_basic.csv",
-            "wse_sm_csv": "node/node_wse_sm.csv",
             "comprehensive_geojson": "node/node_comprehensive.geojson"
         }
     },
@@ -160,11 +159,10 @@ STABLE_TEST_DATA_UAT = {
         "end_time": "2025-06-05T20:00:00Z",
         "expected_count": 2,  # Update with actual count
         "collection_name": "SWOT_L2_HR_RiverSP_D",
-        "fields": "node_id,time_str,wse,width,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b,lat,lon",
+        "fields": "node_id,time_str,wse,width,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b,lat,lon,sword_version",
         "fixtures": {
             "basic_geojson": "node/node_d_basic.geojson",
             "basic_csv": "node/node_d_basic.csv",
-            "wse_sm_csv": "node/node_d_wse_sm.csv",
             "comprehensive_geojson": "node/node_d_comprehensive.geojson"
         }
     },
@@ -177,7 +175,6 @@ STABLE_TEST_DATA_UAT = {
         "fixtures": {
             "basic_geojson": "priorlake/lake_basic.geojson",
             "basic_csv": "priorlake/lake_basic.csv",
-            "qual_f_b_csv": "priorlake/lake_qual_f_b.csv",
             "comprehensive_geojson": "priorlake/lake_comprehensive.geojson"
         }
     },
@@ -191,7 +188,6 @@ STABLE_TEST_DATA_UAT = {
         "fixtures": {
             "basic_geojson": "priorlake/lake_d_basic.geojson",
             "basic_csv": "priorlake/lake_d_basic.csv",
-            "qual_f_b_csv": "priorlake/lake_d_qual_f_b.csv",
             "comprehensive_geojson": "priorlake/lake_d_comprehensive.geojson"
         }
     }

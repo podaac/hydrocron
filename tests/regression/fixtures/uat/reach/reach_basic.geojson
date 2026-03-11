@@ -8,7 +8,12 @@
         "reach_id": "34296500851",
         "time_str": "no_data",
         "wse": "-999999999999.0",
-        "wse_units": "m"
+        "slope": "-999999999999.0",
+        "width": "-999999999999.0",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
@@ -2371,7 +2376,12 @@
         "reach_id": "34296500851",
         "time_str": "2024-02-15T14:55:20Z",
         "wse": "737.7447",
-        "wse_units": "m"
+        "slope": "-0.0031130832",
+        "width": "90.498226",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
@@ -4734,7 +4744,12 @@
         "reach_id": "34296500851",
         "time_str": "2024-02-19T23:50:46Z",
         "wse": "799.125",
-        "wse_units": "m"
+        "slope": "-0.0058624018",
+        "width": "17350.734097",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
@@ -7097,7 +7112,12 @@
         "reach_id": "34296500851",
         "time_str": "2024-02-26T13:18:09Z",
         "wse": "737.9415",
-        "wse_units": "m"
+        "slope": "-0.0030743717",
+        "width": "84.138642",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
@@ -9460,7 +9480,12 @@
         "reach_id": "34296500851",
         "time_str": "no_data",
         "wse": "-999999999999.0",
-        "wse_units": "m"
+        "slope": "-999999999999.0",
+        "width": "-999999999999.0",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
@@ -11823,7 +11848,12 @@
         "reach_id": "34296500851",
         "time_str": "no_data",
         "wse": "-999999999999.0",
-        "wse_units": "m"
+        "slope": "-999999999999.0",
+        "width": "-999999999999.0",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",

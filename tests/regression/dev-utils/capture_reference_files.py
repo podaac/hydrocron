@@ -84,6 +84,7 @@ def capture_reach_fixtures(api_url, test_data, fixtures_dir):
     print("\n📊 Capturing Reach fixtures...")
 
     reach_data = test_data["reach"]
+    fields = reach_data["fields"]
 
     # Basic GeoJSON
     capture_geojson_response(
@@ -94,7 +95,7 @@ def capture_reach_fixtures(api_url, test_data, fixtures_dir):
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "geojson",
-            "fields": "reach_id,time_str,wse"
+            "fields": fields
         },
         fixtures_dir / "reach" / "reach_basic.geojson"
     )
@@ -108,7 +109,7 @@ def capture_reach_fixtures(api_url, test_data, fixtures_dir):
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "csv",
-            "fields": "reach_id,time_str,wse,slope,width"
+            "fields": fields
         },
         fixtures_dir / "reach" / "reach_basic.csv"
     )
@@ -136,9 +137,77 @@ def capture_reach_fixtures(api_url, test_data, fixtures_dir):
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "geojson",
-            "fields": "reach_id,time_str,wse,slope,width,area_total,sword_version,collection_shortname,crid,geometry"
+            "fields": f"{fields},area_total,collection_shortname,crid,geometry"
         },
         fixtures_dir / "reach" / "reach_comprehensive.geojson"
+    )
+
+
+def capture_reach_d_fixtures(api_url, test_data, fixtures_dir):
+    """Capture reach Version D reference files"""
+    print("\n📊 Capturing Reach Version D fixtures...")
+
+    reach_data = test_data["reach_d"]
+    fields = reach_data["fields"]
+
+    # Basic GeoJSON
+    capture_geojson_response(
+        api_url,
+        {
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "geojson",
+            "collection_name": reach_data["collection_name"],
+            "fields": fields
+        },
+        fixtures_dir / "reach" / "reach_d_basic.geojson"
+    )
+
+    # Basic CSV
+    capture_csv_response(
+        api_url,
+        {
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "csv",
+            "collection_name": reach_data["collection_name"],
+            "fields": fields
+        },
+        fixtures_dir / "reach" / "reach_d_basic.csv"
+    )
+
+    # Discharge fields CSV
+    capture_csv_response(
+        api_url,
+        {
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "csv",
+            "collection_name": reach_data["collection_name"],
+            "fields": "reach_id,time_str,wse,dschg_c,dschg_c_u,dschg_c_q"
+        },
+        fixtures_dir / "reach" / "reach_d_discharge.csv"
+    )
+
+    # Comprehensive GeoJSON
+    capture_geojson_response(
+        api_url,
+        {
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "geojson",
+            "collection_name": reach_data["collection_name"],
+            "fields": f"{fields},area_total,collection_shortname,crid,geometry"
+        },
+        fixtures_dir / "reach" / "reach_d_comprehensive.geojson"
     )
 
 
@@ -147,6 +216,7 @@ def capture_node_fixtures(api_url, test_data, fixtures_dir):
     print("\n📊 Capturing Node fixtures...")
 
     node_data = test_data["node"]
+    fields = node_data["fields"]
 
     # Basic GeoJSON
     capture_geojson_response(
@@ -157,7 +227,7 @@ def capture_node_fixtures(api_url, test_data, fixtures_dir):
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
-            "fields": "node_id,time_str,wse,lat,lon"
+            "fields": fields
         },
         fixtures_dir / "node" / "node_basic.geojson"
     )
@@ -171,27 +241,10 @@ def capture_node_fixtures(api_url, test_data, fixtures_dir):
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "csv",
-            "fields": "node_id,time_str,wse,width,lat,lon"
+            "fields": fields
         },
         fixtures_dir / "node" / "node_basic.csv"
     )
-
-    # wse_sm fields CSV (Version D)
-    print("  Note: Skipping wse_sm fixture (requires Version D with specific node ID)")
-    # Uncomment when you have stable Version D node data:
-    # capture_csv_response(
-    #     api_url,
-    #     {
-    #         "feature": "Node",
-    #         "feature_id": node_data["feature_id"],
-    #         "start_time": node_data["start_time"],
-    #         "end_time": node_data["end_time"],
-    #         "output": "csv",
-    #         "collection_name": "SWOT_L2_HR_RiverSP_D",
-    #         "fields": "node_id,time_str,wse,wse_sm,wse_sm_u"
-    #     },
-    #     fixtures_dir / "node" / "node_wse_sm.csv"
-    # )
 
     # Comprehensive GeoJSON
     capture_geojson_response(
@@ -202,9 +255,86 @@ def capture_node_fixtures(api_url, test_data, fixtures_dir):
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
-            "fields": "node_id,time_str,wse,width,lat,lon,geometry"
+            "fields": f"{fields},geometry"
         },
         fixtures_dir / "node" / "node_comprehensive.geojson"
+    )
+
+
+def capture_node_d_fixtures(api_url, test_data, fixtures_dir):
+    """Capture node Version D reference files"""
+    print("\n📊 Capturing Node Version D fixtures...")
+
+    node_data = test_data["node_d"]
+    fields = node_data["fields"]
+
+    # Strip Version D specific fields for basic captures
+    fields_list = [f.strip() for f in fields.split(",")]
+    basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
+    basic_fields_str = ",".join(basic_fields)
+
+    # Get only wse_sm fields for specialized capture
+    wse_sm_fields = [f for f in fields_list if f in ["node_id", "time_str", "wse"] or f.startswith("wse_sm")]
+    wse_sm_fields_str = ",".join(wse_sm_fields)
+
+    # Basic GeoJSON
+    capture_geojson_response(
+        api_url,
+        {
+            "feature": "Node",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
+            "output": "geojson",
+            "collection_name": node_data["collection_name"],
+            "fields": basic_fields_str
+        },
+        fixtures_dir / "node" / "node_d_basic.geojson"
+    )
+
+    # Basic CSV
+    capture_csv_response(
+        api_url,
+        {
+            "feature": "Node",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
+            "output": "csv",
+            "collection_name": node_data["collection_name"],
+            "fields": basic_fields_str
+        },
+        fixtures_dir / "node" / "node_d_basic.csv"
+    )
+
+    # wse_sm fields CSV (Version D specific)
+    capture_csv_response(
+        api_url,
+        {
+            "feature": "Node",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
+            "output": "csv",
+            "collection_name": node_data["collection_name"],
+            "fields": wse_sm_fields_str
+        },
+        fixtures_dir / "node" / "node_d_wse_sm.csv"
+    )
+
+    # Comprehensive GeoJSON
+    capture_geojson_response(
+        api_url,
+        {
+            "feature": "Node",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
+            "output": "geojson",
+            "collection_name": node_data["collection_name"],
+            "fields": f"{fields},geometry"
+        },
+        fixtures_dir / "node" / "node_d_comprehensive.geojson"
     )
 
 
@@ -213,6 +343,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
     print("\n📊 Capturing PriorLake fixtures...")
 
     lake_data = test_data["priorlake"]
+    fields = lake_data["fields"]
 
     # Basic GeoJSON
     capture_geojson_response(
@@ -223,7 +354,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
-            "fields": "lake_id,time_str,wse,area_total"
+            "fields": fields
         },
         fixtures_dir / "priorlake" / "lake_basic.geojson"
     )
@@ -237,27 +368,10 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "csv",
-            "fields": "lake_id,time_str,wse,area_total,quality_f"
+            "fields": fields
         },
         fixtures_dir / "priorlake" / "lake_basic.csv"
     )
-
-    # qual_f_b field CSV (Version D)
-    print("  Note: Skipping qual_f_b fixture (requires Version D)")
-    # Uncomment when Version D is deployed:
-    # capture_csv_response(
-    #     api_url,
-    #     {
-    #         "feature": "PriorLake",
-    #         "feature_id": lake_data["feature_id"],
-    #         "start_time": lake_data["start_time"],
-    #         "end_time": lake_data["end_time"],
-    #         "output": "csv",
-    #         "collection_name": "SWOT_L2_HR_LakeSP_D",
-    #         "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b"
-    #     },
-    #     fixtures_dir / "priorlake" / "lake_qual_f_b.csv"
-    # )
 
     # Comprehensive GeoJSON
     capture_geojson_response(
@@ -268,9 +382,82 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
-            "fields": "lake_id,time_str,wse,area_total,quality_f,PLD_version,geometry"
+            "fields": f"{fields},geometry"
         },
         fixtures_dir / "priorlake" / "lake_comprehensive.geojson"
+    )
+
+
+def capture_priorlake_d_fixtures(api_url, test_data, fixtures_dir):
+    """Capture prior lake Version D reference files"""
+    print("\n📊 Capturing PriorLake Version D fixtures...")
+
+    lake_data = test_data["priorlake_d"]
+    fields = lake_data["fields"]
+
+    # Strip Version D specific fields for basic captures
+    fields_list = [f.strip() for f in fields.split(",")]
+    basic_fields = [f for f in fields_list if f != "qual_f_b"]
+    basic_fields_str = ",".join(basic_fields)
+
+    # Basic GeoJSON
+    capture_geojson_response(
+        api_url,
+        {
+            "feature": "PriorLake",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
+            "output": "geojson",
+            "collection_name": lake_data["collection_name"],
+            "fields": basic_fields_str
+        },
+        fixtures_dir / "priorlake" / "lake_d_basic.geojson"
+    )
+
+    # Basic CSV
+    capture_csv_response(
+        api_url,
+        {
+            "feature": "PriorLake",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
+            "output": "csv",
+            "collection_name": lake_data["collection_name"],
+            "fields": basic_fields_str
+        },
+        fixtures_dir / "priorlake" / "lake_d_basic.csv"
+    )
+
+    # qual_f_b field CSV (Version D specific)
+    capture_csv_response(
+        api_url,
+        {
+            "feature": "PriorLake",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
+            "output": "csv",
+            "collection_name": lake_data["collection_name"],
+            "fields": fields
+        },
+        fixtures_dir / "priorlake" / "lake_d_qual_f_b.csv"
+    )
+
+    # Comprehensive GeoJSON
+    capture_geojson_response(
+        api_url,
+        {
+            "feature": "PriorLake",
+            "feature_id": lake_data["feature_id"],
+            "start_time": lake_data["start_time"],
+            "end_time": lake_data["end_time"],
+            "output": "geojson",
+            "collection_name": lake_data["collection_name"],
+            "fields": f"{fields},geometry"
+        },
+        fixtures_dir / "priorlake" / "lake_d_comprehensive.geojson"
     )
 
 
@@ -314,12 +501,15 @@ def main():
     # Capture based on feature selection
     if args.feature in ['reach', 'all']:
         capture_reach_fixtures(api_url, stable_test_data, fixtures_dir)
+        capture_reach_d_fixtures(api_url, stable_test_data, fixtures_dir)
 
     if args.feature in ['node', 'all']:
         capture_node_fixtures(api_url, stable_test_data, fixtures_dir)
+        capture_node_d_fixtures(api_url, stable_test_data, fixtures_dir)
 
     if args.feature in ['priorlake', 'all']:
         capture_priorlake_fixtures(api_url, stable_test_data, fixtures_dir)
+        capture_priorlake_d_fixtures(api_url, stable_test_data, fixtures_dir)
 
     print("\n" + "=" * 80)
     print("✓ Capture complete!")

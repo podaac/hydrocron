@@ -8,7 +8,12 @@
         "reach_id": "18180900091",
         "time_str": "2024-02-02T08:37:34Z",
         "wse": "1065.3532",
-        "wse_units": "m"
+        "slope": "0.02025204433",
+        "width": "441.562829",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
@@ -1159,7 +1164,12 @@
         "reach_id": "18180900091",
         "time_str": "2024-02-15T17:59:28Z",
         "wse": "1015.1029",
-        "wse_units": "m"
+        "slope": "0.00261907124",
+        "width": "381.69718",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
@@ -2310,7 +2320,12 @@
         "reach_id": "18180900091",
         "time_str": "2024-02-23T05:22:39Z",
         "wse": "1240.6563",
-        "wse_units": "m"
+        "slope": "-0.0068922186",
+        "width": "30.517626",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
@@ -3461,7 +3476,12 @@
         "reach_id": "18180900091",
         "time_str": "2024-03-07T14:44:32Z",
         "wse": "1016.1183",
-        "wse_units": "m"
+        "slope": "0.00263462109",
+        "width": "358.6461",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
@@ -4612,7 +4632,12 @@
         "reach_id": "18180900091",
         "time_str": "2024-03-15T02:07:41Z",
         "wse": "1074.6028",
-        "wse_units": "m"
+        "slope": "0.01884791576",
+        "width": "21.089067",
+        "sword_version": "16",
+        "wse_units": "m",
+        "slope_units": "m/m",
+        "width_units": "m"
       },
       "geometry": {
         "type": "LineString",
