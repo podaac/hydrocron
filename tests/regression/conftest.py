@@ -265,10 +265,7 @@ def stable_test_data(test_env):
     """
     Known stable test data for regression tests based on environment
     """
-    if test_env == "uat":
-        return STABLE_TEST_DATA_UAT
-
-    return STABLE_TEST_DATA_OPS
+    return STABLE_TEST_DATA_OPS if test_env == "ops" else STABLE_TEST_DATA_UAT
 
 
 @pytest.fixture
