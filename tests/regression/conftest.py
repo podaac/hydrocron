@@ -179,10 +179,10 @@ STABLE_TEST_DATA_UAT = {
         }
     },
     "priorlake_d": {
-        "feature_id": "8121554212",  # Update with Version D lake_id
-        "start_time": "2024-06-22T00:00:00Z",  # Update with actual date range
-        "end_time": "2025-07-13T23:59:59Z",
-        "expected_count": 1,  # Update with actual count
+        "feature_id": "8223592002",  # Update with Version D lake_id
+        "start_time": "2025-06-04T00:00:00Z",  # Update with actual date range
+        "end_time": "2025-06-06T23:59:59Z",
+        "expected_count": 2,  # Update with actual count
         "collection_name": "SWOT_L2_HR_LakeSP_D",
         "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b",
         "fixtures": {

@@ -5,11 +5,11 @@
       "id": "0",
       "type": "Feature",
       "properties": {
-        "lake_id": "8121554212",
-        "time_str": "no_data",
-        "wse": "-999999999999.0",
-        "area_total": "-999999999999.0",
-        "quality_f": "-999",
+        "lake_id": "8223592002",
+        "time_str": "2025-06-04T14:07:10Z",
+        "wse": "2.976",
+        "area_total": "0.238974",
+        "quality_f": "1",
         "PLD_version": "202",
         "collection_shortname": "SWOT_L2_HR_LakeSP_D",
         "crid": "PID0",
@@ -19,8 +19,31 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          -20.455824,
-          -25.566242
+          -134.965384,
+          68.324398
+        ]
+      }
+    },
+    {
+      "id": "1",
+      "type": "Feature",
+      "properties": {
+        "lake_id": "8223592002",
+        "time_str": "2025-06-05T14:07:50Z",
+        "wse": "2.88",
+        "area_total": "0.293236",
+        "quality_f": "1",
+        "PLD_version": "202",
+        "collection_shortname": "SWOT_L2_HR_LakeSP_D",
+        "crid": "PID0",
+        "wse_units": "m",
+        "area_total_units": "km^2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -134.965294,
+          68.32433
         ]
       }
     }
