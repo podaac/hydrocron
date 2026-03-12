@@ -47,7 +47,7 @@ matplotlib = "^3.8.3"
 
 
 [tool.poetry.group.test.dependencies]
-pytz = "^2025.2"
+pytz = "^2026"
 
 [tool.coverage.run]
 source = ['hydrocron']
