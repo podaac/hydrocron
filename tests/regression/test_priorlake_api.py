@@ -405,18 +405,30 @@ class TestPriorLakeGoldenFiles:
         HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature priorlake
     """
 
-    def test_lake_basic_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    def test_lake_basic_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, lake_key):
         """Test basic lake GeoJSON matches reference file"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data[lake_key]
 
-        response, _ = api_client.query({
+        # Strip Version D specific fields for basic captures
+        fields = lake_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        basic_fields = [f for f in fields_list if f != "qual_f_b"]
+        basic_fields_str = ",".join(basic_fields)
+
+        params = {
             "feature": "PriorLake",
             "feature_id": lake_data["feature_id"],
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
-            "fields": "lake_id,time_str,wse,area_total"
-        })
+            "fields": basic_fields_str
+        }
+
+        if "collection_name" in lake_data:
+            params["collection_name"] = lake_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(
@@ -427,18 +439,30 @@ class TestPriorLakeGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    def test_lake_basic_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    def test_lake_basic_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir, lake_key):
         """Test basic lake CSV matches reference file"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data[lake_key]
 
-        response, _ = api_client.query({
+        # Strip Version D specific fields for basic captures
+        fields = lake_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        basic_fields = [f for f in fields_list if f != "qual_f_b"]
+        basic_fields_str = ",".join(basic_fields)
+
+        params = {
             "feature": "PriorLake",
             "feature_id": lake_data["feature_id"],
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "csv",
-            "fields": "lake_id,time_str,wse,area_total,quality_f"
-        })
+            "fields": basic_fields_str
+        }
+
+        if "collection_name" in lake_data:
+            params["collection_name"] = lake_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(
@@ -449,18 +473,30 @@ class TestPriorLakeGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    def test_lake_comprehensive_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    def test_lake_comprehensive_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, lake_key):
         """Test comprehensive lake GeoJSON matches reference file"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data[lake_key]
 
-        response, _ = api_client.query({
+        # Strip Version D specific fields for basic captures
+        fields = lake_data["fields"]
+        fields_list = [f.strip() for f in fields.split(",")]
+        basic_fields = [f for f in fields_list if f != "qual_f_b"]
+        basic_fields_str = ",".join(basic_fields)
+
+        params = {
             "feature": "PriorLake",
             "feature_id": lake_data["feature_id"],
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
-            "fields": "lake_id,time_str,wse,area_total,quality_f,PLD_version,geometry"
-        })
+            "fields": f"{basic_fields_str},PLD_version,collection_shortname,crid,geometry"
+        }
+
+        if "collection_name" in lake_data:
+            params["collection_name"] = lake_data["collection_name"]
+
+        response, _ = api_client.query(params)
 
         assert_http_success(response)
         assert_matches_reference(

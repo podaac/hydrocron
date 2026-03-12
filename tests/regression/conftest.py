@@ -90,10 +90,10 @@ STABLE_TEST_DATA_OPS = {
         }
     },
     "priorlake_d": {
-        "feature_id": "5630068642",  # Update with Version D lake_id
-        "start_time": "2024-01-03T00:00:00Z",  # Update with actual date range
-        "end_time": "2024-02-01T23:59:59Z",
-        "expected_count": 5,  # Update with actual count
+        "feature_id": "7230381002",  # Update with Version D lake_id
+        "start_time": "2024-06-29T00:00:00Z",  # Update with actual date range
+        "end_time": "2024-07-19T23:59:59Z",
+        "expected_count": 4,  # Update with actual count
         "collection_name": "SWOT_L2_HR_LakeSP_D",
         "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b",
         "fixtures": {

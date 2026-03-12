@@ -326,6 +326,11 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
     lake_data = test_data["priorlake"]
     fields = lake_data["fields"]
 
+    # Strip Version D specific fields for basic captures
+    fields_list = [f.strip() for f in fields.split(",")]
+    basic_fields = [f for f in fields_list if f != "qual_f_b"]
+    basic_fields_str = ",".join(basic_fields)
+
     # Basic GeoJSON
     capture_geojson_response(
         api_url,
@@ -335,7 +340,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
-            "fields": fields
+            "fields": basic_fields_str
         },
         fixtures_dir / "priorlake" / "lake_basic.geojson"
     )
@@ -349,7 +354,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "csv",
-            "fields": fields
+            "fields": basic_fields_str
         },
         fixtures_dir / "priorlake" / "lake_basic.csv"
     )
@@ -363,7 +368,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
-            "fields": f"{fields},geometry"
+            "fields": f"{basic_fields_str},PLD_version,collection_shortname,crid,geometry"
         },
         fixtures_dir / "priorlake" / "lake_comprehensive.geojson"
     )
@@ -411,21 +416,6 @@ def capture_priorlake_d_fixtures(api_url, test_data, fixtures_dir):
         fixtures_dir / "priorlake" / "lake_d_basic.csv"
     )
 
-    # qual_f_b field CSV (Version D specific)
-    capture_csv_response(
-        api_url,
-        {
-            "feature": "PriorLake",
-            "feature_id": lake_data["feature_id"],
-            "start_time": lake_data["start_time"],
-            "end_time": lake_data["end_time"],
-            "output": "csv",
-            "collection_name": lake_data["collection_name"],
-            "fields": fields
-        },
-        fixtures_dir / "priorlake" / "lake_d_qual_f_b.csv"
-    )
-
     # Comprehensive GeoJSON
     capture_geojson_response(
         api_url,
@@ -436,7 +426,7 @@ def capture_priorlake_d_fixtures(api_url, test_data, fixtures_dir):
             "end_time": lake_data["end_time"],
             "output": "geojson",
             "collection_name": lake_data["collection_name"],
-            "fields": f"{fields},geometry"
+            "fields": f"{basic_fields_str},PLD_version,collection_shortname,crid,geometry"
         },
         fixtures_dir / "priorlake" / "lake_d_comprehensive.geojson"
     )

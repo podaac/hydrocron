@@ -11,6 +11,8 @@
         "area_total": "0.156197",
         "quality_f": "0",
         "PLD_version": "105",
+        "collection_shortname": "SWOT_L2_HR_LakeSP_2.0",
+        "crid": "PGC0",
         "wse_units": "m",
         "area_total_units": "km^2"
       },
@@ -32,6 +34,8 @@
         "area_total": "0.122901",
         "quality_f": "0",
         "PLD_version": "105",
+        "collection_shortname": "SWOT_L2_HR_LakeSP_2.0",
+        "crid": "PIC0",
         "wse_units": "m",
         "area_total_units": "km^2"
       },

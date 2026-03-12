@@ -1,0 +1,28 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "0",
+      "type": "Feature",
+      "properties": {
+        "lake_id": "8121554212",
+        "time_str": "no_data",
+        "wse": "-999999999999.0",
+        "area_total": "-999999999999.0",
+        "quality_f": "-999",
+        "PLD_version": "202",
+        "collection_shortname": "SWOT_L2_HR_LakeSP_D",
+        "crid": "PID0",
+        "wse_units": "m",
+        "area_total_units": "km^2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -20.455824,
+          -25.566242
+        ]
+      }
+    }
+  ]
+}
