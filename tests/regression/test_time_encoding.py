@@ -8,10 +8,7 @@ These tests verify:
 - URL encoding of + as %2b
 - Invalid time formats
 """
-import pytest
-from .utils import assert_http_success, assert_http_error, assert_result_count
-from urllib.parse import urlencode, quote
-
+from .utils import assert_http_success, assert_http_error
 
 class TestBasicISO8601Formats:
     """Test basic ISO 8601 timestamp formats"""

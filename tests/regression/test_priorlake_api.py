@@ -268,8 +268,8 @@ class TestPriorLakeCollectionVersions:
         assert_http_success(response)
         assert_result_count(response, lake_data["expected_count"], output_format="csv")
 
-    def test_default_lake_collection(self, api_client, stable_test_data):
-        """Test that default collection is used when not specified"""
+    def test_default_lake_collection_csv(self, api_client, stable_test_data):
+        """Test that default collection is SWOT_L2_HR_LakeSP_2.0 when collection_name not specified"""
         lake_data = stable_test_data["priorlake"]
 
         response, _ = api_client.query({
@@ -278,12 +278,25 @@ class TestPriorLakeCollectionVersions:
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "csv",
-            # No collection_name specified - should use default
-            "fields": "lake_id,time_str,wse"
+            # No collection_name specified - should use default 2.0
+            "fields": "lake_id,time_str,wse,collection_shortname"
         })
 
         assert_http_success(response)
-        assert_result_count(response, lake_data["expected_count"], output_format="csv")
+
+        # Extract CSV from JSON-wrapped response
+        data = response.json()
+        csv_text = extract_csv_from_response(data)
+
+        # Verify default collection is 2.0
+        rows = validate_csv_structure(
+            csv_text,
+            expected_fields=["lake_id", "collection_shortname"]
+        )
+
+        assert len(rows) > 0, "Should return at least one row"
+        assert rows[0]['collection_shortname'] == 'SWOT_L2_HR_LakeSP_2.0', \
+            f"Expected default collection 'SWOT_L2_HR_LakeSP_2.0', got '{rows[0]['collection_shortname']}'"
 
 
 @pytest.mark.version_d

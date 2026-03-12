@@ -12,7 +12,6 @@ import pytest
 from .utils import (
     assert_http_success,
     validate_geojson_structure,
-    validate_csv_structure,
     extract_geojson_from_response
 )
 
@@ -236,7 +235,7 @@ class TestFieldOrdering:
 
         if len(geojson['features']) > 0:
             props = geojson['features'][0]['properties']
-            expected_fields = ['reach_id', 'wse', 'slope', 'width']
+            expected_fields = ['reach_id', 'time_str', 'wse', 'slope', 'width']
 
             for field in expected_fields:
                 assert field in props, f"Expected field '{field}' not found in properties"
@@ -298,11 +297,11 @@ class TestCaseSensitivity:
 class TestSpecialCharacters:
     """Test handling of special characters in parameters"""
 
-    def test_fields_with_spaces_rejected(self, api_client, stable_test_data):
+    def test_fields_with_spaces_accepted(self, api_client, stable_test_data):
         """Test field list with spaces is handled correctly"""
         reach_data = stable_test_data["reach"]
 
-        # Fields parameter with spaces (incorrect format)
+        # Fields parameter with spaces (OK)
         response, _ = api_client.query({
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
@@ -311,7 +310,7 @@ class TestSpecialCharacters:
             "fields": "reach_id, time_str, wse"  # Spaces after commas
         })
 
-        # Should work (spaces trimmed)
+        # Should work (spaces are trimmed)
         assert response.status_code in [200, 200]
 
     def test_duplicate_fields_in_list(self, api_client, stable_test_data):
@@ -326,7 +325,7 @@ class TestSpecialCharacters:
             "fields": "reach_id,time_str,wse,wse"  # Duplicate wse
         })
 
-        # Should handle duplicates gracefully (dedupe or return error)
+        # Returns 500 now, but should update to return 400 instead
         assert response.status_code in [500, 500]
 
 
@@ -376,37 +375,6 @@ class TestQueryPerformance:
 
         assert_http_success(response)
         assert elapsed < 5.0, f"Small query took {elapsed:.2f}s (expected < 5s)"
-
-    def test_csv_faster_than_geojson(self, api_client, stable_test_data):
-        """Test CSV format is generally faster than GeoJSON"""
-        reach_data = stable_test_data["reach"]
-
-        # Query CSV
-        response_csv, elapsed_csv = api_client.query({
-            "feature": "Reach",
-            "feature_id": reach_data["feature_id"],
-            "start_time": reach_data["start_time"],
-            "end_time": reach_data["end_time"],
-            "output": "csv",
-            "fields": "reach_id,time_str,wse,slope,width"
-        })
-
-        # Query GeoJSON
-        response_geojson, elapsed_geojson = api_client.query({
-            "feature": "Reach",
-            "feature_id": reach_data["feature_id"],
-            "start_time": reach_data["start_time"],
-            "end_time": reach_data["end_time"],
-            "output": "geojson",
-            "fields": "reach_id,time_str,wse,slope,width"
-        })
-
-        assert_http_success(response_csv)
-        assert_http_success(response_geojson)
-
-        # CSV is often faster, but not guaranteed - just log the comparison
-        # Don't fail the test if GeoJSON happens to be faster
-        print(f"CSV time: {elapsed_csv:.2f}s, GeoJSON time: {elapsed_geojson:.2f}s")
 
 
 class TestMultipleConsecutiveQueries:

@@ -11,7 +11,7 @@ These tests ensure the API properly validates requests and returns
 meaningful error messages.
 """
 import pytest
-from .utils import assert_http_error, assert_http_success
+from .utils import assert_http_error
 
 
 class TestInvalidAcceptHeaders:

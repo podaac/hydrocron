@@ -12,7 +12,6 @@ Default behavior:
 import pytest
 from .utils import (
     assert_http_success,
-    validate_geojson_structure,
     extract_geojson_from_response
 )
 
