@@ -268,11 +268,6 @@ def capture_node_d_fixtures(api_url, test_data, fixtures_dir):
     node_data = test_data["node_d"]
     fields = node_data["fields"]
 
-    # Strip Version D specific fields for basic captures
-    fields_list = [f.strip() for f in fields.split(",")]
-    basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
-    basic_fields_str = ",".join(basic_fields)
-
     # Basic GeoJSON
     capture_geojson_response(
         api_url,
@@ -283,7 +278,7 @@ def capture_node_d_fixtures(api_url, test_data, fixtures_dir):
             "end_time": node_data["end_time"],
             "output": "geojson",
             "collection_name": node_data["collection_name"],
-            "fields": basic_fields_str
+            "fields": fields
         },
         fixtures_dir / "node" / "node_d_basic.geojson"
     )
@@ -298,7 +293,7 @@ def capture_node_d_fixtures(api_url, test_data, fixtures_dir):
             "end_time": node_data["end_time"],
             "output": "csv",
             "collection_name": node_data["collection_name"],
-            "fields": basic_fields_str
+            "fields": fields
         },
         fixtures_dir / "node" / "node_d_basic.csv"
     )
@@ -313,7 +308,7 @@ def capture_node_d_fixtures(api_url, test_data, fixtures_dir):
             "end_time": node_data["end_time"],
             "output": "geojson",
             "collection_name": node_data["collection_name"],
-            "fields": f"{basic_fields_str},area_total,collection_shortname,crid,geometry"
+            "fields": f"{fields},area_total,collection_shortname,crid,geometry"
         },
         fixtures_dir / "node" / "node_d_comprehensive.geojson"
     )
@@ -326,11 +321,6 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
     lake_data = test_data["priorlake"]
     fields = lake_data["fields"]
 
-    # Strip Version D specific fields for basic captures
-    fields_list = [f.strip() for f in fields.split(",")]
-    basic_fields = [f for f in fields_list if f != "qual_f_b"]
-    basic_fields_str = ",".join(basic_fields)
-
     # Basic GeoJSON
     capture_geojson_response(
         api_url,
@@ -340,7 +330,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
-            "fields": basic_fields_str
+            "fields": fields
         },
         fixtures_dir / "priorlake" / "lake_basic.geojson"
     )
@@ -354,7 +344,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "csv",
-            "fields": basic_fields_str
+            "fields": fields
         },
         fixtures_dir / "priorlake" / "lake_basic.csv"
     )
@@ -368,7 +358,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
-            "fields": f"{basic_fields_str},PLD_version,collection_shortname,crid,geometry"
+            "fields": f"{fields},PLD_version,collection_shortname,crid,geometry"
         },
         fixtures_dir / "priorlake" / "lake_comprehensive.geojson"
     )
@@ -381,11 +371,6 @@ def capture_priorlake_d_fixtures(api_url, test_data, fixtures_dir):
     lake_data = test_data["priorlake_d"]
     fields = lake_data["fields"]
 
-    # Strip Version D specific fields for basic captures
-    fields_list = [f.strip() for f in fields.split(",")]
-    basic_fields = [f for f in fields_list if f != "qual_f_b"]
-    basic_fields_str = ",".join(basic_fields)
-
     # Basic GeoJSON
     capture_geojson_response(
         api_url,
@@ -396,7 +381,7 @@ def capture_priorlake_d_fixtures(api_url, test_data, fixtures_dir):
             "end_time": lake_data["end_time"],
             "output": "geojson",
             "collection_name": lake_data["collection_name"],
-            "fields": basic_fields_str
+            "fields": fields
         },
         fixtures_dir / "priorlake" / "lake_d_basic.geojson"
     )
@@ -411,7 +396,7 @@ def capture_priorlake_d_fixtures(api_url, test_data, fixtures_dir):
             "end_time": lake_data["end_time"],
             "output": "csv",
             "collection_name": lake_data["collection_name"],
-            "fields": basic_fields_str
+            "fields": fields
         },
         fixtures_dir / "priorlake" / "lake_d_basic.csv"
     )
@@ -426,7 +411,7 @@ def capture_priorlake_d_fixtures(api_url, test_data, fixtures_dir):
             "end_time": lake_data["end_time"],
             "output": "geojson",
             "collection_name": lake_data["collection_name"],
-            "fields": f"{basic_fields_str},PLD_version,collection_shortname,crid,geometry"
+            "fields": f"{fields},PLD_version,collection_shortname,crid,geometry"
         },
         fixtures_dir / "priorlake" / "lake_d_comprehensive.geojson"
     )

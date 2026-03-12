@@ -25,19 +25,13 @@ class TestNodeBasicQueries:
         """Test node query with GeoJSON output"""
         node_data = stable_test_data[node_key]
 
-        # Strip Version D specific fields for basic compatibility test
-        fields = node_data["fields"]
-        fields_list = [f.strip() for f in fields.split(",")]
-        # Remove wse_sm* fields
-        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
-
         params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
-            "fields": ",".join(basic_fields)
+            "fields": node_data["fields"]
         }
 
         # Add collection_name if present (for Version D)
@@ -65,19 +59,13 @@ class TestNodeBasicQueries:
         """Test node query with CSV output"""
         node_data = stable_test_data[node_key]
 
-        # Strip Version D specific fields for basic compatibility test
-        fields = node_data["fields"]
-        fields_list = [f.strip() for f in fields.split(",")]
-        # Remove wse_sm* fields
-        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
-
         params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "csv",
-            "fields": ",".join(basic_fields)
+            "fields": node_data["fields"]
         }
 
         # Add collection_name if present (for Version D)
@@ -93,7 +81,8 @@ class TestNodeBasicQueries:
         # Extract and validate CSV structure
         data = response.json()
         csv_text = extract_csv_from_response(data)
-        validate_csv_structure(csv_text, expected_fields=["node_id", "time_str", "wse", "width", "lat", "lon"])
+        fields_list = [f.strip() for f in node_data["fields"].split(",")]
+        validate_csv_structure(csv_text, expected_fields=fields_list)
 
     def test_node_with_geometry(self, api_client, stable_test_data):
         """Test node query includes geometry"""
@@ -330,19 +319,13 @@ class TestNodeGoldenFiles:
         """Test basic node GeoJSON matches reference file"""
         node_data = stable_test_data[node_key]
 
-        # Strip Version D specific fields for basic captures
-        fields = node_data["fields"]
-        fields_list = [f.strip() for f in fields.split(",")]
-        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
-        basic_fields_str = ",".join(basic_fields)
-
         params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
-            "fields": basic_fields_str
+            "fields": node_data["fields"]
         }
 
         if "collection_name" in node_data:
@@ -364,19 +347,13 @@ class TestNodeGoldenFiles:
         """Test basic node CSV matches reference file"""
         node_data = stable_test_data[node_key]
 
-        # Strip Version D specific fields for basic captures
-        fields = node_data["fields"]
-        fields_list = [f.strip() for f in fields.split(",")]
-        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
-        basic_fields_str = ",".join(basic_fields)
-
         params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "csv",
-            "fields": basic_fields_str
+            "fields": node_data["fields"]
         }
 
         if "collection_name" in node_data:
@@ -398,19 +375,13 @@ class TestNodeGoldenFiles:
         """Test comprehensive node GeoJSON matches reference file"""
         node_data = stable_test_data[node_key]
 
-        # Strip Version D specific fields for basic captures
-        fields = node_data["fields"]
-        fields_list = [f.strip() for f in fields.split(",")]
-        basic_fields = [f for f in fields_list if not f.startswith("wse_sm")]
-        basic_fields_str = ",".join(basic_fields)
-
         params = {
             "feature": "Node",
             "feature_id": node_data["feature_id"],
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
-            "fields": f"{basic_fields_str},area_total,collection_shortname,crid,geometry"
+            "fields": f"{node_data['fields']},area_total,collection_shortname,crid,geometry"
         }
 
         if "collection_name" in node_data:
