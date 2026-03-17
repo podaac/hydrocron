@@ -24,25 +24,20 @@ class TestReachBasicQueries:
         """Test reach query with comprehensive field list (performance test: < 2s)"""
         reach_data = stable_test_data["reach"]
 
-        # Warm-up call to handle cold starts / cache warming
-        api_client.query({
-            "feature": "Reach",
-            "feature_id": reach_data["feature_id"],
-            "start_time": reach_data["start_time"],
-            "end_time": reach_data["end_time"],
-            "output": "geojson",
-            "fields": "reach_id,time_str,wse"
-        })
-
-        # Actual timed test
-        response, elapsed = api_client.query({
+        params = {
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "geojson",
             "fields": "reach_id,time_str,wse,slope,width,area_total,sword_version,collection_shortname,crid,geometry"
-        })
+        }
+        
+        # Warm-up call to handle cold starts / cache warming
+        api_client.query(params)
+
+        # Actual timed test
+        response, elapsed = api_client.query(params)
 
         assert_http_success(response)
         assert_response_time(elapsed, max_seconds=2)

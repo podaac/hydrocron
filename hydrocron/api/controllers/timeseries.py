@@ -180,7 +180,7 @@ def validate_parameters(parameters):
     elif parameters['output'] not in ('csv', 'geojson', 'default'):
         error_message = f'400: output parameter should be csv or geojson, not: {parameters["output"]}'
 
-    elif not is_fields_valid(parameters['feature'], parameters['fields']):
+    elif not is_fields_valid(parameters['feature'], parameters['fields'], parameters['collection_name']):
         error_message = '400: fields parameter should contain valid SWOT fields'
 
     elif parameters['compact'] not in ('true', 'false'):
@@ -209,20 +209,25 @@ def is_date_valid(query_date):
         return False
 
 
-def is_fields_valid(feature, fields):
+def is_fields_valid(feature, fields, collection_name):
     """
     Check if fields are present in either the reach or node list of columns
 
-    :param feature: The type of feature, either 'Reach' or 'Node'
+    :param feature: The type of feature, either 'Reach', 'Node', or 'PriorLake'
     :type feature: str
 
     :param fields: List of requested columns
     :type fields: str
 
+    :param collection_name: Name of collection being queried
+    :type collection_name: str
+
     :rtype: bool
     """
 
-    fields = fields.split(',')
+    fields_list = fields.split(',')
+
+    # First check if all fields are valid for the feature type
     if feature == 'Reach':
         columns = constants.REACH_ALL_COLUMNS
     elif feature == 'Node':
@@ -231,7 +236,23 @@ def is_fields_valid(feature, fields):
         columns = constants.PRIOR_LAKE_ALL_COLUMNS
     else:
         columns = []
-    return all(field in columns for field in fields)
+
+    if not all(field in columns for field in fields_list):
+        return False
+
+    # For Node feature, check if Version D only fields are being requested with 2.0 collection
+    if feature == 'Node' and collection_name.endswith('_2.0'):
+        # Check if any requested fields are Version D only
+        if any(field in constants.NODE_VERSION_D_ONLY_FIELDS for field in fields_list):
+            return False
+
+    # For PriorLake feature, check if Version D only fields are being requested with 2.0 collection
+    if feature == 'PriorLake' and collection_name.endswith('_2.0'):
+        # Check if any requested fields are Version D only
+        if any(field in constants.PRIOR_LAKE_VERSION_D_ONLY_FIELDS for field in fields_list):
+            return False
+
+    return True
 
 
 def sanitize_time(start_time, end_time):

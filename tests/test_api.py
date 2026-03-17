@@ -843,22 +843,32 @@ def test_is_fields_valid_wse_sm():
     os.environ['DEFAULT_COLLECTION_VERSION'] = 'D'
     import hydrocron.api.controllers.timeseries
 
-    # Test is_fields_valid accepts wse_sm for Node
+    # Test is_fields_valid accepts wse_sm for Node with Version D collection
     assert hydrocron.api.controllers.timeseries.is_fields_valid(
         'Node',
-        'node_id,time_str,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b'
+        'node_id,time_str,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b',
+        'SWOT_L2_HR_RiverSP_D'
     ) is True
+
+    # Test that wse_sm fields are NOT valid for Node with 2.0 collection
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Node',
+        'node_id,time_str,wse_sm',
+        'SWOT_L2_HR_RiverSP_2.0'
+    ) is False
 
     # Test that wse_sm fields are NOT valid for Reach (Node-only fields)
     assert hydrocron.api.controllers.timeseries.is_fields_valid(
         'Reach',
-        'reach_id,time_str,wse_sm'
+        'reach_id,time_str,wse_sm',
+        'SWOT_L2_HR_RiverSP_D'
     ) is False
 
     # Test that wse_sm fields are NOT valid for PriorLake
     assert hydrocron.api.controllers.timeseries.is_fields_valid(
         'PriorLake',
-        'lake_id,time_str,wse_sm'
+        'lake_id,time_str,wse_sm',
+        'SWOT_L2_HR_LakeSP_D'
     ) is False
 
 
@@ -874,22 +884,32 @@ def test_is_fields_valid_qual_f_b():
     os.environ['DEFAULT_COLLECTION_VERSION'] = 'D'
     import hydrocron.api.controllers.timeseries
 
-    # Test is_fields_valid accepts qual_f_b for PriorLake
+    # Test is_fields_valid accepts qual_f_b for PriorLake with Version D collection
     assert hydrocron.api.controllers.timeseries.is_fields_valid(
         'PriorLake',
-        'lake_id,time_str,wse,qual_f_b'
+        'lake_id,time_str,wse,qual_f_b',
+        'SWOT_L2_HR_LakeSP_D'
     ) is True
+
+    # Test that qual_f_b field is NOT valid for PriorLake with 2.0 collection
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'PriorLake',
+        'lake_id,time_str,wse,qual_f_b',
+        'SWOT_L2_HR_LakeSP_2.0'
+    ) is False
 
     # Test that qual_f_b field is NOT valid for Reach (PriorLake-only field)
     assert hydrocron.api.controllers.timeseries.is_fields_valid(
         'Reach',
-        'reach_id,time_str,wse,qual_f_b'
+        'reach_id,time_str,wse,qual_f_b',
+        'SWOT_L2_HR_RiverSP_D'
     ) is False
 
     # Test that qual_f_b field is NOT valid for Node
     assert hydrocron.api.controllers.timeseries.is_fields_valid(
         'Node',
-        'node_id,time_str,wse,qual_f_b'
+        'node_id,time_str,wse,qual_f_b',
+        'SWOT_L2_HR_RiverSP_D'
     ) is False
 
 

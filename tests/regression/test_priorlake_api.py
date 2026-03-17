@@ -39,6 +39,10 @@ class TestPriorLakeBasicQueries:
         if "collection_name" in lake_data:
             params["collection_name"] = lake_data["collection_name"]
 
+        # Warm-up call to handle cold starts / cache warming
+        api_client.query(params)
+
+        # Actual timed test
         response, elapsed = api_client.query(params)
 
         assert_http_success(response)

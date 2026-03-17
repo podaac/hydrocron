@@ -307,6 +307,10 @@ NODE_DATA_COLUMNS = [
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c'
 ]
 
+# Version D specific fields (not available in 2.0)
+NODE_VERSION_D_ONLY_FIELDS = ['wse_sm', 'wse_sm_u', 'wse_sm_q', 'wse_sm_q_b']
+PRIOR_LAKE_VERSION_D_ONLY_FIELDS = ['qual_f_b']
+
 PRIOR_LAKE_DATA_COLUMNS = [
     'wse', 'wse_u', 'wse_r_u', 'wse_std',
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
@@ -357,7 +361,7 @@ NODE_ALL_COLUMNS = [
     'reach_id', 'node_id', 'time', 'time_tai', 'time_str',
     'lat', 'lon', 'lat_u', 'lon_u', 'river_name',
     'wse', 'wse_u', 'wse_r_u',
-    'wse_sm', 'wse_sm_u', 'wse_sm_q', 'wse_sm_q_b',
+    'wse_sm', 'wse_sm_u', 'wse_sm_q', 'wse_sm_q_b',     # Version D only fields
     'width', 'width_u',
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u', 'area_wse',
     'layovr_val', 'node_dist', 'xtrk_dist',
@@ -379,7 +383,8 @@ PRIOR_LAKE_ALL_COLUMNS = [
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
     'layovr_val', 'xtrk_dist', 'ds1_l', 'ds1_l_u', 'ds1_q', 'ds1_q_u',
     'ds2_l', 'ds2_l_u', 'ds2_q', 'ds2_q_u',
-    'qual_f_b', 'quality_f', 'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f',
+    'qual_f_b',     # Version D only field
+    'quality_f', 'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f',
     'xovr_cal_q', 'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c', 'lake_name', 'p_res_id',
     'p_lon', 'p_lat', 'p_ref_wse', 'p_ref_area', 'p_date_t0', 'p_ds_t0', 'p_storage',

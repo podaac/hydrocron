@@ -10,6 +10,7 @@
         "wse": "2.976",
         "area_total": "0.238974",
         "quality_f": "1",
+        "qual_f_b": "10",
         "wse_units": "m",
         "area_total_units": "km^2"
       },
@@ -30,6 +31,7 @@
         "wse": "2.88",
         "area_total": "0.293236",
         "quality_f": "1",
+        "qual_f_b": "10",
         "wse_units": "m",
         "area_total_units": "km^2"
       },
