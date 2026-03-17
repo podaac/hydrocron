@@ -10,7 +10,7 @@ To contribute to the development of Hydrocron, see the [contributing guidelines]
 
 ## Requirements
 
-Python 3.10+
+Python 3.12+
 
 ## Running Locally with Docker
 

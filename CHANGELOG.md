@@ -7,11 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 304 - Add wse_sm, wse_sm_u, wse_sm_q, wse_sm_q_b (smoothed WSE) fields for Version D Node features
+    - Issue 261 - Add qual_f_b for Version D Lake features
+    - Added Regression Test Suite to test live API in UAT and OPS
 ### Changed
+    - Updated Python to 3.12
+    - Minor doc updates
 ### Deprecated
 ### Removed
 ### Fixed
 ### Security
+    - Updated Actions versions, poetry version to 2.3.2, and dependency versions
 
 ## [1.6.4]
 

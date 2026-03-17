@@ -23,8 +23,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  POETRY_VERSION: "1.7.1"
-  PYTHON_VERSION: "3.10"
+  POETRY_VERSION: "2.3.2"
+  PYTHON_VERSION: "3.12"
 
 jobs:
   deploy:
@@ -39,15 +39,15 @@ jobs:
         with:
           app_id: ${{ secrets.CICD_APP_ID }}
           private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           repository: ${{ github.repository }}
           token: ${{ steps.podaac-cicd.outputs.token }}
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v3
+        uses: abatilo/actions-poetry@v4
         with:
           poetry-version: ${{ env.POETRY_VERSION }}
 
@@ -58,9 +58,9 @@ jobs:
           poetry run jupyter-book build docs/
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           # Upload only docs repository
           path: 'docs/_build/html'

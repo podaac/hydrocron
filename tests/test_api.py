@@ -791,7 +791,7 @@ def test_get_collection_name():
     collection_name = hydrocron.api.controllers.timeseries.get_collection_name(event)
     assert collection_name == "SWOT_L2_HR_RiverSP_2.0"
 
-    # Current version
+    # Test 2.0 version
     event = {
         "headers": {
             "Accept": "text/csv",
@@ -811,7 +811,7 @@ def test_get_collection_name():
     collection_name = hydrocron.api.controllers.timeseries.get_collection_name(event)
     assert collection_name == "SWOT_L2_HR_RiverSP_2.0"
 
-    # Next version
+    # Test D version
     event = {
         "headers": {
             "Accept": "text/csv",
@@ -829,3 +829,128 @@ def test_get_collection_name():
     }
     collection_name = hydrocron.api.controllers.timeseries.get_collection_name(event)
     assert collection_name == "SWOT_L2_HR_RiverSP_D"
+
+
+def test_is_fields_valid_wse_sm():
+    """
+    Test that wse_sm fields are valid for Node requests only.
+    These are smoothed WSE fields available in Version D Node data.
+    """
+    os.environ['HYDROCRON_ENV'] = 'test'
+    os.environ['HYDROCRON_dynamodb_endpoint_url'] = 'http://localhost:8000'
+    os.environ['DEFAULT_RIVER_COLLECTION'] = 'SWOT_L2_HR_RiverSP'
+    os.environ['DEFAULT_LAKE_COLLECTION'] = 'SWOT_L2_HR_LakeSP'
+    os.environ['DEFAULT_COLLECTION_VERSION'] = 'D'
+    import hydrocron.api.controllers.timeseries
+
+    # Test is_fields_valid accepts wse_sm for Node
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Node',
+        'node_id,time_str,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b'
+    ) is True
+
+    # Test that wse_sm fields are NOT valid for Reach (Node-only fields)
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Reach',
+        'reach_id,time_str,wse_sm'
+    ) is False
+
+    # Test that wse_sm fields are NOT valid for PriorLake
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'PriorLake',
+        'lake_id,time_str,wse_sm'
+    ) is False
+
+
+def test_is_fields_valid_qual_f_b():
+    """
+    Test that qual_f_b field is valid for PriorLake requests only.
+    This field is available in Version D PriorLake data.
+    """
+    os.environ['HYDROCRON_ENV'] = 'test'
+    os.environ['HYDROCRON_dynamodb_endpoint_url'] = 'http://localhost:8000'
+    os.environ['DEFAULT_RIVER_COLLECTION'] = 'SWOT_L2_HR_RiverSP'
+    os.environ['DEFAULT_LAKE_COLLECTION'] = 'SWOT_L2_HR_LakeSP'
+    os.environ['DEFAULT_COLLECTION_VERSION'] = 'D'
+    import hydrocron.api.controllers.timeseries
+
+    # Test is_fields_valid accepts qual_f_b for PriorLake
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'PriorLake',
+        'lake_id,time_str,wse,qual_f_b'
+    ) is True
+
+    # Test that qual_f_b field is NOT valid for Reach (PriorLake-only field)
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Reach',
+        'reach_id,time_str,wse,qual_f_b'
+    ) is False
+
+    # Test that qual_f_b field is NOT valid for Node
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Node',
+        'node_id,time_str,wse,qual_f_b'
+    ) is False
+
+
+def test_timeseries_node_wse_sm_fields(hydrocron_api):
+    """
+    Test that wse_sm fields can be queried from Version D Node data.
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Node",
+            "feature_id": "31241400580011",
+            "start_time": "2026-02-01T00:00:00Z",
+            "end_time": "2026-02-28T00:00:00Z",
+            "output": "csv",
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "fields": "node_id,time_str,wse,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+
+    assert result['status'] == '200 OK'
+    # Verify wse_sm fields are in the CSV response
+    csv_result = result['results']['csv']
+    assert 'wse_sm' in csv_result
+    assert 'wse_sm_u' in csv_result
+    assert 'wse_sm_q' in csv_result
+    assert 'wse_sm_q_b' in csv_result
+
+
+def test_timeseries_priorlake_qual_f_b_field(hydrocron_api):
+    """
+    Test that qual_f_b field can be queried from Version D PriorLake data.
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "PriorLake",
+            "feature_id": "5160001832",
+            "start_time": "2025-06-01T00:00:00-00:00",
+            "end_time": "2025-06-30T23:59:59-00:00",
+            "output": "csv",
+            "collection_name": "SWOT_L2_HR_LakeSP_D",
+            "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+
+    assert result['status'] == '200 OK'
+    # Verify qual_f_b field is in the CSV response
+    csv_result = result['results']['csv']
+    assert 'qual_f_b' in csv_result
