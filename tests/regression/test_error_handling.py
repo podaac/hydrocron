@@ -155,7 +155,7 @@ class TestInvalidParameterValues:
         })
 
         # Should return error--invalid date format
-        assert response.status_code in [400, 400]
+        assert response.status_code == 400
 
     def test_malformed_date_format(self, api_client, stable_test_data):
         """Test malformed date returns 400"""
@@ -184,7 +184,7 @@ class TestInvalidParameterValues:
         })
 
         # Should return 500 Internal Server Error
-        assert response.status_code in [500, 500]
+        assert response.status_code == 500
 
     def test_invalid_field_name(self, api_client, stable_test_data):
         """Test invalid field name returns 400"""

@@ -12,7 +12,7 @@ This script:
    - Summary showing what changed between versions
 
 Usage:
-    AWS_PROFILE=myprofile poetry run python tests/regression/scan-dynamodb.py
+    AWS_PROFILE=myprofile poetry run python tests/regression/dev-utils/scan-dynamodb.py
 """
 
 import sys

@@ -69,7 +69,7 @@ class TestAPIKeyHeader:
 
         # Should either succeed (key not validated) or return error
         # Behavior depends on whether API key validation is implemented
-        assert response.status_code in [400, 400]
+        assert response.status_code == 400
 
 
 class TestGeometryFieldBehavior:
@@ -258,7 +258,7 @@ class TestCaseSensitivity:
         })
 
         # Should return error, case-sensitive
-        assert response.status_code in [400, 400]
+        assert response.status_code == 400
 
     def test_field_names_case_sensitive(self, api_client, stable_test_data):
         """Test field names are case-sensitive"""
@@ -274,7 +274,7 @@ class TestCaseSensitivity:
         })
 
         # Should return error--case-sensitive
-        assert response.status_code in [400, 400]
+        assert response.status_code == 400
 
     def test_output_parameter_case_sensitive(self, api_client, stable_test_data):
         """Test output parameter is case-sensitive"""
@@ -291,7 +291,7 @@ class TestCaseSensitivity:
         })
 
         # Should return error--case-sensitive
-        assert response.status_code in [400, 400]
+        assert response.status_code == 400
 
 
 class TestSpecialCharacters:
@@ -311,7 +311,7 @@ class TestSpecialCharacters:
         })
 
         # Should work (spaces are trimmed)
-        assert response.status_code in [200, 200]
+        assert response.status_code == 200
 
     def test_duplicate_fields_in_list(self, api_client, stable_test_data):
         """Test duplicate fields in fields parameter"""
@@ -326,7 +326,7 @@ class TestSpecialCharacters:
         })
 
         # Returns 500 now, but should update to return 400 instead
-        assert response.status_code in [500, 500]
+        assert response.status_code == 500
 
 
 class TestNoDataSentinelValues:
