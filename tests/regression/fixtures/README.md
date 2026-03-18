@@ -132,7 +132,7 @@ See `utils.py` for normalization functions that handle this.
 
 2. **If intentional**: Recapture reference files
    ```bash
-   HYDROCRON_ENV=uat poetry run python tests/regression/capture_reference_files.py
+   HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py
    ```
 
 3. **If NOT intentional**: This is a regression!
@@ -146,7 +146,7 @@ See `utils.py` for normalization functions that handle this.
 
 **Action**: Capture reference files
 ```bash
-HYDROCRON_ENV=uat poetry run python tests/regression/capture_reference_files.py
+HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py
 ```
 
 ## Best Practices

@@ -264,7 +264,7 @@ def load_reference_file(fixtures_dir: Path, relative_path: str) -> Any:
     if not file_path.exists():
         raise FileNotFoundError(
             f"Reference file not found: {file_path}\n"
-            f"Run 'poetry run python tests/regression/capture_reference_files.py' to generate it."
+            f"Run 'poetry run python tests/regression/dev-utils/capture_reference_files.py' to generate it."
         )
 
     if file_path.suffix in ['.json', '.geojson']:
