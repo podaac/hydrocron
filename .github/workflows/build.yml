@@ -14,10 +14,6 @@ on:
       - 'dependabot/**'
     tags-ignore:
       - '*'
-    # Do not trigger build if pyproject.toml was the only thing changed
-    paths-ignore:
-      - 'pyproject.toml'
-      - 'poetry.lock'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
