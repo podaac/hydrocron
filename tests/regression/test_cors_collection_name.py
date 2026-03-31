@@ -10,7 +10,6 @@ Before the fix: Requests with collection_name parameter would fail with CORS err
 After the fix: All requests should include proper CORS headers regardless of parameters
 """
 import pytest
-import requests
 from .utils import (
     assert_http_success
 )
