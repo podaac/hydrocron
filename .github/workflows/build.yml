@@ -14,6 +14,10 @@ on:
       - 'dependabot/**'
     tags-ignore:
       - '*'
+    # Do not trigger build if pyproject.toml was the only thing changed
+    paths-ignore:
+      - 'pyproject.toml'
+      - 'poetry.lock'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
@@ -50,7 +54,7 @@ jobs:
       version: ${{ steps.poetry-build.outputs.the_version }}
       pyproject_name: ${{ steps.poetry-build.outputs.pyproject_name }}
     steps:
-      - uses: getsentry/action-github-app-token@v3
+      - uses: getsentry/action-github-app-token@v4.0.0
         name: podaac cicd token
         id: podaac-cicd
         with:
