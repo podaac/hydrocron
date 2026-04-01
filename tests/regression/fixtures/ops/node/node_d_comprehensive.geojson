@@ -1,0 +1,117 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "0",
+      "type": "Feature",
+      "properties": {
+        "node_id": "44404000150591",
+        "time_str": "2024-01-09T08:18:57Z",
+        "wse": "24.89255",
+        "width": "429.384401",
+        "lat": "3.40866376",
+        "lon": "102.5434018",
+        "sword_version": "7b",
+        "area_total": "93033.8",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_D",
+        "crid": "PGD0",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.543408,
+          3.40867
+        ]
+      }
+    },
+    {
+      "id": "1",
+      "type": "Feature",
+      "properties": {
+        "node_id": "44404000150591",
+        "time_str": "2024-01-14T19:32:23Z",
+        "wse": "22.06794",
+        "width": "374.54059",
+        "lat": "3.40845336",
+        "lon": "102.5431407",
+        "sword_version": "7b",
+        "area_total": "81150.9",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_D",
+        "crid": "PGD0",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.543408,
+          3.40867
+        ]
+      }
+    },
+    {
+      "id": "2",
+      "type": "Feature",
+      "properties": {
+        "node_id": "44404000150591",
+        "time_str": "2024-01-30T05:04:03Z",
+        "wse": "23.0522",
+        "width": "437.965927",
+        "lat": "3.40837848",
+        "lon": "102.5436444",
+        "sword_version": "7b",
+        "area_total": "94893.1",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_D",
+        "crid": "PGD0",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.543408,
+          3.40867
+        ]
+      }
+    },
+    {
+      "id": "3",
+      "type": "Feature",
+      "properties": {
+        "node_id": "44404000150591",
+        "time_str": "2024-02-04T16:17:29Z",
+        "wse": "21.68793",
+        "width": "343.275404",
+        "lat": "3.40922524",
+        "lon": "102.5427368",
+        "sword_version": "7b",
+        "area_total": "74376.7",
+        "collection_shortname": "SWOT_L2_HR_RiverSP_D",
+        "crid": "PGD0",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east",
+        "area_total_units": "m^2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.543408,
+          3.40867
+        ]
+      }
+    }
+  ]
+}

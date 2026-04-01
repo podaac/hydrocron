@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "0",
+      "type": "Feature",
+      "properties": {
+        "node_id": "33122000170101",
+        "time_str": "2025-06-04T22:40:03Z",
+        "wse": "26.21814",
+        "width": "88.678801",
+        "wse_sm": "25.56884",
+        "wse_sm_u": "0.30776",
+        "wse_sm_q": "0",
+        "wse_sm_q_b": "0",
+        "lat": "72.43013941",
+        "lon": "84.8257224",
+        "sword_version": "7b",
+        "wse_units": "m",
+        "width_units": "m",
+        "wse_sm_units": "m",
+        "wse_sm_u_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          84.826878,
+          72.430083
+        ]
+      }
+    },
+    {
+      "id": "1",
+      "type": "Feature",
+      "properties": {
+        "node_id": "33122000170101",
+        "time_str": "2025-06-05T22:40:43Z",
+        "wse": "21.24329",
+        "width": "341.639489",
+        "wse_sm": "21.54314",
+        "wse_sm_u": "0.16324",
+        "wse_sm_q": "1",
+        "wse_sm_q_b": "1024",
+        "lat": "72.43068659",
+        "lon": "84.8288465",
+        "sword_version": "7b",
+        "wse_units": "m",
+        "width_units": "m",
+        "wse_sm_units": "m",
+        "wse_sm_u_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          84.826878,
+          72.430083
+        ]
+      }
+    }
+  ]
+}

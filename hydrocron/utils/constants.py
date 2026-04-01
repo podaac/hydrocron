@@ -34,6 +34,7 @@ TEST_REACH_ITEM_DICT = {
 DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 API_TEST_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
 API_TEST_NODE_TABLE_NAME = "hydrocron-swot-node-table"
+API_TEST_NODE_TABLE_NAME_D = "hydrocron-SWOT_L2_HR_RiverSP_D-node-table"
 TEST_REACH_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
 TEST_REACH_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-reach-track-ingest-table"
 TEST_REACH_PARTITION_KEY_NAME = 'reach_id'
@@ -121,6 +122,7 @@ TEST_PLAKE_ITEM_NO_GEO_DICT = {
 
 DB_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-testlake-table"
 API_TEST_PLAKE_TABLE_NAME = "hydrocron-swot-prior-lake-table"
+API_TEST_PLAKE_TABLE_NAME_D = "hydrocron-SWOT_L2_HR_LakeSP_D-prior-lake-table"
 TEST_PLAKE_COLLECTION_NAME = "SWOT_L2_HR_LakeSP_2.0"
 TEST_PLAKE_PARTITION_KEY_NAME = 'lake_id'
 TEST_PLAKE_SORT_KEY_NAME = 'range_start_time'
@@ -305,6 +307,10 @@ NODE_DATA_COLUMNS = [
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c'
 ]
 
+# Version D specific fields (not available in 2.0)
+NODE_VERSION_D_ONLY_FIELDS = ['wse_sm', 'wse_sm_u', 'wse_sm_q', 'wse_sm_q_b']
+PRIOR_LAKE_VERSION_D_ONLY_FIELDS = ['qual_f_b']
+
 PRIOR_LAKE_DATA_COLUMNS = [
     'wse', 'wse_u', 'wse_r_u', 'wse_std',
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
@@ -355,6 +361,7 @@ NODE_ALL_COLUMNS = [
     'reach_id', 'node_id', 'time', 'time_tai', 'time_str',
     'lat', 'lon', 'lat_u', 'lon_u', 'river_name',
     'wse', 'wse_u', 'wse_r_u',
+    'wse_sm', 'wse_sm_u', 'wse_sm_q', 'wse_sm_q_b',     # Version D only fields
     'width', 'width_u',
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u', 'area_wse',
     'layovr_val', 'node_dist', 'xtrk_dist',
@@ -376,6 +383,7 @@ PRIOR_LAKE_ALL_COLUMNS = [
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
     'layovr_val', 'xtrk_dist', 'ds1_l', 'ds1_l_u', 'ds1_q', 'ds1_q_u',
     'ds2_l', 'ds2_l_u', 'ds2_q', 'ds2_q_u',
+    'qual_f_b',     # Version D only field
     'quality_f', 'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'partial_f',
     'xovr_cal_q', 'geoid_hght', 'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c', 'lake_name', 'p_res_id',

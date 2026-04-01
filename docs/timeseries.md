@@ -155,7 +155,7 @@ Version D:
 
 The SWOT data fields to return in the request.
 
-This is specified in the form of a comma separated list (without any spaces): `fields=reach_id,time_str,wse,slope`
+This is specified in the form of a comma separated list: `fields=reach_id,time_str,wse,slope`
 
 Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, SWORD and PLD (prior river and lake database names), and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are described in the [](fields-detail) section.
 

@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "0",
+      "type": "Feature",
+      "properties": {
+        "node_id": "28311800020621",
+        "time_str": "2024-01-28T08:15:21Z",
+        "wse": "-15.54433",
+        "width": "197.950116",
+        "lat": "48.35478321",
+        "lon": "45.9494847",
+        "sword_version": "16",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          45.949474,
+          48.354881
+        ]
+      }
+    },
+    {
+      "id": "1",
+      "type": "Feature",
+      "properties": {
+        "node_id": "28311800020621",
+        "time_str": "2024-01-31T21:37:09Z",
+        "wse": "-15.63838",
+        "width": "141.288713",
+        "lat": "48.35369367",
+        "lon": "45.9497848",
+        "sword_version": "16",
+        "wse_units": "m",
+        "width_units": "m",
+        "lat_units": "degrees_north",
+        "lon_units": "degrees_east"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          45.949474,
+          48.354881
+        ]
+      }
+    }
+  ]
+}

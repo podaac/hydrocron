@@ -1,0 +1,45 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "0",
+      "type": "Feature",
+      "properties": {
+        "lake_id": "8510353162",
+        "time_str": "2024-09-12T03:15:36Z",
+        "wse": "364.464",
+        "area_total": "0.043329",
+        "quality_f": "1",
+        "wse_units": "m",
+        "area_total_units": "km^2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.2179819740994,
+          68.57698926374117
+        ]
+      }
+    },
+    {
+      "id": "1",
+      "type": "Feature",
+      "properties": {
+        "lake_id": "8510353162",
+        "time_str": "2024-09-18T18:34:30Z",
+        "wse": "361.658",
+        "area_total": "0.020346",
+        "quality_f": "0",
+        "wse_units": "m",
+        "area_total_units": "km^2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.21576055942752,
+          68.5771061501817
+        ]
+      }
+    }
+  ]
+}
