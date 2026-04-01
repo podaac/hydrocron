@@ -321,7 +321,7 @@ class TestOutputParameterVsAcceptHeader:
         )
 
         # Should return error--invalid combination of Accept header and output parameter
-        assert response.status_code in [400, 400]
+        assert response.status_code == 400
 
     def test_output_parameter_without_accept_header(self, api_client, stable_test_data):
         """Test output parameter works without explicit Accept header"""

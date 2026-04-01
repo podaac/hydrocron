@@ -19,18 +19,25 @@ This directory contains manual utility scripts for developers working with regre
 # Capture all reference files from UAT
 HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py
 
+# Capture all reference files from OPS
+HYDROCRON_ENV=ops poetry run python tests/regression/dev-utils/capture_reference_files.py
+
 # Capture specific feature only
 HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature reach
 HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature node
 HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature priorlake
 ```
 
-**Output**: Creates/updates JSON and CSV files in `tests/regression/fixtures/`
+**Output**: Creates/updates files in environment-specific directories:
+- UAT: `tests/regression/fixtures/uat/` (reach/, node/, priorlake/)
+- OPS: `tests/regression/fixtures/ops/` (reach/, node/, priorlake/)
 
 **Important**:
-- ⚠️ Always capture from a known-good deployment (UAT after testing)
+- ⚠️ Reference files are **environment-specific** (UAT and OPS have different feature IDs)
+- ⚠️ Always capture from a known-good deployment (UAT after testing, then OPS after promotion)
 - ⚠️ Review captured files before committing
 - ⚠️ Don't capture from broken deployments
+- ⚠️ Update **both** UAT and OPS reference files when API changes affect both environments
 
 ### scan-dynamodb.py
 
@@ -66,20 +73,25 @@ AWS_PROFILE=myprofile poetry run python tests/regression/dev-utils/scan-dynamodb
    curl "https://uat-api/timeseries?feature=Node&feature_id=...&fields=my_new_field"
    ```
 
-4. **Recapture references**:
+4. **Recapture UAT references**:
    ```bash
    HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature node
    ```
 
-5. **Run regression tests**:
+5. **Run regression tests against UAT**:
    ```bash
    HYDROCRON_ENV=uat poetry run pytest tests/regression/ -v
    ```
 
-6. **Commit updated references**:
+6. **Deploy to OPS and recapture OPS references**:
    ```bash
-   git add tests/regression/fixtures/
-   git commit -m "Add my_new_field and update reference files"
+   HYDROCRON_ENV=ops poetry run python tests/regression/dev-utils/capture_reference_files.py --feature node
+   ```
+
+7. **Commit updated references for both environments**:
+   ```bash
+   git add tests/regression/fixtures/uat/ tests/regression/fixtures/ops/
+   git commit -m "Add my_new_field and update UAT/OPS reference files"
    ```
 
 ### Investigating Schema Differences
@@ -98,18 +110,23 @@ AWS_PROFILE=uat poetry run python tests/regression/dev-utils/scan-dynamodb.py
 ### First-Time Setup
 
 ```bash
-# 1. Capture all reference files from UAT
+# 1. Capture reference files from UAT
 HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py
 
-# 2. Review captured files
-ls -lh tests/regression/fixtures/*/
+# 2. Capture reference files from OPS (if available)
+HYDROCRON_ENV=ops poetry run python tests/regression/dev-utils/capture_reference_files.py
 
-# 3. Run tests to verify references work
+# 3. Review captured files (should have both uat/ and ops/ directories)
+ls -lh tests/regression/fixtures/uat/*/
+ls -lh tests/regression/fixtures/ops/*/
+
+# 4. Run tests against both environments to verify references work
 HYDROCRON_ENV=uat poetry run pytest tests/regression/ -v -m golden
+HYDROCRON_ENV=ops poetry run pytest tests/regression/ -v -m golden
 
-# 4. Commit reference files
+# 5. Commit reference files for both environments
 git add tests/regression/fixtures/
-git commit -m "Add golden reference files for regression testing"
+git commit -m "Add golden reference files for UAT and OPS regression testing"
 ```
 
 ## Script Locations
@@ -125,14 +142,16 @@ These scripts are in `dev-utils/` to indicate they are:
 ✅ **DO**:
 - Run these scripts when needed for test maintenance
 - Review outputs before committing
-- Use UAT as source for golden references
+- Maintain **both** UAT and OPS reference files (in their respective directories)
+- Use UAT as primary source, then update OPS after promotion
 - Document why you're updating references
 
 ❌ **DON'T**:
 - Run these in CI/CD pipelines
-- Capture from production/OPS as primary source
+- Mix UAT and OPS reference files in the same directory
 - Commit outputs without review
 - Use these to "fix" failing tests without understanding why they fail
+- Only update one environment when changes affect both
 
 ## Getting Help
 

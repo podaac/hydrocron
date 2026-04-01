@@ -4,7 +4,7 @@ SWOT data periodically undergoes reprocessing, where data products are recreated
 
 In version 1.7.0, Hydrocron will support multiple versions of SWOT data collections. To specify which collection you want to retrieve data from, use the new [](collection_name) request parameter.
 
-SWOT collection names supported by Hydrocron inclcude:
+SWOT collection names supported by Hydrocron include:
 
 Version C/2.0 (default):
 

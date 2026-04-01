@@ -15,22 +15,57 @@ Golden file testing validates that API responses haven't changed unexpectedly. T
 
 ```
 fixtures/
-├── reach/
-│   ├── reach_basic.geojson              # Basic reach query (GeoJSON)
-│   ├── reach_basic.csv                  # Basic reach query (CSV)
-│   ├── reach_discharge.csv              # Reach with discharge fields
-│   └── reach_comprehensive.geojson      # Reach with many fields
-├── node/
-│   ├── node_basic.geojson               # Basic node query (GeoJSON)
-│   ├── node_basic.csv                   # Basic node query (CSV)
-│   ├── node_wse_sm.csv                  # Node with wse_sm fields (Version D)
-│   └── node_comprehensive.geojson       # Node with many fields
-└── priorlake/
-    ├── lake_basic.geojson               # Basic lake query (GeoJSON)
-    ├── lake_basic.csv                   # Basic lake query (CSV)
-    ├── lake_qual_f_b.csv                # Lake with qual_f_b field (Version D)
-    └── lake_comprehensive.geojson       # Lake with many fields
+├── uat/                                    # UAT environment reference files
+│   ├── reach/
+│   │   ├── reach_basic.geojson             # Basic reach query (GeoJSON, 2.0)
+│   │   ├── reach_basic.csv                 # Basic reach query (CSV, 2.0)
+│   │   ├── reach_discharge.csv             # Reach with discharge fields (2.0)
+│   │   ├── reach_comprehensive.geojson     # Reach with many fields (2.0)
+│   │   ├── reach_d_basic.geojson           # Basic reach query (GeoJSON, Version D)
+│   │   ├── reach_d_basic.csv               # Basic reach query (CSV, Version D)
+│   │   ├── reach_d_discharge.csv           # Reach with discharge fields (Version D)
+│   │   └── reach_d_comprehensive.geojson   # Reach with many fields (Version D)
+│   ├── node/
+│   │   ├── node_basic.geojson              # Basic node query (GeoJSON, 2.0)
+│   │   ├── node_basic.csv                  # Basic node query (CSV, 2.0)
+│   │   ├── node_comprehensive.geojson      # Node with many fields (2.0)
+│   │   ├── node_d_basic.geojson            # Basic node query (GeoJSON, Version D)
+│   │   ├── node_d_basic.csv                # Basic node query (CSV, Version D with wse_sm)
+│   │   └── node_d_comprehensive.geojson    # Node with many fields (Version D)
+│   └── priorlake/
+│       ├── lake_basic.geojson              # Basic lake query (GeoJSON, 2.0)
+│       ├── lake_basic.csv                  # Basic lake query (CSV, 2.0)
+│       ├── lake_comprehensive.geojson      # Lake with many fields (2.0)
+│       ├── lake_d_basic.geojson            # Basic lake query (GeoJSON, Version D)
+│       ├── lake_d_basic.csv                # Basic lake query (CSV, Version D with qual_f_b)
+│       └── lake_d_comprehensive.geojson    # Lake with many fields (Version D)
+└── ops/                                    # OPS environment reference files
+    ├── reach/
+    │   ├── reach_basic.geojson
+    │   ├── reach_basic.csv
+    │   ├── reach_discharge.csv
+    │   ├── reach_comprehensive.geojson
+    │   ├── reach_d_basic.geojson
+    │   ├── reach_d_basic.csv
+    │   ├── reach_d_discharge.csv
+    │   └── reach_d_comprehensive.geojson
+    ├── node/
+    │   ├── node_basic.geojson
+    │   ├── node_basic.csv
+    │   ├── node_comprehensive.geojson
+    │   ├── node_d_basic.geojson
+    │   ├── node_d_basic.csv
+    │   └── node_d_comprehensive.geojson
+    └── priorlake/
+        ├── lake_basic.geojson
+        ├── lake_basic.csv
+        ├── lake_comprehensive.geojson
+        ├── lake_d_basic.geojson
+        ├── lake_d_basic.csv
+        └── lake_d_comprehensive.geojson
 ```
+
+**Note**: Reference files are environment-specific because UAT and OPS have different feature IDs and data availability.
 
 ## Capturing Reference Files
 
@@ -97,7 +132,7 @@ See `utils.py` for normalization functions that handle this.
 
 2. **If intentional**: Recapture reference files
    ```bash
-   HYDROCRON_ENV=uat poetry run python tests/regression/capture_reference_files.py
+   HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py
    ```
 
 3. **If NOT intentional**: This is a regression!
@@ -111,7 +146,7 @@ See `utils.py` for normalization functions that handle this.
 
 **Action**: Capture reference files
 ```bash
-HYDROCRON_ENV=uat poetry run python tests/regression/capture_reference_files.py
+HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py
 ```
 
 ## Best Practices

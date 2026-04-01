@@ -27,6 +27,7 @@ STABLE_TEST_DATA_OPS = {
         "start_time": "2024-02-02T00:00:00Z",
         "end_time": "2024-03-20T00:00:00Z",
         "expected_count": 5,
+        "collection_name": "SWOT_L2_HR_RiverSP_2.0",
         "fields": "reach_id,time_str,wse,slope,width,sword_version",
         "fixtures": {
             "basic_geojson": "reach/reach_basic.geojson",
@@ -54,6 +55,7 @@ STABLE_TEST_DATA_OPS = {
         "start_time": "2023-09-17T00:00:00Z",
         "end_time": "2023-10-30T00:00:00Z",
         "expected_count": 5,
+        "collection_name": "SWOT_L2_HR_RiverSP_2.0",
         "fields": "node_id,time_str,wse,width,lat,lon,sword_version",
         "fixtures": {
             "basic_geojson": "node/node_basic.geojson",
@@ -80,6 +82,7 @@ STABLE_TEST_DATA_OPS = {
         "start_time": "2024-09-12T00:00:00Z",
         "end_time": "2024-09-18T23:59:59Z",
         "expected_count": 2,
+        "collection_name": "SWOT_L2_HR_LakeSP_2.0",
         "fields": "lake_id,time_str,wse,area_total,quality_f",
         "fixtures": {
             "basic_geojson": "priorlake/lake_basic.geojson",
@@ -117,6 +120,7 @@ STABLE_TEST_DATA_UAT = {
         "start_time": "2024-02-10T00:00:00Z",
         "end_time": "2024-05-03T00:00:00Z",
         "expected_count": 6,
+        "collection_name": "SWOT_L2_HR_RiverSP_2.0",
         "fields": "reach_id,time_str,wse,slope,width,sword_version",
         "fixtures": {
             "basic_geojson": "reach/reach_basic.geojson",
@@ -144,6 +148,7 @@ STABLE_TEST_DATA_UAT = {
         "start_time": "2024-01-28T00:00:00Z",
         "end_time": "2024-02-01T00:00:00Z",
         "expected_count": 2,
+        "collection_name": "SWOT_L2_HR_RiverSP_2.0",
         "fields": "node_id,time_str,wse,width,lat,lon,sword_version",
         "fixtures": {
             "basic_geojson": "node/node_basic.geojson",
@@ -157,8 +162,7 @@ STABLE_TEST_DATA_UAT = {
         "end_time": "2025-06-06T20:00:00Z",
         "expected_count": 2,
         "collection_name": "SWOT_L2_HR_RiverSP_D",
-        "fields": "node_id,time_str,wse,width,lat,lon,sword_version",
-#        "fields": "node_id,time_str,wse,width,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b,lat,lon,sword_version",
+        "fields": "node_id,time_str,wse,width,wse_sm,wse_sm_u,wse_sm_q,wse_sm_q_b,lat,lon,sword_version",
         "fixtures": {
             "basic_geojson": "node/node_d_basic.geojson",
             "basic_csv": "node/node_d_basic.csv",
@@ -170,6 +174,7 @@ STABLE_TEST_DATA_UAT = {
         "start_time": "2023-09-09T00:00:00Z",
         "end_time": "2024-08-20T23:59:59Z",
         "expected_count": 2,
+        "collection_name": "SWOT_L2_HR_LakeSP_2.0",
         "fields": "lake_id,time_str,wse,area_total,quality_f",
         "fixtures": {
             "basic_geojson": "priorlake/lake_basic.geojson",
@@ -183,8 +188,7 @@ STABLE_TEST_DATA_UAT = {
         "end_time": "2025-06-06T23:59:59Z",
         "expected_count": 2,
         "collection_name": "SWOT_L2_HR_LakeSP_D",
-        "fields": "lake_id,time_str,wse,area_total,quality_f",
-#        "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b",
+        "fields": "lake_id,time_str,wse,area_total,quality_f,qual_f_b",
         "fixtures": {
             "basic_geojson": "priorlake/lake_d_basic.geojson",
             "basic_csv": "priorlake/lake_d_basic.csv",
