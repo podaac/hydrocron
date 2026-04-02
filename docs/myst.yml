@@ -45,3 +45,4 @@ site:
   template: book-theme
   parts:
       primary_sidebar_footer: empty-footer.md
+      footer: footer.md
