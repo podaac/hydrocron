@@ -33,37 +33,42 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: getsentry/action-github-app-token@v4.0.0
-        name: podaac cicd token
-        id: podaac-cicd
-        with:
-          app_id: ${{ secrets.CICD_APP_ID }}
-          private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
       - uses: actions/checkout@v6
         with:
           repository: ${{ github.repository }}
-          token: ${{ steps.podaac-cicd.outputs.token }}
+
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Sync docs version
+        run: python scripts/update_docs_version.py
+
       - name: Install Poetry
         uses: abatilo/actions-poetry@v4
         with:
           poetry-version: ${{ env.POETRY_VERSION }}
 
-      # Build the book
       - name: Build the book
+        env:
+            BASE_URL: /hydrocron
         run: |
           poetry install --only docs
-          poetry run jupyter-book build docs/
+          NPM_CONFIG_CACHE=/tmp/npm-cache poetry -P . -C docs run jupyter-book build --html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
           # Upload only docs repository
           path: 'docs/_build/html'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
