@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 import tomllib
 
 
@@ -9,11 +10,19 @@ ROOT = Path(__file__).resolve().parents[1]
 PYPROJECT = ROOT / "pyproject.toml"
 GENERATED_MD = ROOT / "docs" / "_generated_version.md"
 GENERATED_SVG = ROOT / "docs" / "_generated_version.svg"
+PRE_RELEASE_PATTERN = re.compile(r"^(\d+(?:\.\d+)*)(?:a|b|rc)\d+.*$")
 
 
 def read_version() -> str:
     data = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
     return data["tool"]["poetry"]["version"]
+
+
+def normalize_release_version(version: str) -> str:
+    match = PRE_RELEASE_PATTERN.match(version)
+    if match:
+        return match.group(1)
+    return version
 
 
 def build_badge_svg(version: str) -> str:
@@ -69,7 +78,7 @@ def write_generated(version: str) -> bool:
 
 
 def main() -> None:
-    version = read_version()
+    version = normalize_release_version(read_version())
     changed = write_generated(version)
     if changed:
         print(f"Updated docs/_generated_version.* to version {version}")
