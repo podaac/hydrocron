@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
+    - Issue 329 - Fix docs so they deploy when we make a new release
 ### Deprecated
 ### Removed
 ### Fixed
