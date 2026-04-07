@@ -1,0 +1,48 @@
+version: 1
+project:
+  title: Hydrocron
+  copyright: '2024'
+  github: podaac/hydrocron
+  edit_url: null
+  bibliography:
+    - references.bib
+  exports:
+    - format: pdf
+      template: plain_latex_book
+      output: exports/book.pdf
+  toc:
+    - file: intro.md
+    - title: GETTING STARTED
+      children:
+        - file: overview.md
+        - file: user-guide/start.md
+          children:
+            - file: user-guide/fields.md
+            - file: user-guide/time.md
+            - file: user-guide/versioning.md
+        - file: examples.md
+        - file: hydrocron_tutorial.ipynb
+    - title: API ENDPOINTS
+      children:
+        - file: timeseries.md
+    - title: RESOURCES
+      children:
+        - url: https://github.com/podaac/hydrocron
+          title: GitHub Repository
+        - url: https://podaac.jpl.nasa.gov/SWOT
+          title: SWOT Mission Page
+        - url: https://www.swordexplorer.com/
+          title: SWOT River Database (SWORD) Explorer
+        - url: https://podaac.jpl.nasa.gov
+          title: PO.DAAC Website
+        - url: https://podaac.github.io/tutorials/
+          title: PO.DAAC Cookbook
+site:
+  options:
+    logo: hydrocron_logo.png
+    favicon: hydrocron_logo.png
+    folders: true
+  template: book-theme
+  parts:
+      primary_sidebar_footer: empty-footer.md
+      footer: footer.md
