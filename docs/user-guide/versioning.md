@@ -2,19 +2,11 @@
 
 SWOT data periodically undergoes reprocessing, where data products are recreated from the original observations with updated processing algorithms. This results in a new data collection version.
 
-In version 1.7.0, Hydrocron will support multiple versions of SWOT data collections. To specify which collection you want to retrieve data from, use the new [](collection_name) request parameter.
+Hydrocron supports multiple versions of SWOT data collections. As of version 1.8.0, Version D is the default - no `collection_name` parameter required. To retrieve data from a specific collection version, use the [](collection_name) request parameter.
 
 SWOT collection names supported by Hydrocron include:
 
-Version C/2.0 (default):
-
-- SWOT_L2_HR_RiverSP_2.0
-- SWOT_L2_HR_RiverSP_reach_2.0
-- SWOT_L2_HR_RiverSP_node_2.0
-- SWOT_L2_HR_LakeSP_2.0
-- SWOT_L2_HR_LakeSP_prior_2.0
-
-Version D:
+Version D (default):
 
 - SWOT_L2_HR_RiverSP_D
 - SWOT_L2_HR_RiverSP_reach_D
@@ -22,18 +14,26 @@ Version D:
 - SWOT_L2_HR_LakeSP_D
 - SWOT_L2_HR_LakeSP_prior_D
 
+Version C/2.0:
+
+- SWOT_L2_HR_RiverSP_2.0
+- SWOT_L2_HR_RiverSP_reach_2.0
+- SWOT_L2_HR_RiverSP_node_2.0
+- SWOT_L2_HR_LakeSP_2.0
+- SWOT_L2_HR_LakeSP_prior_2.0
+
 ## Parent Collections and Sub Collections
 
 SWOT hydrology data products are organized into parent and child collections. The parent collections indicate the general feature type (river or lake):
 
-- SWOT_L2_HR_RiverSP_2.0
-- SWOT_L2_HR_LakeSP_2.0
+- SWOT_L2_HR_RiverSP_D
+- SWOT_L2_HR_LakeSP_D
 
 and the sub collections indicate the specific feature or subtype of data (reach or node for rivers, prior, observed, or unassigned for lakes)
 
-- SWOT_L2_HR_RiverSP_reach_2.0
-- SWOT_L2_HR_RiverSP_node_2.0
-- SWOT_L2_HR_LakeSP_prior_2.0
+- SWOT_L2_HR_RiverSP_reach_D
+- SWOT_L2_HR_RiverSP_node_D
+- SWOT_L2_HR_LakeSP_prior_D
 
 The SWOT Product Description Documents for SWOT Rivers and Lakes contain more information about the differences between subtypes of data. Note that currently Hydrocron does not support the lake subtypes of 'observed' and 'unassigned'.
 
