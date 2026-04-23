@@ -29,6 +29,7 @@ def test_timeseries_lambda_handler_json_reach(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
         },
         "headers": {
@@ -63,6 +64,7 @@ def test_timeseries_lambda_handler_json_lake(hydrocron_api):
             "start_time": "2024-06-22T00:00:00-00:00",
             "end_time": "2024-07-13T23:59:59-00:00",
             "output": "geojson",
+            "collection_name": "SWOT_L2_HR_LakeSP_2.0",
             "fields": "lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time"
         },
         "headers": {
@@ -97,6 +99,7 @@ def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse,slope,time"
         },
         "headers": {
@@ -127,6 +130,7 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid,geometry"
         },
         "headers": {
@@ -488,6 +492,7 @@ def test_timeseries_lambda_handler_geojson_accept(hydrocron_api):
             "feature_id": "71224100223",
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid",
             "compact": "false"
         },
@@ -523,6 +528,7 @@ def test_timeseries_lambda_handler_csv_accept(hydrocron_api):
             "feature_id": "71224100223",
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid,geometry"
         },
         "headers": {
@@ -588,6 +594,7 @@ def test_timeseries_lambda_handler_json_no_output(hydrocron_api):
             "feature_id": "71224100223",
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
         },
         "headers": {
@@ -621,6 +628,7 @@ def test_timeseries_lambda_handler_json_multi_accept(hydrocron_api):
             "feature_id": "71224100223",
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
         },
         "headers": {
@@ -710,6 +718,7 @@ def test_timeseries_lambda_handler_json_compact(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid",
             "compact": "true"
         },
@@ -744,6 +753,7 @@ def test_timeseries_lambda_handler_geojson_accept_compact(hydrocron_api):
             "feature_id": "71224100223",
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid",
         },
         "headers": {
@@ -769,7 +779,7 @@ def test_get_collection_name():
     os.environ['HYDROCRON_dynamodb_endpoint_url'] = 'http://localhost:8000'
     os.environ['DEFAULT_RIVER_COLLECTION'] = 'SWOT_L2_HR_RiverSP'
     os.environ['DEFAULT_LAKE_COLLECTION'] = 'SWOT_L2_HR_LakeSP'
-    os.environ['DEFAULT_COLLECTION_VERSION'] = '2.0'
+    os.environ['DEFAULT_COLLECTION_VERSION'] = 'D'
     import hydrocron.api.controllers.timeseries
 
     # Default
@@ -789,7 +799,7 @@ def test_get_collection_name():
     }
 
     collection_name = hydrocron.api.controllers.timeseries.get_collection_name(event)
-    assert collection_name == "SWOT_L2_HR_RiverSP_2.0"
+    assert collection_name == "SWOT_L2_HR_RiverSP_D"
 
     # Test 2.0 version
     event = {

@@ -297,7 +297,7 @@ Will return GeoJSON:
                         "wse": "260.802",
                         "area_total": "0.553409",
                         "quality_f": "1",
-                        "collection_shortname": "SWOT_L2_HR_LakeSP_2.0",
+                        "collection_shortname": "SWOT_L2_HR_LakeSP_D",
                         "crid": "PIC0",
                         "PLD_version": "105",
                         "range_start_time": "2024-07-25T22:47:27Z",
@@ -374,7 +374,7 @@ Will return CSV:
     "time": 321.592,
     "hits": 1,
     "results": {
-        "csv": "lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time,wse_units,area_total_units\n6350036102,2024-07-25T22:48:23Z,260.802,0.553409,1,SWOT_L2_HR_LakeSP_2.0,PIC0,105,2024-07-25T22:47:27Z,m,km^2\n",
+        "csv": "lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time,wse_units,area_total_units\n6350036102,2024-07-25T22:48:23Z,260.802,0.553409,1,SWOT_L2_HR_LakeSP_D,PIC0,105,2024-07-25T22:47:27Z,m,km^2\n",
         "geojson": {}
     }
 }
