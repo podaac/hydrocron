@@ -161,19 +161,19 @@ poetry run pytest tests/
 
 ### Test Suite Summary
 
-| File | Test Classes | Approx Tests | Purpose |
-|------|-------------|--------------|---------|
-| `test_smoke.py` | 4 | ~8 | Quick deployment validation |
-| `test_reach_api.py` | 6 | ~15 | Reach feature tests (note: discharge tests skipped) |
-| `test_node_api.py` | 4 | ~20 | Node feature + Version D tests (parameterized) |
-| `test_priorlake_api.py` | 6 | ~25 | PriorLake feature + Version D tests (parameterized) |
-| `test_compact_parameter.py` | 5 | ~11 | Compact parameter testing |
-| `test_error_handling.py` | 8 | ~25 | Error cases and validation |
-| `test_time_encoding.py` | 7 | ~19 | Time format handling |
-| `test_response_formats.py` | 8 | ~18 | Response format negotiation |
-| `test_api_features.py` | 9 | ~19 | Additional features and edge cases |
-| `test_cors_collection_name.py` | 1 | ~10 | CORS header validation with collection_name |
-| **TOTAL** | **58** | **~170** | Full regression coverage |
+| File | Test Classes | Tests | Purpose |
+|------|-------------|-------|---------|
+| `test_smoke.py` | 4 | 5 | Quick deployment validation |
+| `test_reach_api.py` | 6 | 15 | Reach feature tests (note: discharge tests skipped) |
+| `test_node_api.py` | 4 | 16 | Node feature + Version D tests (parameterized) |
+| `test_priorlake_api.py` | 6 | 18 | PriorLake feature + Version D tests (parameterized) |
+| `test_compact_parameter.py` | 5 | 11 | Compact parameter testing |
+| `test_error_handling.py` | 8 | 25 | Error cases and validation |
+| `test_time_encoding.py` | 6 | 18 | Time format handling |
+| `test_response_formats.py` | 7 | 18 | Response format negotiation |
+| `test_api_features.py` | 8 | 18 | Additional features and edge cases |
+| `test_cors_collection_name.py` | 1 | 4 | CORS header validation with collection_name |
+| **TOTAL** | **55** | **148** | Full regression coverage |
 
 ### Smoke Tests (`test_smoke.py`)
 - **Purpose**: Quick verification API is functioning
@@ -240,6 +240,7 @@ Comprehensive error handling and validation:
 - HTTP 415 errors for invalid Accept headers
 - HTTP 400 errors for missing required parameters (feature, feature_id, start_time, end_time, fields)
 - HTTP 400 errors for invalid parameter values (dates, field names, feature types)
+- HTTP 400 errors for mismatched sub-collection and feature type (e.g. `SWOT_L2_HR_RiverSP_reach_D` with `Node`)
 - Start time after end time validation
 - Non-existent feature IDs
 - Valid features with no data in time range
@@ -545,6 +546,8 @@ When adding new regression tests:
 
 ## TODO
 
-- Add new Golden tests to test all fields being returned with saved ref files
-  - Mentioned when granuleUR was missing
-- Add new Golden tests to test Accept headers application/json, geojson, and csv
+- Finish golden file tests in `test_node_api.py` and `test_priorlake_api.py` (several are marked `@pytest.mark.skip(reason="Not finished yet")`)
+- Add golden tests covering all fields being returned with saved reference files (mentioned when granuleUR was missing)
+- Add golden tests covering Accept headers: `application/json`, `application/geo+json`, and `text/csv`
+- Enable `test_large_payload_returns_413` once a feature ID with a dataset exceeding 6MB is identified
+- Enable `test_query_with_valid_api_key_succeeds` once a valid API key is available for testing

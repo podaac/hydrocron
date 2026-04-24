@@ -30,14 +30,14 @@ fixtures/
 │   │   ├── node_basic.csv                  # Basic node query (CSV, Version 2.0)
 │   │   ├── node_comprehensive.geojson      # Node with many fields (Version 2.0)
 │   │   ├── node_d_basic.geojson            # Basic node query (GeoJSON, Version D)
-│   │   ├── node_d_basic.csv                # Basic node query (CSV, Version D with wse_sm)
+│   │   ├── node_d_basic.csv                # Basic node query (CSV, Version D)
 │   │   └── node_d_comprehensive.geojson    # Node with many fields (Version D)
 │   └── priorlake/
 │       ├── lake_basic.geojson              # Basic lake query (GeoJSON, Version 2.0)
 │       ├── lake_basic.csv                  # Basic lake query (CSV, Version 2.0)
 │       ├── lake_comprehensive.geojson      # Lake with many fields (Version 2.0)
 │       ├── lake_d_basic.geojson            # Basic lake query (GeoJSON, Version D)
-│       ├── lake_d_basic.csv                # Basic lake query (CSV, Version D with qual_f_b)
+│       ├── lake_d_basic.csv                # Basic lake query (CSV, Version D)
 │       └── lake_d_comprehensive.geojson    # Lake with many fields (Version D)
 └── ops/                                    # OPS environment reference files
     ├── reach/
