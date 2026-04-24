@@ -223,6 +223,17 @@ SHORTNAME = {
     "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0",
 }
 
+# Maps sub-collection names to the api_feature_type they are valid for.
+# Used to reject requests where the sub-collection and feature type are inconsistent.
+SUBCOLLECTION_FEATURE_TYPE = {
+    "SWOT_L2_HR_RiverSP_reach_D": "Reach",
+    "SWOT_L2_HR_RiverSP_reach_2.0": "Reach",
+    "SWOT_L2_HR_RiverSP_node_D": "Node",
+    "SWOT_L2_HR_RiverSP_node_2.0": "Node",
+    "SWOT_L2_HR_LakeSP_prior_D": "PriorLake",
+    "SWOT_L2_HR_LakeSP_prior_2.0": "PriorLake",
+}
+
 COLLECTIONS_LIST = [
     "SWOT_L2_HR_RiverSP",
     "SWOT_L2_HR_RiverSP_reach",

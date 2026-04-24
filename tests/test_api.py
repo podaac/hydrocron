@@ -1043,3 +1043,40 @@ def test_timeseries_child_collection_lake(hydrocron_api, collection_name, featur
 
     assert result['status'] == '200 OK'
     assert 'lake_id' in result['results']['csv']
+
+
+@pytest.mark.parametrize("collection_name,feature", [
+    ("SWOT_L2_HR_RiverSP_reach_D",   "Node"),
+    ("SWOT_L2_HR_RiverSP_reach_2.0", "Node"),
+    ("SWOT_L2_HR_RiverSP_reach_D",   "PriorLake"),
+    ("SWOT_L2_HR_RiverSP_node_D",    "Reach"),
+    ("SWOT_L2_HR_RiverSP_node_2.0",  "Reach"),
+    ("SWOT_L2_HR_RiverSP_node_D",    "PriorLake"),
+    ("SWOT_L2_HR_LakeSP_prior_D",    "Reach"),
+    ("SWOT_L2_HR_LakeSP_prior_2.0",  "Node"),
+])
+def test_timeseries_child_collection_feature_mismatch(hydrocron_api, collection_name, feature):
+    """Test that a mismatched sub-collection and feature type returns a 400 error."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": feature,
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv",
+            "collection_name": collection_name,
+            "fields": "reach_id,time_str,wse"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+
+    assert "Sub-collection" in str(exc_info.value)
+    assert collection_name in str(exc_info.value)
+    assert feature in str(exc_info.value)

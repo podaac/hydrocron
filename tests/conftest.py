@@ -183,16 +183,16 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         TEST_SHAPEFILE_PATH_REACH,
         obscure_data=False,
         columns=constants.REACH_DATA_COLUMNS)
-    for item_attrs in reach_items:
+    for item_attrs in reach_items[:10]:  # Limit to 10 records for test speed (target reach_id at index 2)
         reach_hydro_table.add_data(**item_attrs)
-    
+
     # load lake table
     lake_hydro_table = HydrocronTable(dynamo_db, constants.API_TEST_PLAKE_TABLE_NAME)
     lake_items = swot_shp.read_shapefile(
         TEST_SHAPEFILE_PATH_LAKE,
         obscure_data=False,
         columns=constants.PRIOR_LAKE_DATA_COLUMNS)
-    for item_attrs in lake_items:
+    for item_attrs in lake_items[:1602]:  # Limit to 1602 records for test speed (target lake_id at index 1601)
         lake_hydro_table.add_data(**item_attrs)
 
     # load node table (2.0) - limited to 110 records for test speed
@@ -228,7 +228,7 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         TEST_SHAPEFILE_PATH_LAKE_VERSION_D,
         obscure_data=False,
         columns=constants.PRIOR_LAKE_DATA_COLUMNS)
-    for item_attrs in lake_d_items:
+    for item_attrs in lake_d_items[:10]:  # Limit to 10 records for test speed (target lake_id at index 0)
         lake_d_hydro_table.add_data(**item_attrs)
 
     try:
