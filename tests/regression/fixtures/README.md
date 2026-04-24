@@ -17,27 +17,27 @@ Golden file testing validates that API responses haven't changed unexpectedly. T
 fixtures/
 ├── uat/                                    # UAT environment reference files
 │   ├── reach/
-│   │   ├── reach_basic.geojson             # Basic reach query (GeoJSON, 2.0)
-│   │   ├── reach_basic.csv                 # Basic reach query (CSV, 2.0)
-│   │   ├── reach_discharge.csv             # Reach with discharge fields (2.0)
-│   │   ├── reach_comprehensive.geojson     # Reach with many fields (2.0)
+│   │   ├── reach_basic.geojson             # Basic reach query (GeoJSON, Version 2.0)
+│   │   ├── reach_basic.csv                 # Basic reach query (CSV, Version 2.0)
+│   │   ├── reach_discharge.csv             # Reach with discharge fields (Version 2.0)
+│   │   ├── reach_comprehensive.geojson     # Reach with many fields (Version 2.0)
 │   │   ├── reach_d_basic.geojson           # Basic reach query (GeoJSON, Version D)
 │   │   ├── reach_d_basic.csv               # Basic reach query (CSV, Version D)
 │   │   ├── reach_d_discharge.csv           # Reach with discharge fields (Version D)
 │   │   └── reach_d_comprehensive.geojson   # Reach with many fields (Version D)
 │   ├── node/
-│   │   ├── node_basic.geojson              # Basic node query (GeoJSON, 2.0)
-│   │   ├── node_basic.csv                  # Basic node query (CSV, 2.0)
-│   │   ├── node_comprehensive.geojson      # Node with many fields (2.0)
+│   │   ├── node_basic.geojson              # Basic node query (GeoJSON, Version 2.0)
+│   │   ├── node_basic.csv                  # Basic node query (CSV, Version 2.0)
+│   │   ├── node_comprehensive.geojson      # Node with many fields (Version 2.0)
 │   │   ├── node_d_basic.geojson            # Basic node query (GeoJSON, Version D)
-│   │   ├── node_d_basic.csv                # Basic node query (CSV, Version D with wse_sm)
+│   │   ├── node_d_basic.csv                # Basic node query (CSV, Version D)
 │   │   └── node_d_comprehensive.geojson    # Node with many fields (Version D)
 │   └── priorlake/
-│       ├── lake_basic.geojson              # Basic lake query (GeoJSON, 2.0)
-│       ├── lake_basic.csv                  # Basic lake query (CSV, 2.0)
-│       ├── lake_comprehensive.geojson      # Lake with many fields (2.0)
+│       ├── lake_basic.geojson              # Basic lake query (GeoJSON, Version 2.0)
+│       ├── lake_basic.csv                  # Basic lake query (CSV, Version 2.0)
+│       ├── lake_comprehensive.geojson      # Lake with many fields (Version 2.0)
 │       ├── lake_d_basic.geojson            # Basic lake query (GeoJSON, Version D)
-│       ├── lake_d_basic.csv                # Basic lake query (CSV, Version D with qual_f_b)
+│       ├── lake_d_basic.csv                # Basic lake query (CSV, Version D)
 │       └── lake_d_comprehensive.geojson    # Lake with many fields (Version D)
 └── ops/                                    # OPS environment reference files
     ├── reach/

@@ -92,7 +92,7 @@ class TestPriorLakeBasicQueries:
 
     def test_lake_with_geometry(self, api_client, stable_test_data):
         """Test prior lake query includes geometry"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -114,8 +114,8 @@ class TestPriorLakeBasicQueries:
             assert feature['geometry'] is not None
 
     def test_default_lake_collection(self, api_client, stable_test_data):
-        """Test default collection_shortname is SWOT_L2_HR_LakeSP_2.0 when not specified"""
-        lake_data = stable_test_data["priorlake"]
+        """Test default collection_shortname is SWOT_L2_HR_LakeSP_D when not specified"""
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -124,7 +124,7 @@ class TestPriorLakeBasicQueries:
             "end_time": lake_data["end_time"],
             "output": "geojson",
             "fields": "lake_id,time_str,wse,collection_shortname"
-            # Note: No collection_name parameter - should default to 2.0
+            # Note: No collection_name parameter - should default to D
         })
 
         assert_http_success(response)
@@ -132,12 +132,12 @@ class TestPriorLakeBasicQueries:
         data = response.json()
         geojson = extract_geojson_from_response(data)
 
-        # Verify default collection is 2.0
+        # Verify default collection is D
         if len(geojson['features']) > 0:
             props = geojson['features'][0]['properties']
             assert 'collection_shortname' in props, "collection_shortname not found in properties"
-            assert props['collection_shortname'] == 'SWOT_L2_HR_LakeSP_2.0', \
-                f"Expected default collection 'SWOT_L2_HR_LakeSP_2.0', got '{props['collection_shortname']}'"
+            assert props['collection_shortname'] == 'SWOT_L2_HR_LakeSP_D', \
+                f"Expected default collection 'SWOT_L2_HR_LakeSP_D', got '{props['collection_shortname']}'"
 
 
 class TestPriorLakeDrainageFields:
@@ -145,7 +145,7 @@ class TestPriorLakeDrainageFields:
 
     def test_lake_with_drainage_fields(self, api_client, stable_test_data):
         """Test prior lake query with drainage system fields (ds1/ds2)"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -161,7 +161,7 @@ class TestPriorLakeDrainageFields:
 
     def test_lake_with_all_drainage_fields(self, api_client, stable_test_data):
         """Test prior lake query with all drainage system fields"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -181,7 +181,7 @@ class TestPriorLakeQualityFields:
 
     def test_lake_with_quality_fields(self, api_client, stable_test_data):
         """Test prior lake query with quality flags"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -205,7 +205,7 @@ class TestPriorLakeQualityFields:
 
     def test_lake_with_pld_version(self, api_client, stable_test_data):
         """Test prior lake query includes PLD version"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -262,8 +262,8 @@ class TestPriorLakeCollectionVersions:
         assert_result_count(response, lake_data["expected_count"], output_format="csv")
 
     def test_default_lake_collection_csv(self, api_client, stable_test_data):
-        """Test that default collection is SWOT_L2_HR_LakeSP_2.0 when collection_name not specified"""
-        lake_data = stable_test_data["priorlake"]
+        """Test that default collection is SWOT_L2_HR_LakeSP_D when collection_name not specified"""
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -271,7 +271,7 @@ class TestPriorLakeCollectionVersions:
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "csv",
-            # No collection_name specified - should use default 2.0
+            # No collection_name specified - should use default D
             "fields": "lake_id,time_str,wse,collection_shortname"
         })
 
@@ -281,15 +281,15 @@ class TestPriorLakeCollectionVersions:
         data = response.json()
         csv_text = extract_csv_from_response(data)
 
-        # Verify default collection is 2.0
+        # Verify default collection is D
         rows = validate_csv_structure(
             csv_text,
             expected_fields=["lake_id", "collection_shortname"]
         )
 
         assert len(rows) > 0, "Should return at least one row"
-        assert rows[0]['collection_shortname'] == 'SWOT_L2_HR_LakeSP_2.0', \
-            f"Expected default collection 'SWOT_L2_HR_LakeSP_2.0', got '{rows[0]['collection_shortname']}'"
+        assert rows[0]['collection_shortname'] == 'SWOT_L2_HR_LakeSP_D', \
+            f"Expected default collection 'SWOT_L2_HR_LakeSP_D', got '{rows[0]['collection_shortname']}'"
 
 
 @pytest.mark.version_d

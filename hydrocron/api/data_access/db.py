@@ -30,8 +30,18 @@ class DynamoDataRepository:
         @return:
         """
 
+        # If a sub-collection name was provided, validate it matches the requested feature type.
+        if collection_name in constants.SUBCOLLECTION_FEATURE_TYPE:
+            expected_feature_type = constants.SUBCOLLECTION_FEATURE_TYPE[collection_name]
+            if feature_type != expected_feature_type:
+                raise ValueError(
+                    f"400: Sub-collection '{collection_name}' is not valid for feature type '{feature_type}'."
+                )
+
+        # Resolve sub-collection names (e.g. SWOT_L2_HR_RiverSP_reach_D) to their parent collection.
+        parent_collection = constants.SHORTNAME.get(collection_name, collection_name)
         for table_info in constants.TABLE_COLLECTION_INFO:
-            if (table_info['collection_name'] in collection_name) & (table_info['api_feature_type'].lower() == feature_type.lower()):
+            if (table_info['collection_name'] == parent_collection) and (table_info['api_feature_type'].lower() == feature_type.lower()):
                 table_name = table_info['table_name']
                 partition_key = table_info['partition_key']
                 sort_key = table_info['sort_key']

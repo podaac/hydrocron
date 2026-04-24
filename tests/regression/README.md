@@ -161,18 +161,19 @@ poetry run pytest tests/
 
 ### Test Suite Summary
 
-| File | Test Classes | Approx Tests | Purpose |
-|------|-------------|--------------|---------|
-| `test_smoke.py` | 4 | ~8 | Quick deployment validation |
-| `test_reach_api.py` | 6 | ~15 | Reach feature tests (note: discharge tests skipped) |
-| `test_node_api.py` | 4 | ~20 | Node feature + Version D tests (parameterized) |
-| `test_priorlake_api.py` | 6 | ~25 | PriorLake feature + Version D tests (parameterized) |
-| `test_compact_parameter.py` | 5 | ~11 | Compact parameter testing |
-| `test_error_handling.py` | 8 | ~25 | Error cases and validation |
-| `test_time_encoding.py` | 7 | ~19 | Time format handling |
-| `test_response_formats.py` | 8 | ~18 | Response format negotiation |
-| `test_api_features.py` | 9 | ~19 | Additional features and edge cases |
-| **TOTAL** | **57** | **~160** | Full regression coverage |
+| File | Test Classes | Tests | Purpose |
+|------|-------------|-------|---------|
+| `test_smoke.py` | 4 | 5 | Quick deployment validation |
+| `test_reach_api.py` | 6 | 15 | Reach feature tests (note: discharge tests skipped) |
+| `test_node_api.py` | 4 | 16 | Node feature + Version D tests (parameterized) |
+| `test_priorlake_api.py` | 6 | 18 | PriorLake feature + Version D tests (parameterized) |
+| `test_compact_parameter.py` | 5 | 11 | Compact parameter testing |
+| `test_error_handling.py` | 8 | 25 | Error cases and validation |
+| `test_time_encoding.py` | 6 | 18 | Time format handling |
+| `test_response_formats.py` | 7 | 18 | Response format negotiation |
+| `test_api_features.py` | 8 | 18 | Additional features and edge cases |
+| `test_cors_collection_name.py` | 1 | 4 | CORS header validation with collection_name |
+| **TOTAL** | **55** | **148** | Full regression coverage |
 
 ### Smoke Tests (`test_smoke.py`)
 - **Purpose**: Quick verification API is functioning
@@ -186,36 +187,41 @@ poetry run pytest tests/
 #### Reach Tests (`test_reach_api.py`)
 - **Purpose**: Comprehensive Reach feature testing
 - **Note**: Discharge field tests are currently marked as `@pytest.mark.skip` - re-enable when needed
+- **Note**: Basic query tests default to `reach_d` (Version D) data; 2.0 collection is tested explicitly in `TestReachCollectionVersions`
 - **Coverage**:
-  - Basic queries (GeoJSON, CSV)
+  - Basic queries (GeoJSON, CSV) - using Version D data by default
   - Discharge fields (all algorithms: consensus, MetroMan, BAM, HiVDI) - currently skipped
   - Content negotiation (Accept headers)
   - Units fields validation
-  - Collection version testing (2.0, D)
+  - Collection version testing (2.0, D); default is Version D
   - Geometry validation
-  - Golden file comparisons
+  - Golden file comparisons (parameterized for both 2.0 and D)
 
 #### Node Tests (`test_node_api.py`)
 - **Purpose**: Comprehensive Node feature testing + Version D
-- **Note**: Basic query tests are parameterized to run with both `node` (2.0) and `node_d` (Version D) data, automatically stripping Version D-specific fields for compatibility testing
+- **Note**: Basic query tests are parameterized to run with both `node` (2.0) and `node_d` (Version D) data
+- **Note**: Default collection when `collection_name` is omitted is `SWOT_L2_HR_RiverSP_D`
 - **Coverage**:
   - Basic queries (GeoJSON, CSV) - parameterized for both 2.0 and D
+  - Default collection verification (D)
   - **Version D wse_sm field tests** (smoothed water surface elevation)
   - Backward compatibility
   - Performance tests
-  - Golden file comparisons
+  - Golden file comparisons (parameterized for both 2.0 and D)
 
 #### PriorLake Tests (`test_priorlake_api.py`)
 - **Purpose**: Comprehensive PriorLake feature testing + Version D
-- **Note**: Basic query tests are parameterized to run with both `priorlake` (2.0) and `priorlake_d` (Version D) data, automatically stripping Version D-specific fields for compatibility testing
+- **Note**: Basic query tests are parameterized to run with both `priorlake` (2.0) and `priorlake_d` (Version D) data
+- **Note**: Default collection when `collection_name` is omitted is `SWOT_L2_HR_LakeSP_D`
 - **Coverage**:
   - Basic queries (GeoJSON, CSV) - parameterized for both 2.0 and D
+  - Default collection verification (D)
   - Drainage system fields (ds1/ds2)
   - Quality and metadata fields
   - **Version D qual_f_b field tests** (quality flag)
   - Collection version testing (2.0, D)
   - Geometry validation
-  - Golden file comparisons
+  - Golden file comparisons (parameterized for both 2.0 and D)
 
 ### API Behavior Tests
 
@@ -234,6 +240,7 @@ Comprehensive error handling and validation:
 - HTTP 415 errors for invalid Accept headers
 - HTTP 400 errors for missing required parameters (feature, feature_id, start_time, end_time, fields)
 - HTTP 400 errors for invalid parameter values (dates, field names, feature types)
+- HTTP 400 errors for mismatched sub-collection and feature type (e.g. `SWOT_L2_HR_RiverSP_reach_D` with `Node`)
 - Start time after end time validation
 - Non-existent feature IDs
 - Valid features with no data in time range
@@ -263,6 +270,13 @@ Response format handling and content negotiation:
 - Units fields automatically included (wse_units, slope_units, etc.)
 - Response format consistency across all feature types
 
+#### CORS (`test_cors_collection_name.py`)
+CORS header validation for the `collection_name` parameter:
+- CORS headers present with explicit `collection_name` (all feature types and versions)
+- CORS headers present with no `collection_name` (default D collections only)
+- CORS headers present on error responses with `collection_name`
+- CORS headers present on error responses without `collection_name`
+
 #### API Features (`test_api_features.py`)
 Additional API features and edge cases:
 - Optional API key header (x-hydrocron-key) for rate limiting
@@ -289,9 +303,11 @@ The regression test suite provides comprehensive coverage of the Hydrocron API a
 **Feature-Specific Tests:**
 - ✅ All three feature types (Reach, Node, PriorLake)
 - ✅ Version D fields (wse_sm for Node, qual_f_b for PriorLake)
+- ✅ Default collection is Version D for all feature types
 - ✅ Collection version testing (2.0, D)
 - ✅ Feature-specific fields (discharge algorithms, drainage system, quality fields)
 - ✅ Backward compatibility
+- ✅ CORS headers (with and without collection_name, on success and error responses)
 
 **API Behavior:**
 - ✅ Compact parameter for GeoJSON responses
@@ -526,3 +542,12 @@ When adding new regression tests:
 4. ✅ Update this README with new test categories
 5. ✅ Test both success and error cases
 6. ✅ Include performance assertions where appropriate
+
+
+## TODO
+
+- Finish golden file tests in `test_node_api.py` and `test_priorlake_api.py` (several are marked `@pytest.mark.skip(reason="Not finished yet")`)
+- Add golden tests covering all fields being returned with saved reference files (mentioned when granuleUR was missing)
+- Add golden tests covering Accept headers: `application/json`, `application/geo+json`, and `text/csv`
+- Enable `test_large_payload_returns_413` once a feature ID with a dataset exceeding 6MB is identified
+- Enable `test_query_with_valid_api_key_succeeds` once a valid API key is available for testing

@@ -3,9 +3,54 @@ Utility functions for regression tests
 """
 import csv
 import json
+from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
 from typing import Dict, List, Any, Optional
+
+import pytest
+
+
+def format_curl_command(response) -> str:
+    """
+    Format the HTTP request that produced a response as a curl command.
+
+    Useful for reproducing failures manually. Filters out boilerplate
+    headers (Accept-Encoding, Connection) so the output is concise.
+
+    Args:
+        response: requests.Response object
+
+    Returns:
+        curl command string
+    """
+    req = response.request
+    cmd = f"curl -v '{req.url}'"
+    skip = {'accept-encoding', 'connection', 'user-agent'}
+    for key, value in req.headers.items():
+        if key.lower() not in skip:
+            cmd += f" \\\n  -H '{key}: {value}'"
+    return cmd
+
+
+@contextmanager
+def on_failure_show_curl(response):
+    """
+    Context manager that appends the equivalent curl command to any
+    AssertionError raised inside the block, making failures easy to reproduce.
+
+    Usage::
+
+        response, _ = api_client.query(params, headers={"Accept": "text/csv"})
+        with on_failure_show_curl(response):
+            assert_http_success(response)
+            assert_matches_reference(response, ...)
+    """
+    try:
+        yield
+    except AssertionError as exc:
+        curl_cmd = format_curl_command(response)
+        pytest.fail(f"{exc}\n\nReproduce with:\n  {curl_cmd}")
 
 
 def validate_geojson_structure(data):

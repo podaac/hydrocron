@@ -300,7 +300,12 @@ def timeseries_get(collection_name, feature, feature_id, start_time, end_time, o
     hits = 0
 
     data_repository = DynamoDataRepository(connection.dynamodb_resource)
-    results = data_repository.get_series_by_feature_id(collection_name, feature, feature_id, start_time, end_time)
+    try:
+        results = data_repository.get_series_by_feature_id(collection_name, feature, feature_id, start_time, end_time)
+    except ValueError as e:
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = str(e)
+        return data, hits
 
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
