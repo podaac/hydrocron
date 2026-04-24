@@ -35,6 +35,7 @@ DB_TEST_TABLE_NAME = "hydrocron-swot-test-table"
 API_TEST_REACH_TABLE_NAME = "hydrocron-swot-reach-table"
 API_TEST_NODE_TABLE_NAME = "hydrocron-swot-node-table"
 API_TEST_NODE_TABLE_NAME_D = "hydrocron-SWOT_L2_HR_RiverSP_D-node-table"
+API_TEST_REACH_TABLE_NAME_D = "hydrocron-SWOT_L2_HR_RiverSP_D-reach-table"
 TEST_REACH_COLLECTION_NAME = "SWOT_L2_HR_RiverSP_2.0"
 TEST_REACH_TRACK_INGEST_TABLE_NAME = "hydrocron-swot-reach-track-ingest-table"
 TEST_REACH_PARTITION_KEY_NAME = 'reach_id'
@@ -216,7 +217,10 @@ FEATURE_ID = {
 SHORTNAME = {
     "SWOT_L2_HR_RiverSP_reach_D": "SWOT_L2_HR_RiverSP_D",
     "SWOT_L2_HR_RiverSP_node_D": "SWOT_L2_HR_RiverSP_D",
-    "SWOT_L2_HR_LakeSP_prior_D": "SWOT_L2_HR_LakeSP_D"
+    "SWOT_L2_HR_LakeSP_prior_D": "SWOT_L2_HR_LakeSP_D",
+    "SWOT_L2_HR_RiverSP_reach_2.0": "SWOT_L2_HR_RiverSP_2.0",
+    "SWOT_L2_HR_RiverSP_node_2.0": "SWOT_L2_HR_RiverSP_2.0",
+    "SWOT_L2_HR_LakeSP_prior_2.0": "SWOT_L2_HR_LakeSP_2.0",
 }
 
 COLLECTIONS_LIST = [

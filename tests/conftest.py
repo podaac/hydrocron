@@ -39,6 +39,18 @@ TEST_SHAPEFILE_PATH_REACH_CRID = os.path.join(
     'SWOT_L2_HR_RiverSP_Reach_009_499_AF_20240121T225107_20240121T225110_PIC0_01.zip'  # noqa
 )
 
+TEST_SHAPEFILE_PATH_NODE = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_RiverSP_Node_032_166_SI_20250503T222433_20250503T222608_PIC2_01.zip'  # noqa
+)
+
+TEST_SHAPEFILE_PATH_REACH_VERSION_D = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_RiverSP_Reach_049_058_AU_20260419T185249_20260419T190852_PID0_01.zip'  # noqa
+)
+
 TEST_SHAPEFILE_PATH_NODE_VERSION_D = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
     'data',
@@ -139,9 +151,23 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
 
     create_tables(
         dynamo_db,
+        constants.API_TEST_NODE_TABLE_NAME,
+        'node_id',
+        ['node_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
+    )
+
+    create_tables(
+        dynamo_db,
         constants.API_TEST_NODE_TABLE_NAME_D,
         'node_id',
         ['node_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
+    )
+
+    create_tables(
+        dynamo_db,
+        constants.API_TEST_REACH_TABLE_NAME_D,
+        'reach_id',
+        ['reach_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
     )
 
     create_tables(
@@ -168,6 +194,24 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         columns=constants.PRIOR_LAKE_DATA_COLUMNS)
     for item_attrs in lake_items:
         lake_hydro_table.add_data(**item_attrs)
+
+    # load node table (2.0) - limited to 110 records for test speed
+    node_2_hydro_table = HydrocronTable(dynamo_db, constants.API_TEST_NODE_TABLE_NAME)
+    node_2_items = swot_shp.read_shapefile(
+        TEST_SHAPEFILE_PATH_NODE,
+        obscure_data=False,
+        columns=constants.NODE_DATA_COLUMNS)
+    for item_attrs in node_2_items[:110]:
+        node_2_hydro_table.add_data(**item_attrs)
+
+    # load reach table (Version D)
+    reach_d_hydro_table = HydrocronTable(dynamo_db, constants.API_TEST_REACH_TABLE_NAME_D)
+    reach_d_items = swot_shp.read_shapefile(
+        TEST_SHAPEFILE_PATH_REACH_VERSION_D,
+        obscure_data=False,
+        columns=constants.REACH_DATA_COLUMNS)
+    for item_attrs in reach_d_items:
+        reach_d_hydro_table.add_data(**item_attrs)
 
     # load node table (Version D with wse_sm fields) - limited to first 100 records for speed
     node_hydro_table = HydrocronTable(dynamo_db, constants.API_TEST_NODE_TABLE_NAME_D)
