@@ -22,7 +22,7 @@ Because reach and node definitions changed between SWORD versions, a small numbe
 
 The SWORD version used for a given observation can be returned by including `sword_version` in the [](fields) parameter.
 
-## Example: Node ID 43210100080371
+### Example: Node ID 43210100080371
 
 The following example demonstrates how node ID `43210100080371` resolves to different geographic locations depending on which collection version is queried. This node is one of the approximately 1,662 reaches affected by the SWORD v16 → v17b update.
 
