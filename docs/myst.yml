@@ -20,6 +20,8 @@ project:
             - file: user-guide/fields.md
             - file: user-guide/time.md
             - file: user-guide/versioning.md
+              children:
+                - file: user-guide/sword-versions.md
         - file: examples.md
         - file: hydrocron_tutorial.ipynb
     - title: API ENDPOINTS
