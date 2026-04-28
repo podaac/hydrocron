@@ -22,6 +22,12 @@ Version C/2.0:
 - SWOT_L2_HR_LakeSP_2.0
 - SWOT_L2_HR_LakeSP_prior_2.0
 
+## SWORD Version and Feature ID Compatibility
+
+Reach and node IDs are defined by the SWOT River Database (SWORD). Version C/2.0 uses SWORD v16, while Version D uses SWORD v17b. A small number of reach and node IDs differ between the two versions as a result. Users comparing data across collection versions should be aware that the same feature ID may not refer to the same geographic feature.
+
+See [SWORD Version Differences](sword-versions.md) for details.
+
 ## Parent Collections and Sub Collections
 
 SWOT hydrology data products are organized into parent and child collections. The parent collections indicate the general feature type (river or lake):

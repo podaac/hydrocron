@@ -208,7 +208,7 @@ jobs:
           echo "deploy_env=${{ env.TARGET_ENV_UPPERCASE }}" >> $GITHUB_OUTPUT
           echo "the_version=$(poetry version | awk '{print $2}')" >> $GITHUB_OUTPUT
           echo "pyproject_name=$(poetry version | awk '{print $1}')" >> $GITHUB_OUTPUT
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.poetry-build.outputs.pyproject_name }}-dist
           path: dist/*
