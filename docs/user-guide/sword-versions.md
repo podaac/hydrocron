@@ -5,7 +5,7 @@ River reach and node IDs are defined by the SWOT River Database (SWORD). Version
 
 | Collection Version | SWORD Version | Zenodo DOI |
 |--------------------|---------------|------------|
-| Version C / 2.0    | SWORD v16  | [10.5281/zenodo.10013982](https://zenodo.org/records/10013982) |
+| Version 2.0    | SWORD v16  | [10.5281/zenodo.10013982](https://zenodo.org/records/10013982) |
 | Version D          | SWORD v17b | [10.5281/zenodo.15299138](https://zenodo.org/records/15299138) |
 
 ## What changed in SWORD v17b
@@ -24,7 +24,7 @@ The SWORD version used for a given observation can be returned by including `swo
 
 ### Example: Node ID 43210100080371
 
-The following example demonstrates how node ID `43210100080371` resolves to different geographic locations depending on which collection version is queried. This node is one of the approximately 1,662 reaches affected by the SWORD v16 → v17b update.
+The following example demonstrates how node ID `43210100080371` resolves to different geographic locations depending on which collection version is queried. This node is one of the approximately 1,662 nodes affected by the SWORD v16 → v17b update.
 
 **Version 2.0 request:**
 

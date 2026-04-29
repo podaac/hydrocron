@@ -14,7 +14,7 @@ Version D (default):
 - SWOT_L2_HR_LakeSP_D
 - SWOT_L2_HR_LakeSP_prior_D
 
-Version C/2.0:
+Version 2.0:
 
 - SWOT_L2_HR_RiverSP_2.0
 - SWOT_L2_HR_RiverSP_reach_2.0
@@ -24,7 +24,7 @@ Version C/2.0:
 
 ## SWORD Version and Feature ID Compatibility
 
-Reach and node IDs are defined by the SWOT River Database (SWORD). Version C/2.0 uses SWORD v16, while Version D uses SWORD v17b. A small number of reach and node IDs differ between the two versions as a result. Users comparing data across collection versions should be aware that the same feature ID may not refer to the same geographic feature.
+Reach and node IDs are defined by the SWOT River Database (SWORD). Version 2.0 uses SWORD v16, while Version D uses SWORD v17b. A small number of reach and node IDs differ between the two versions as a result. Users comparing data across collection versions should be aware that the same feature ID may not refer to the same geographic feature.
 
 See [SWORD Version Differences](sword-versions.md) for details.
 

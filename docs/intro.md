@@ -19,6 +19,6 @@ Datasets included in Hydrocron:
 - [SWOT Level 2 River Single-Pass Vector Data Product, Version 2.0](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_RiverSP_2.0)
 - [SWOT Level 2 Lake Single-Pass Vector Data Product, Version 2.0](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_LakeSP_2.0)
 
-:::{important} Version D is now the default
-If you have existing requests that do not specify `collection_name`, results may differ from before — including node and reach IDs for some features. See the [versioning guide](user-guide/versioning.md) and [SWORD Version Differences](user-guide/sword-versions.md) for details.
+:::{important} Version D is the default
+To query Version 2.0 data, use the `collection_name` parameter with one of the Version 2.0 collection names listed in the [versioning guide](user-guide/versioning.md).  Also, some node and reach IDs have changed from version 2.0 to version D. See the [versioning guide](user-guide/versioning.md) and [SWORD Version Differences](user-guide/sword-versions.md) for details.
 :::
