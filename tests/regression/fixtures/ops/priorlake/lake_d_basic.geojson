@@ -10,6 +10,7 @@
         "wse": "575.275",
         "area_total": "0.018555",
         "quality_f": "1",
+        "qual_f_b": "1035",
         "wse_units": "m",
         "area_total_units": "km^2"
       },
@@ -30,6 +31,7 @@
         "wse": "575.29",
         "area_total": "0.042514",
         "quality_f": "1",
+        "qual_f_b": "1033",
         "wse_units": "m",
         "area_total_units": "km^2"
       },
@@ -50,6 +52,7 @@
         "wse": "575.324",
         "area_total": "0.023275",
         "quality_f": "1",
+        "qual_f_b": "11",
         "wse_units": "m",
         "area_total_units": "km^2"
       },
@@ -70,6 +73,7 @@
         "wse": "575.494",
         "area_total": "0.033442",
         "quality_f": "1",
+        "qual_f_b": "1025",
         "wse_units": "m",
         "area_total_units": "km^2"
       },

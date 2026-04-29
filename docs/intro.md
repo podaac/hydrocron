@@ -1,6 +1,7 @@
 # Hydrocron Documentation
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11176233.svg)](https://doi.org/10.5281/zenodo.11176233)
+<a href="#"><img src="_generated_version.svg" alt="Hydrocron version badge" align="left"></a>
+<a href="https://zenodo.org/records/11176233"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.11176233.svg" alt="DOI badge" align="left"></a>
 
 Hydrocron is an API that repackages hydrology datasets from the Surface Water and Ocean Topography (SWOT) satellite into formats that make time-series analysis easier.
 
@@ -10,5 +11,14 @@ Original SWOT data is archived at NASA's [Physical Oceanography Distributed Acti
 
 Datasets included in Hydrocron:
 
+### Version D (Default)
+- [SWOT Level 2 River Single-Pass Vector Data Product, Version D](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_RiverSP_D)
+- [SWOT Level 2 Lake Single-Pass Vector Data Product, Version D](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_LakeSP_D)
+
+### Version 2.0
 - [SWOT Level 2 River Single-Pass Vector Data Product, Version 2.0](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_RiverSP_2.0)
 - [SWOT Level 2 Lake Single-Pass Vector Data Product, Version 2.0](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_LakeSP_2.0)
+
+:::{important} Version D is the default
+To query Version 2.0 data, use the `collection_name` parameter with one of the Version 2.0 collection names listed in the [versioning guide](user-guide/versioning.md).  Also, some node and reach IDs have changed from version 2.0 to version D. See the [versioning guide](user-guide/versioning.md) and [SWORD Version Differences](user-guide/sword-versions.md) for details.
+:::

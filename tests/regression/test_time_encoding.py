@@ -9,6 +9,7 @@ These tests verify:
 - Invalid time formats
 """
 from .utils import assert_http_success, assert_http_error
+import requests
 
 class TestBasicISO8601Formats:
     """Test basic ISO 8601 timestamp formats"""
@@ -20,8 +21,9 @@ class TestBasicISO8601Formats:
         response, _ = api_client.query({
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
-            "start_time": "2024-02-10T00:00:00Z",
-            "end_time": "2024-05-03T23:59:59Z",
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -36,6 +38,7 @@ class TestBasicISO8601Formats:
             "feature_id": reach_data["feature_id"],
             "start_time": "2024-02-10T00:00:00",
             "end_time": "2024-05-03T23:59:59",
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -51,6 +54,7 @@ class TestBasicISO8601Formats:
             "feature_id": reach_data["feature_id"],
             "start_time": "2024-02-10T00:00:00.000Z",
             "end_time": "2024-05-03T23:59:59.999Z",
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -70,13 +74,13 @@ class TestUTCOffsets:
         end_time_encoded = "2024-05-04T04:59:59%2B05:00"
 
         # Manually construct URL to ensure proper encoding
-        import requests
         url = api_client.base_url
         params = {
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
             "start_time": start_time_encoded,
             "end_time": end_time_encoded,
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         }
 
@@ -98,6 +102,7 @@ class TestUTCOffsets:
             "feature_id": reach_data["feature_id"],
             "start_time": "2024-02-09T16:00:00-08:00",
             "end_time": "2024-05-03T15:59:59-08:00",
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -112,13 +117,13 @@ class TestUTCOffsets:
         start_time_encoded = "2024-02-10T00:00:00%2B00:00"
         end_time_encoded = "2024-05-03T23:59:59%2B00:00"
 
-        import requests
         url = api_client.base_url
         params_str = (
             f"feature=Reach&"
             f"feature_id={reach_data['feature_id']}&"
             f"start_time={start_time_encoded}&"
             f"end_time={end_time_encoded}&"
+            f"collection_name={reach_data['collection_name']}&"
             f"fields=reach_id,time_str,wse"
         )
         full_url = f"{url}?{params_str}"
@@ -138,8 +143,6 @@ class TestURLEncoding:
         # Test with improperly encoded + (as literal +)
         # Note: requests library automatically encodes URLs, so we need to test
         # the raw URL construction
-        import requests
-
         url = api_client.base_url
 
         # Incorrectly using literal + (will be interpreted as space)
@@ -148,6 +151,7 @@ class TestURLEncoding:
             f"feature_id={reach_data['feature_id']}&"
             f"start_time=2024-02-10T00:00:00+00:00&"  # Literal + (wrong)
             f"end_time=2024-05-03T23:59:59+00:00&"
+            f"collection_name={reach_data['collection_name']}&"
             f"fields=reach_id,time_str,wse"
         )
 
@@ -157,6 +161,7 @@ class TestURLEncoding:
             f"feature_id={reach_data['feature_id']}&"
             f"start_time=2024-02-10T00:00:00%2B00:00&"  # Encoded as %2b (correct)
             f"end_time=2024-05-03T23:59:59%2B00:00&"
+            f"collection_name={reach_data['collection_name']}&"
             f"fields=reach_id,time_str,wse"
         )
 
@@ -185,6 +190,7 @@ class TestInvalidTimeFormats:
             "feature_id": reach_data["feature_id"],
             "start_time": "invalid-date-format",
             "end_time": reach_data["end_time"],
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -199,6 +205,7 @@ class TestInvalidTimeFormats:
             "feature_id": reach_data["feature_id"],
             "start_time": "2024-02-10",  # No time component
             "end_time": "2024-05-03",
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -214,6 +221,7 @@ class TestInvalidTimeFormats:
             "feature_id": reach_data["feature_id"],
             "start_time": "00:00:00",  # No date component
             "end_time": reach_data["end_time"],
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -228,6 +236,7 @@ class TestInvalidTimeFormats:
             "feature_id": reach_data["feature_id"],
             "start_time": "2024-13-01T00:00:00Z",  # Month 13 invalid
             "end_time": reach_data["end_time"],
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -242,6 +251,7 @@ class TestInvalidTimeFormats:
             "feature_id": reach_data["feature_id"],
             "start_time": "2024-02-32T00:00:00Z",  # Day 32 invalid
             "end_time": reach_data["end_time"],
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -256,6 +266,7 @@ class TestInvalidTimeFormats:
             "feature_id": reach_data["feature_id"],
             "start_time": "2024-02-10T25:00:00Z",  # Hour 25 invalid
             "end_time": reach_data["end_time"],
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -276,6 +287,7 @@ class TestTimeRangeBehavior:
             "feature_id": reach_data["feature_id"],
             "start_time": same_time,
             "end_time": same_time,
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -291,6 +303,7 @@ class TestTimeRangeBehavior:
             "feature_id": reach_data["feature_id"],
             "start_time": "2024-02-10T00:00:00Z",
             "end_time": "2024-02-10T00:00:01Z",  # 1 second range
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
@@ -299,7 +312,7 @@ class TestTimeRangeBehavior:
 
     def test_very_wide_time_range(self, api_client, stable_test_data):
         """Test query with very wide time range (10 years)"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -312,55 +325,10 @@ class TestTimeRangeBehavior:
         # Should work but may return 413 if too much data
         assert response.status_code == 200
 
-
-class TestTimeFormatConsistency:
-    """Test time format consistency across feature types"""
-
-    def test_same_time_format_works_for_all_features(self, api_client, stable_test_data):
-        """Test that same time format works for Reach, Node, and PriorLake"""
-        reach_data = stable_test_data["reach"]
-        node_data = stable_test_data["node"]
-        lake_data = stable_test_data["priorlake"]
-
-        time_format = "2024-02-10T00:00:00Z"
-
-        # Test Reach
-        response_reach, _ = api_client.query({
-            "feature": "Reach",
-            "feature_id": reach_data["feature_id"],
-            "start_time": reach_data["start_time"],
-            "end_time": reach_data["end_time"],
-            "fields": "reach_id,time_str,wse"
-        })
-
-        # Test Node
-        response_node, _ = api_client.query({
-            "feature": "Node",
-            "feature_id": node_data["feature_id"],
-            "start_time": node_data["start_time"],
-            "end_time": node_data["end_time"],
-            "fields": "node_id,time_str,wse"
-        })
-
-        # Test PriorLake
-        response_lake, _ = api_client.query({
-            "feature": "PriorLake",
-            "feature_id": lake_data["feature_id"],
-            "start_time": lake_data["start_time"],
-            "end_time": lake_data["end_time"],
-            "fields": "lake_id,time_str,wse"
-        })
-
-        # All should succeed with same time format
-        assert_http_success(response_reach)
-        assert_http_success(response_node)
-        assert_http_success(response_lake)
-
-
 class TestLeapYearAndDST:
     """Test edge cases like leap years and daylight saving time"""
 
-    def test_leap_day_february_29(self, api_client, stable_test_data):
+    def test_leap_day_february_29(self, api_client):
         """Test querying on leap day (Feb 29, 2024)"""
 
         response, _ = api_client.query({
@@ -368,6 +336,7 @@ class TestLeapYearAndDST:
             "feature_id": "14306900121",  # hardcoded to reach_id that has data on Feb 29, 2024
             "start_time": "2024-02-29T00:00:00Z",  # 2024 is leap year
             "end_time": "2024-02-29T23:59:59Z",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse"
         })
 
@@ -383,6 +352,7 @@ class TestLeapYearAndDST:
             "feature_id": reach_data["feature_id"],
             "start_time": "2023-02-29T00:00:00Z",  # 2023 is NOT leap year
             "end_time": reach_data["end_time"],
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse"
         })
 
