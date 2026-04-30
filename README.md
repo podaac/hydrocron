@@ -6,7 +6,7 @@ The following sections of this readme describe how to install and run a developm
 
 To contribute to the development of Hydrocron, see the [contributing guidelines](https://github.com/podaac/hydrocron/blob/develop/CONTRIBUTING.md) and browse the open issues.
 
-***NOTE: the following instructions for installing and running a local version of Hydrocron are out of date, and may result in a broken install. We are aware of the issue and working on restoring local development functionality. Please open a new issue or ask a question on the [PO.DAAC forum](https://podaac.jpl.nasa.gov/forum/viewforum.php?f=6) if you need to run a local installation.***
+***NOTE: the following instructions for installing and running a local version of Hydrocron are out of date, and may result in a broken install. We are aware of the issue and working on restoring local development functionality. Please open a new issue or ask a question on the [PO.DAAC forum](https://podaac.jpl.nasa.gov/node/584) if you need to run a local installation.***
 
 ## Requirements
 
