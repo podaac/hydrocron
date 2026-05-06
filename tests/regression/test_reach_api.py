@@ -22,7 +22,7 @@ class TestReachBasicQueries:
 
     def test_reach_geojson_with_all_standard_fields(self, api_client, stable_test_data):
         """Test reach query with comprehensive field list (performance test: < 2s)"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         params = {
             "feature": "Reach",
@@ -54,14 +54,14 @@ class TestReachBasicQueries:
             for field in expected_fields:
                 assert field in props, f"Expected field '{field}' not found in properties"
 
-            # Verify collection name is 2.0 (default)
+            # Verify collection name is version D (default)
             assert 'collection_shortname' in props, "collection_shortname not found in properties"
-            assert props['collection_shortname'] == 'SWOT_L2_HR_RiverSP_2.0', \
-                f"Expected collection_shortname 'SWOT_L2_HR_RiverSP_2.0', got '{props['collection_shortname']}'"
+            assert props['collection_shortname'] == 'SWOT_L2_HR_RiverSP_D', \
+                f"Expected collection_shortname 'SWOT_L2_HR_RiverSP_D', got '{props['collection_shortname']}'"
 
     def test_reach_csv_basic(self, api_client, stable_test_data):
         """Test basic reach CSV query"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, elapsed = api_client.query({
             "feature": "Reach",
@@ -82,7 +82,7 @@ class TestReachBasicQueries:
 
     def test_reach_with_geometry_field(self, api_client, stable_test_data):
         """Test reach query explicitly includes geometry"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -113,7 +113,7 @@ class TestReachDischargeFields:
 
     def test_reach_csv_with_discharge_fields(self, api_client, stable_test_data):
         """Test reach query with discharge fields"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, elapsed = api_client.query({
             "feature": "Reach",
@@ -135,7 +135,7 @@ class TestReachDischargeFields:
 
     def test_reach_with_multiple_discharge_algorithms(self, api_client, stable_test_data):
         """Test reach query with multiple discharge algorithm fields"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -160,7 +160,7 @@ class TestReachContentNegotiation:
 
     def test_reach_accept_header_geojson(self, api_client, stable_test_data):
         """Test reach query using Accept header for GeoJSON"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -181,7 +181,7 @@ class TestReachContentNegotiation:
 
     def test_reach_accept_header_csv(self, api_client, stable_test_data):
         """Test reach query using Accept header for CSV"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -203,7 +203,7 @@ class TestReachUnitsFields:
 
     def test_reach_with_units(self, api_client, stable_test_data):
         """Test reach query returns unit fields"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -263,8 +263,8 @@ class TestReachCollectionVersions:
         assert_result_count(response, reach_data["expected_count"], output_format="csv")
 
     def test_default_reach_collection(self, api_client, stable_test_data):
-        """Test that default collection is SWOT_L2_HR_RiverSP_2.0 when collection_name not specified"""
-        reach_data = stable_test_data["reach"]
+        """Test that default collection is SWOT_L2_HR_RiverSP_D when collection_name not specified"""
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -272,7 +272,7 @@ class TestReachCollectionVersions:
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "csv",
-            # No collection_name specified - should use default 2.0
+            # No collection_name specified - should use default D
             "fields": "reach_id,time_str,wse,collection_shortname"
         })
 
@@ -282,15 +282,15 @@ class TestReachCollectionVersions:
         data = response.json()
         csv_text = extract_csv_from_response(data)
 
-        # Verify default collection is 2.0
+        # Verify default collection is D
         rows = validate_csv_structure(
             csv_text,
             expected_fields=["reach_id", "collection_shortname"]
         )
 
         assert len(rows) > 0, "Should return at least one row"
-        assert rows[0]['collection_shortname'] == 'SWOT_L2_HR_RiverSP_2.0', \
-            f"Expected default collection 'SWOT_L2_HR_RiverSP_2.0', got '{rows[0]['collection_shortname']}'"
+        assert rows[0]['collection_shortname'] == 'SWOT_L2_HR_RiverSP_D', \
+            f"Expected default collection 'SWOT_L2_HR_RiverSP_D', got '{rows[0]['collection_shortname']}'"
 
 
 @pytest.mark.golden

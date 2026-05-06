@@ -62,9 +62,9 @@ AWS_PROFILE=myprofile poetry run python tests/regression/dev-utils/scan-dynamodb
 
 ## Workflow Examples
 
-### Adding New API Fields
+### Adding New API Fields or Changing API Behavior
 
-1. **Add field to API code**
+1. **Make API changes** (new fields, validation logic, error handling, etc.)
 
 2. **Deploy to UAT**
 
@@ -73,7 +73,7 @@ AWS_PROFILE=myprofile poetry run python tests/regression/dev-utils/scan-dynamodb
    curl "https://uat-api/timeseries?feature=Node&feature_id=...&fields=my_new_field"
    ```
 
-4. **Recapture UAT references**:
+4. **Recapture UAT references** for the affected feature:
    ```bash
    HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature node
    ```

@@ -14,6 +14,8 @@ parts:
     - file: user-guide/fields
     - file: user-guide/time
     - file: user-guide/versioning
+      sections:
+      - file: user-guide/sword-versions
   - file: examples
   - file: hydrocron_tutorial
 - caption: API ENDPOINTS

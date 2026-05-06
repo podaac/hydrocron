@@ -13,7 +13,8 @@ from .utils import (
     extract_geojson_from_response,
     extract_csv_from_response,
     assert_matches_reference,
-    assert_result_count
+    assert_result_count,
+    on_failure_show_curl
 )
 
 
@@ -90,7 +91,7 @@ class TestNodeBasicQueries:
 
     def test_node_with_geometry(self, api_client, stable_test_data):
         """Test node query includes geometry"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data["node_d"]
 
         response, _ = api_client.query({
             "feature": "Node",
@@ -113,8 +114,8 @@ class TestNodeBasicQueries:
             assert 'type' in feature['geometry']
 
     def test_default_node_collection(self, api_client, stable_test_data):
-        """Test default collection_shortname is SWOT_L2_HR_RiverSP_2.0 when not specified"""
-        node_data = stable_test_data["node"]
+        """Test default collection_shortname is SWOT_L2_HR_RiverSP_D when not specified"""
+        node_data = stable_test_data["node_d"]
 
         response, _ = api_client.query({
             "feature": "Node",
@@ -123,7 +124,7 @@ class TestNodeBasicQueries:
             "end_time": node_data["end_time"],
             "output": "geojson",
             "fields": "node_id,time_str,wse,collection_shortname"
-            # Note: No collection_name parameter - should default to 2.0
+            # Note: No collection_name parameter - should default to D
         })
 
         assert_http_success(response)
@@ -131,12 +132,12 @@ class TestNodeBasicQueries:
         data = response.json()
         geojson = extract_geojson_from_response(data)
 
-        # Verify default collection is 2.0
+        # Verify default collection is D
         if len(geojson['features']) > 0:
             props = geojson['features'][0]['properties']
             assert 'collection_shortname' in props, "collection_shortname not found in properties"
-            assert props['collection_shortname'] == 'SWOT_L2_HR_RiverSP_2.0', \
-                f"Expected default collection 'SWOT_L2_HR_RiverSP_2.0', got '{props['collection_shortname']}'"
+            assert props['collection_shortname'] == 'SWOT_L2_HR_RiverSP_D', \
+                f"Expected default collection 'SWOT_L2_HR_RiverSP_D', got '{props['collection_shortname']}'"
 
 @pytest.mark.version_d
 class TestNodeVersionDFields:
@@ -227,7 +228,7 @@ class TestNodeVersionDFields:
         assert_http_success(response_node)
 
         # Should NOT work for Reach - field validation should fail
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
         response_reach, _ = api_client.query({
             "feature": "Reach",
             "feature_id": reach_data["feature_id"],
@@ -240,7 +241,7 @@ class TestNodeVersionDFields:
         assert_http_error(response_reach)
 
         # Should NOT work for PriorLake - field validation should fail
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
         response_lake, _ = api_client.query({
             "feature": "PriorLake",
             "feature_id": lake_data["feature_id"],
@@ -275,7 +276,7 @@ class TestNodePerformance:
 
     def test_response_time_acceptable(self, api_client, stable_test_data):
         """Test node query responds within acceptable time"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data["node_d"]
 
         response, elapsed = api_client.query({
             "feature": "Node",
@@ -401,3 +402,61 @@ class TestNodeGoldenFiles:
             output_format="geojson",
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
+
+    @pytest.mark.skip(reason="Not finished yet, will update soon")
+    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    def test_node_geojson_accept_header_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
+        """Test node GeoJSON response via Accept: application/geo+json matches reference file"""
+        node_data = stable_test_data[node_key]
+
+        params = {
+            "feature": "Node",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
+            "fields": node_data["fields"]
+        }
+
+        if "collection_name" in node_data:
+            params["collection_name"] = node_data["collection_name"]
+
+        response, _ = api_client.query(params, headers={"Accept": "application/geo+json"})
+
+        with on_failure_show_curl(response):
+            assert_http_success(response)
+            assert_matches_reference(
+                response,
+                node_data["fixtures"]["basic_geojson"],
+                fixtures_dir,
+                output_format="geojson",
+                ignore_fields=['ingest_time', 'crid', 'granuleUR']
+            )
+
+    @pytest.mark.skip(reason="Not finished yet, will update soon")
+    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    def test_node_csv_accept_header_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
+        """Test node CSV response via Accept: text/csv matches reference file"""
+        node_data = stable_test_data[node_key]
+
+        params = {
+            "feature": "Node",
+            "feature_id": node_data["feature_id"],
+            "start_time": node_data["start_time"],
+            "end_time": node_data["end_time"],
+            "fields": node_data["fields"]
+        }
+
+        if "collection_name" in node_data:
+            params["collection_name"] = node_data["collection_name"]
+
+        response, _ = api_client.query(params, headers={"Accept": "text/csv"})
+
+        with on_failure_show_curl(response):
+            assert_http_success(response)
+            assert_matches_reference(
+                response,
+                node_data["fixtures"]["basic_csv"],
+                fixtures_dir,
+                output_format="csv",
+                ignore_fields=['ingest_time', 'crid', 'granuleUR']
+            )

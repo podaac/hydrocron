@@ -50,10 +50,9 @@ class TestCORSWithCollectionName:
         assert 'Access-Control-Allow-Origin' in response.headers, \
             "Missing Access-Control-Allow-Origin header"
 
-    # Current default collection version is 2.0, so we are only testing 2.0 versions here
-    @pytest.mark.parametrize("data_key", ["reach", "node", "priorlake"])
+    @pytest.mark.parametrize("data_key", ["reach_d", "node_d", "priorlake_d"])
     def test_cors_with_default_collection_name(self, api_client, stable_test_data, data_key):
-        """Test CORS headers with default collection_name (no explicit parameter) for all feature types (2.0 versions only)"""
+        """Test CORS headers with default collection_name (no explicit parameter) for all feature types (D versions only)"""
         test_data = stable_test_data[data_key]
 
         # Determine feature type based on data key

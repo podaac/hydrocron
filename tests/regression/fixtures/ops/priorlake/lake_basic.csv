@@ -1,1 +1,1 @@
-{"status":"200 OK","time":347.221,"hits":2,"results":{"csv":"lake_id,time_str,wse,area_total,quality_f,wse_units,area_total_units\n8510353162,2024-09-12T03:15:36Z,364.464,0.043329,1,m,km^2\n8510353162,2024-09-18T18:34:30Z,361.658,0.020346,0,m,km^2\n","geojson":{}}}
+{"status":"200 OK","time":324.7,"hits":2,"results":{"csv":"lake_id,time_str,wse,area_total,quality_f,wse_units,area_total_units\n8510353162,2024-09-12T03:15:36Z,364.464,0.043329,1,m,km^2\n8510353162,2024-09-18T18:34:30Z,361.658,0.020346,0,m,km^2\n","geojson":{}}}

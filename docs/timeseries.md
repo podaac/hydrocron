@@ -140,15 +140,15 @@ The default for header `Accept: application/geo+json` is to set compact to `true
 The name of the collection to return. Allows users to explicitly request data from a particular version of the data.
 Supported collection names include:
 
-Version C/2.0 (default):
-
-- SWOT_L2_HR_RiverSP_2.0,
-- SWOT_L2_HR_LakeSP_2.0
-
-Version D:
+Version D (default):
 
 - SWOT_L2_HR_RiverSP_D,
 - SWOT_L2_HR_LakeSP_D
+
+Version C/2.0:
+
+- SWOT_L2_HR_RiverSP_2.0,
+- SWOT_L2_HR_LakeSP_2.0
 
 (fields)=
 ### fields : string, required: yes

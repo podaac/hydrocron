@@ -19,7 +19,7 @@ class TestInvalidAcceptHeaders:
 
     def test_invalid_accept_header_returns_415(self, api_client, stable_test_data):
         """Test invalid Accept header returns 415 error"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -38,7 +38,7 @@ class TestInvalidAcceptHeaders:
 
     def test_multiple_invalid_accept_headers(self, api_client, stable_test_data):
         """Test various invalid Accept headers return 415"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         invalid_headers = [
             "text/html",
@@ -144,7 +144,7 @@ class TestInvalidParameterValues:
 
     def test_invalid_date_format(self, api_client, stable_test_data):
         """Test invalid date format returns 400"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -159,7 +159,7 @@ class TestInvalidParameterValues:
 
     def test_malformed_date_format(self, api_client, stable_test_data):
         """Test malformed date returns 400"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -173,7 +173,7 @@ class TestInvalidParameterValues:
 
     def test_start_time_after_end_time(self, api_client, stable_test_data):
         """Test start_time after end_time returns 400"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -188,7 +188,7 @@ class TestInvalidParameterValues:
 
     def test_invalid_field_name(self, api_client, stable_test_data):
         """Test invalid field name returns 400"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -202,7 +202,7 @@ class TestInvalidParameterValues:
 
     def test_empty_fields_parameter(self, api_client, stable_test_data):
         """Test empty fields parameter returns 400"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -216,7 +216,7 @@ class TestInvalidParameterValues:
 
     def test_invalid_collection_name(self, api_client, stable_test_data):
         """Test invalid collection_name returns 400"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -276,7 +276,7 @@ class TestNoDataInTimeRange:
 
     def test_valid_reach_no_data_in_time_range(self, api_client, stable_test_data):
         """Test valid reach ID with time range that has no data"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         # Query far future where no data exists
         response, _ = api_client.query({
@@ -291,7 +291,7 @@ class TestNoDataInTimeRange:
 
     def test_valid_node_no_data_in_time_range(self, api_client, stable_test_data):
         """Test valid node ID with time range that has no data"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data["node_d"]
 
         # Query far past where no data exists
         response, _ = api_client.query({
@@ -338,7 +338,7 @@ class TestFieldValidation:
 
     def test_reach_specific_fields_invalid_for_node(self, api_client, stable_test_data):
         """Test reach-specific fields are rejected for node queries"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data["node_d"]
 
         response, _ = api_client.query({
             "feature": "Node",
@@ -352,7 +352,7 @@ class TestFieldValidation:
 
     def test_node_specific_fields_invalid_for_reach(self, api_client, stable_test_data):
         """Test node-specific fields are rejected for reach queries"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -366,7 +366,7 @@ class TestFieldValidation:
 
     def test_lake_specific_fields_invalid_for_reach(self, api_client, stable_test_data):
         """Test lake-specific fields are rejected for reach queries"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -384,7 +384,7 @@ class TestErrorMessageQuality:
 
     def test_invalid_field_error_message_mentions_field(self, api_client, stable_test_data):
         """Test error message for invalid field mentions the field name"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",

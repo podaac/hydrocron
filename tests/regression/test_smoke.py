@@ -16,7 +16,7 @@ class TestAPIHealth:
 
     def test_api_responds(self, api_client, stable_test_data):
         """Test API is up and responding"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, elapsed = api_client.query({
             "feature": "Reach",
@@ -33,9 +33,9 @@ class TestAPIHealth:
 
 @pytest.mark.smoke
 @pytest.mark.parametrize("feature_key,feature_name", [
-    ("reach", "Reach"),
-    ("node", "Node"),
-    ("priorlake", "PriorLake"),
+    ("reach_d", "Reach"),
+    ("node_d", "Node"),
+    ("priorlake_d", "PriorLake"),
 ])
 class TestBasicQueryPerFeature:
     """Test basic query for each feature type"""
@@ -82,6 +82,7 @@ class TestOutputFormats:
             "start_time": "2024-02-10T00:00:00Z",
             "end_time": "2024-02-11T00:00:00Z",
             "output": output_format,
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
             "fields": "reach_id,time_str,wse"
         })
 
