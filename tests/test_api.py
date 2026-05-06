@@ -821,7 +821,7 @@ def test_get_collection_name():
     collection_name = hydrocron.api.controllers.timeseries.get_collection_name(event)
     assert collection_name == "SWOT_L2_HR_RiverSP_2.0"
 
-    # Test D version
+    # Test D version (explicit)
     event = {
         "headers": {
             "Accept": "text/csv",

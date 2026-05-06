@@ -21,7 +21,7 @@ class TestCompactParameterBasics:
 
     def test_compact_true_returns_single_feature_with_arrays(self, api_client, stable_test_data):
         """Test compact=true returns single feature with array values"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -54,7 +54,7 @@ class TestCompactParameterBasics:
 
     def test_compact_false_returns_multiple_features(self, api_client, stable_test_data):
         """Test compact=false returns one feature per observation"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -91,7 +91,7 @@ class TestCompactDefaultBehavior:
 
     def test_geo_json_accept_header_defaults_to_compact_true(self, api_client, stable_test_data):
         """Test application/geo+json defaults to compact=true"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -115,7 +115,7 @@ class TestCompactDefaultBehavior:
 
     def test_json_accept_header_defaults_to_compact_false(self, api_client, stable_test_data):
         """Test application/json defaults to compact=false (with wrapper)"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -144,7 +144,7 @@ class TestCompactOverridesAcceptHeader:
 
     def test_compact_true_overrides_json_accept_header(self, api_client, stable_test_data):
         """Test compact=true works even with application/json Accept header"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -168,7 +168,7 @@ class TestCompactOverridesAcceptHeader:
 
     def test_compact_false_overrides_geo_json_accept_header(self, api_client, stable_test_data):
         """Test compact=false works even with application/geo+json Accept header"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -195,7 +195,7 @@ class TestCompactAllFeatureTypes:
 
     def test_compact_true_node(self, api_client, stable_test_data):
         """Test compact=true works for Node features"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data["node_d"]
 
         response, _ = api_client.query({
             "feature": "Node",
@@ -215,7 +215,7 @@ class TestCompactAllFeatureTypes:
 
     def test_compact_true_priorlake(self, api_client, stable_test_data):
         """Test compact=true works for PriorLake features"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -235,7 +235,7 @@ class TestCompactAllFeatureTypes:
 
     def test_compact_false_node(self, api_client, stable_test_data):
         """Test compact=false works for Node features"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data["node_d"]
 
         response, _ = api_client.query({
             "feature": "Node",
@@ -255,7 +255,7 @@ class TestCompactAllFeatureTypes:
 
     def test_compact_false_priorlake(self, api_client, stable_test_data):
         """Test compact=false works for PriorLake features"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -279,7 +279,7 @@ class TestCompactWithCSV:
 
     def test_compact_ignored_for_csv_output(self, api_client, stable_test_data):
         """Test compact parameter is ignored for CSV output format"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         # Test with compact=true
         response_compact_true, _ = api_client.query({

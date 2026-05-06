@@ -2,7 +2,7 @@
 
 SWOT data periodically undergoes reprocessing, where data products are recreated from the original observations with updated processing algorithms. This results in a new data collection version.
 
-Hydrocron supports multiple versions of SWOT data collections. As of version 1.8.0, Version D is the default - no `collection_name` parameter required. To retrieve data from a specific collection version, use the [](collection_name) request parameter.
+Hydrocron supports multiple versions of SWOT data collections. As of version 1.8.0, Version D is the default — omitting the optional _collection_name_ parameter will return Version D data. To retrieve data from a specific collection version, use the [](collection_name) request parameter.
 
 SWOT collection names supported by Hydrocron include:
 
@@ -14,13 +14,19 @@ Version D (default):
 - SWOT_L2_HR_LakeSP_D
 - SWOT_L2_HR_LakeSP_prior_D
 
-Version C/2.0:
+Version 2.0:
 
 - SWOT_L2_HR_RiverSP_2.0
 - SWOT_L2_HR_RiverSP_reach_2.0
 - SWOT_L2_HR_RiverSP_node_2.0
 - SWOT_L2_HR_LakeSP_2.0
 - SWOT_L2_HR_LakeSP_prior_2.0
+
+## SWORD Version and Feature ID Compatibility
+
+Reach and node IDs are defined by the SWOT River Database (SWORD). Version 2.0 uses SWORD v16, while Version D uses SWORD v17b. A small number of reach and node IDs differ between the two versions as a result. Users comparing data across collection versions should be aware that the same feature ID may not refer to the same geographic feature.
+
+See [SWORD Version Differences](sword-versions.md) for details.
 
 ## Parent Collections and Sub Collections
 

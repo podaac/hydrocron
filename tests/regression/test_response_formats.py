@@ -22,7 +22,7 @@ class TestJSONWrapperFormat:
 
     def test_json_wrapper_contains_status(self, api_client, stable_test_data):
         """Test JSON wrapper includes status field"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -48,7 +48,7 @@ class TestJSONWrapperFormat:
 
     def test_json_wrapper_contains_time(self, api_client, stable_test_data):
         """Test JSON wrapper includes response time field"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -76,7 +76,7 @@ class TestJSONWrapperFormat:
 
     def test_json_wrapper_contains_hits(self, api_client, stable_test_data):
         """Test JSON wrapper includes hits count"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -105,7 +105,7 @@ class TestJSONWrapperFormat:
 
     def test_json_wrapper_contains_results(self, api_client, stable_test_data):
         """Test JSON wrapper includes results field with data"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -135,7 +135,7 @@ class TestJSONWrapperFormat:
 
     def test_json_wrapper_csv_in_results(self, api_client, stable_test_data):
         """Test JSON wrapper with CSV output includes csv in results"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -169,7 +169,7 @@ class TestRawGeoJSONFormat:
 
     def test_geo_json_accept_returns_raw_geojson(self, api_client, stable_test_data):
         """Test application/geo+json returns GeoJSON directly without wrapper"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -197,7 +197,7 @@ class TestRawGeoJSONFormat:
 
     def test_geo_json_content_type_header(self, api_client, stable_test_data):
         """Test application/geo+json Accept returns proper Content-Type"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -224,7 +224,7 @@ class TestRawCSVFormat:
 
     def test_csv_accept_returns_csv_data(self, api_client, stable_test_data):
         """Test text/csv Accept header returns CSV data"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -251,7 +251,7 @@ class TestRawCSVFormat:
 
     def test_csv_content_type_header(self, api_client, stable_test_data):
         """Test CSV output returns text/csv Content-Type"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -277,7 +277,7 @@ class TestOutputParameterVsAcceptHeader:
 
     def test_output_csv_with_json_accept_header(self, api_client, stable_test_data):
         """Test output=csv with application/json Accept header"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -306,7 +306,7 @@ class TestOutputParameterVsAcceptHeader:
 
     def test_output_geojson_with_csv_accept_header(self, api_client, stable_test_data):
         """Test output=geojson with text/csv Accept header"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -325,7 +325,7 @@ class TestOutputParameterVsAcceptHeader:
 
     def test_output_parameter_without_accept_header(self, api_client, stable_test_data):
         """Test output parameter works without explicit Accept header"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         # Test CSV output
         response_csv, _ = api_client.query({
@@ -353,7 +353,7 @@ class TestOutputParameterVsAcceptHeader:
 
     def test_no_output_param_no_accept_header_uses_default(self, api_client, stable_test_data):
         """Test default format when neither output param nor Accept header specified"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -375,7 +375,7 @@ class TestContentTypeHeaders:
 
     def test_geojson_output_has_json_content_type(self, api_client, stable_test_data):
         """Test GeoJSON output returns JSON Content-Type"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -396,7 +396,7 @@ class TestContentTypeHeaders:
 
     def test_csv_output_has_csv_content_type(self, api_client, stable_test_data):
         """Test CSV output returns CSV Content-Type"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -421,7 +421,7 @@ class TestUnitsFieldsInResponses:
 
     def test_geojson_includes_units_fields(self, api_client, stable_test_data):
         """Test GeoJSON response includes unit fields for fields with units"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -459,7 +459,7 @@ class TestUnitsFieldsInResponses:
 
     def test_csv_includes_units_columns(self, api_client, stable_test_data):
         """Test CSV response includes unit columns"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -486,9 +486,9 @@ class TestResponseFormatConsistency:
 
     def test_all_feature_types_support_csv(self, api_client, stable_test_data):
         """Test all feature types return valid CSV"""
-        reach_data = stable_test_data["reach"]
-        node_data = stable_test_data["node"]
-        lake_data = stable_test_data["priorlake"]
+        reach_data = stable_test_data["reach_d"]
+        node_data = stable_test_data["node_d"]
+        lake_data = stable_test_data["priorlake_d"]
 
         # Test Reach
         response_reach, _ = api_client.query({

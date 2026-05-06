@@ -21,7 +21,7 @@ class TestAPIKeyHeader:
 
     def test_query_without_api_key_succeeds(self, api_client, stable_test_data):
         """Test queries work without API key (API key is optional)"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -36,7 +36,7 @@ class TestAPIKeyHeader:
     @pytest.mark.skip(reason="Requires valid API key - update with real key to test")
     def test_query_with_valid_api_key_succeeds(self, api_client, stable_test_data):
         """Test query with valid API key succeeds"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -54,7 +54,7 @@ class TestAPIKeyHeader:
     @pytest.mark.skip(reason="Not implemented yet--API key validation is not implemented")
     def test_query_with_invalid_api_key(self, api_client, stable_test_data):
         """Test query with invalid API key behavior"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(
             params={
@@ -77,7 +77,7 @@ class TestGeometryFieldBehavior:
 
     def test_reach_geometry_is_linestring(self, api_client, stable_test_data):
         """Test Reach features return LineString geometry"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -101,7 +101,7 @@ class TestGeometryFieldBehavior:
 
     def test_node_geometry_is_point(self, api_client, stable_test_data):
         """Test Node features return Point geometry"""
-        node_data = stable_test_data["node"]
+        node_data = stable_test_data["node_d"]
 
         response, _ = api_client.query({
             "feature": "Node",
@@ -125,7 +125,7 @@ class TestGeometryFieldBehavior:
 
     def test_priorlake_geometry_is_point(self, api_client, stable_test_data):
         """Test PriorLake features return Point geometry (lake center)"""
-        lake_data = stable_test_data["priorlake"]
+        lake_data = stable_test_data["priorlake_d"]
 
         response, _ = api_client.query({
             "feature": "PriorLake",
@@ -150,7 +150,7 @@ class TestGeometryFieldBehavior:
 
     def test_geometry_field_optional(self, api_client, stable_test_data):
         """Test geometry field can be omitted from fields parameter"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -175,7 +175,7 @@ class TestFieldOrdering:
 
     def test_csv_columns_match_fields_order(self, api_client, stable_test_data):
         """Test CSV columns appear in same order as fields parameter"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         requested_fields = ["wse", "reach_id", "time_str", "slope"]
 
@@ -217,7 +217,7 @@ class TestFieldOrdering:
 
     def test_geojson_properties_include_all_fields(self, api_client, stable_test_data):
         """Test GeoJSON properties include all requested fields"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -246,7 +246,7 @@ class TestCaseSensitivity:
 
     def test_feature_parameter_case_sensitive(self, api_client, stable_test_data):
         """Test feature parameter values are case-sensitive"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         # Try lowercase 'reach' (should fail if case-sensitive)
         response, _ = api_client.query({
@@ -262,7 +262,7 @@ class TestCaseSensitivity:
 
     def test_field_names_case_sensitive(self, api_client, stable_test_data):
         """Test field names are case-sensitive"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         # Try uppercase field name
         response, _ = api_client.query({
@@ -278,7 +278,7 @@ class TestCaseSensitivity:
 
     def test_output_parameter_case_sensitive(self, api_client, stable_test_data):
         """Test output parameter is case-sensitive"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         # Try uppercase 'CSV'
         response, _ = api_client.query({
@@ -299,7 +299,7 @@ class TestSpecialCharacters:
 
     def test_fields_with_spaces_accepted(self, api_client, stable_test_data):
         """Test field list with spaces is handled correctly"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         # Fields parameter with spaces (OK)
         response, _ = api_client.query({
@@ -315,7 +315,7 @@ class TestSpecialCharacters:
 
     def test_duplicate_fields_in_list(self, api_client, stable_test_data):
         """Test duplicate fields in fields parameter"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -334,7 +334,7 @@ class TestNoDataSentinelValues:
 
     def test_no_data_value_negative_999999999999(self, api_client, stable_test_data):
         """Test that no-data values use sentinel -999999999999.0"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query({
             "feature": "Reach",
@@ -363,7 +363,7 @@ class TestQueryPerformance:
 
     def test_small_query_responds_quickly(self, api_client, stable_test_data):
         """Test small queries respond within 5 seconds"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, elapsed = api_client.query({
             "feature": "Reach",
@@ -382,7 +382,7 @@ class TestMultipleConsecutiveQueries:
 
     def test_consecutive_queries_all_succeed(self, api_client, stable_test_data):
         """Test making multiple queries in succession all succeed"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         for i in range(3):
             response, _ = api_client.query({
@@ -397,9 +397,9 @@ class TestMultipleConsecutiveQueries:
 
     def test_different_feature_types_consecutive(self, api_client, stable_test_data):
         """Test querying different feature types consecutively"""
-        reach_data = stable_test_data["reach"]
-        node_data = stable_test_data["node"]
-        lake_data = stable_test_data["priorlake"]
+        reach_data = stable_test_data["reach_d"]
+        node_data = stable_test_data["node_d"]
+        lake_data = stable_test_data["priorlake_d"]
 
         # Query Reach
         response_reach, _ = api_client.query({
