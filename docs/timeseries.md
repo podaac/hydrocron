@@ -435,7 +435,7 @@ import requests
 url = "https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries"
 
 headers = {
-    "x-hydrocon-key": "<podaac-provided-api-key>"
+    "x-hydrocron-key": "<podaac-provided-api-key>"
 }
 
 params = {

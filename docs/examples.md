@@ -10,261 +10,176 @@ Will return GeoJSON:
 
 ```json
 {
-    "status":"200 OK",
-    "time":844.614,
-    "hits":10,
-    "results":{
-        "csv":"",
-        "geojson":{
-            "type":"FeatureCollection",
-            "features":[
+    "status": "200 OK",
+    "time": 843.578,
+    "hits": 10,
+    "results": {
+        "csv": "",
+        "geojson": {
+            "type": "FeatureCollection",
+            "features": [
                 {
-                    "id":"0",
-                    "type":"Feature",
-                    "properties":{
-                        "reach_id":"78340600051",
-                        "time_str":"2024-01-30T09:38:22Z",
-                        "wse":"3089.5784",
-                        "slope":"-0.0177291808"
+                    "id": "0",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "78340600051",
+                        "time_str": "2024-02-03T18:34:05Z",
+                        "wse": "386.9557",
+                        "slope": "-0.0019823218",
+                        "wse_units": "m",
+                        "slope_units": "m/m"
                     },
-                    "geometry":{
-                        "type":"LineString",
-                        "coordinates":[
-                            [-127.285739,54.942484],
-                            [-127.286202,54.942598],
-                            [-127.286664,54.942767],
-                            [-127.287029,54.942988],
-                            [-127.330039,54.99239]
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [-127.330039, 54.99239],
+                            [-127.32957, 54.992383],
+                            "...",
+                            [-127.285739, 54.942484]
                         ]
                     }
                 },
                 {
-                    "id":"1",
-                    "type":"Feature",
-                    "properties":{
-                        "reach_id":"78340600051",
-                        "time_str":"2024-02-03T18:33:48Z",
-                        "wse":"1545.616","slope":"-0.0084122704"},
-                        "geometry":{
-                            "type":"LineString",
-                            "coordinates":[
-                                [-127.285739,54.942484],
-                                [-127.286202,54.942598],
-                                [-127.286664,54.942767],
-                                [-127.287029,54.942988],
-                                [-127.330039,54.99239]
-                            ]
-                        }
+                    "id": "1",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "78340600051",
+                        "time_str": "2024-02-09T08:00:46Z",
+                        "wse": "-999999999999.0",
+                        "slope": "-999999999999.0",
+                        "wse_units": "m",
+                        "slope_units": "m/m"
                     },
-                    {
-                        "id":"5",
-                        "type":"Feature",
-                        "properties":{
-                            "reach_id":"78340600051",
-                            "time_str":"2024-02-24T15:18:54Z",
-                            "wse":"2315.8056",
-                            "slope":"-0.010764612"
-                        },
-                        "geometry":{
-                            "type":"LineString",
-                            "coordinates":[
-                                [-127.285739,54.942484],
-                                [-127.286202,54.942598],
-                                [-127.286664,54.942767],
-                                [-127.287029,54.942988],
-                                [-127.330039,54.99239]
-                            ]
-                        }
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [-127.330039, 54.99239],
+                            [-127.32957, 54.992383],
+                            "...",
+                            [-127.285739, 54.942484]
+                        ]
                     }
-                ]
-            }
+                },
+                {
+                    "id": "2",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "78340600051",
+                        "time_str": "2024-02-20T06:23:40Z",
+                        "wse": "386.5979",
+                        "slope": "-0.0021285298",
+                        "wse_units": "m",
+                        "slope_units": "m/m"
+                    },
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [-127.330039, 54.99239],
+                            [-127.32957, 54.992383],
+                            "...",
+                            [-127.285739, 54.942484]
+                        ]
+                    }
+                }
+            ]
         }
+    }
 }
 ```
 
-** geometry simplified for example
+**Note:** Geometry coordinates simplified for this example (329 total coordinates per feature).
 
 ## Get time series GeoJSON for river node
 
 Search for a single river node by ID:
 
-[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=12228200110861&start_time=2024-01-25T00:00:00Z&end_time=2024-03-30T00:00:00Z&output=geojson&fields=reach_id,node_id,time_str,wse](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=12228200110861&start_time=2024-01-25T00:00:00Z&end_time=2024-03-30T00:00:00Z&output=geojson&fields=reach_id,node_id,time_str,wse)
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=44404000150591&start_time=2024-01-02T00:00:00Z&end_time=2024-02-10T00:00:00Z&output=geojson&fields=reach_id,node_id,time_str,wse](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=44404000150591&start_time=2024-01-02T00:00:00Z&end_time=2024-02-10T00:00:00Z&output=geojson&fields=reach_id,node_id,time_str,wse)
 
 Will return GeoJSON:
 
 ```json
 {
-"status": "200 OK",
-"time": 604.705,
-"hits": 9,
-"results": {
-    "csv": "",
-    "geojson": {
-        "type": "FeatureCollection",
-        "features": [
-            {
-            "id": "0",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "12228200111",
-                "node_id": "12228200110861",
-                "time_str": "2024-01-30T21:19:19Z",
-                "wse": "677.9232",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                35.149314,
-                -10.256285
-                ]
-            }
-            },
-            {
-            "id": "1",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "12228200111",
-                "node_id": "12228200110861",
-                "time_str": "2024-02-06T08:37:09Z",
-                "wse": "673.46918",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                35.149314,
-                -10.256285
-                ]
-            }
-            },
-            {
-            "id": "2",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "12228200111",
-                "node_id": "12228200110861",
-                "time_str": "no_data",
-                "wse": "-999999999999.0",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                35.149314,
-                -10.256285
-                ]
-            }
-            },
-            {
-            "id": "3",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "12228200111",
-                "node_id": "12228200110861",
-                "time_str": "2024-02-20T18:04:24Z",
-                "wse": "673.69799",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                35.149314,
-                -10.256285
-                ]
-            }
-            },
-            {
-            "id": "4",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "12228200111",
-                "node_id": "12228200110861",
-                "time_str": "2024-02-27T05:22:15Z",
-                "wse": "674.66235",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                35.149314,
-                -10.256285
-                ]
-            }
-            },
-            {
-            "id": "5",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "12228200111",
-                "node_id": "12228200110861",
-                "time_str": "no_data",
-                "wse": "-999999999999.0",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                35.149314,
-                -10.256285
-                ]
-            }
-            },
-            {
-            "id": "6",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "12228200111",
-                "node_id": "12228200110861",
-                "time_str": "2024-03-12T14:49:26Z",
-                "wse": "673.47788",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                35.149314,
-                -10.256285
-                ]
-            }
-            },
-            {
-            "id": "7",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "12228200111",
-                "node_id": "12228200110861",
-                "time_str": "2024-03-19T02:07:17Z",
-                "wse": "675.23219",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                35.149314,
-                -10.256285
-                ]
-            }
-            },
-            {
-            "id": "8",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "12228200111",
-                "node_id": "12228200110861",
-                "time_str": "no_data",
-                "wse": "-999999999999.0",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                35.149314,
-                -10.256285
-                ]
-            }
-            }
-        ]
+    "status": "200 OK",
+    "time": 482.824,
+    "hits": 4,
+    "results": {
+        "csv": "",
+        "geojson": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "id": "0",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "44404000151",
+                        "node_id": "44404000150591",
+                        "time_str": "2024-01-09T08:18:57Z",
+                        "wse": "24.89255",
+                        "wse_units": "m"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            102.543408,
+                            3.40867
+                        ]
+                    }
+                },
+                {
+                    "id": "1",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "44404000151",
+                        "node_id": "44404000150591",
+                        "time_str": "2024-01-14T19:32:23Z",
+                        "wse": "22.06794",
+                        "wse_units": "m"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            102.543408,
+                            3.40867
+                        ]
+                    }
+                },
+                {
+                    "id": "2",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "44404000151",
+                        "node_id": "44404000150591",
+                        "time_str": "2024-01-30T05:04:03Z",
+                        "wse": "23.0522",
+                        "wse_units": "m"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            102.543408,
+                            3.40867
+                        ]
+                    }
+                },
+                {
+                    "id": "3",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "44404000151",
+                        "node_id": "44404000150591",
+                        "time_str": "2024-02-04T16:17:29Z",
+                        "wse": "21.68793",
+                        "wse_units": "m"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            102.543408,
+                            3.40867
+                        ]
+                    }
+                }
+            ]
         }
     }
 }
@@ -281,8 +196,8 @@ Will return GeoJSON:
 ```json
 {
     "status": "200 OK",
-    "time": 391.613,
-    "hits": 1,
+    "time": 410.161,
+    "hits": 2,
     "results": {
         "csv": "",
         "geojson": {
@@ -293,13 +208,37 @@ Will return GeoJSON:
                     "type": "Feature",
                     "properties": {
                         "lake_id": "6350036102",
-                        "time_str": "2024-07-25T22:48:23Z",
-                        "wse": "260.802",
-                        "area_total": "0.553409",
+                        "time_str": "2024-07-23T11:50:03Z",
+                        "wse": "260.893",
+                        "area_total": "0.483733",
                         "quality_f": "1",
                         "collection_shortname": "SWOT_L2_HR_LakeSP_D",
-                        "crid": "PIC0",
-                        "PLD_version": "105",
+                        "crid": "PGD0",
+                        "PLD_version": "202",
+                        "range_start_time": "2024-07-23T11:44:34Z",
+                        "wse_units": "m",
+                        "area_total_units": "km^2"
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            -42.592754,
+                            -19.822244
+                        ]
+                    }
+                },
+                {
+                    "id": "1",
+                    "type": "Feature",
+                    "properties": {
+                        "lake_id": "6350036102",
+                        "time_str": "2024-07-25T22:48:23Z",
+                        "wse": "260.803",
+                        "area_total": "0.470057",
+                        "quality_f": "1",
+                        "collection_shortname": "SWOT_L2_HR_LakeSP_D",
+                        "crid": "PGD0",
+                        "PLD_version": "202",
                         "range_start_time": "2024-07-25T22:47:27Z",
                         "wse_units": "m",
                         "area_total_units": "km^2"
@@ -307,8 +246,8 @@ Will return GeoJSON:
                     "geometry": {
                         "type": "Point",
                         "coordinates": [
-                            -42.590727027987064,
-                            -19.822613018107482
+                            -42.591732,
+                            -19.822285
                         ]
                     }
                 }
@@ -331,10 +270,10 @@ Will return CSV:
 ```json
 {
     "status": "200 OK",
-    "time": 850.25,
-    "hits": 12,
+    "time": 697.498,
+    "hits": 10,
     "results": {
-        "csv": "reach_id,time_str,wse,slope,wse_units,slope_units\n78340600051,2024-01-30T09:38:22Z,386.1973,-0.0022161476,m,m/m\n78340600051,2024-02-03T18:33:48Z,386.404,-0.0021030676,m,m/m\n78340600051,no_data,-999999999999.0,-999999999999.0,m,m/m\n78340600051,2024-02-13T16:56:05Z,386.4593,-0.0024754944,m,m/m\n78340600051,2024-02-20T06:23:27Z,407.3638,-0.0021535548,m,m/m\n78340600051,2024-02-24T15:18:54Z,385.9676,-0.001794102,m,m/m\n78340600051,no_data,-999999999999.0,-999999999999.0,m,m/m\n78340600051,2024-03-05T13:41:09Z,385.6664,-0.0024497335,m,m/m\n78340600051,2024-03-12T03:08:30Z,408.4634,-0.0021388862,m,m/m\n78340600051,2024-03-16T12:03:56Z,386.5635,-0.0021972558,m,m/m\n78340600051,no_data,-999999999999.0,-999999999999.0,m,m/m\n78340600051,2024-03-26T10:26:13Z,386.2493,-0.0021548483,m,m/m\n",
+        "csv": "reach_id,time_str,wse,slope,wse_units,slope_units\n78340600051,2024-02-03T18:34:05Z,386.9557,-0.0019823218,m,m/m\n78340600051,2024-02-09T08:00:46Z,-999999999999.0,-999999999999.0,m,m/m\n78340600051,2024-02-20T06:23:40Z,386.5979,-0.0021285298,m,m/m\n78340600051,2024-02-24T15:19:10Z,386.6074,-0.00197282,m,m/m\n78340600051,no_data,-999999999999.0,-999999999999.0,m,m/m\n78340600051,2024-03-05T13:41:22Z,387.0104,-0.0020154178,m,m/m\n78340600051,2024-03-12T03:08:43Z,386.5742,-0.0021428208,m,m/m\n78340600051,2024-03-16T12:04:12Z,386.5983,-0.0019235693,m,m/m\n78340600051,no_data,-999999999999.0,-999999999999.0,m,m/m\n78340600051,2024-03-26T10:26:26Z,386.3501,-0.0021486242,m,m/m\n",
         "geojson": {}
     }
 }
@@ -344,17 +283,17 @@ Will return CSV:
 
 Search for a single river node by ID.
 
-[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=28311800020621&start_time=2024-01-25T00:00:00Z&end_time=2024-03-27T00:00:00Z&output=csv&fields=node_id,reach_id,time_str,wse,geometry](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=28311800020621&start_time=2024-01-25T00:00:00Z&end_time=2024-03-27T00:00:00Z&output=csv&fields=node_id,reach_id,time_str,wse,geometry)
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=44404000150591&start_time=2024-01-02T00:00:00Z&end_time=2024-02-10T00:00:00Z&output=csv&fields=node_id,reach_id,time_str,wse,geometry](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Node&feature_id=44404000150591&start_time=2024-01-02T00:00:00Z&end_time=2024-02-10T00:00:00Z&output=csv&fields=node_id,reach_id,time_str,wse,geometry)
 
 Will return CSV:
 
 ```json
 {
     "status": "200 OK",
-    "time": 500.644,
-    "hits": 11,
+    "time": 806.167,
+    "hits": 4,
     "results": {
-        "csv": "node_id,reach_id,time_str,wse,geometry,wse_units\n28311800020621,28311800021,2024-01-28T08:15:21Z,-15.54433,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-01-31T21:37:09Z,-15.63838,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-07T06:37:36Z,-999999999999.0,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-10T19:59:24Z,-14.46997,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-18T05:00:26Z,-15.99808,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-21T18:22:14Z,-999999999999.0,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-02-28T03:22:42Z,-999999999999.0,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-03-02T16:44:30Z,-16.80069,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-03-10T01:45:29Z,-15.65594,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-03-13T15:07:16Z,-999999999999.0,POINT (45.949474 48.354881),m\n28311800020621,28311800021,2024-03-23T13:29:33Z,-16.73133,POINT (45.949474 48.354881),m\n",
+        "csv": "node_id,reach_id,time_str,wse,geometry,wse_units\n44404000150591,44404000151,2024-01-09T08:18:57Z,24.89255,POINT (102.543408 3.40867),m\n44404000150591,44404000151,2024-01-14T19:32:23Z,22.06794,POINT (102.543408 3.40867),m\n44404000150591,44404000151,2024-01-30T05:04:03Z,23.0522,POINT (102.543408 3.40867),m\n44404000150591,44404000151,2024-02-04T16:17:29Z,21.68793,POINT (102.543408 3.40867),m\n",
         "geojson": {}
     }
 }
@@ -371,10 +310,10 @@ Will return CSV:
 ```json
 {
     "status": "200 OK",
-    "time": 321.592,
-    "hits": 1,
+    "time": 325.231,
+    "hits": 2,
     "results": {
-        "csv": "lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time,wse_units,area_total_units\n6350036102,2024-07-25T22:48:23Z,260.802,0.553409,1,SWOT_L2_HR_LakeSP_D,PIC0,105,2024-07-25T22:47:27Z,m,km^2\n",
+        "csv": "lake_id,time_str,wse,area_total,quality_f,collection_shortname,crid,PLD_version,range_start_time,wse_units,area_total_units\n6350036102,2024-07-23T11:50:03Z,260.893,0.483733,1,SWOT_L2_HR_LakeSP_D,PGD0,202,2024-07-23T11:44:34Z,m,km^2\n6350036102,2024-07-25T22:48:23Z,260.803,0.470057,1,SWOT_L2_HR_LakeSP_D,PGD0,202,2024-07-25T22:47:27Z,m,km^2\n",
         "geojson": {}
     }
 }
@@ -390,7 +329,7 @@ See the [documentation on the timeseries endpoint](timeseries.md) for an explana
 curl --header "Accept: application/geo+json" --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
 ```
 
-** Note the output query parameter is not specified in the request.
+**Note:** The output query parameter is not specified in the request.
 
 Will return GeoJSON response:
 
@@ -404,36 +343,36 @@ Will return GeoJSON response:
             "properties": {
                 "reach_id": [
                     "63470800171",
-                    "63470800171"
+                    "63470800171",
+                    "63470800171",
+                    "..."
                 ],
                 "time_str": [
-                    "2024-02-01T02:26:50Z",
-                    "2024-02-08T13:48:41Z"
+                    "2024-02-08T13:48:48Z",
+                    "2024-02-12T00:49:59Z",
+                    "2024-02-29T10:33:53Z",
+                    "..."
                 ],
                 "wse": [
-                    "3386.9332",
-                    "1453.4136"
-                ],
-                "width": [
-                    "383.19271200000003",
-                    "501.616464"
+                    "493.9646",
+                    "495.8134",
+                    "489.3664",
+                    "..."
                 ],
                 "wse_units": [
                     "m",
-                    "m"
-                ],
-                "width_units": [
                     "m",
-                    "m"
+                    "m",
+                    "..."
                 ]
             },
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                    [
-                        -45.845445,
-                        -16.166559
-                    ]
+                    [-46.100781, -15.940864],
+                    [-46.101059, -15.940592],
+                    "...",
+                    [-46.122559, -15.875454]
                 ]
             }
         }
@@ -441,7 +380,7 @@ Will return GeoJSON response:
 }
 ```
 
-** geometry simplified for example
+**Note:** Response truncated — 25 observations and 295 coordinates in full response.
 
 ### Get time series for text/csv Accept Header
 
@@ -449,12 +388,12 @@ Will return GeoJSON response:
 curl --header "Accept: text/csv" --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
 ```
 
-** Note the output query parameter is not specified in the request.
+**Note:** The output query parameter is not specified in the request.
 
 Will return a CSV response:
 
-```json
-"reach_id,time_str,wse,width,wse_units,width_units\n63470800171,2024-02-01T02:26:50Z,3386.9332,383.19271200000003,m,m\n63470800171,2024-02-08T13:48:41Z,1453.4136,501.616464,m,m\n"
+```
+"reach_id,time_str,wse,wse_units\n63470800171,2024-02-08T13:48:48Z,493.9646,m\n63470800171,2024-02-12T00:49:59Z,495.8134,m\n63470800171,2024-02-29T10:33:53Z,489.3664,m\n...\n"
 ```
 
 ## Compact request
@@ -471,7 +410,7 @@ Will return a compacted JSON response with metadata:
 {
     "status": "200 OK",
     "time": 737.056,
-    "hits": 2,
+    "hits": 25,
     "results": {
         "csv": "",
         "geojson": {
@@ -483,28 +422,36 @@ Will return a compacted JSON response with metadata:
                     "properties": {
                         "reach_id": [
                             "63470800171",
-                            "63470800171"
+                            "63470800171",
+                            "63470800171",
+                            "..."
                         ],
                         "time_str": [
-                            "2024-02-01T02:26:50Z",
-                            "2024-02-08T13:48:41Z"
+                            "2024-02-08T13:48:48Z",
+                            "2024-02-12T00:49:59Z",
+                            "2024-02-29T10:33:53Z",
+                            "..."
                         ],
                         "wse": [
-                            "3386.9332",
-                            "1453.4136"
+                            "493.9646",
+                            "495.8134",
+                            "489.3664",
+                            "..."
                         ],
                         "wse_units": [
                             "m",
-                            "m"
+                            "m",
+                            "m",
+                            "..."
                         ]
                     },
                     "geometry": {
                         "type": "LineString",
                         "coordinates": [
-                            [
-                                -45.845445,
-                                -16.166559
-                            ]
+                            [-46.100781, -15.940864],
+                            [-46.101059, -15.940592],
+                            "...",
+                            [-46.122559, -15.875454]
                         ]
                     }
                 }
@@ -514,7 +461,7 @@ Will return a compacted JSON response with metadata:
 }
 ```
 
-** geometry simplified for example
+**Note:** Response truncated — 25 observations and 295 coordinates in full response.
 
 ### Get time series for application/geo+json
 
@@ -522,7 +469,7 @@ Will return a compacted JSON response with metadata:
 curl -v --header "Accept: application/geo+json" --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
 ```
 
-** Note compacted response returned by default as no compact query parameter is specified.
+**Note:** Compacted response returned by default as no compact query parameter is specified.
 
 Will return compacted GeoJSON response:
 
@@ -536,28 +483,36 @@ Will return compacted GeoJSON response:
             "properties": {
                 "reach_id": [
                     "63470800171",
-                    "63470800171"
+                    "63470800171",
+                    "63470800171",
+                    "..."
                 ],
                 "time_str": [
-                    "2024-02-01T02:26:50Z",
-                    "2024-02-08T13:48:41Z"
+                    "2024-02-08T13:48:48Z",
+                    "2024-02-12T00:49:59Z",
+                    "2024-02-29T10:33:53Z",
+                    "..."
                 ],
                 "wse": [
-                    "3386.9332",
-                    "1453.4136"
+                    "493.9646",
+                    "495.8134",
+                    "489.3664",
+                    "..."
                 ],
                 "wse_units": [
                     "m",
-                    "m"
+                    "m",
+                    "m",
+                    "..."
                 ]
             },
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                    [
-                        -45.845445,
-                        -16.166559
-                    ]
+                    [-46.100781, -15.940864],
+                    [-46.101059, -15.940592],
+                    "...",
+                    [-46.122559, -15.875454]
                 ]
             }
         }
@@ -565,7 +520,7 @@ Will return compacted GeoJSON response:
 }
 ```
 
-** geometry simplified for example
+**Note:** Response truncated — 25 observations and 295 coordinates in full response.
 
 ### Get time series for application/geo+json with compact=False
 
@@ -573,7 +528,7 @@ Will return compacted GeoJSON response:
 curl --header "Accept: application/geo+json" --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse&compact=false'
 ```
 
-** Note compact query parameter is specified.
+**Note:** The compact query parameter is specified.
 
 Will return a GeoJSON response that is not compacted:
 
@@ -586,17 +541,17 @@ Will return a GeoJSON response that is not compacted:
             "type": "Feature",
             "properties": {
                 "reach_id": "63470800171",
-                "time_str": "2024-02-01T02:26:50Z",
-                "wse": "3386.9332",
+                "time_str": "2024-02-08T13:48:48Z",
+                "wse": "493.9646",
                 "wse_units": "m"
             },
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                    [
-                        -45.845445,
-                        -16.166559
-                    ]
+                    [-46.100781, -15.940864],
+                    [-46.101059, -15.940592],
+                    "...",
+                    [-46.122559, -15.875454]
                 ]
             }
         },
@@ -605,17 +560,17 @@ Will return a GeoJSON response that is not compacted:
             "type": "Feature",
             "properties": {
                 "reach_id": "63470800171",
-                "time_str": "2024-02-08T13:48:41Z",
-                "wse": "1453.4136",
+                "time_str": "2024-02-12T00:49:59Z",
+                "wse": "495.8134",
                 "wse_units": "m"
             },
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                    [
-                        -45.845445,
-                        -16.166559
-                    ]
+                    [-46.100781, -15.940864],
+                    [-46.101059, -15.940592],
+                    "...",
+                    [-46.122559, -15.875454]
                 ]
             }
         }
@@ -623,4 +578,4 @@ Will return a GeoJSON response that is not compacted:
 }
 ```
 
-** geometry simplified for example
+**Note:** Response truncated — 25 features and 295 coordinates per feature in full response.
