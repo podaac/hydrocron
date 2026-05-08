@@ -15,8 +15,11 @@ Expected sword_version values:
 Usage:
     HYDROCRON_ENV=ops poetry run pytest tests/regression/test_version.py -v
 """
+import csv
+from io import StringIO
+
 import pytest
-from .utils import assert_http_success, extract_geojson_from_response
+from .utils import assert_http_success, extract_csv_from_response, extract_geojson_from_response
 
 
 @pytest.mark.parametrize("data_key,expected_version", [
@@ -95,19 +98,15 @@ class TestCollectionVersion:
         assert_http_success(response)
 
         data = response.json()
-        csv_text = data['results']['csv']
-        lines = csv_text.strip().split('\n')
+        csv_text = extract_csv_from_response(data)
+        rows = list(csv.DictReader(StringIO(csv_text)))
 
-        assert len(lines) >= 2, f"No data rows returned for {data_key}"
-
-        headers = lines[0].split(',')
-        assert 'collection_version' in headers, \
+        assert len(rows) > 0, f"No data rows returned for {data_key}"
+        assert 'collection_version' in rows[0], \
             "collection_version field not in CSV headers"
 
-        version_idx = headers.index('collection_version')
-        for i, line in enumerate(lines[1:]):
-            values = line.split(',')
-            version = values[version_idx]
+        for i, row in enumerate(rows):
+            version = row['collection_version']
             assert version == expected_version, \
                 f"Row {i}: collection_version = '{version}', expected '{expected_version}'"
 
@@ -179,18 +178,14 @@ class TestSwordVersion:
         assert_http_success(response)
 
         data = response.json()
-        csv_text = data['results']['csv']
-        lines = csv_text.strip().split('\n')
+        csv_text = extract_csv_from_response(data)
+        rows = list(csv.DictReader(StringIO(csv_text)))
 
-        assert len(lines) >= 2, f"No data rows returned for {data_key}"
-
-        headers = lines[0].split(',')
-        assert 'sword_version' in headers, \
+        assert len(rows) > 0, f"No data rows returned for {data_key}"
+        assert 'sword_version' in rows[0], \
             "sword_version field not in CSV headers"
 
-        version_idx = headers.index('sword_version')
-        for i, line in enumerate(lines[1:]):
-            values = line.split(',')
-            version = values[version_idx]
+        for i, row in enumerate(rows):
+            version = row['sword_version']
             assert version == expected_sword_version, \
                 f"Row {i}: sword_version = '{version}', expected '{expected_sword_version}'"
