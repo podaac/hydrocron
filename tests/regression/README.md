@@ -551,4 +551,4 @@ When adding new regression tests:
 - Add golden tests covering Accept headers: `application/json`, `application/geo+json`, and `text/csv`
 - Enable `test_large_payload_returns_413` once a feature ID with a dataset exceeding 6MB is identified
 - Enable `test_query_with_valid_api_key_succeeds` once a valid API key is available for testing
-- Ingest Regression Test: Add a new regression test to check that new granules being ingested into hydrocron
+- Ingest Regression Test: Add a new regression test to check that newly ingested granules are returned by Hydrocron queries for the expected time range.
