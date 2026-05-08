@@ -62,7 +62,7 @@
                     {
                         "Description": "Data Contact URL",
                         "Name": "HOME PAGE",
-                        "Linkage": "https://podaac.jpl.nasa.gov/"
+                        "Linkage": "https://www.earthdata.nasa.gov/centers/po-daac"
                     }
                 ],
                 "ContactMechanisms": [

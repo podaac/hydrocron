@@ -33,45 +33,23 @@ Content-Type: 'application/geo+json'
 
 ```json
 {
-    "type": "FeatureCollection",
-    "features": [
-        {
-            "id": "0",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "63470800171",
-                "time_str": "2024-02-08T13:48:48Z",
-                "wse": "493.9646",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "LineString",
-                "coordinates": [
-                    [-46.100781, -15.940864],
-                    "...",
-                    [-46.122559, -15.875454]
-                ]
-            }
-        },
-        {
-            "id": "1",
-            "type": "Feature",
-            "properties": {
-                "reach_id": "63470800171",
-                "time_str": "2024-02-12T00:49:59Z",
-                "wse": "495.8134",
-                "wse_units": "m"
-            },
-            "geometry": {
-                "type": "LineString",
-                "coordinates": [
-                    [-46.100781, -15.940864],
-                    "...",
-                    [-46.122559, -15.875454]
-                ]
-            }
-        }
-    ]
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "0",
+      "type": "Feature",
+      "properties": {
+        "reach_id": ["63470800171", "63470800171", "63470800171", ...],
+        "time_str": ["2024-02-08T13:48:48Z", "2024-02-12T00:49:59Z", "2024-02-29T10:33:53Z", ...],
+        "wse": ["493.9646", "495.8134", "489.3664", ...],
+        "wse_units": ["m", "m", "m", ...]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[-46.100781, -15.940864], [-46.101059, -15.940592], ...295 total...]
+      }
+    }
+  ]
 }
 ```
 
@@ -103,8 +81,8 @@ ID of the feature to retrieve
 - Nodes have the format CBBBBBRRRRNNNT (e.g., 12228200110861)
 - PriorLakes have the format CBBNNNNNNT (e.g., 2710046612)
 
-Please see the [SWOT Product Description Document for the L2_HR_RiverSP Dataset](https://podaac.jpl.nasa.gov/SWOT?tab=datasets-information&sections=about) for more information on reach and node identifiers.
-Please see the [SWOT Product Description Document for the L2_HR_LakeSP Dataset](https://podaac.jpl.nasa.gov/SWOT?tab=datasets-information&sections=about) for more information on lake identifiers.
+Please see the [SWOT Product Description Document for the L2_HR_RiverSP Dataset](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-d-d) for more information on reach and node identifiers.
+Please see the [SWOT Product Description Document for the L2_HR_LakeSP Dataset](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-lakesp-d-d) for more information on lake identifiers.
 
 ### start_time : string, required: yes
 
@@ -144,17 +122,26 @@ The default for header `Accept: application/geo+json` is to set compact to `true
 ### collection_name: string, required: no
 
 The name of the collection to return. Allows users to explicitly request data from a particular version of the data.
-Supported collection names include:
 
-Version D (default):
+Supported collection names:
 
-- SWOT_L2_HR_RiverSP_D,
-- SWOT_L2_HR_LakeSP_D
+| Collection Name | Version | Description |
+|-----------------|---------|-------------|
+| `SWOT_L2_HR_RiverSP_D` | D (default) | River data (reaches and nodes) |
+| `SWOT_L2_HR_LakeSP_D` | D (default) | Lake data |
+| `SWOT_L2_HR_RiverSP_2.0` | 2.0 | River data (reaches and nodes) |
+| `SWOT_L2_HR_LakeSP_2.0` | 2.0 | Lake data |
 
-Version 2.0:
+Sub-collection names can also be used to search only reaches, nodes, or prior lakes within a collection:
 
-- SWOT_L2_HR_RiverSP_2.0,
-- SWOT_L2_HR_LakeSP_2.0
+| Sub-collection Name | Searches |
+|---------------------|----------|
+| `SWOT_L2_HR_RiverSP_reach_D` | Version D reaches only |
+| `SWOT_L2_HR_RiverSP_node_D` | Version D nodes only |
+| `SWOT_L2_HR_LakeSP_prior_D` | Version D prior lakes only |
+| `SWOT_L2_HR_RiverSP_reach_2.0` | Version 2.0 reaches only |
+| `SWOT_L2_HR_RiverSP_node_2.0` | Version 2.0 nodes only |
+| `SWOT_L2_HR_LakeSP_prior_2.0` | Version 2.0 prior lakes only |
 
 (fields)=
 ### fields : string, required: yes

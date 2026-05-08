@@ -25,11 +25,11 @@ parts:
   chapters:
   - url: https://github.com/podaac/hydrocron
     title: GitHub Repository
-  - url: https://podaac.jpl.nasa.gov/SWOT
+  - url: https://www.earthdata.nasa.gov/data/platforms/space-based-platforms/swot
     title: SWOT Mission Page
   - url: https://www.swordexplorer.com/
     title: SWOT River Database (SWORD) Explorer
-  - url: https://podaac.jpl.nasa.gov
+  - url: https://www.earthdata.nasa.gov/centers/po-daac
     title: PO.DAAC Website
   - url: https://podaac.github.io/tutorials/
     title: PO.DAAC Cookbook
