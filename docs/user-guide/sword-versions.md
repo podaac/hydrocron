@@ -1,7 +1,7 @@
 (sword-versions)=
 # SWORD Version Differences
 
-River reach and node IDs are defined by the SWOT River Database (SWORD). Version C/2.0 and Version D of the SWOT RiverSP data products were produced using different versions of SWORD:
+River reach and node IDs are defined by the SWOT River Database (SWORD). Version 2.0 and Version D of the SWOT RiverSP data products were produced using different versions of SWORD:
 
 | Collection Version | SWORD Version | Zenodo DOI |
 |--------------------|---------------|------------|
@@ -18,7 +18,7 @@ SWORD v17b introduced the following changes relative to v16:
 
 ## Impact on Hydrocron queries
 
-Because reach and node definitions changed between SWORD versions, a small number of feature IDs differ between Version C/2.0 and Version D data. Users querying the same geographic location across both versions should be aware that results may not align exactly.
+Because reach and node definitions changed between SWORD versions, a small number of feature IDs differ between Version 2.0 and Version D data. Users querying the same geographic location across both versions should be aware that results may not align exactly.
 
 The SWORD version used for a given observation can be returned by including `sword_version` in the [](fields) parameter.
 

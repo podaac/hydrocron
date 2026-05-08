@@ -145,7 +145,7 @@ Version D (default):
 - SWOT_L2_HR_RiverSP_D,
 - SWOT_L2_HR_LakeSP_D
 
-Version C/2.0:
+Version 2.0:
 
 - SWOT_L2_HR_RiverSP_2.0,
 - SWOT_L2_HR_LakeSP_2.0
