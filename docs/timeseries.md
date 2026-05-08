@@ -26,7 +26,7 @@ Possible header and request parameter combinations:
 Example GeoJSON request and response:
 
 ```bash
-curl -v --header "Accept: application/geo+json" --location 'https://soto.podaac.sit.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
+curl -v --header "Accept: application/geo+json" --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
 ```
 
 Content-Type: 'application/geo+json'
@@ -40,13 +40,17 @@ Content-Type: 'application/geo+json'
             "type": "Feature",
             "properties": {
                 "reach_id": "63470800171",
-                "time_str": "2024-02-01T02:26:50Z",
-                "wse": "3386.9332",
+                "time_str": "2024-02-08T13:48:48Z",
+                "wse": "493.9646",
                 "wse_units": "m"
             },
             "geometry": {
                 "type": "LineString",
-                "coordinates": []
+                "coordinates": [
+                    [-46.100781, -15.940864],
+                    "...",
+                    [-46.122559, -15.875454]
+                ]
             }
         },
         {
@@ -54,31 +58,33 @@ Content-Type: 'application/geo+json'
             "type": "Feature",
             "properties": {
                 "reach_id": "63470800171",
-                "time_str": "2024-02-08T13:48:41Z",
-                "wse": "1453.4136",
+                "time_str": "2024-02-12T00:49:59Z",
+                "wse": "495.8134",
                 "wse_units": "m"
             },
             "geometry": {
                 "type": "LineString",
-                "coordinates": []
+                "coordinates": [
+                    [-46.100781, -15.940864],
+                    "...",
+                    [-46.122559, -15.875454]
+                ]
             }
         }
     ]
 }
 ```
 
-*Coordinates removed
-
 Example CSV request and response:
 
 ```bash
-curl -v --header "Accept: text/csv" --location 'https://soto.podaac.sit.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
+curl -v --header "Accept: text/csv" --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&fields=reach_id,time_str,wse'
 ```
 
 Content-Type: text/csv
 
-```json
-"reach_id,time_str,wse,wse_units\n63470800171,2024-02-01T02:26:50Z,3386.9332,m\n63470800171,2024-02-08T13:48:41Z,1453.4136,m\n"
+```
+"reach_id,time_str,wse,wse_units\n63470800171,2024-02-08T13:48:48Z,493.9646,m\n63470800171,2024-02-12T00:49:59Z,495.8134,m\n...\n"
 ```
 
 ## Request Parameters
@@ -174,10 +180,10 @@ Example CSV response:
 ```json
 {
     "status": "200 OK",
-    "time": 806.886,
-    "hits": 4,
+    "time": 697.498,
+    "hits": 10,
     "results": {
-        "csv": "reach_id,time_str,wse,geometry,wse_units\n72390300011,2024-01-29T15:06:46Z,41.2087,\"LINESTRING (-62.159497 50.285927)\",m\n",
+        "csv": "reach_id,time_str,wse,wse_units\n78340600051,2024-02-03T18:34:05Z,386.9557,m\n78340600051,2024-02-09T08:00:46Z,-999999999999.0,m\n...\n",
         "geojson": {}
     }
 }
@@ -191,7 +197,7 @@ Example JSON response:
 {
     "status": "200 OK",
     "time": 723.004,
-    "hits": 2,
+    "hits": 25,
     "results": {
         "csv": "",
         "geojson": {
@@ -202,17 +208,16 @@ Example JSON response:
                     "type": "Feature",
                     "properties": {
                         "reach_id": "63470800171",
-                        "time_str": "2024-02-01T02:26:50Z",
-                        "wse": "3386.9332",
+                        "time_str": "2024-02-08T13:48:48Z",
+                        "wse": "493.9646",
                         "wse_units": "m"
                     },
                     "geometry": {
                         "type": "LineString",
                         "coordinates": [
-                            [
-                                -45.845445,
-                                -16.166559
-                            ]
+                            [-46.100781, -15.940864],
+                            "...",
+                            [-46.122559, -15.875454]
                         ]
                     }
                 },
@@ -221,17 +226,16 @@ Example JSON response:
                     "type": "Feature",
                     "properties": {
                         "reach_id": "63470800171",
-                        "time_str": "2024-02-08T13:48:41Z",
-                        "wse": "1453.4136",
+                        "time_str": "2024-02-12T00:49:59Z",
+                        "wse": "495.8134",
                         "wse_units": "m"
                     },
                     "geometry": {
                         "type": "LineString",
                         "coordinates": [
-                            [
-                                -45.845445,
-                                -16.166559
-                            ]
+                            [-46.100781, -15.940864],
+                            "...",
+                            [-46.122559, -15.875454]
                         ]
                     }
                 }
@@ -251,7 +255,7 @@ Example compacted JSON response:
 {
     "status": "200 OK",
     "time": 2175.824,
-    "hits": 2,
+    "hits": 25,
     "results": {
         "csv": "",
         "geojson": {
@@ -263,26 +267,31 @@ Example compacted JSON response:
                     "properties": {
                         "reach_id": [
                             "63470800171",
-                            "63470800171"
+                            "63470800171",
+                            "..."
                         ],
                         "time_str": [
-                            "2024-02-01T02:26:50Z",
-                            "2024-02-08T13:48:41Z"
+                            "2024-02-08T13:48:48Z",
+                            "2024-02-12T00:49:59Z",
+                            "..."
                         ],
                         "wse": [
-                            "3386.9332",
-                            "1453.4136"
+                            "493.9646",
+                            "495.8134",
+                            "..."
                         ],
                         "wse_units": [
                             "m",
-                            "m"
+                            "m",
+                            "..."
                         ]
                     },
                     "geometry": {
                         "type": "LineString",
                         "coordinates": [
-                            -45.845445,
-                            -16.166559
+                            [-46.100781, -15.940864],
+                            "...",
+                            [-46.122559, -15.875454]
                         ]
                     }
                 }
@@ -291,8 +300,6 @@ Example compacted JSON response:
     }
 }
 ```
-
-*Coordinates removed
 
 ### application/geo+json
 
@@ -312,36 +319,37 @@ Example compacted GeoJSON response:
             "properties": {
                 "reach_id": [
                     "63470800171",
-                    "63470800171"
+                    "63470800171",
+                    "..."
                 ],
                 "time_str": [
-                    "2024-02-01T02:26:50Z",
-                    "2024-02-08T13:48:41Z"
+                    "2024-02-08T13:48:48Z",
+                    "2024-02-12T00:49:59Z",
+                    "..."
                 ],
                 "wse": [
-                    "3386.9332",
-                    "1453.4136"
+                    "493.9646",
+                    "495.8134",
+                    "..."
                 ],
                 "wse_units": [
                     "m",
-                    "m"
+                    "m",
+                    "..."
                 ]
             },
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                    [
-                        -45.845445,
-                        -16.166559
-                    ]
+                    [-46.100781, -15.940864],
+                    "...",
+                    [-46.122559, -15.875454]
                 ]
             }
         }
     ]
 }
 ```
-
-*Coordinates removed
 
 If the user sends a request parameter of `compact=false` then the GeoJSON response will not be compacted and there will be one "Feature" per time step.
 
@@ -356,13 +364,17 @@ Example GeoJSON response that is not compacted:
             "type": "Feature",
             "properties": {
                 "reach_id": "63470800171",
-                "time_str": "2024-02-01T02:26:50Z",
-                "wse": "3386.9332",
+                "time_str": "2024-02-08T13:48:48Z",
+                "wse": "493.9646",
                 "wse_units": "m"
             },
             "geometry": {
                 "type": "LineString",
-                "coordinates": []
+                "coordinates": [
+                    [-46.100781, -15.940864],
+                    "...",
+                    [-46.122559, -15.875454]
+                ]
             }
         },
         {
@@ -370,20 +382,22 @@ Example GeoJSON response that is not compacted:
             "type": "Feature",
             "properties": {
                 "reach_id": "63470800171",
-                "time_str": "2024-02-08T13:48:41Z",
-                "wse": "1453.4136",
+                "time_str": "2024-02-12T00:49:59Z",
+                "wse": "495.8134",
                 "wse_units": "m"
             },
             "geometry": {
                 "type": "LineString",
-                "coordinates": []
+                "coordinates": [
+                    [-46.100781, -15.940864],
+                    "...",
+                    [-46.122559, -15.875454]
+                ]
             }
         }
     ]
 }
 ```
-
-*Coordinates removed
 
 ### text/csv
 
@@ -391,8 +405,8 @@ When the `Accept` header is set to `text/csv` and there is no `output` request p
 
 Example CSV response:
 
-```bash
-"reach_id,time_str,wse,wse_units\n63470800171,2024-02-01T02:26:50Z,3386.9332,m\n63470800171,2024-02-08T13:48:41Z,1453.4136,m\n"
+```
+"reach_id,time_str,wse,wse_units\n63470800171,2024-02-08T13:48:48Z,493.9646,m\n63470800171,2024-02-12T00:49:59Z,495.8134,m\n...\n"
 ```
 
 ## Response Codes
