@@ -94,7 +94,7 @@ Please note you will need to encode offsets that use the `+` sign with `%2b` so 
 
 Example:
 
-`/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00%2b00:00&end_time=2024-03-29T00:00:00%2b00:00&fields=reach_id,time_str,wse,slope`
+[`GET /timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00+00:00&end_time=2024-03-29T00:00:00+00:00&fields=reach_id,time_str,wse,slope`](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00%3A00%3A00%2b00%3A00&end_time=2024-03-29T00%3A00%3A00%2b00%3A00&fields=reach_id,time_str,wse,slope)
 
 ### end_time : string, required: yes
 
@@ -106,7 +106,7 @@ Please note you will need to encode offsets that use the `+` sign with `%2b` so 
 
 Example:
 
-`/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00%2b00:00&end_time=2024-03-29T00:00:00%2b00:00&fields=reach_id,time_str,wse,slope`
+[`GET /timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00+00:00&end_time=2024-03-29T00:00:00+00:00&fields=reach_id,time_str,wse,slope`](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00%3A00%3A00%2b00%3A00&end_time=2024-03-29T00%3A00%3A00%2b00%3A00&fields=reach_id,time_str,wse,slope)
 
 ### output : string, required: no
 
@@ -124,7 +124,6 @@ The default for header `Accept: application/geo+json` is to set compact to `true
 The name of the collection to return. Allows users to explicitly request data from a particular version of the data.
 
 Supported collection names:
-
 | Collection Name | Version | Description |
 |-----------------|---------|-------------|
 | `SWOT_L2_HR_RiverSP_D` | D (default) | River data (reaches and nodes) |
@@ -133,7 +132,6 @@ Supported collection names:
 | `SWOT_L2_HR_LakeSP_2.0` | 2.0 | Lake data |
 
 Sub-collection names can also be used to search only reaches, nodes, or prior lakes within a collection:
-
 | Sub-collection Name | Searches |
 |---------------------|----------|
 | `SWOT_L2_HR_RiverSP_reach_D` | Version D reaches only |
