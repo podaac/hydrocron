@@ -121,25 +121,20 @@ The default for header `Accept: application/geo+json` is to set compact to `true
 (collection_name)=
 ### collection_name: string, required: no
 
-The name of the collection to return. Allows users to explicitly request data from a particular version of the data.
+The name of the collection to query. Allows users to request data from a specific version or feature type. If omitted, defaults to a Version D collection.
 
-Supported collection names:
-| Collection Name | Version | Description |
-|-----------------|---------|-------------|
-| `SWOT_L2_HR_RiverSP_D` | D (default) | River data (reaches and nodes) |
+| Collection Name | Version | Scope |
+|-----------------|---------|-------|
+| `SWOT_L2_HR_RiverSP_D` | D (default) | All river data (reaches and nodes) |
+| `SWOT_L2_HR_RiverSP_reach_D` | D | Reaches only |
+| `SWOT_L2_HR_RiverSP_node_D` | D | Nodes only |
 | `SWOT_L2_HR_LakeSP_D` | D (default) | Lake data |
-| `SWOT_L2_HR_RiverSP_2.0` | 2.0 | River data (reaches and nodes) |
+| `SWOT_L2_HR_LakeSP_prior_D` | D | Prior lakes only |
+| `SWOT_L2_HR_RiverSP_2.0` | 2.0 | All river data (reaches and nodes) |
+| `SWOT_L2_HR_RiverSP_reach_2.0` | 2.0 | Reaches only |
+| `SWOT_L2_HR_RiverSP_node_2.0` | 2.0 | Nodes only |
 | `SWOT_L2_HR_LakeSP_2.0` | 2.0 | Lake data |
-
-Sub-collection names can also be used to search only reaches, nodes, or prior lakes within a collection:
-| Sub-collection Name | Searches |
-|---------------------|----------|
-| `SWOT_L2_HR_RiverSP_reach_D` | Version D reaches only |
-| `SWOT_L2_HR_RiverSP_node_D` | Version D nodes only |
-| `SWOT_L2_HR_LakeSP_prior_D` | Version D prior lakes only |
-| `SWOT_L2_HR_RiverSP_reach_2.0` | Version 2.0 reaches only |
-| `SWOT_L2_HR_RiverSP_node_2.0` | Version 2.0 nodes only |
-| `SWOT_L2_HR_LakeSP_prior_2.0` | Version 2.0 prior lakes only |
+| `SWOT_L2_HR_LakeSP_prior_2.0` | 2.0 | Prior lakes only |
 
 (fields)=
 ### fields : string, required: yes
