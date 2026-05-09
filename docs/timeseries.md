@@ -94,7 +94,7 @@ Please note you will need to encode offsets that use the `+` sign with `%2b` so 
 
 Example:
 
-[`GET /timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00+00:00&end_time=2024-03-29T00:00:00+00:00&fields=reach_id,time_str,wse,slope`](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00%3A00%3A00%2b00%3A00&end_time=2024-03-29T00%3A00%3A00%2b00%3A00&fields=reach_id,time_str,wse,slope)
+`/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00%2b00:00&end_time=2024-03-29T00:00:00%2b00:00&fields=reach_id,time_str,wse,slope`
 
 ### end_time : string, required: yes
 
@@ -106,7 +106,7 @@ Please note you will need to encode offsets that use the `+` sign with `%2b` so 
 
 Example:
 
-[`GET /timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00+00:00&end_time=2024-03-29T00:00:00+00:00&fields=reach_id,time_str,wse,slope`](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00%3A00%3A00%2b00%3A00&end_time=2024-03-29T00%3A00%3A00%2b00%3A00&fields=reach_id,time_str,wse,slope)
+`/timeseries?feature=Reach&feature_id=78340600051&output=geojson&start_time=2024-01-25T00:00:00%2b00:00&end_time=2024-03-29T00:00:00%2b00:00&fields=reach_id,time_str,wse,slope`
 
 ### output : string, required: no
 
