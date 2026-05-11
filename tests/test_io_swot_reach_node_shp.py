@@ -29,7 +29,7 @@ def test_parse_from_filename_reach():
     assert filename_attrs['range_end_time'] == "2023-06-10T19:33:44Z"
     assert filename_attrs['crid'] == "PIA1"
     assert filename_attrs['collection_shortname'] == constants.TEST_REACH_COLLECTION_NAME
-    assert filename_attrs['collection_version'] == ""
+    assert filename_attrs['collection_version'] == "2.0"
     assert filename_attrs['granuleUR'] == constants.TEST_REACH_FILENAME
     assert datetime.strptime(filename_attrs['ingest_time'], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc) - datetime.now(timezone.utc) <= timedelta(minutes=5)
 
@@ -48,7 +48,7 @@ def test_parse_from_filename_lake():
     assert filename_attrs['range_end_time'] == "2024-07-13T11:20:27Z"
     assert filename_attrs['crid'] == "PIC0"
     assert filename_attrs['collection_shortname'] == constants.TEST_PLAKE_COLLECTION_NAME
-    assert filename_attrs['collection_version'] == ""
+    assert filename_attrs['collection_version'] == "2.0"
     assert filename_attrs['granuleUR'] == constants.TEST_PLAKE_FILENAME
     assert datetime.strptime(filename_attrs['ingest_time'], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=pytz.utc) - datetime.now(timezone.utc) <= timedelta(minutes=5)
 
