@@ -155,8 +155,9 @@ def parse_metadata_from_shpxml(xml_elem):
     logging.info('Starting parse metadata from shpfile')
     # get SWORD version
     for globs in xml_elem.findall('global_attributes'):
-        prior_db_files = globs.find('xref_prior_river_db_files').text
-        metadata_attrs = {'sword_version': prior_db_files[-5:-3]}
+        prior_db_files = globs.find('xref_prior_river_db_files').text.strip()
+        sword_version = prior_db_files.rsplit('_v', 1)[-1].replace('.nc', '')[1:]
+        metadata_attrs = {'sword_version': sword_version}
 
     # get PLD version
     for globs in xml_elem.findall('global_metadata'):
@@ -229,6 +230,7 @@ def parse_from_filename(filepath):
     for table_info in constants.TABLE_COLLECTION_INFO:
         if (table_info['feature_type'] in filename) & (table_info['collection_name'] in filepath):
             collection = table_info['collection_name']
+            collection_version = collection.rsplit('_', 1)[-1]
 
     filename_attrs = {
         'cycle_id': filename_components[5],

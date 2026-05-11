@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+    - Issue 346 - SWORD version incorrect for version D
+    - Issue 288 - Ensure collection version is populated in Hydrocron DynamoDB table fields
 ### Security
 
 ## [1.8.0]
