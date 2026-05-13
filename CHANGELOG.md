@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 ### Changed
+    - Issue 220 - Update terraform aws provider to 5.0
 ### Deprecated
 ### Removed
 ### Fixed
