@@ -383,9 +383,6 @@ resource "aws_iam_role" "hydrocron-lambda-execution-role" {
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
 
-  lifecycle {
-    ignore_changes = [managed_policy_arns]
-  }
 }
 
 resource "aws_iam_role_policy_attachment" "hydrocron_lambda_execution_role_basic_execution" {
@@ -418,10 +415,6 @@ resource "aws_iam_role" "hydrocron-lambda-authorizer-role" {
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
 
-  lifecycle {
-    ignore_changes = [managed_policy_arns]
-  }
-
   inline_policy {
     name   = "HydrocronLambdaVPC"
     policy = data.aws_iam_policy_document.lambda-vpc.json
@@ -438,10 +431,6 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-
-  lifecycle {
-    ignore_changes = [managed_policy_arns]
-  }
 
   inline_policy {
     name   = "HydrocronLambdaInvoke"
@@ -471,10 +460,6 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-
-  lifecycle {
-    ignore_changes = [managed_policy_arns]
-  }
 
   inline_policy {
     name   = "HydrocronDynamoWrite"
@@ -512,10 +497,6 @@ resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-
-  lifecycle {
-    ignore_changes = [managed_policy_arns]
-  }
 
   inline_policy {
     name   = "HydrocronLambdaInvoke"
@@ -560,9 +541,6 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
 
-  lifecycle {
-    ignore_changes = [managed_policy_arns]
-  }
 }
 
 resource "aws_iam_role_policy_attachment" "hydrocron_lambda_track_ingest_role_basic_execution" {
