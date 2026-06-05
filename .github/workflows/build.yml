@@ -154,9 +154,6 @@ jobs:
         run: |
           poetry run pylint hydrocron
           poetry run flake8 hydrocron
-      - name: Test and coverage
-        run: |
-          poetry run pytest --junitxml=build/reports/pytest.xml --cov=hydrocron --cov-report=xml:build/reports/coverage.xml tests/
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
@@ -201,6 +198,9 @@ jobs:
           args: >
             --org=${{ secrets.SNYK_ORG_ID }}
             --project-name=${{ github.repository }}
+      - name: Test and coverage
+        run: |
+          poetry run pytest --junitxml=build/reports/pytest.xml --cov=hydrocron --cov-report=xml:build/reports/coverage.xml tests/
       - name: Build Python Artifact
         id: poetry-build
         run: |
