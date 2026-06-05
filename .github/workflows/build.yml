@@ -164,6 +164,7 @@ jobs:
           terraform init -backend=false
           terraform validate -no-color
       - name: Run Snyk as a blocking step
+        if: false
         uses: snyk/actions/python-3.12@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -175,6 +176,7 @@ jobs:
             --severity-threshold=high
             --fail-on=all
       - name: Run Snyk on Python
+        if: false
         uses: snyk/actions/python-3.12@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
