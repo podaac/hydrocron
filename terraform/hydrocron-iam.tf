@@ -425,6 +425,11 @@ resource "aws_iam_role" "hydrocron-lambda-authorizer-role" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "hydrocron_lambda_authorizer_role_basic_execution" {
+  role       = aws_iam_role.hydrocron-lambda-authorizer-role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 
 resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
   name = "${local.aws_resource_prefix}-lambda-load-data-role"
