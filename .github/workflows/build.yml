@@ -163,21 +163,6 @@ jobs:
         run: |
           terraform init -backend=false
           terraform validate -no-color
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=${{ github.repository_owner }}
-            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
-            -Dsonar.python.coverage.reportPaths=build/reports/coverage.xml
-            -Dsonar.sources=hydrocron/
-            -Dsonar.tests=tests/
-            -Dsonar.projectName=${{ github.repository }}
-            -Dsonar.projectVersion=${{ env.software_version }}
-            -Dsonar.python.version=3.10,3.12
       - name: Run Snyk as a blocking step
         uses: snyk/actions/python-3.12@master
         env:
@@ -201,6 +186,21 @@ jobs:
       - name: Test and coverage
         run: |
           poetry run pytest --junitxml=build/reports/pytest.xml --cov=hydrocron --cov-report=xml:build/reports/coverage.xml tests/
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
+            -Dsonar.python.coverage.reportPaths=build/reports/coverage.xml
+            -Dsonar.sources=hydrocron/
+            -Dsonar.tests=tests/
+            -Dsonar.projectName=${{ github.repository }}
+            -Dsonar.projectVersion=${{ env.software_version }}
+            -Dsonar.python.version=3.10,3.12      
       - name: Build Python Artifact
         id: poetry-build
         run: |
