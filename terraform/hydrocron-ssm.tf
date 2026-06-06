@@ -1,7 +1,7 @@
 resource "aws_ssm_parameter" "hydrocron-api-url" {
   name  = "/service/${var.app_name}/api-url"
   type  = "String"
-  value = aws_api_gateway_deployment.hydrocron-api-gateway-deployment.invoke_url
+  value = aws_api_gateway_stage.hydrocron-api-gateway-stage.invoke_url
 }
 
 
