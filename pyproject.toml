@@ -56,6 +56,9 @@ optional = true
 rich = "^13.0"
 netCDF4 = "^1.6"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.coverage.run]
 source = ['hydrocron']
 relative_files = true

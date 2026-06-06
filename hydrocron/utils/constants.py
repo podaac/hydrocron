@@ -307,10 +307,7 @@ REACH_DATA_COLUMNS = [
     'dark_frac', 'ice_clim_f', 'ice_dyn_f', 'n_good_nod',
     'obs_frac_n', 'xovr_cal_q', 'geoid_hght', 'geoid_slop',
     'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
-    'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c',
-    'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
-    'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q',
-    'swot_discharge_reanalysis'
+    'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c'
 ]
 
 NODE_DATA_COLUMNS = [
