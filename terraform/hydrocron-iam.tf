@@ -301,6 +301,17 @@ data "aws_iam_policy_document" "sns-resource-cnm-policy" {
 }
 
 
+data "aws_iam_policy_document" "sqs-send-granule-policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "sqs:SendMessage"
+    ]
+    resources = [aws_sqs_queue.hydrocron_granule_queue.arn]
+  }
+}
+
+
 data "aws_iam_policy_document" "apigw-resource-policy" {
   statement {
     effect = "Allow"
@@ -448,7 +459,8 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
   managed_policy_arns = [
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
   ]
 
   inline_policy {
@@ -487,8 +499,8 @@ resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
   "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"]
 
   inline_policy {
-    name   = "HydrocronLambdaInvoke"
-    policy = data.aws_iam_policy_document.lambda-invoke-policy.json
+    name   = "HydrocronSQSSendGranule"
+    policy = data.aws_iam_policy_document.sqs-send-granule-policy.json
   }
   inline_policy {
     policy = data.aws_iam_policy_document.lambda_log_to_cloudwatch.json

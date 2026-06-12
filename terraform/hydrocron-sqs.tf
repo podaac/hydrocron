@@ -46,3 +46,31 @@ resource "aws_lambda_event_source_mapping" "hydrocron_cnm_sqs_trigger" {
   function_name    = aws_lambda_function.hydrocron_lambda_cnm.arn
   batch_size       = 1
 }
+
+
+# Dead letter queue for failed granule load messages
+resource "aws_sqs_queue" "hydrocron_granule_dlq" {
+  name                      = "${local.aws_resource_prefix}-granule-dlq"
+  message_retention_seconds = 1209600 # 14 days
+  tags                      = var.default_tags
+}
+
+# SQS queue between CNM Lambda and Load Granule Lambda
+resource "aws_sqs_queue" "hydrocron_granule_queue" {
+  name                       = "${local.aws_resource_prefix}-granule-queue"
+  visibility_timeout_seconds = 960 # Lambda timeout (900s) + buffer
+  message_retention_seconds  = 86400
+  tags                       = var.default_tags
+
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.hydrocron_granule_dlq.arn
+    maxReceiveCount     = 2
+  })
+}
+
+# Lambda event source mapping: SQS -> Load Granule Lambda
+resource "aws_lambda_event_source_mapping" "hydrocron_granule_sqs_trigger" {
+  event_source_arn = aws_sqs_queue.hydrocron_granule_queue.arn
+  function_name    = aws_lambda_function.hydrocron_lambda_load_granule.arn
+  batch_size       = 1
+}
