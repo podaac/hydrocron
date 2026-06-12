@@ -168,7 +168,7 @@ def cnm_handler(event, _):
 
     # Parse message
     for message in event['Records']:
-        cnm = json.loads(message['Sns']['Message'])
+        cnm = json.loads(message['body'])
         revision_date = cnm['submissionTime']
 
         logging.info("Begin processing message %s", json.dumps(cnm))
