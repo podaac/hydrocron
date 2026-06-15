@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
     - Issue 220 - Update terraform aws provider to 6.0 
+    - SQS - Added an sqs  after sns from cnm response so that we have retry and have a dead letter queue
 ### Deprecated
 ### Removed
 ### Fixed
     - Issue 346 - SWORD version incorrect for version D
     - Issue 288 - Ensure collection version is populated in Hydrocron DynamoDB table fields
+    - Issue 358 - Add requester pay into download file from s3
 ### Security
 
 ## [1.8.0]
