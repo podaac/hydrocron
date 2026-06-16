@@ -154,6 +154,9 @@ jobs:
         run: |
           poetry run pylint hydrocron
           poetry run flake8 hydrocron
+      - name: Test and coverage
+        run: |
+          poetry run pytest --junitxml=build/reports/pytest.xml --cov=hydrocron --cov-report=xml:build/reports/coverage.xml tests/
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
@@ -163,31 +166,6 @@ jobs:
         run: |
           terraform init -backend=false
           terraform validate -no-color
-      - name: Run Snyk as a blocking step
-        if: false
-        uses: snyk/actions/python-3.12@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: >
-            --org=${{ secrets.SNYK_ORG_ID }}
-            --project-name=${{ github.repository }}
-            --severity-threshold=high
-            --fail-on=all
-      - name: Run Snyk on Python
-        if: false
-        uses: snyk/actions/python-3.12@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: monitor
-          args: >
-            --org=${{ secrets.SNYK_ORG_ID }}
-            --project-name=${{ github.repository }}
-      - name: Test and coverage
-        run: |
-          poetry run pytest --junitxml=build/reports/pytest.xml --cov=hydrocron --cov-report=xml:build/reports/coverage.xml tests/
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v7
         env:
@@ -202,7 +180,27 @@ jobs:
             -Dsonar.tests=tests/
             -Dsonar.projectName=${{ github.repository }}
             -Dsonar.projectVersion=${{ env.software_version }}
-            -Dsonar.python.version=3.10,3.12      
+            -Dsonar.python.version=3.10,3.12
+      - name: Run Snyk as a blocking step
+        uses: snyk/actions/python-3.12@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: >
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --project-name=${{ github.repository }}
+            --severity-threshold=high
+            --fail-on=all
+      - name: Run Snyk on Python
+        uses: snyk/actions/python-3.12@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: >
+            --org=${{ secrets.SNYK_ORG_ID }}
+            --project-name=${{ github.repository }}
       - name: Build Python Artifact
         id: poetry-build
         run: |
