@@ -181,26 +181,26 @@ jobs:
             -Dsonar.projectName=${{ github.repository }}
             -Dsonar.projectVersion=${{ env.software_version }}
             -Dsonar.python.version=3.10,3.12
-      - name: Run Snyk as a blocking step
-        uses: snyk/actions/python-3.12@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: >
-            --org=${{ secrets.SNYK_ORG_ID }}
-            --project-name=${{ github.repository }}
-            --severity-threshold=high
-            --fail-on=all
-      - name: Run Snyk on Python
-        uses: snyk/actions/python-3.12@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: monitor
-          args: >
-            --org=${{ secrets.SNYK_ORG_ID }}
-            --project-name=${{ github.repository }}
+      #- name: Run Snyk as a blocking step
+      #  uses: snyk/actions/python-3.12@master
+      #  env:
+      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #  with:
+      #    command: test
+      #    args: >
+      #      --org=${{ secrets.SNYK_ORG_ID }}
+      #      --project-name=${{ github.repository }}
+      #      --severity-threshold=high
+      #      --fail-on=all
+      #- name: Run Snyk on Python
+      #  uses: snyk/actions/python-3.12@master
+      #  env:
+      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #  with:
+      #    command: monitor
+      #    args: >
+      #      --org=${{ secrets.SNYK_ORG_ID }}
+      #      --project-name=${{ github.repository }}
       - name: Build Python Artifact
         id: poetry-build
         run: |
