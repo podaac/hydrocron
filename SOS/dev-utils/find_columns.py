@@ -2,12 +2,12 @@
 """CLI to scan a DynamoDB table for rows containing columns matching a prefix.
 
 Usage:
-    python SOS/utils/find_columns.py <table_name> <column_filter> [--profile <aws_profile>]
+    python SOS/dev-utils/find_columns.py <table_name> <column_filter> [--profile <aws_profile>]
 
 Examples:
-    python SOS/utils/find_columns.py hydrocron-swot-reach-table sos
-    python SOS/utils/find_columns.py hydrocron-swot-reach-table dschg_ --limit 5
-    python SOS/utils/find_columns.py hydrocron-swot-reach-table sos --profile podaac-services-uat
+    python SOS/dev-utils/find_columns.py hydrocron-swot-reach-table sos
+    python SOS/dev-utils/find_columns.py hydrocron-swot-reach-table dschg_ --limit 5
+    python SOS/dev-utils/find_columns.py hydrocron-swot-reach-table sos --profile podaac-services-uat
 """
 import argparse
 import sys

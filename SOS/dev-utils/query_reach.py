@@ -2,11 +2,11 @@
 """CLI to query a DynamoDB reach and display columns/values per time step.
 
 Usage:
-    python SOS/utils/query_reach.py <table_name> <reach_id> [--profile <aws_profile>]
+    python SOS/dev-utils/query_reach.py <table_name> <reach_id> [--profile <aws_profile>]
 
 Examples:
-    python SOS/utils/query_reach.py hydrocron-swot-reach-table 71224100223
-    python SOS/utils/query_reach.py hydrocron-swot-reach-table 18180900091 --profile podaac-services-ops
+    python SOS/dev-utils/query_reach.py hydrocron-swot-reach-table 71224100223
+    python SOS/dev-utils/query_reach.py hydrocron-swot-reach-table 18180900091 --profile podaac-services-ops
 """
 import argparse
 import re
