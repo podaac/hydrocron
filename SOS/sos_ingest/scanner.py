@@ -63,7 +63,6 @@ def scan(config: IngestConfig) -> ScanSummary:
     no_time_match = 0
     missing_column = 0
     value_mismatch = 0
-    source_mismatch = 0
     total_time_steps = 0
 
     # Scan progress
@@ -138,27 +137,9 @@ def scan(config: IngestConfig) -> ScanSummary:
                     continue
 
                 db_row = find_db_row(rows, matched_time)
-                db_source = db_row.get("sos_source_filename", "") if db_row else ""
-
-                # Check source filename
-                has_source_mismatch = False
-                if db_source and db_source != sos_filename:
-                    row_data = {
-                        "reach_id": reach_id,
-                        "sos_time": sos_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "matched_range_start_time": matched_time,
-                        "column": "sos_source_filename",
-                        "status": "source_mismatch",
-                        "expected_value": sos_filename,
-                        "actual_value": db_source,
-                    }
-                    writer.writerow(row_data)
-                    discrepancies.append(row_data)
-                    source_mismatch += 1
-                    has_source_mismatch = True
 
                 # Check each algorithm column
-                step_ok = not has_source_mismatch
+                step_ok = True
                 for rec in recs:
                     col = algo_column_map.get(rec.algorithm)
                     if not col:
@@ -210,7 +191,6 @@ def scan(config: IngestConfig) -> ScanSummary:
         no_time_match=no_time_match,
         missing_column=missing_column,
         value_mismatch=value_mismatch,
-        source_mismatch=source_mismatch,
     )
 
     ui.show_scan_results(summary, config, scan_path, discrepancies)

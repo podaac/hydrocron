@@ -110,55 +110,6 @@ class TestScanValueMismatch:
             assert summary.value_mismatch > 0
 
 
-class TestScanSourceMismatch:
-    def test_reports_source_mismatch(self, sample_sos_netcdf):
-        with moto.mock_aws():
-            dynamodb = boto3.resource("dynamodb", region_name="us-west-2")
-            times = _get_db_times()
-            _setup_table(dynamodb, ["10000000021"], times)
-
-            # Ingest first
-            ingest_config = _make_config(sample_sos_netcdf, start_reach_id="10000000021", stop_reach_id="10000000021")
-            run(ingest_config)
-
-            # Now change source filename on one row
-            table = dynamodb.Table(MOCK_TABLE_NAME)
-            table.update_item(
-                Key={"reach_id": "10000000021", "range_start_time": times[1]},
-                UpdateExpression="SET #c = :v",
-                ExpressionAttributeNames={"#c": "sos_source_filename"},
-                ExpressionAttributeValues={":v": "different_file.nc"},
-            )
-
-            scan_config = _make_config(sample_sos_netcdf, output_dir=tempfile.mkdtemp(),
-                                       start_reach_id="10000000021", stop_reach_id="10000000021")
-            summary = scan(scan_config)
-
-            assert summary.source_mismatch > 0
-
-
-class TestScanSourceMismatchAndColumnIssue:
-    def test_reports_both_source_and_value_mismatch(self, sample_sos_netcdf):
-        with moto.mock_aws():
-            dynamodb = boto3.resource("dynamodb", region_name="us-west-2")
-            times = _get_db_times()
-            table = _setup_table(dynamodb, ["10000000021"], times)
-
-            # Write wrong source AND wrong column value on same row
-            table.update_item(
-                Key={"reach_id": "10000000021", "range_start_time": times[1]},
-                UpdateExpression="SET #s = :s, #c = :c",
-                ExpressionAttributeNames={"#s": "sos_source_filename", "#c": "sos_consensus_q"},
-                ExpressionAttributeValues={":s": "different_file.nc", ":c": "WRONG"},
-            )
-
-            scan_config = _make_config(sample_sos_netcdf, start_reach_id="10000000021", stop_reach_id="10000000021")
-            summary = scan(scan_config)
-
-            assert summary.source_mismatch > 0
-            assert summary.value_mismatch > 0
-
-
 class TestScanNoRows:
     def test_reports_no_rows_for_missing_reach(self, sample_sos_netcdf):
         with moto.mock_aws():
@@ -213,7 +164,7 @@ class TestScanCsvWritten:
                 rows = list(reader)
             assert len(rows) > 0
             for row in rows:
-                assert row["status"] in ("no_rows", "no_time_match", "missing_column", "value_mismatch", "source_mismatch")
+                assert row["status"] in ("no_rows", "no_time_match", "missing_column", "value_mismatch")
 
 
 class TestScanSummaryCounts:
@@ -225,12 +176,6 @@ class TestScanSummaryCounts:
             scan_config = _make_config(sample_sos_netcdf, start_reach_id="10000000021", stop_reach_id="10000000021")
             summary = scan(scan_config)
 
-            # ok + all discrepancy types should equal total time steps
-            # (source_mismatch is counted per time step, not per column)
-            total_accounted = summary.ok + summary.no_rows + summary.no_time_match + summary.source_mismatch
-            # missing_column and value_mismatch are per-column, not per-step
-            # But ok is only incremented if ALL columns pass, so:
-            # time_steps = ok + no_rows + no_time_match + source_mismatch + steps_with_column_issues
             assert summary.total_time_steps > 0
 
 

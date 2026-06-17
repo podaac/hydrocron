@@ -91,7 +91,6 @@ class TestFullLiveRun:
             resp = table.get_item(Key={"reach_id": "10000000021", "range_start_time": times[1]})
             item = resp["Item"]
             assert "sos_consensus_q" in item
-            assert "sos_source_filename" in item
 
 
 class TestResumeFromReachId:

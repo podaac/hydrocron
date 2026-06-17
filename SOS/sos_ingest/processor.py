@@ -35,7 +35,7 @@ def _group_by_time(rds: ReachDischargeSet) -> dict[float, list]:
     return dict(sorted(groups.items()))
 
 
-def _build_column_updates(records: list, sos_filename: str) -> dict[str, str]:
+def _build_column_updates(records: list) -> dict[str, str]:
     """Build the column_updates dict from all algorithm records at one time step."""
     algo_column_map = {a.name: a.column_name for a in ALGORITHM_CONFIG}
     updates: dict[str, str] = {}
@@ -43,18 +43,14 @@ def _build_column_updates(records: list, sos_filename: str) -> dict[str, str]:
         col = algo_column_map.get(rec.algorithm)
         if col:
             updates[col] = str(float(rec.discharge_value))
-    updates["sos_source_filename"] = sos_filename
-    updates["sos_ingest_time"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     return updates
 
 
 def _row_already_has_values(db_row: dict | None, column_updates: dict[str, str]) -> bool:
-    """Check if the DB row already has all SOS columns with the same values (skip sos_ingest_time)."""
+    """Check if the DB row already has all SOS columns with the same values."""
     if db_row is None:
         return False
     for col, val in column_updates.items():
-        if col == "sos_ingest_time":
-            continue
         if db_row.get(col) != val:
             return False
     return True
@@ -179,7 +175,7 @@ def run(config: IngestConfig) -> ProcessingSummary:
                         progress.advance(task_id, 1)
                         continue
 
-                    column_updates = _build_column_updates(recs, sos_filename)
+                    column_updates = _build_column_updates(recs)
                     matched += 1
 
                     db_row = find_db_row(rows, matched_time)

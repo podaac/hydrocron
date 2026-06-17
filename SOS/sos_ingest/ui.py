@@ -191,7 +191,6 @@ class IngestUI:
         result_table.add_row("  ✗ No time match:", f"{summary.no_time_match:,} ({pct(summary.no_time_match)})")
         result_table.add_row("  ✗ Missing column:", f"{summary.missing_column:,} ({pct(summary.missing_column)})")
         result_table.add_row("  ✗ Value mismatch:", f"{summary.value_mismatch:,} ({pct(summary.value_mismatch)})")
-        result_table.add_row("  ✗ Source mismatch:", f"{summary.source_mismatch:,} ({pct(summary.source_mismatch)})")
         result_table.add_row("", "")
         result_table.add_row("Scan report:", scan_path)
 

@@ -66,4 +66,3 @@ class ScanSummary:
     no_time_match: int
     missing_column: int
     value_mismatch: int
-    source_mismatch: int
