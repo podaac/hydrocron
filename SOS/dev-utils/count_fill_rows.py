@@ -8,11 +8,11 @@ scans the table and reports:
   2. Any unusual range_start_time values found (samples first to detect patterns)
 
 Usage:
-    python SOS/utils/count_fill_rows.py <table_name> [--profile <aws_profile>]
+    python SOS/dev-utils/count_fill_rows.py <table_name> [--profile <aws_profile>]
 
 Examples:
-    python SOS/utils/count_fill_rows.py hydrocron-swot-reach-table
-    python SOS/utils/count_fill_rows.py hydrocron-swot-reach-table --profile podaac-services-uat
+    python SOS/dev-utils/count_fill_rows.py hydrocron-swot-reach-table
+    python SOS/dev-utils/count_fill_rows.py hydrocron-swot-reach-table --profile podaac-services-uat
 """
 import argparse
 import sys

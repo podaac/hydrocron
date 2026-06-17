@@ -121,12 +121,13 @@ def scan(config: IngestConfig) -> ScanSummary:
                 matched_time, delta, status = find_closest_time(sos_dt, db_times, config.time_tolerance_seconds)
 
                 if status != "matched":
+                    csv_status = "no_time_match" if status == "no_match" else status
                     row_data = {
                         "reach_id": reach_id,
                         "sos_time": sos_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "matched_range_start_time": "",
                         "column": "",
-                        "status": "no_time_match",
+                        "status": csv_status,
                         "expected_value": "",
                         "actual_value": "",
                     }

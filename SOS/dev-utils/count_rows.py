@@ -2,12 +2,12 @@
 """CLI to count rows in a DynamoDB table, optionally filtered by reach_id.
 
 Usage:
-    python SOS/utils/count_rows.py <table_name> [--reach-id <id>] [--profile <aws_profile>]
+    python SOS/dev-utils/count_rows.py <table_name> [--reach-id <id>] [--profile <aws_profile>]
 
 Examples:
-    python SOS/utils/count_rows.py hydrocron-swot-reach-table
-    python SOS/utils/count_rows.py hydrocron-swot-reach-table --reach-id 18180900091
-    python SOS/utils/count_rows.py hydrocron-swot-reach-table --profile podaac-services-uat
+    python SOS/dev-utils/count_rows.py hydrocron-swot-reach-table
+    python SOS/dev-utils/count_rows.py hydrocron-swot-reach-table --reach-id 18180900091
+    python SOS/dev-utils/count_rows.py hydrocron-swot-reach-table --profile podaac-services-uat
 """
 import argparse
 import sys

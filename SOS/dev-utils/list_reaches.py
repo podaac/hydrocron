@@ -2,11 +2,11 @@
 """CLI to list all reach_ids between a start and end reach_id.
 
 Usage:
-    python SOS/utils/list_reaches.py <start_reach_id> <end_reach_id> [--profile <aws_profile>]
+    python SOS/dev-utils/list_reaches.py <start_reach_id> <end_reach_id> [--profile <aws_profile>]
 
 Examples:
-    python SOS/utils/list_reaches.py 18180900091 18180900095
-    python SOS/utils/list_reaches.py 18180900091 18180900095 --profile podaac-services-uat
+    python SOS/dev-utils/list_reaches.py 18180900091 18180900095
+    python SOS/dev-utils/list_reaches.py 18180900091 18180900095 --profile podaac-services-uat
 """
 import argparse
 

@@ -51,10 +51,22 @@ def main(argv: list[str] | None = None) -> None:
     logging.basicConfig(level=getattr(logging, config.log_level.upper(), logging.INFO))
 
     if config.scan_only:
-        from SOS.sos_ingest.scanner import scan  # noqa: E501
+        try:
+            from SOS.sos_ingest.scanner import scan  # noqa: E501
+        except ImportError as e:
+            raise SystemExit(
+                "ERROR: Optional SOS ingest dependencies are not installed. "
+                "Install with `poetry install --with sos` (or add rich/netCDF4 to your environment)."
+            ) from e
         scan(config)
     else:
-        from SOS.sos_ingest.processor import run  # noqa: E501
+        try:
+            from SOS.sos_ingest.processor import run  # noqa: E501
+        except ImportError as e:
+            raise SystemExit(
+                "ERROR: Optional SOS ingest dependencies are not installed. "
+                "Install with `poetry install --with sos` (or add rich/netCDF4 to your environment)."
+            ) from e
         run(config)
 
 

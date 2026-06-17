@@ -78,8 +78,8 @@ class IngestErrorLogger:
             lines.append(f"Time tolerance: {config.time_tolerance_seconds}s ({config.time_tolerance_seconds // 60} min)")
         lines += [
             f"Mode:           {'DRY RUN' if summary.dry_run else 'LIVE'}",
-            f"Started:        {summary.start_time.strftime("%Y-%m-%dT%H:%M:%SZ") if summary.start_time else 'N/A'}",
-            f"Completed:      {summary.end_time.strftime("%Y-%m-%dT%H:%M:%SZ") if summary.end_time else 'N/A'}",
+            f"Started:        {summary.start_time.strftime('%Y-%m-%dT%H:%M:%SZ') if summary.start_time else 'N/A'}",
+            f"Completed:      {summary.end_time.strftime('%Y-%m-%dT%H:%M:%SZ') if summary.end_time else 'N/A'}",
             f"Duration:       {duration}",
             "",
             f"Total reaches in SOS file: {summary.total_reaches:,}",

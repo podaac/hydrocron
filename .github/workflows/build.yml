@@ -187,7 +187,9 @@ jobs:
             --project-name=${{ github.repository }}
       - name: Test and coverage
         run: |
+          poetry install --with sos
           poetry run pytest --junitxml=build/reports/pytest.xml --cov=hydrocron --cov-report=xml:build/reports/coverage.xml tests/
+          poetry run pytest SOS/tests/ -v
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v7
         env:
