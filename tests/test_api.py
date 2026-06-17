@@ -2,7 +2,7 @@
 Tests for API queries
 """
 import csv
-import os.path
+import os
 import pathlib
 
 import pytest
