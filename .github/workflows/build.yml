@@ -186,6 +186,8 @@ jobs:
             --org=${{ secrets.SNYK_ORG_ID }}
             --project-name=${{ github.repository }}
       - name: Test and coverage
+        env:
+          AWS_DEFAULT_REGION: us-west-2
         run: |
           poetry install --with sos
           poetry run pytest --junitxml=build/reports/pytest.xml --cov=hydrocron --cov-report=xml:build/reports/coverage.xml tests/
