@@ -53,9 +53,6 @@ def scan(config: IngestConfig) -> ScanSummary:
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
     base = os.path.splitext(sos_filename)[0]
     scan_path = os.path.join(config.output_dir, f"{base}_scan_{timestamp}.csv")
-    scan_file = open(scan_path, "w", newline="")
-    writer = csv.DictWriter(scan_file, fieldnames=SCAN_CSV_COLUMNS)
-    writer.writeheader()
 
     discrepancies: list[dict] = []
     ok = 0
@@ -72,117 +69,119 @@ def scan(config: IngestConfig) -> ScanSummary:
     )
     scan_progress = ui.create_scan_progress(total_steps)
 
-    with scan_progress:
-        task_id = list(scan_progress.task_ids)[0]
+    with open(scan_path, "w", newline="") as scan_file:
+        writer = csv.DictWriter(scan_file, fieldnames=SCAN_CSV_COLUMNS)
+        writer.writeheader()
 
-        for reach_id in all_reach_ids:
-            rds = reach_data[reach_id]
+        with scan_progress:
+            task_id = list(scan_progress.task_ids)[0]
 
-            # Group by time step
-            time_groups: dict[float, list] = defaultdict(list)
-            for rec in rds.records:
-                time_groups[rec.sos_time_seconds].append(rec)
+            for reach_id in all_reach_ids:
+                rds = reach_data[reach_id]
 
-            try:
-                rows = db_client.query_reach(reach_id)
-            except Exception as e:
-                logger.error("Failed to query reach %s: %s", reach_id, e)
-                no_rows += 1
-                for t_seconds in time_groups:
-                    total_time_steps += 1
-                    scan_progress.advance(task_id, 1)
-                continue
+                # Group by time step
+                time_groups: dict[float, list] = defaultdict(list)
+                for rec in rds.records:
+                    time_groups[rec.sos_time_seconds].append(rec)
 
-            if not rows:
-                no_rows += 1
-                for t_seconds, recs in time_groups.items():
-                    row_data = {
-                        "reach_id": reach_id,
-                        "sos_time": recs[0].sos_datetime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "matched_range_start_time": "",
-                        "column": "",
-                        "status": "no_rows",
-                        "expected_value": "",
-                        "actual_value": "",
-                    }
-                    writer.writerow(row_data)
-                    discrepancies.append(row_data)
-                    total_time_steps += 1
-                    scan_progress.advance(task_id, 1)
-                continue
-
-            db_times = parse_db_times(rows)
-
-            for t_seconds in sorted(time_groups.keys()):
-                recs = time_groups[t_seconds]
-                sos_dt = recs[0].sos_datetime
-                total_time_steps += 1
-
-                matched_time, delta, status = find_closest_time(sos_dt, db_times, config.time_tolerance_seconds)
-
-                if status != "matched":
-                    csv_status = "no_time_match" if status == "no_match" else status
-                    row_data = {
-                        "reach_id": reach_id,
-                        "sos_time": sos_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "matched_range_start_time": "",
-                        "column": "",
-                        "status": csv_status,
-                        "expected_value": "",
-                        "actual_value": "",
-                    }
-                    writer.writerow(row_data)
-                    discrepancies.append(row_data)
-                    no_time_match += 1
-                    scan_progress.advance(task_id, 1)
+                try:
+                    rows = db_client.query_reach(reach_id)
+                except Exception as e:
+                    logger.error("Failed to query reach %s: %s", reach_id, e)
+                    no_rows += 1
+                    for t_seconds in time_groups:
+                        total_time_steps += 1
+                        scan_progress.advance(task_id, 1)
                     continue
 
-                db_row = find_db_row(rows, matched_time)
-
-                # Check each algorithm column
-                step_ok = True
-                for rec in recs:
-                    col = algo_column_map.get(rec.algorithm)
-                    if not col:
-                        continue
-                    expected_val = str(float(rec.discharge_value))
-                    actual_val = db_row.get(col, "") if db_row else ""
-
-                    if not actual_val:
+                if not rows:
+                    no_rows += 1
+                    for t_seconds, recs in time_groups.items():
                         row_data = {
                             "reach_id": reach_id,
-                            "sos_time": sos_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                            "matched_range_start_time": matched_time,
-                            "column": col,
-                            "status": "missing_column",
-                            "expected_value": expected_val,
+                            "sos_time": recs[0].sos_datetime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "matched_range_start_time": "",
+                            "column": "",
+                            "status": "no_rows",
+                            "expected_value": "",
                             "actual_value": "",
                         }
                         writer.writerow(row_data)
                         discrepancies.append(row_data)
-                        missing_column += 1
-                        step_ok = False
-                    elif actual_val != expected_val:
+                        total_time_steps += 1
+                        scan_progress.advance(task_id, 1)
+                    continue
+
+                db_times = parse_db_times(rows)
+
+                for t_seconds in sorted(time_groups.keys()):
+                    recs = time_groups[t_seconds]
+                    sos_dt = recs[0].sos_datetime
+                    total_time_steps += 1
+
+                    matched_time, delta, status = find_closest_time(sos_dt, db_times, config.time_tolerance_seconds)
+
+                    if status != "matched":
+                        csv_status = "no_time_match" if status == "no_match" else status
                         row_data = {
                             "reach_id": reach_id,
                             "sos_time": sos_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                            "matched_range_start_time": matched_time,
-                            "column": col,
-                            "status": "value_mismatch",
-                            "expected_value": expected_val,
-                            "actual_value": actual_val,
+                            "matched_range_start_time": "",
+                            "column": "",
+                            "status": csv_status,
+                            "expected_value": "",
+                            "actual_value": "",
                         }
                         writer.writerow(row_data)
                         discrepancies.append(row_data)
-                        value_mismatch += 1
-                        step_ok = False
+                        no_time_match += 1
+                        scan_progress.advance(task_id, 1)
+                        continue
 
-                if step_ok:
-                    ok += 1
+                    db_row = find_db_row(rows, matched_time)
 
-                scan_progress.advance(task_id, 1)
+                    # Check each algorithm column
+                    step_ok = True
+                    for rec in recs:
+                        col = algo_column_map.get(rec.algorithm)
+                        if not col:
+                            continue
+                        expected_val = str(float(rec.discharge_value))
+                        actual_val = db_row.get(col, "") if db_row else ""
 
-    scan_file.close()
+                        if not actual_val:
+                            row_data = {
+                                "reach_id": reach_id,
+                                "sos_time": sos_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                "matched_range_start_time": matched_time,
+                                "column": col,
+                                "status": "missing_column",
+                                "expected_value": expected_val,
+                                "actual_value": "",
+                            }
+                            writer.writerow(row_data)
+                            discrepancies.append(row_data)
+                            missing_column += 1
+                            step_ok = False
+                        elif actual_val != expected_val:
+                            row_data = {
+                                "reach_id": reach_id,
+                                "sos_time": sos_dt.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                "matched_range_start_time": matched_time,
+                                "column": col,
+                                "status": "value_mismatch",
+                                "expected_value": expected_val,
+                                "actual_value": actual_val,
+                            }
+                            writer.writerow(row_data)
+                            discrepancies.append(row_data)
+                            value_mismatch += 1
+                            step_ok = False
+
+                    if step_ok:
+                        ok += 1
+
+                    scan_progress.advance(task_id, 1)
 
     summary = ScanSummary(
         total_reaches=len(all_reach_ids),

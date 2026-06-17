@@ -11,7 +11,7 @@ poetry install --with sos
 ## Usage
 
 ```bash
-poetry run sos_ingest --sos-file <path_to_sos_netcdf_file> [options]
+poetry run sos_ingest --sos-file <path_to_sos_netcdf_file> --aws-profile <profile_name> [options]
 ```
 
 ## Arguments
@@ -53,6 +53,7 @@ AF_FILE="/path/to/af_sword_v16_SOS_results_unconstrained_....nc"
 # Dry run for a single reach
 poetry run sos_ingest \
     --sos-file "$AF_FILE" \
+    --aws-profile podaac-services-uat \
     --dry-run \
     --start-reach-id 18180900091 \
     --stop-reach-id 18180900091
@@ -60,22 +61,25 @@ poetry run sos_ingest \
 # Live ingest for a single reach
 poetry run sos_ingest \
     --sos-file "$AF_FILE" \
+    --aws-profile podaac-services-uat \
     --start-reach-id 18180900091 \
     --stop-reach-id 18180900091
 
 # Process only specific algorithms
 poetry run sos_ingest \
     --sos-file "$AF_FILE" \
+    --aws-profile podaac-services-uat \
     --algorithms consensus,sic4dvar
 
 # Post-ingest verification scan
 poetry run sos_ingest \
     --sos-file "$AF_FILE" \
+    --aws-profile podaac-services-uat \
     --scan-only
 
 # Script multiple continent files (skip prompts)
 for f in /path/to/data/*_sword_v16_SOS_results_*.nc; do
-    poetry run sos_ingest --sos-file "$f" -y
+    poetry run sos_ingest --sos-file "$f" --aws-profile podaac-services-uat -y
 done
 ```
 
@@ -100,7 +104,7 @@ The SOS file stores time as seconds since `2000-01-01T00:00:00Z`. The tool conve
 If a run is interrupted (Ctrl+C or error), the completion summary shows the last successfully processed `reach_id`. Resume with:
 
 ```bash
-poetry run sos_ingest --sos-file "$AF_FILE" --start-reach-id <last_reach_id>
+poetry run sos_ingest --sos-file "$AF_FILE" --aws-profile podaac-services-uat --start-reach-id <last_reach_id>
 ```
 
 ## Scan Mode
