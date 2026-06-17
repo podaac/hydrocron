@@ -2,12 +2,11 @@
 """CLI to scan a DynamoDB table for rows containing columns matching a prefix.
 
 Usage:
-    python SOS/dev-utils/find_columns.py <table_name> <column_filter> [--profile <aws_profile>]
+    python SOS/dev-utils/find_columns.py <table_name> <column_filter> --profile <aws_profile>
 
 Examples:
-    python SOS/dev-utils/find_columns.py hydrocron-swot-reach-table sos
-    python SOS/dev-utils/find_columns.py hydrocron-swot-reach-table dschg_ --limit 5
     python SOS/dev-utils/find_columns.py hydrocron-swot-reach-table sos --profile podaac-services-uat
+    python SOS/dev-utils/find_columns.py hydrocron-swot-reach-table dschg_ --profile podaac-services-uat --limit 5
 """
 import argparse
 import sys
@@ -79,7 +78,7 @@ def main():
     parser = argparse.ArgumentParser(description="Find rows with columns matching a prefix.")
     parser.add_argument("table_name", help="DynamoDB table name")
     parser.add_argument("column_filter", help="Column name prefix to search for (e.g. 'sos')")
-    parser.add_argument("--profile", default="podaac-services-ops", help="AWS profile (default: podaac-services-ops)")
+    parser.add_argument("--profile", required=True, help="AWS profile (from ~/.aws/credentials)")
     parser.add_argument("--region", default="us-west-2", help="AWS region (default: us-west-2)")
     parser.add_argument("--limit", type=int, default=10, help="Max rows to display (default: 10)")
     parser.add_argument("--scan-limit", type=int, default=10000, help="Max items to scan before stopping (default: 10000)")

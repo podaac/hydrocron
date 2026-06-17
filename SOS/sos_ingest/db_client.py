@@ -14,7 +14,7 @@ FILL_VALUE_TIME = -999999999999.0
 class SosDbClient:
     """Wraps DynamoDB query and update operations for the reach table."""
 
-    def __init__(self, table_name: str, dry_run: bool, aws_profile: str | None = "podaac-services-uat"):
+    def __init__(self, table_name: str, dry_run: bool, aws_profile: str | None):
         config = Config(retries={"max_attempts": 5, "mode": "adaptive"})
         session = boto3.Session(profile_name=aws_profile) if aws_profile else boto3.Session()
         self._resource = session.resource("dynamodb", config=config)

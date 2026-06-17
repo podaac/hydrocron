@@ -8,10 +8,9 @@ scans the table and reports:
   2. Any unusual range_start_time values found (samples first to detect patterns)
 
 Usage:
-    python SOS/dev-utils/count_fill_rows.py <table_name> [--profile <aws_profile>]
+    python SOS/dev-utils/count_fill_rows.py <table_name> --profile <aws_profile>
 
 Examples:
-    python SOS/dev-utils/count_fill_rows.py hydrocron-swot-reach-table
     python SOS/dev-utils/count_fill_rows.py hydrocron-swot-reach-table --profile podaac-services-uat
 """
 import argparse
@@ -88,7 +87,7 @@ def scan_and_count(table) -> dict:
 def main():
     parser = argparse.ArgumentParser(description="Count rows with fill/sentinel values.")
     parser.add_argument("table_name", help="DynamoDB table name")
-    parser.add_argument("--profile", default="podaac-services-ops", help="AWS profile (default: podaac-services-ops)")
+    parser.add_argument("--profile", required=True, help="AWS profile (from ~/.aws/credentials)")
     parser.add_argument("--region", default="us-west-2", help="AWS region (default: us-west-2)")
     args = parser.parse_args()
 

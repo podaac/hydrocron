@@ -97,6 +97,7 @@ class TestWriteSummaryCreatesFile:
         )
         config = IngestConfig(
             sos_file="/path/to/af_sword_v16_SOS_results.nc",
+            aws_profile=None,
             table_name="hydrocron-swot-reach-table",
             time_tolerance_seconds=900,
         )

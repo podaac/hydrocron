@@ -21,7 +21,7 @@ def parse_args(argv: list[str] | None = None) -> IngestConfig:
     parser.add_argument("--output-dir", default="./output", help="Directory for error log and summary")
     parser.add_argument("--algorithms", default="all", help="Comma-separated algorithms or 'all'")
     parser.add_argument("--log-level", default="INFO", help="Python logging level")
-    parser.add_argument("--aws-profile", default="podaac-services-uat", help="AWS profile name")
+    parser.add_argument("--aws-profile", required=True, help="AWS profile name (from ~/.aws/credentials)")
     parser.add_argument("--scan-only", action="store_true", help="Post-ingest verification mode (read-only)")
     parser.add_argument("-y", "--yes", action="store_true", help="Skip confirmation prompt")
 

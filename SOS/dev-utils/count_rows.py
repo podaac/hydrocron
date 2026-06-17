@@ -2,12 +2,11 @@
 """CLI to count rows in a DynamoDB table, optionally filtered by reach_id.
 
 Usage:
-    python SOS/dev-utils/count_rows.py <table_name> [--reach-id <id>] [--profile <aws_profile>]
+    python SOS/dev-utils/count_rows.py <table_name> --profile <aws_profile> [--reach-id <id>]
 
 Examples:
-    python SOS/dev-utils/count_rows.py hydrocron-swot-reach-table
-    python SOS/dev-utils/count_rows.py hydrocron-swot-reach-table --reach-id 18180900091
     python SOS/dev-utils/count_rows.py hydrocron-swot-reach-table --profile podaac-services-uat
+    python SOS/dev-utils/count_rows.py hydrocron-swot-reach-table --profile podaac-services-uat --reach-id 18180900091
 """
 import argparse
 import sys
@@ -56,7 +55,7 @@ def main():
     parser = argparse.ArgumentParser(description="Count rows in a DynamoDB table.")
     parser.add_argument("table_name", help="DynamoDB table name")
     parser.add_argument("--reach-id", default=None, help="Optional reach_id to count rows for")
-    parser.add_argument("--profile", default="podaac-services-ops", help="AWS profile (default: podaac-services-ops)")
+    parser.add_argument("--profile", required=True, help="AWS profile (from ~/.aws/credentials)")
     parser.add_argument("--region", default="us-west-2", help="AWS region (default: us-west-2)")
     parser.add_argument("--estimate", action="store_true", help="Use table metadata estimate (fast, ~6hr lag)")
     args = parser.parse_args()

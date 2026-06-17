@@ -11,7 +11,7 @@ from SOS.sos_ingest.ui import IngestUI
 
 
 def _make_config(**kwargs) -> IngestConfig:
-    defaults = {"sos_file": "/tmp/test.nc", "dry_run": True}
+    defaults = {"sos_file": "/tmp/test.nc", "aws_profile": None, "dry_run": True}
     defaults.update(kwargs)
     return IngestConfig(**defaults)
 

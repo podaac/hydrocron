@@ -308,13 +308,13 @@ class TestMultipleAlgorithmsGrouped:
 
 class TestValidateConfigFileNotFound:
     def test_raises_system_exit_for_missing_file(self):
-        config = IngestConfig(sos_file="/nonexistent/path/file.nc", output_dir=tempfile.mkdtemp())
+        config = IngestConfig(sos_file="/nonexistent/path/file.nc", aws_profile=None, output_dir=tempfile.mkdtemp())
         with pytest.raises(SystemExit, match="SOS file not found"):
             _validate_config(config)
 
 
 class TestValidateConfigOutputDirNotWritable:
     def test_raises_system_exit_for_unwritable_dir(self, sample_sos_netcdf):
-        config = IngestConfig(sos_file=sample_sos_netcdf, output_dir="/proc/not_writable_dir")
+        config = IngestConfig(sos_file=sample_sos_netcdf, aws_profile=None, output_dir="/proc/not_writable_dir")
         with pytest.raises((SystemExit, OSError)):
             _validate_config(config)

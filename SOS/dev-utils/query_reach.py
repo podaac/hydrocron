@@ -2,10 +2,9 @@
 """CLI to query a DynamoDB reach and display columns/values per time step.
 
 Usage:
-    python SOS/dev-utils/query_reach.py <table_name> <reach_id> [--profile <aws_profile>]
+    python SOS/dev-utils/query_reach.py <table_name> <reach_id> --profile <aws_profile>
 
 Examples:
-    python SOS/dev-utils/query_reach.py hydrocron-swot-reach-table 71224100223
     python SOS/dev-utils/query_reach.py hydrocron-swot-reach-table 18180900091 --profile podaac-services-ops
 """
 import argparse
@@ -73,7 +72,7 @@ def main():
     parser = argparse.ArgumentParser(description="Query a DynamoDB reach and display time-series data.")
     parser.add_argument("table_name", help="DynamoDB table name")
     parser.add_argument("reach_id", help="Reach ID to query")
-    parser.add_argument("--profile", default="podaac-services-ops", help="AWS profile (default: podaac-services-ops)")
+    parser.add_argument("--profile", required=True, help="AWS profile (from ~/.aws/credentials)")
     parser.add_argument("--region", default="us-west-2", help="AWS region (default: us-west-2)")
     parser.add_argument("--limit", type=int, default=None, help="Max time steps to display")
     parser.add_argument("--columns", nargs="+", help="Only show these columns")

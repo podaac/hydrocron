@@ -2,10 +2,9 @@
 """CLI to list all reach_ids between a start and end reach_id.
 
 Usage:
-    python SOS/dev-utils/list_reaches.py <start_reach_id> <end_reach_id> [--profile <aws_profile>]
+    python SOS/dev-utils/list_reaches.py <start_reach_id> <end_reach_id> --profile <aws_profile>
 
 Examples:
-    python SOS/dev-utils/list_reaches.py 18180900091 18180900095
     python SOS/dev-utils/list_reaches.py 18180900091 18180900095 --profile podaac-services-uat
 """
 import argparse
@@ -41,7 +40,7 @@ def main():
     parser = argparse.ArgumentParser(description="List reach_ids between a start and end range.")
     parser.add_argument("start_reach_id", help="Start reach_id (inclusive)")
     parser.add_argument("end_reach_id", help="End reach_id (inclusive)")
-    parser.add_argument("--profile", default="podaac-services-ops", help="AWS profile (default: podaac-services-ops)")
+    parser.add_argument("--profile", required=True, help="AWS profile (from ~/.aws/credentials)")
     parser.add_argument("--region", default="us-west-2", help="AWS region (default: us-west-2)")
     parser.add_argument("--table", default=TABLE_NAME, help=f"DynamoDB table name (default: {TABLE_NAME})")
     args = parser.parse_args()

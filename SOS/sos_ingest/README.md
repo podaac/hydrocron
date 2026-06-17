@@ -27,7 +27,7 @@ poetry run sos_ingest --sos-file <path_to_sos_netcdf_file> [options]
 | `--output-dir` | `./output` | Directory for error log and summary report |
 | `--algorithms` | `all` | Comma-separated list of algorithms, or `all` |
 | `--log-level` | `INFO` | Python logging level |
-| `--aws-profile` | `podaac-services-uat` | AWS profile name (from ~/.aws/credentials) |
+| `--aws-profile` | (required) | AWS profile name (from ~/.aws/credentials) |
 | `--scan-only` | False | Post-ingest verification mode (read-only, no writes) |
 | `-y` / `--yes` | False | Skip confirmation prompt |
 

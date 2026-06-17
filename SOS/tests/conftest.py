@@ -209,6 +209,7 @@ def sample_config(sample_sos_netcdf):
     """Return an IngestConfig with dry_run=True and reasonable test defaults."""
     return IngestConfig(
         sos_file=sample_sos_netcdf,
+        aws_profile=None,
         table_name=MOCK_TABLE_NAME,
         dry_run=True,
         output_dir=tempfile.mkdtemp(),

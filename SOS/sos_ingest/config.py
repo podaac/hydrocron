@@ -7,6 +7,7 @@ class IngestConfig:
     """All runtime configuration, created from CLI args."""
 
     sos_file: str
+    aws_profile: str
     table_name: str = "hydrocron-swot-reach-table"
     dry_run: bool = False
     start_reach_id: str | None = None
@@ -17,4 +18,3 @@ class IngestConfig:
     log_level: str = "INFO"
     scan_only: bool = False
     yes: bool = False
-    aws_profile: str = "podaac-services-uat"
