@@ -326,7 +326,7 @@ NODE_DATA_COLUMNS = [
 NODE_VERSION_D_ONLY_FIELDS = ['wse_sm', 'wse_sm_u', 'wse_sm_q', 'wse_sm_q_b']
 PRIOR_LAKE_VERSION_D_ONLY_FIELDS = ['qual_f_b']
 
-# As of version 1.9.0, the API returns this fill value for any column missing from a DynamoDB row.
+# Fill value returned by the API for any column missing from a DynamoDB row.
 # Future work: remove all fill-value columns from the database to reduce storage size and cost.
 FILL_VALUE = "-999999999999"
 

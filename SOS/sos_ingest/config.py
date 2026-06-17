@@ -7,7 +7,7 @@ class IngestConfig:
     """All runtime configuration, created from CLI args."""
 
     sos_file: str
-    aws_profile: str
+    aws_profile: str | None = None
     table_name: str = "hydrocron-swot-reach-table"
     dry_run: bool = False
     start_reach_id: str | None = None

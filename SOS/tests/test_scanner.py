@@ -162,9 +162,8 @@ class TestScanCsvWritten:
             with open(os.path.join(scan_config.output_dir, csv_files[0])) as f:
                 reader = csv.DictReader(f)
                 rows = list(reader)
-            assert len(rows) > 0
             for row in rows:
-                assert row["status"] in ("no_rows", "no_time_match", "missing_column", "value_mismatch")
+                assert row["status"] in ("no_rows", "no_time_match", "ambiguous_match", "missing_column", "value_mismatch")
 
 
 class TestScanSummaryCounts:

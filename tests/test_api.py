@@ -1082,13 +1082,8 @@ def test_timeseries_child_collection_feature_mismatch(hydrocron_api, collection_
     assert feature in str(exc_info.value)
 
 
-def test_is_fields_valid_sos_reach():
+def test_is_fields_valid_sos_reach(hydrocron_api):
     """Test that SOS discharge fields are valid for Reach 2.0 requests only."""
-    os.environ['HYDROCRON_ENV'] = 'test'
-    os.environ['HYDROCRON_dynamodb_endpoint_url'] = 'http://localhost:8000'
-    os.environ['DEFAULT_RIVER_COLLECTION'] = 'SWOT_L2_HR_RiverSP'
-    os.environ['DEFAULT_LAKE_COLLECTION'] = 'SWOT_L2_HR_LakeSP'
-    os.environ['DEFAULT_COLLECTION_VERSION'] = 'D'
     import hydrocron.api.controllers.timeseries
 
     # SOS fields should be valid for Reach with 2.0 collection
