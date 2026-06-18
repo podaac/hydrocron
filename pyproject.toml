@@ -20,9 +20,9 @@ six = "^1.16.0"
 boto3 = "^1.28.2"
 pymysql = "^1.1.1"
 geopandas = "^1.1.2"
-earthaccess = "^0.17.0"
+earthaccess = "^0.18.0"
 shapely = "^2.0.1"
-cryptography = "^48.0.0"
+cryptography = "^49.0.0"
 python-dotenv = "^1.0.0"
 geojson = "^3.1.0"
 accept-types = "^0.4.1"
@@ -49,6 +49,16 @@ matplotlib = "^3.8.3"
 [tool.poetry.group.test.dependencies]
 pytz = "^2026"
 
+[tool.poetry.group.sos]
+optional = true
+
+[tool.poetry.group.sos.dependencies]
+rich = "^13.0"
+netCDF4 = "^1.6"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.coverage.run]
 source = ['hydrocron']
 relative_files = true
@@ -56,6 +66,7 @@ relative_files = true
 [tool.poetry.scripts]
 hydrocron_api = "hydrocron.api.__main__:__main__"
 hydrocron_load = 'hydrocron.db.load_data:main'
+sos_ingest = "SOS.sos_ingest.cli:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
