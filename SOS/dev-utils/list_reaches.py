@@ -37,6 +37,7 @@ def list_reach_ids(table, start_id: str, end_id: str) -> list[str]:
 
 
 def main():
+    """Parse arguments and list reach_ids in the specified range."""
     parser = argparse.ArgumentParser(description="List reach_ids between a start and end range.")
     parser.add_argument("start_reach_id", help="Start reach_id (inclusive)")
     parser.add_argument("end_reach_id", help="End reach_id (inclusive)")

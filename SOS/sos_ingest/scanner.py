@@ -47,6 +47,8 @@ def scan(config: IngestConfig) -> ScanSummary:
         all_reach_ids = [rid for rid in all_reach_ids if int(rid) >= int(config.start_reach_id)]
     if config.stop_reach_id:
         all_reach_ids = [rid for rid in all_reach_ids if int(rid) <= int(config.stop_reach_id)]
+    if config.limit:
+        all_reach_ids = all_reach_ids[:config.limit]
 
     # Set up scan CSV
     os.makedirs(config.output_dir, exist_ok=True)
@@ -120,6 +122,16 @@ def scan(config: IngestConfig) -> ScanSummary:
                     total_time_steps += 1
 
                     matched_time, delta, status = find_closest_time(sos_dt, db_times, config.time_tolerance_seconds)
+
+                    # Fallback: lakeflow-only at midnight — match by calendar day
+                    if status == "no_match" and all(r.algorithm == "lakeflow" for r in recs):
+                        sos_date = sos_dt.strftime("%Y-%m-%d")
+                        for db_time_str, db_dt in db_times:
+                            if db_dt.strftime("%Y-%m-%d") == sos_date:
+                                matched_time = db_time_str
+                                delta = abs((sos_dt - db_dt).total_seconds())
+                                status = "matched"
+                                break
 
                     if status != "matched":
                         csv_status = "no_time_match" if status == "no_match" else status

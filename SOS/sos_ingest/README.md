@@ -23,6 +23,7 @@ poetry run sos_ingest --sos-file <path_to_sos_netcdf_file> --aws-profile <profil
 | `--dry-run` | False | Preview mode, no DB writes |
 | `--start-reach-id` | None | Reach ID to resume from (skip all IDs before this) |
 | `--stop-reach-id` | None | Reach ID to stop after (inclusive) |
+| `--limit` | None | Max number of reaches to process |
 | `--time-tolerance` | 900 | Max seconds between SOS time and DB `range_start_time` for a match |
 | `--output-dir` | `./output` | Directory for error log and summary report |
 | `--algorithms` | `all` | Comma-separated list of algorithms, or `all` |

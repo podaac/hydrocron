@@ -52,6 +52,7 @@ def count_rows_for_reach(table, reach_id: str) -> int:
 
 
 def main():
+    """Parse arguments and count rows in the specified DynamoDB table."""
     parser = argparse.ArgumentParser(description="Count rows in a DynamoDB table.")
     parser.add_argument("table_name", help="DynamoDB table name")
     parser.add_argument("--reach-id", default=None, help="Optional reach_id to count rows for")

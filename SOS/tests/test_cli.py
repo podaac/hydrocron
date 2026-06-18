@@ -68,3 +68,13 @@ class TestTimeToleranceArg:
     def test_default_is_900(self):
         config = parse_args(["--sos-file", "/tmp/test.nc", "--aws-profile", "test"])
         assert config.time_tolerance_seconds == 900
+
+
+class TestLimitArg:
+    def test_limit_parsed(self):
+        config = parse_args(["--sos-file", "/tmp/test.nc", "--aws-profile", "test", "--limit", "10"])
+        assert config.limit == 10
+
+    def test_default_is_none(self):
+        config = parse_args(["--sos-file", "/tmp/test.nc", "--aws-profile", "test"])
+        assert config.limit is None

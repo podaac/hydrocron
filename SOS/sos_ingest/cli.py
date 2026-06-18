@@ -1,7 +1,6 @@
 """CLI entry point for SOS discharge ingest."""
 import argparse
 import logging
-import sys
 
 from SOS.sos_ingest.config import IngestConfig
 
@@ -17,6 +16,7 @@ def parse_args(argv: list[str] | None = None) -> IngestConfig:
     parser.add_argument("--dry-run", action="store_true", help="Preview mode, no DB writes")
     parser.add_argument("--start-reach-id", default=None, help="Reach ID to resume from")
     parser.add_argument("--stop-reach-id", default=None, help="Reach ID to stop after (inclusive)")
+    parser.add_argument("--limit", type=int, default=None, help="Max number of reaches to process")
     parser.add_argument("--time-tolerance", type=int, default=900, help="Max seconds for time matching (default: 900)")
     parser.add_argument("--output-dir", default="./output", help="Directory for error log and summary")
     parser.add_argument("--algorithms", default="all", help="Comma-separated algorithms or 'all'")
@@ -35,6 +35,7 @@ def parse_args(argv: list[str] | None = None) -> IngestConfig:
         dry_run=args.dry_run,
         start_reach_id=args.start_reach_id,
         stop_reach_id=args.stop_reach_id,
+        limit=args.limit,
         time_tolerance_seconds=args.time_tolerance,
         output_dir=args.output_dir,
         algorithms=algorithms,

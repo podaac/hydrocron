@@ -69,6 +69,7 @@ def print_timestep(item: dict, index: int, total: int):
 
 
 def main():
+    """Parse arguments and display time-series data for a single reach."""
     parser = argparse.ArgumentParser(description="Query a DynamoDB reach and display time-series data.")
     parser.add_argument("table_name", help="DynamoDB table name")
     parser.add_argument("reach_id", help="Reach ID to query")

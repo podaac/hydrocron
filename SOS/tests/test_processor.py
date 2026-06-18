@@ -4,16 +4,13 @@ import os
 import signal
 import tempfile
 import threading
-from datetime import datetime, timezone
-from unittest.mock import patch, MagicMock
 
 import moto
 import boto3
 import pytest
 
 from SOS.sos_ingest.config import IngestConfig
-from SOS.sos_ingest.processor import run, _build_column_updates, _validate_config
-from SOS.sos_ingest.models import ReachDischargeSet, DischargeRecord
+from SOS.sos_ingest.processor import run, _validate_config
 from SOS.sos_ingest.reader import sos_seconds_to_datetime
 from SOS.tests.conftest import SAMPLE_TIMES, MOCK_TABLE_NAME
 
@@ -133,6 +130,32 @@ class TestStartAndStopReachId:
             assert summary.last_reach_id == "10000000041"
 
 
+class TestLimit:
+    def test_limit_stops_after_n_reaches(self, sample_sos_netcdf):
+        with moto.mock_aws():
+            dynamodb = boto3.resource("dynamodb", region_name="us-west-2")
+            times = _get_db_times_for_fixture()
+            _setup_mock_db_with_times(dynamodb, ["10000000021", "10000000041", "10000000051"], times)
+
+            config = _make_config(sample_sos_netcdf, limit=1)
+            summary = run(config)
+
+            # Only 1 reach should be processed
+            assert summary.reaches_processed == 1
+
+    def test_limit_with_start_reach_id(self, sample_sos_netcdf):
+        with moto.mock_aws():
+            dynamodb = boto3.resource("dynamodb", region_name="us-west-2")
+            times = _get_db_times_for_fixture()
+            _setup_mock_db_with_times(dynamodb, ["10000000021", "10000000041", "10000000051"], times)
+
+            config = _make_config(sample_sos_netcdf, start_reach_id="10000000041", limit=1)
+            summary = run(config)
+
+            assert summary.reaches_processed == 1
+            assert summary.last_reach_id == "10000000041"
+
+
 class TestSummaryCounts:
     def test_summary_has_correct_counts(self, sample_sos_netcdf):
         with moto.mock_aws():
@@ -158,10 +181,10 @@ class TestErrorLogWritten:
             _setup_mock_db_with_times(dynamodb, ["10000000021"], _get_db_times_for_fixture())
 
             config = _make_config(sample_sos_netcdf)
-            summary = run(config)
+            run(config)
 
-            # Find the error CSV
-            csv_files = [f for f in os.listdir(config.output_dir) if f.endswith(".csv")]
+            # Find the error CSV (exclude dry_run log)
+            csv_files = [f for f in os.listdir(config.output_dir) if f.endswith(".csv") and "dry_run" not in f]
             assert len(csv_files) == 1
             with open(os.path.join(config.output_dir, csv_files[0])) as f:
                 reader = csv.DictReader(f)
@@ -179,7 +202,7 @@ class TestSingleAlgorithmFilter:
             _setup_mock_db_with_times(dynamodb, ["10000000021"], times)
 
             config = _make_config(sample_sos_netcdf, dry_run=False, algorithms=["consensus"])
-            summary = run(config)
+            run(config)
 
             table = dynamodb.Table(MOCK_TABLE_NAME)
             resp = table.get_item(Key={"reach_id": "10000000021", "range_start_time": times[1]})
@@ -231,7 +254,7 @@ class TestCtrlCGracefulShutdown:
             thread = threading.Thread(target=send_signal)
             thread.start()
 
-            summary = run(config)
+            run(config)
             thread.join()
 
             # Summary should exist even after interrupt
@@ -290,7 +313,7 @@ class TestMultipleAlgorithmsGrouped:
             _setup_mock_db_with_times(dynamodb, ["10000000021"], times)
 
             config = _make_config(sample_sos_netcdf, dry_run=False)
-            summary = run(config)
+            run(config)
 
             # Verify multiple algorithm columns written in one go
             table = dynamodb.Table(MOCK_TABLE_NAME)

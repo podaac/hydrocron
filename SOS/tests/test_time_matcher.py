@@ -1,5 +1,5 @@
 """Tests for time matching logic."""
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from SOS.sos_ingest.time_matcher import find_closest_time
 

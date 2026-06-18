@@ -75,6 +75,7 @@ def print_row(item: dict, prefix: str, index: int):
 
 
 def main():
+    """Parse arguments and scan the table for columns matching a prefix."""
     parser = argparse.ArgumentParser(description="Find rows with columns matching a prefix.")
     parser.add_argument("table_name", help="DynamoDB table name")
     parser.add_argument("column_filter", help="Column name prefix to search for (e.g. 'sos')")

@@ -80,7 +80,14 @@ def run(config: IngestConfig) -> ProcessingSummary:
     ui = IngestUI()
     sos_filename = os.path.basename(config.sos_file)
     error_logger = IngestErrorLogger(config.output_dir, sos_filename, table_name=config.table_name)
-    db_client = SosDbClient(config.table_name, config.dry_run, config.aws_profile)
+
+    dry_run_log_path = None
+    if config.dry_run:
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+        base = os.path.splitext(sos_filename)[0]
+        dry_run_log_path = os.path.join(config.output_dir, f"{base}_dry_run_{timestamp}.csv")
+
+    db_client = SosDbClient(config.table_name, config.dry_run, config.aws_profile, dry_run_log_path=dry_run_log_path)
 
     start_time = datetime.now(timezone.utc)
 
@@ -102,6 +109,8 @@ def run(config: IngestConfig) -> ProcessingSummary:
         all_reach_ids = [rid for rid in all_reach_ids if int(rid) >= int(config.start_reach_id)]
     if config.stop_reach_id:
         all_reach_ids = [rid for rid in all_reach_ids if int(rid) <= int(config.stop_reach_id)]
+    if config.limit:
+        all_reach_ids = all_reach_ids[:config.limit]
 
     reaches_to_process = len(all_reach_ids)
     reaches_skipped = total_in_file - reaches_to_process
@@ -161,6 +170,16 @@ def run(config: IngestConfig) -> ProcessingSummary:
                     sos_dt = recs[0].sos_datetime
                     matched_time, delta, status = find_closest_time(sos_dt, db_times, config.time_tolerance_seconds)
 
+                    # Fallback: lakeflow-only at midnight — match by calendar day
+                    if status == "no_match" and all(r.algorithm == "lakeflow" for r in recs):
+                        sos_date = sos_dt.strftime("%Y-%m-%d")
+                        for db_time_str, db_dt in db_times:
+                            if db_dt.strftime("%Y-%m-%d") == sos_date:
+                                matched_time = db_time_str
+                                delta = abs((sos_dt - db_dt).total_seconds())
+                                status = "matched"
+                                break
+
                     if status == "no_match":
                         error_logger.log(reach_id, sos_dt, t_seconds, None, delta, "no_match")
                         no_match += 1
@@ -181,11 +200,6 @@ def run(config: IngestConfig) -> ProcessingSummary:
                     db_row = find_db_row(rows, matched_time)
                     if _row_already_has_values(db_row, column_updates):
                         skipped_unchanged += 1
-                        steps_processed += 1
-                        progress.advance(task_id, 1)
-                        continue
-
-                    if config.dry_run:
                         steps_processed += 1
                         progress.advance(task_id, 1)
                         continue
@@ -230,6 +244,7 @@ def run(config: IngestConfig) -> ProcessingSummary:
 
     error_logger.write_summary(summary, config)
     error_logger.close()
+    db_client.close()
     ui.show_completion_summary(summary, error_logger.error_path, error_logger.summary_path)
 
     return summary

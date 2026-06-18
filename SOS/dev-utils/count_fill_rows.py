@@ -14,7 +14,6 @@ Examples:
     python SOS/dev-utils/count_fill_rows.py hydrocron-swot-reach-table --profile podaac-services-uat
 """
 import argparse
-import sys
 from collections import Counter
 from decimal import Decimal
 
@@ -85,6 +84,7 @@ def scan_and_count(table) -> dict:
 
 
 def main():
+    """Parse arguments and run the fill-row scan against DynamoDB."""
     parser = argparse.ArgumentParser(description="Count rows with fill/sentinel values.")
     parser.add_argument("table_name", help="DynamoDB table name")
     parser.add_argument("--profile", required=True, help="AWS profile (from ~/.aws/credentials)")
@@ -110,12 +110,12 @@ def main():
     print(f"  Rows with anomalous RST:      {stats['anomalous_rst']:,}")
 
     if stats["fill_time_rst_values"]:
-        print(f"\n  range_start_time values on fill rows (top 10):")
+        print("\n  range_start_time values on fill rows (top 10):")
         for rst, count in stats["fill_time_rst_values"].most_common(10):
             print(f"    {rst!r:30s}  ({count:,} rows)")
 
     if stats["rst_samples"]:
-        print(f"\n  Anomalous range_start_time samples:")
+        print("\n  Anomalous range_start_time samples:")
         for rst, count in stats["rst_samples"].most_common(20):
             print(f"    {rst!r:30s}  ({count:,} rows)")
 

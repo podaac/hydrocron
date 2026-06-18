@@ -28,10 +28,12 @@ class IngestErrorLogger:
 
     @property
     def error_path(self) -> str:
+        """Path to the error CSV file."""
         return self._error_path
 
     @property
     def summary_path(self) -> str:
+        """Path to the summary report file."""
         return self._summary_path
 
     def log(

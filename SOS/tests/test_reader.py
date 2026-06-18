@@ -1,11 +1,10 @@
 """Tests for SOS NetCDF reader."""
-from datetime import datetime, timezone
+from datetime import timezone
 
 import numpy as np
 import pytest
 
 from SOS.sos_ingest.reader import (
-    ALGORITHM_CONFIG,
     get_reach_count,
     read_sos_file,
     sos_seconds_to_datetime,
