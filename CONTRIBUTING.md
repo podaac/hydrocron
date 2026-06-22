@@ -20,7 +20,7 @@ Thank you for contributing to Hydrocron!
 ## How to Get Help
 
 The easiest way to get help or ask a question regarding Hydrocron is by asking a question 
-on the [PO.DAAC Forum](https://podaac.jpl.nasa.gov/forum/viewforum.php?f=6).
+on the [PO.DAAC Forum](https://forum.earthdata.nasa.gov/viewforum.php?f=7&tagMatch=all&DAAC=146&keywords=&).
 
 ## How to Contribute
 
