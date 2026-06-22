@@ -352,19 +352,24 @@ def convert_to_df(items) -> gpd.GeoDataFrame:
 
 def _fill_missing_columns(gdf, columns):
     """Add missing columns to GeoDataFrame with fill value. Resolves aliases."""
+    # First, ensure all non-alias columns exist and are filled (order-independent).
     for col in columns:
-        if col == "geometry":
+        if col == "geometry" or col in constants.FIELD_ALIASES:
             continue
-        source = constants.FIELD_ALIASES.get(col)
-        if source:
-            if source in gdf.columns:
-                gdf[col] = gdf[source].fillna(constants.FILL_VALUE)
-            else:
-                gdf[col] = constants.FILL_VALUE
-        elif col not in gdf.columns:
+        if col not in gdf.columns:
             gdf[col] = constants.FILL_VALUE
         else:
             gdf[col] = gdf[col].fillna(constants.FILL_VALUE)
+
+    # Second, resolve aliases after sources have been created/filled.
+    for alias, source in constants.FIELD_ALIASES.items():
+        if alias not in columns or alias == "geometry":
+            continue
+        if source in gdf.columns:
+            gdf[alias] = gdf[source].fillna(constants.FILL_VALUE)
+        else:
+            gdf[alias] = constants.FILL_VALUE
+
     return gdf
 
 
