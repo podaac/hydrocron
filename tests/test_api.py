@@ -1163,14 +1163,14 @@ def test_sos_fields_fill_value_when_missing_in_db(hydrocron_api):
     assert len(features) > 0
     for feature in features:
         props = feature['properties']
-        assert props['sos_consensus_q'] == "-999999999999"
-        assert props['sos_hivdi_q'] == "-999999999999"
-        assert props['sos_metroman_q'] == "-999999999999"
-        assert props['sos_momma_q'] == "-999999999999"
-        assert props['sos_sad_q'] == "-999999999999"
-        assert props['sos_sic4dvar_q'] == "-999999999999"
-        assert props['sos_lakeflow_q'] == "-999999999999"
-        assert props['swot_discharge_reanalysis'] == "-999999999999"
+        assert props['sos_consensus_q'] == "-999999999999.0"
+        assert props['sos_hivdi_q'] == "-999999999999.0"
+        assert props['sos_metroman_q'] == "-999999999999.0"
+        assert props['sos_momma_q'] == "-999999999999.0"
+        assert props['sos_sad_q'] == "-999999999999.0"
+        assert props['sos_sic4dvar_q'] == "-999999999999.0"
+        assert props['sos_lakeflow_q'] == "-999999999999.0"
+        assert props['swot_discharge_reanalysis'] == "-999999999999.0"
 
 
 def test_sos_fields_with_values(hydrocron_api):
@@ -1221,9 +1221,9 @@ def test_sos_fields_with_values(hydrocron_api):
     assert props['sos_sic4dvar_q'] == "513.42"
     assert props['sos_lakeflow_q'] == "21.315"
     # Fields that were NOT written — should get fill value
-    assert props['sos_metroman_q'] == "-999999999999"
-    assert props['sos_momma_q'] == "-999999999999"
-    assert props['sos_sad_q'] == "-999999999999"
+    assert props['sos_metroman_q'] == "-999999999999.0"
+    assert props['sos_momma_q'] == "-999999999999.0"
+    assert props['sos_sad_q'] == "-999999999999.0"
     # Alias should match consensus
     assert props['swot_discharge_reanalysis'] == "460.756"
     assert props['swot_discharge_reanalysis'] == props['sos_consensus_q']

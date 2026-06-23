@@ -134,37 +134,33 @@ class TestReachSosFields:
             'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
             'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis'
         ]
-        if len(geojson['features']) > 0:
-            props = geojson['features'][0]['properties']
-            for field in expected_fields:
-                assert field in props, f"SOS field '{field}' not found in properties"
 
-            assert props['sos_momma_q'] == "-999999999999", \
-                f"Expected fill value for 'sos_momma_q', got '{props['sos_momma_q']}'"
+        assert len(geojson['features']) > 0, "Expected at least one feature in response"
 
-            # Verify at least one row has real metroman data
-            has_metroman = any(
-                f['properties'].get('sos_metroman_q') != "-999999999999"
-                for f in geojson['features']
-            )
-            assert has_metroman, "Expected at least one row with non-fill sos_metroman_q"
+        props = geojson['features'][0]['properties']
+        for field in expected_fields:
+            assert field in props, f"SOS field '{field}' not found in properties"
 
-            # Verify at least one row has real momma data
-            has_momma = any(
-                f['properties'].get('sos_momma_q') != "-999999999999"
-                for f in geojson['features']
-            )
-            assert has_momma, "Expected at least one row with non-fill sos_momma_q"
+        # First row should have fill value for momma (no momma data at this time step)
+        assert props['sos_momma_q'] == "-999999999999.0", \
+            f"Expected fill value for 'sos_momma_q', got '{props['sos_momma_q']}'"
 
-            # Verify alias matches consensus on a row with real data
-            for f in geojson['features']:
-                p = f['properties']
-                if p.get('sos_consensus_q') != "-999999999999":
-                    assert p['swot_discharge_reanalysis'] == p['sos_consensus_q'], \
-                        f"swot_discharge_reanalysis ({p['swot_discharge_reanalysis']}) should match sos_consensus_q ({p['sos_consensus_q']})"
-                    break
-            else:
-                pytest.fail("No row found with non-fill sos_consensus_q to verify alias")
+        # Verify at least one row has metroman value > 150
+        has_metroman = any(
+            float(f['properties']['sos_metroman_q']) > 150
+            for f in geojson['features']
+        )
+        assert has_metroman, "Expected at least one sos_metroman_q > 150"
+
+        # Verify alias matches consensus on a row with consensus > 1000
+        for f in geojson['features']:
+            p = f['properties']
+            if float(p['sos_consensus_q']) > 1000:
+                assert p['swot_discharge_reanalysis'] == p['sos_consensus_q'], \
+                    f"swot_discharge_reanalysis ({p['swot_discharge_reanalysis']}) should match sos_consensus_q ({p['sos_consensus_q']})"
+                break
+        else:
+            pytest.fail("No row found with sos_consensus_q > 1000 to verify alias")
 
     def test_sos_fields_rejected_for_version_d(self, api_client, stable_test_data):
         """Test that SOS fields are rejected when querying vD collection."""
