@@ -180,6 +180,12 @@ def validate_parameters(parameters):
     elif parameters['output'] not in ('csv', 'geojson', 'default'):
         error_message = f'400: output parameter should be csv or geojson, not: {parameters["output"]}'
 
+    elif parameters['feature'] == 'Reach' and parameters['collection_name'].endswith('_D') and \
+            any(f in constants.REACH_VERSION_2_0_ONLY_FIELDS for f in parameters['fields'].split(',')):
+        error_message = ('400: SOS Discharge fields are not available for the SWOT vD collection at this time. '
+                         'If wishing to request SOS Discharge fields corresponding to SWOT v2.0, '
+                         'please specify collection_name=SWOT_L2_HR_RiverSP_2.0 in your request.')
+
     elif not is_fields_valid(parameters['feature'], parameters['fields'], parameters['collection_name']):
         error_message = '400: fields parameter should contain valid SWOT fields'
 
@@ -250,6 +256,11 @@ def is_fields_valid(feature, fields, collection_name):
     if feature == 'PriorLake' and collection_name.endswith('_2.0'):
         # Check if any requested fields are Version D only
         if any(field in constants.PRIOR_LAKE_VERSION_D_ONLY_FIELDS for field in fields_list):
+            return False
+
+    # For Reach feature, check if 2.0-only fields are being requested with Version D collection
+    if feature == 'Reach' and collection_name.endswith('_D'):
+        if any(field in constants.REACH_VERSION_2_0_ONLY_FIELDS for field in fields_list):
             return False
 
     return True
@@ -339,6 +350,24 @@ def convert_to_df(items) -> gpd.GeoDataFrame:
     return gdf
 
 
+def _fill_missing_columns(gdf, columns):
+    """Add missing columns to GeoDataFrame with fill value. Resolves aliases."""
+    for col in columns:
+        if col == "geometry":
+            continue
+        source = constants.FIELD_ALIASES.get(col)
+        if source:
+            if source in gdf.columns:
+                gdf[col] = gdf[source].fillna(constants.FILL_VALUE)
+            else:
+                gdf[col] = constants.FILL_VALUE
+        elif col not in gdf.columns:
+            gdf[col] = constants.FILL_VALUE
+        else:
+            gdf[col] = gdf[col].fillna(constants.FILL_VALUE)
+    return gdf
+
+
 def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
     """ Format the results to the file format that the user selects (geojson)
 
@@ -354,6 +383,7 @@ def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
     columns = add_units(gdf, columns)
     if 'geometry' not in fields:
         columns.append('geometry')   # Add geometry to convert to geoJSON
+    gdf = _fill_missing_columns(gdf, columns)
     gdf = gdf[columns]
     gdf_json = json.loads(gdf.to_json())
 
@@ -379,6 +409,7 @@ def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
 
     columns = fields.split(',')
     columns = add_units(gdf, columns)
+    gdf = _fill_missing_columns(gdf, columns)
     gdf = gdf[columns]
     gdf_csv = gdf.to_csv(index=False)
 

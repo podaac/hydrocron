@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 308 - Add SOS Hydrology V3 products to SWOT_L2_HR_RiverSP_2.0 collection 
 ### Changed
     - Issue 220 - Update terraform aws provider to 6.0 
     - Added SQS queues after SNS for CNM responses to enable retries and a dead-letter queue
