@@ -107,6 +107,104 @@ class TestReachBasicQueries:
             assert 'coordinates' in feature['geometry']
 
 
+class TestReachSosFields:
+    """Test SOS discharge field queries (v2.0 collection only)"""
+
+    def test_sos_fields(self, api_client, stable_test_data):
+        """Test that all SOS fields are present in the response."""
+        reach_data = stable_test_data["reach"]
+
+        response, _ = api_client.query({
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "geojson",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis"
+        })
+
+        assert_http_success(response)
+
+        data = response.json()
+        geojson = extract_geojson_from_response(data)
+        validate_geojson_structure(geojson)
+
+        expected_fields = [
+            'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
+            'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis'
+        ]
+        if len(geojson['features']) > 0:
+            props = geojson['features'][0]['properties']
+            for field in expected_fields:
+                assert field in props, f"SOS field '{field}' not found in properties"
+
+            assert props['sos_momma_q'] == "-999999999999", \
+                f"Expected fill value for 'sos_momma_q', got '{props['sos_momma_q']}'"
+
+            # Verify at least one row has real metroman data
+            has_metroman = any(
+                f['properties'].get('sos_metroman_q') != "-999999999999"
+                for f in geojson['features']
+            )
+            assert has_metroman, "Expected at least one row with non-fill sos_metroman_q"
+
+            # Verify at least one row has real momma data
+            has_momma = any(
+                f['properties'].get('sos_momma_q') != "-999999999999"
+                for f in geojson['features']
+            )
+            assert has_momma, "Expected at least one row with non-fill sos_momma_q"
+
+            # Verify alias matches consensus on a row with real data
+            for f in geojson['features']:
+                p = f['properties']
+                if p.get('sos_consensus_q') != "-999999999999":
+                    assert p['swot_discharge_reanalysis'] == p['sos_consensus_q'], \
+                        f"swot_discharge_reanalysis ({p['swot_discharge_reanalysis']}) should match sos_consensus_q ({p['sos_consensus_q']})"
+                    break
+            else:
+                pytest.fail("No row found with non-fill sos_consensus_q to verify alias")
+
+    def test_sos_fields_rejected_for_version_d(self, api_client, stable_test_data):
+        """Test that SOS fields are rejected when querying vD collection."""
+        reach_data = stable_test_data["reach_d"]
+
+        response, _ = api_client.query({
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "geojson",
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "fields": "reach_id,time_str,sos_consensus_q"
+        })
+
+        # Should return 400 error
+        assert response.status_code == 400
+        error_text = response.text
+        assert "SOS Discharge fields are not available for the SWOT vD collection" in error_text
+
+    def test_sos_fields_rejected_without_collection_name(self, api_client, stable_test_data):
+        """Test that SOS fields return error when collection_name not specified (defaults to vD)."""
+        reach_data = stable_test_data["reach_d"]
+
+        response, _ = api_client.query({
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "geojson",
+            "fields": "reach_id,time_str,sos_consensus_q"
+        })
+
+        # Should return 400 error since default collection is D
+        assert response.status_code == 400
+        error_text = response.text
+        assert "SOS Discharge fields are not available for the SWOT vD collection" in error_text
+        assert "collection_name=SWOT_L2_HR_RiverSP_2.0" in error_text
+
+
 @pytest.mark.skip(reason="Discharge fields tests temporarily disabled")
 class TestReachDischargeFields:
     """Test reach discharge field queries"""
@@ -384,6 +482,33 @@ class TestReachGoldenFiles:
         assert_matches_reference(
             response,
             reach_data["fixtures"]["discharge_csv"],
+            fixtures_dir,
+            output_format="csv",
+            ignore_fields=['ingest_time', 'crid', 'granuleUR']
+        )
+
+    def test_reach_sos_discharge_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir):
+        """Test reach SOS discharge fields CSV matches reference file (v2.0 collection only for now)"""
+        reach_data = stable_test_data["reach"]
+
+        params = {
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "csv",
+            "fields": "reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis"
+        }
+
+        if "collection_name" in reach_data:
+            params["collection_name"] = reach_data["collection_name"]
+
+        response, _ = api_client.query(params)
+
+        assert_http_success(response)
+        assert_matches_reference(
+            response,
+            reach_data["fixtures"]["sos_discharge_csv"],
             fixtures_dir,
             output_format="csv",
             ignore_fields=['ingest_time', 'crid', 'granuleUR']

@@ -114,16 +114,17 @@ STABLE_TEST_DATA_OPS = {
 # Use capture_reference_files.py to generate/update reference files
 STABLE_TEST_DATA_UAT = {
     "reach": {
-        "feature_id": "34296500851",
-        "start_time": "2024-02-10T00:00:00Z",
-        "end_time": "2024-05-03T00:00:00Z",
-        "expected_count": 6,
+        "feature_id": "18180900091",
+        "start_time": "2024-02-01T00:00:00Z",
+        "end_time": "2024-05-11T00:00:00Z",
+        "expected_count": 4,
         "collection_name": "SWOT_L2_HR_RiverSP_2.0",
         "fields": "reach_id,time_str,wse,slope,width,sword_version",
         "fixtures": {
             "basic_geojson": "reach/reach_basic.geojson",
             "basic_csv": "reach/reach_basic.csv",
             "discharge_csv": "reach/reach_discharge.csv",
+            "sos_discharge_csv": "reach/reach_sos_discharge.csv",
             "comprehensive_geojson": "reach/reach_comprehensive.geojson"
         }
     },
