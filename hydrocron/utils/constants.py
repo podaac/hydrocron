@@ -328,7 +328,7 @@ PRIOR_LAKE_VERSION_D_ONLY_FIELDS = ['qual_f_b']
 
 # Fill value returned by the API for any column missing from a DynamoDB row.
 # Future work: remove all fill-value columns from the database to reduce storage size and cost.
-FILL_VALUE = "-999999999999"
+FILL_VALUE = "-999999999999.0"
 
 # Version 2.0 specific fields (not available in D)
 REACH_VERSION_2_0_ONLY_FIELDS = [
