@@ -363,7 +363,7 @@ def _fill_missing_columns(gdf, columns):
 
     # Second, resolve aliases after sources have been created/filled.
     for alias, source in constants.FIELD_ALIASES.items():
-        if alias not in columns or alias == "geometry":
+        if alias not in columns:
             continue
         if source in gdf.columns:
             gdf[alias] = gdf[source].fillna(constants.FILL_VALUE)
