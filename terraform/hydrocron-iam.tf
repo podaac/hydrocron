@@ -393,20 +393,30 @@ resource "aws_iam_role" "hydrocron-lambda-execution-role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 
-  inline_policy {
-    name   = "HydrocronDynamoRead"
-    policy = data.aws_iam_policy_document.dynamo-read-policy.json
-  }
-  inline_policy {
-    name   = "HydrocronSSMRead"
-    policy = data.aws_iam_policy_document.ssm-read-policy.json
-  }
-  inline_policy {
-    name   = "HydrocronLambdaVPC"
-    policy = data.aws_iam_policy_document.lambda-vpc.json
-  }
+}
+
+resource "aws_iam_role_policy_attachment" "hydrocron_lambda_execution_role_basic_execution" {
+  role       = aws_iam_role.hydrocron-lambda-execution-role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "hydrocron_lambda_execution_role_dynamo_read" {
+  name   = "HydrocronDynamoRead"
+  role   = aws_iam_role.hydrocron-lambda-execution-role.id
+  policy = data.aws_iam_policy_document.dynamo-read-policy.json
+}
+
+resource "aws_iam_role_policy" "hydrocron_lambda_execution_role_ssm_read" {
+  name   = "HydrocronSSMRead"
+  role   = aws_iam_role.hydrocron-lambda-execution-role.id
+  policy = data.aws_iam_policy_document.ssm-read-policy.json
+}
+
+resource "aws_iam_role_policy" "hydrocron_lambda_execution_role_vpc" {
+  name   = "HydrocronLambdaVPC"
+  role   = aws_iam_role.hydrocron-lambda-execution-role.id
+  policy = data.aws_iam_policy_document.lambda-vpc.json
 }
 
 
@@ -415,7 +425,6 @@ resource "aws_iam_role" "hydrocron-lambda-authorizer-role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 
   inline_policy {
     name   = "HydrocronLambdaVPC"
@@ -427,13 +436,17 @@ resource "aws_iam_role" "hydrocron-lambda-authorizer-role" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "hydrocron_lambda_authorizer_role_basic_execution" {
+  role       = aws_iam_role.hydrocron-lambda-authorizer-role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 
 resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
   name = "${local.aws_resource_prefix}-lambda-load-data-role"
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 
   inline_policy {
     name   = "HydrocronLambdaInvoke"
@@ -450,6 +463,11 @@ resource "aws_iam_role" "hydrocron-lambda-load-data-role" {
     name   = "HydrocronLambdaVPC"
     policy = data.aws_iam_policy_document.lambda-vpc.json
   }
+}
+
+resource "aws_iam_role_policy_attachment" "hydrocron_lambda_load_data_role_basic_execution" {
+  role       = aws_iam_role.hydrocron-lambda-load-data-role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 
@@ -488,15 +506,17 @@ resource "aws_iam_role" "hydrocron-lambda-load-granule-role" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "hydrocron_lambda_load_granule_role_basic_execution" {
+  role       = aws_iam_role.hydrocron-lambda-load-granule-role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 
 resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
   name = "${local.aws_resource_prefix}-lambda-cnm-role"
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-  "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"]
 
   inline_policy {
     name   = "HydrocronSQSSendGranule"
@@ -515,6 +535,16 @@ resource "aws_iam_role" "hydrocron-lambda-cnm-role" {
   }
 }
 
+resource "aws_iam_role_policy_attachment" "hydrocron_lambda_cnm_role_basic_execution" {
+  role       = aws_iam_role.hydrocron-lambda-cnm-role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "hydrocron_lambda_cnm_role_sqs_execution" {
+  role       = aws_iam_role.hydrocron-lambda-cnm-role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+}
+
 
 
 
@@ -523,32 +553,48 @@ resource "aws_iam_role" "hydrocron_lambda_track_ingest_role" {
 
   permissions_boundary = "arn:aws:iam::${local.account_id}:policy/NGAPShRoleBoundary"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_lambda.json
-  managed_policy_arns  = ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
 
-  inline_policy {
-    name   = "HydrocronDynamoRead"
-    policy = data.aws_iam_policy_document.dynamo-read-policy.json
-  }
-  inline_policy {
-    name   = "HydrocronDynamoReadIngest"
-    policy = data.aws_iam_policy_document.dynamo-read-policy-track-ingest.json
-  }
-  inline_policy {
-    name   = "HydrocronDynamoWriteIngest"
-    policy = data.aws_iam_policy_document.dynamo-write-policy-track-ingest.json
-  }
-  inline_policy {
-    name   = "HydrocronSSMRead"
-    policy = data.aws_iam_policy_document.ssm-read-policy.json
-  }
-  inline_policy {
-    name   = "HydrocronSSMPutTrack"
-    policy = data.aws_iam_policy_document.ssm-put-policy-track-ingest.json
-  }
-  inline_policy {
-    name   = "HydrocronSNSPublish"
-    policy = data.aws_iam_policy_document.sns-resource-cnm-policy.json
-  }
+}
+
+resource "aws_iam_role_policy_attachment" "hydrocron_lambda_track_ingest_role_basic_execution" {
+  role       = aws_iam_role.hydrocron_lambda_track_ingest_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "hydrocron_lambda_track_ingest_role_dynamo_read" {
+  name   = "HydrocronDynamoRead"
+  role   = aws_iam_role.hydrocron_lambda_track_ingest_role.id
+  policy = data.aws_iam_policy_document.dynamo-read-policy.json
+}
+
+resource "aws_iam_role_policy" "hydrocron_lambda_track_ingest_role_dynamo_read_track_ingest" {
+  name   = "HydrocronDynamoReadIngest"
+  role   = aws_iam_role.hydrocron_lambda_track_ingest_role.id
+  policy = data.aws_iam_policy_document.dynamo-read-policy-track-ingest.json
+}
+
+resource "aws_iam_role_policy" "hydrocron_lambda_track_ingest_role_dynamo_write_track_ingest" {
+  name   = "HydrocronDynamoWriteIngest"
+  role   = aws_iam_role.hydrocron_lambda_track_ingest_role.id
+  policy = data.aws_iam_policy_document.dynamo-write-policy-track-ingest.json
+}
+
+resource "aws_iam_role_policy" "hydrocron_lambda_track_ingest_role_ssm_read" {
+  name   = "HydrocronSSMRead"
+  role   = aws_iam_role.hydrocron_lambda_track_ingest_role.id
+  policy = data.aws_iam_policy_document.ssm-read-policy.json
+}
+
+resource "aws_iam_role_policy" "hydrocron_lambda_track_ingest_role_ssm_put_track" {
+  name   = "HydrocronSSMPutTrack"
+  role   = aws_iam_role.hydrocron_lambda_track_ingest_role.id
+  policy = data.aws_iam_policy_document.ssm-put-policy-track-ingest.json
+}
+
+resource "aws_iam_role_policy" "hydrocron_lambda_track_ingest_role_sns_publish" {
+  name   = "HydrocronSNSPublish"
+  role   = aws_iam_role.hydrocron_lambda_track_ingest_role.id
+  policy = data.aws_iam_policy_document.sns-resource-cnm-policy.json
 }
 
 
