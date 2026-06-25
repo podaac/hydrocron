@@ -258,11 +258,6 @@ def is_fields_valid(feature, fields, collection_name):
         if any(field in constants.PRIOR_LAKE_VERSION_D_ONLY_FIELDS for field in fields_list):
             return False
 
-    # For Reach feature, check if 2.0-only fields are being requested with Version D collection
-    if feature == 'Reach' and collection_name.endswith('_D'):
-        if any(field in constants.REACH_VERSION_2_0_ONLY_FIELDS for field in fields_list):
-            return False
-
     return True
 
 

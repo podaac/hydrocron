@@ -17,7 +17,7 @@ def parse_args(argv: list[str] | None = None) -> IngestConfig:
     parser.add_argument("--start-reach-id", default=None, help="Reach ID to resume from")
     parser.add_argument("--stop-reach-id", default=None, help="Reach ID to stop after (inclusive)")
     parser.add_argument("--limit", type=int, default=None, help="Max number of reaches to process")
-    parser.add_argument("--time-tolerance", type=int, default=900, help="Max seconds for time matching (default: 900)")
+    parser.add_argument("--time-tolerance", type=int, default=3600, help="Max seconds for time matching (default: 3600)")
     parser.add_argument("--output-dir", default="./output", help="Directory for error log and summary")
     parser.add_argument("--algorithms", default="all", help="Comma-separated algorithms or 'all'")
     parser.add_argument("--log-level", default="INFO", help="Python logging level")
