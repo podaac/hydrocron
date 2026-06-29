@@ -62,7 +62,7 @@ paths:
         explode: true
         schema:
           type: string
-          enum: [ "csv", "geojson"]
+          enum: [ "csv", "geojson", "csv_file"]
           default: geojson
         example: geojson
       - name: fields
@@ -83,6 +83,13 @@ paths:
           type: boolean
           default: false
         example: true
+      - name: filename
+        in: query
+        description: Custom filename for CSV file download (used with output=csv_file)
+        required: false
+        schema:
+          type: string
+        example: my_swot_data.csv
       - name: collection_name
         in: query
         description: Name of collection to query data for
@@ -98,6 +105,9 @@ paths:
           description: OK
           headers:
             Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+            Content-Disposition:
               schema:
                 type: "string"
           content:
@@ -170,10 +180,16 @@ paths:
             responseTemplates:
               application/json: |
                 #set($inputRoot = $input.path('$'))
+                #if($inputRoot.toString().contains('__hydrocron_download__'))
+                #set($context.responseOverride.header.Content-Type = 'text/csv')
+                #set($context.responseOverride.header.Content-Disposition = "attachment; filename=""$input.path('$.filename')""")
+                $input.path('$.csv_data')
+                #else
                 #if($inputRoot.toString().contains('206 PARTIAL CONTENT'))
                   #set($context.responseOverride.status = 206)
                 #end
                 $input.json('$')
+                #end
               application/geo+json: |
                 #set($inputRoot = $input.path('$'))
                 #if($inputRoot.toString().contains('206 PARTIAL CONTENT'))
@@ -274,6 +290,9 @@ paths:
             Access-Control-Allow-Headers:
               schema:
                 type: "string"
+            Access-Control-Expose-Headers:
+              schema:
+                type: "string"
           content: {}
       x-amazon-apigateway-integration:
         type: mock
@@ -286,6 +305,7 @@ paths:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
               method.response.header.Access-Control-Allow-Methods: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Expose-Headers: "'Content-Disposition'"
 x-amazon-apigateway-api-key-source: "AUTHORIZER"
 components:
   schemas:

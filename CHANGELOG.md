@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 317 - Ability to download CSV file
+    - Issue 252 - Get skeleton local install working again and update readme instructions
     - Issue 308 - Add SOS Hydrology V3 products to SWOT_L2_HR_RiverSP_2.0 collection 
 ### Changed
 ### Deprecated
