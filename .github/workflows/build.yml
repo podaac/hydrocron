@@ -373,7 +373,6 @@ jobs:
     env:
       THE_VERSION: ${{ needs.build.outputs.version }}
       CONTAINER_IMAGE_URI: ${{ needs.docker.outputs.container_image_uri }}
-      DEPLOY_ENV: ${{ needs.build.outputs.deploy_env }}
     if: |
       github.ref == 'refs/heads/develop' ||
       github.ref == 'refs/heads/main'    ||
