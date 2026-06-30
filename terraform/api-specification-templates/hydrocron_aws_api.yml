@@ -110,6 +110,9 @@ paths:
             Content-Disposition:
               schema:
                 type: "string"
+            Access-Control-Expose-Headers:
+              schema:
+                type: "string"
           content:
             application/json:
               schema:
@@ -180,11 +183,12 @@ paths:
             responseTemplates:
               application/json: |
                 #set($inputRoot = $input.path('$'))
-                #if($inputRoot.toString().contains('__hydrocron_download__'))
+                #set($isDownload = $input.path('$.__hydrocron_download__'))
+                #if($isDownload == true)
                 #set($context.responseOverride.header.Content-Type = 'text/csv')
                 #set($context.responseOverride.header.Access-Control-Expose-Headers = 'Content-Disposition')
                 #set($fn = $input.path('$.filename'))
-                #set($context.responseOverride.header.Content-Disposition = "attachment; filename=\"$fn\"")
+                #set($context.responseOverride.header.Content-Disposition = "attachment; filename=$fn")
                 $input.path('$.csv_data')
                 #else
                 #if($inputRoot.toString().contains('206 PARTIAL CONTENT'))
