@@ -37,7 +37,10 @@ def timeseries():
 
     try:
         resp = requests.post(LAMBDA_URL, json=event, timeout=30)
-        lambda_result = resp.json()
+        try:
+            lambda_result = resp.json()
+        except ValueError:
+            lambda_result = resp.text
     except Exception as e:
         return Response(json.dumps({'error': str(e)}), status=502, content_type='application/json')
 

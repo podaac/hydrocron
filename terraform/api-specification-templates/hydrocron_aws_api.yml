@@ -182,7 +182,9 @@ paths:
                 #set($inputRoot = $input.path('$'))
                 #if($inputRoot.toString().contains('__hydrocron_download__'))
                 #set($context.responseOverride.header.Content-Type = 'text/csv')
-                #set($context.responseOverride.header.Content-Disposition = "attachment; filename=""$input.path('$.filename')""")
+                #set($context.responseOverride.header.Access-Control-Expose-Headers = 'Content-Disposition')
+                #set($fn = $input.path('$.filename'))
+                #set($context.responseOverride.header.Content-Disposition = "attachment; filename=\"$fn\"")
                 $input.path('$.csv_data')
                 #else
                 #if($inputRoot.toString().contains('206 PARTIAL CONTENT'))
