@@ -373,6 +373,7 @@ jobs:
     env:
       THE_VERSION: ${{ needs.build.outputs.version }}
       CONTAINER_IMAGE_URI: ${{ needs.docker.outputs.container_image_uri }}
+      DEPLOY_ENV: ${{ needs.build.outputs.deploy_env }}
     if: |
       github.ref == 'refs/heads/develop' ||
       github.ref == 'refs/heads/main'    ||
@@ -401,26 +402,18 @@ jobs:
         working-directory: terraform
         env:
           AWS_DEFAULT_REGION: us-west-2
-          # Secret format example: 123456789012 or 123456789012,234567890123 or ["123456789012","234567890123"].
-          TF_VAR_cross_account_ids: ${{ secrets[vars.AWS_ACCOUNT_ID_CUMULUS_SWOT_SECRET_NAME] }}
+          # Secrets example: 123456789012 in each secret; SIT uses only the first secret, UAT/OPS use both.
+          CROSS_ACCOUNT_ID_1: ${{ secrets[vars.AWS_ACCOUNT_ID_CUMULUS_SWOT_SECRET_NAME] }}
+          CROSS_ACCOUNT_ID_2: ${{ needs.build.outputs.deploy_env != 'SIT' && secrets[vars.AWS_ACCOUNT_ID_CONSOLIDATED_CUMULUS_SWOT_SECRET_NAME] || '' }}
         run: |
-          if [[ -z "${TF_VAR_cross_account_ids//[[:space:]]/}" ]]; then
-            echo "TF_VAR_cross_account_ids is empty; set the secret referenced by AWS_ACCOUNT_ID_CUMULUS_SWOT_SECRET_NAME to one or more 12-digit account IDs." >&2
-            exit 1
-          fi
-
-          if [[ ! "${TF_VAR_cross_account_ids}" =~ ^[[:space:]]*\[ ]]; then
-            IFS=',' read -r -a cross_account_ids <<< "${TF_VAR_cross_account_ids}"
-            TF_VAR_cross_account_ids="["
-            separator=""
-            for account_id in "${cross_account_ids[@]}"; do
-              account_id="${account_id//[[:space:]]/}"
-              if [[ -n "${account_id}" ]]; then
-                TF_VAR_cross_account_ids+="${separator}\"${account_id}\""
-                separator=","
-              fi
-            done
-            TF_VAR_cross_account_ids+="]"
-          fi
+          TF_VAR_cross_account_ids="["
+          separator=""
+          for account_id in "${CROSS_ACCOUNT_ID_1}" "${CROSS_ACCOUNT_ID_2}"; do
+            account_id="${account_id//[[:space:]]/}"
+            if [[ -n "${account_id}" ]]; then
+              TF_VAR_cross_account_ids+="${separator}\"${account_id}\""
+              separator=","
+            fi
+          done
           export TF_VAR_cross_account_ids
           ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ vars.TF_VENUE }} --lambda_container_image_uri ${{ env.CONTAINER_IMAGE_URI }}
