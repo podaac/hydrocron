@@ -401,6 +401,18 @@ jobs:
         working-directory: terraform
         env:
           AWS_DEFAULT_REGION: us-west-2
-          TF_VAR_cross_account_id: ${{ secrets[vars.AWS_ACCOUNT_ID_CUMULUS_SWOT_SECRET_NAME] }}
+          CROSS_ACCOUNT_ID_1: ${{ secrets[vars.AWS_ACCOUNT_ID_CUMULUS_SWOT_SECRET_NAME] }}
+          CROSS_ACCOUNT_ID_2: ${{ secrets[vars.AWS_ACCOUNT_ID_CONSOLIDATED_CUMULUS_SWOT_SECRET_NAME] }}
         run: |
+          TF_VAR_cross_account_ids="["
+          separator=""
+          for account_id in "${CROSS_ACCOUNT_ID_1}" "${CROSS_ACCOUNT_ID_2}"; do
+            account_id="${account_id//[[:space:]]/}"
+            if [[ -n "${account_id}" ]]; then
+              TF_VAR_cross_account_ids+="${separator}\"${account_id}\""
+              separator=","
+            fi
+          done
+          TF_VAR_cross_account_ids+="]"
+          export TF_VAR_cross_account_ids
           ./bin/deploy.sh --app-version ${{ env.THE_VERSION }} --tf-venue ${{ vars.TF_VENUE }} --lambda_container_image_uri ${{ env.CONTAINER_IMAGE_URI }}
