@@ -1,14 +1,14 @@
 """Load test data into a local DynamoDB instance for development."""
 import os
 
-os.environ['HYDROCRON_ENV'] = 'LOCAL'
-os.environ['HYDROCRON_dynamodb_endpoint_url'] = 'http://localhost:8001'
-os.environ['AWS_ACCESS_KEY_ID'] = 'fakeMyKeyId'
-os.environ['AWS_SECRET_ACCESS_KEY'] = 'fakeSecretAccessKey'
-os.environ['AWS_DEFAULT_REGION'] = 'us-west-2'
-os.environ['DEFAULT_RIVER_COLLECTION'] = 'SWOT_L2_HR_RiverSP'
-os.environ['DEFAULT_LAKE_COLLECTION'] = 'SWOT_L2_HR_LakeSP'
-os.environ['DEFAULT_COLLECTION_VERSION'] = 'D'
+os.environ.setdefault('HYDROCRON_ENV', 'LOCAL')
+os.environ.setdefault('HYDROCRON_dynamodb_endpoint_url', 'http://localhost:8001')
+os.environ.setdefault('AWS_ACCESS_KEY_ID', 'fakeMyKeyId')
+os.environ.setdefault('AWS_SECRET_ACCESS_KEY', 'fakeSecretAccessKey')
+os.environ.setdefault('AWS_DEFAULT_REGION', 'us-west-2')
+os.environ.setdefault('DEFAULT_RIVER_COLLECTION', 'SWOT_L2_HR_RiverSP')
+os.environ.setdefault('DEFAULT_LAKE_COLLECTION', 'SWOT_L2_HR_LakeSP')
+os.environ.setdefault('DEFAULT_COLLECTION_VERSION', 'D')
 
 from botocore.exceptions import ClientError  # noqa: E402
 from hydrocron.db import HydrocronTable  # noqa: E402

@@ -12,32 +12,40 @@ services:
     working_dir: /home/dynamodblocal
     networks:
       - hydrocron
-  hydrocron-table-create:
-    image: "amazon/aws-cli"
-    container_name: hydrocron-table-create
-    entrypoint: /bin/sh -c
-    command: >
-      "echo 'Tables will be created by load_data_local.py - skipping'"
+  hydrocron-load-data:
+    image: "hydrocron:latest"
+    container_name: hydrocron-load-data
+    entrypoint: python
+    command: /var/task/tests/load_data_local.py
+    volumes:
+      - ./tests:/var/task/tests
     depends_on:
       - dynamodb-local
     networks:
       - hydrocron
     environment:
+      PYTHONPATH: /var/task
+      HYDROCRON_ENV: LOCAL
+      HYDROCRON_dynamodb_endpoint_url: http://dynamodb-local:8000
       AWS_ACCESS_KEY_ID: fakeMyKeyId
       AWS_SECRET_ACCESS_KEY: fakeSecretAccessKey
       AWS_DEFAULT_REGION: us-west-2
+      DEFAULT_RIVER_COLLECTION: SWOT_L2_HR_RiverSP
+      DEFAULT_LAKE_COLLECTION: SWOT_L2_HR_LakeSP
+      DEFAULT_COLLECTION_VERSION: D
   hydrocron-lambda:
     image: "hydrocron:latest"
     container_name: hydrocron-lambda
     ports:
       - "9000:8080"
     depends_on:
-      - hydrocron-table-create
+      hydrocron-load-data:
+        condition: service_completed_successfully
     networks:
       - hydrocron
     environment:
       HYDROCRON_ENV: LOCAL
-      HYDROCRON_dynamodb_endpoint_url: http://host.docker.internal:8001
+      HYDROCRON_dynamodb_endpoint_url: http://dynamodb-local:8000
       AWS_ACCESS_KEY_ID: fakeMyKeyId
       AWS_SECRET_ACCESS_KEY: fakeSecretAccessKey
       AWS_DEFAULT_REGION: us-west-2
@@ -57,5 +65,11 @@ services:
       - hydrocron
     environment:
       LAMBDA_URL: http://hydrocron-lambda:8080/2015-03-31/functions/function/invocations
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf 'http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2020-06-04T00:00:00Z&end_time=2026-06-23T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 networks:
   hydrocron: {}
