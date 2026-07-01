@@ -126,7 +126,17 @@ Example:
 
 ### output : string, required: no
 
-Format of the data returned. Either: "csv" or "geojson"
+Format of the data returned. Either: "csv", "geojson", or "csv_file"
+
+- `csv` — returns CSV data in the JSON response body
+- `geojson` — returns GeoJSON data in the JSON response body
+- `csv_file` — triggers a CSV file download in the browser with a `Content-Disposition: attachment` header
+
+### filename : string, required: no
+
+Custom filename for the downloaded CSV file. Only used when `output=csv_file`. If not provided, a default filename is generated in the format: `hydrocron_{feature}_{feature_id}_{start_date}_{end_date}.csv`
+
+The filename is sanitized to only allow safe characters (`a-z`, `A-Z`, `0-9`, `_`, `-`, `.`). If the filename does not end with `.csv`, the extension is appended automatically. Maximum length is 200 characters.
 
 ### compact: string, required: no
 
@@ -394,6 +404,26 @@ Example CSV response:
 ```bash
 "reach_id,time_str,wse,wse_units\n63470800171,2024-02-01T02:26:50Z,3386.9332,m\n63470800171,2024-02-08T13:48:41Z,1453.4136,m\n"
 ```
+
+### CSV File Download
+
+When the `output` parameter is set to `csv_file`, the response triggers a file download in the browser. The response has `Content-Type: text/csv` and a `Content-Disposition: attachment; filename="..."` header that causes the browser to prompt a Save As dialog.
+
+Example request with default filename:
+
+```bash
+curl -OJ --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&output=csv_file&fields=reach_id,time_str,wse'
+```
+
+Downloads as: `hydrocron_Reach_63470800171_2024-02-01_2024-10-30.csv`
+
+Example request with custom filename:
+
+```bash
+curl -OJ --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=63470800171&start_time=2024-02-01T00:00:00%2b00:00&end_time=2024-10-30T00:00:00%2b00:00&output=csv_file&filename=my_analysis&fields=reach_id,time_str,wse'
+```
+
+Downloads as: `my_analysis.csv`
 
 ## Response Codes
 

@@ -36,10 +36,10 @@ docker pull ghcr.io/podaac/hydrocron:latest
 
 ### 2. Run Docker Compose
 
-Launch dynamodb local on port 8000 and hyrdrocron on port 9000
+Launch DynamoDB local on port 8001, Hydrocron Lambda on port 9000, and local API Gateway on port 8080:
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 ### 3. Load Test Data
@@ -61,8 +61,27 @@ that can be used to allow the data to persist across container restarts if desir
 
 ### 4. Execute Sample Requests
 
-The docker container is running a lambda container image. By posting data to port 9000, the lambda handler will be invoked
-and will return results from the loaded test data. For example:
+The local API Gateway on port 8080 accepts GET requests just like the deployed AWS API. Open these URLs in your browser or use curl.
+
+**Note:** The local API Gateway is a Flask proxy that simulates AWS API Gateway behavior. It validates the Lambda logic end-to-end (query params, DB queries, response formatting) but does not execute the actual VTL response templates. API Gateway-specific behavior (header mapping, content-type negotiation via VTL) is only testable after deployment to SIT/UAT.
+
+```
+http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2023-06-04T00:00:00Z&end_time=2023-06-23T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse
+```
+
+```
+http://localhost:8080/timeseries?feature=Node&feature_id=31241400580011&start_time=2026-02-01T00:00:00Z&end_time=2026-02-28T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_D&fields=node_id,time_str,wse,wse_sm,wse_sm_u,wse_sm_q
+```
+
+CSV file download (triggers browser Save As):
+
+```
+http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2023-06-04T00:00:00Z&end_time=2023-06-23T00:00:00Z&output=csv_file&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse
+```
+
+You can also invoke the Lambda container directly via POST on port 9000. For example:
+
+Reach data (v2.0 collection):
 
 ```bash
 curl --location 'http://localhost:9000/2015-03-31/functions/function/invocations' \
@@ -70,11 +89,38 @@ curl --location 'http://localhost:9000/2015-03-31/functions/function/invocations
 --data '{
     "body":{
         "feature": "Reach",
-        "reach_id": "71224100223",
-        "start_time": "2022-08-04T00:00:00+00:00",
-        "end_time": "2022-08-23T00:00:00+00:00",
+        "feature_id": "71224100223",
+        "start_time": "2023-06-04T00:00:00+00:00",
+        "end_time": "2023-06-23T00:00:00+00:00",
         "output": "csv",
-        "fields": "feature_id,time_str,wse"
+        "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+        "fields": "reach_id,time_str,wse"
+    },
+    "headers": {
+        "User-Agent": "curl",
+        "X-Forwarded-For": "127.0.0.1"
+    }
+}'
+```
+
+Node data with smoothed WSE fields (Version D collection):
+
+```bash
+curl --location 'http://localhost:9000/2015-03-31/functions/function/invocations' \
+--header 'Content-Type: application/json' \
+--data '{
+    "body":{
+        "feature": "Node",
+        "feature_id": "31241400580011",
+        "start_time": "2026-02-01T00:00:00+00:00",
+        "end_time": "2026-02-28T00:00:00+00:00",
+        "output": "csv",
+        "collection_name": "SWOT_L2_HR_RiverSP_D",
+        "fields": "node_id,time_str,wse,wse_sm,wse_sm_u,wse_sm_q"
+    },
+    "headers": {
+        "User-Agent": "curl",
+        "X-Forwarded-For": "127.0.0.1"
     }
 }'
 ```

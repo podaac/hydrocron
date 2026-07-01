@@ -7,6 +7,7 @@ import datetime
 import json
 import logging
 import os
+import re
 import sys
 import time
 
@@ -74,6 +75,7 @@ def get_request_parameters(event, accept_header):
         parameters['compact'] = 'false' if 'compact' not in event['body'].keys() else event['body']['compact']
         if accept_header == 'application/geo+json':   # Default is different for geo+json
             parameters['compact'] = 'true' if 'compact' not in event['body'].keys() else event['body']['compact']
+        parameters['filename'] = '' if 'filename' not in event['body'].keys() else event['body']['filename']
         parameters['collection_name'] = get_collection_name(event)
     except KeyError as e:
         raise RequestError(f'400: This required parameter is missing: {e}') from e
@@ -177,8 +179,8 @@ def validate_parameters(parameters):
         error_message = ('400: start_time and end_time parameters must conform '
                          'to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00')
 
-    elif parameters['output'] not in ('csv', 'geojson', 'default'):
-        error_message = f'400: output parameter should be csv or geojson, not: {parameters["output"]}'
+    elif parameters['output'] not in ('csv', 'geojson', 'csv_file', 'default'):
+        error_message = f'400: output parameter should be csv, geojson, or csv_file, not: {parameters["output"]}'
 
     elif parameters['feature'] == 'Reach' and parameters['collection_name'].endswith('_D') and \
             any(f in constants.REACH_VERSION_2_0_ONLY_FIELDS for f in parameters['fields'].split(',')):
@@ -281,6 +283,23 @@ def sanitize_time(start_time, end_time):
     start_time = datetime.datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
     end_time = datetime.datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%dT%H:%M:%S%z")
     return start_time, end_time
+
+
+def sanitize_filename(filename):
+    """Sanitize user-provided filename, keeping only safe characters."""
+    sanitized = re.sub(r'[^a-zA-Z0-9_\-.]', '_', filename)
+    if not sanitized.endswith('.csv'):
+        sanitized += '.csv'
+    if len(sanitized) > 200:
+        sanitized = sanitized[:196] + '.csv'
+    return sanitized
+
+
+def build_default_filename(feature, feature_id, start_time, end_time):
+    """Build default download filename from request parameters."""
+    start_date = start_time[:10]
+    end_date = end_time[:10]
+    return f"hydrocron_{feature}_{feature_id}_{start_date}_{end_date}.csv"
 
 
 def timeseries_get(collection_name, feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -533,7 +552,9 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         logging.info('user_ip: %s', headers['user_ip'])
         parameters = get_request_parameters(event, headers['accept'])
         logging.info('collection_name: %s', parameters['collection_name'])
-        return_type, output = get_return_type(headers['accept'], parameters['output'])
+        is_csv_file = parameters['output'] == 'csv_file'
+        effective_output = 'csv' if is_csv_file else parameters['output']
+        return_type, output = get_return_type(headers['accept'], effective_output)
     except RequestError as e:
         error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
         logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
@@ -558,6 +579,22 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
         logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
+
+    if is_csv_file and results['http_code'] == '200 OK':
+        filename = parameters['filename']
+        if filename:
+            filename = sanitize_filename(filename)
+        else:
+            filename = sanitize_filename(build_default_filename(
+                parameters['feature'], parameters['feature_id'],
+                parameters['start_time'], parameters['end_time']
+            ))
+        data = {
+            '__hydrocron_download__': True,
+            'csv_data': results['response'],
+            'filename': filename
+        }
+
     logging.info('response: %s', json.dumps({'status': results['http_code'], 'time': elapsed, 'hits': hits}))
     logging.info('response_size: %s', str(sys.getsizeof(data)))
 
