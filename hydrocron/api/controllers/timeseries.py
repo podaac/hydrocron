@@ -585,10 +585,10 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         if filename:
             filename = sanitize_filename(filename)
         else:
-            filename = build_default_filename(
+            filename = sanitize_filename(build_default_filename(
                 parameters['feature'], parameters['feature_id'],
                 parameters['start_time'], parameters['end_time']
-            )
+            ))
         data = {
             '__hydrocron_download__': True,
             'csv_data': results['response'],

@@ -10,6 +10,7 @@ os.environ['DEFAULT_RIVER_COLLECTION'] = 'SWOT_L2_HR_RiverSP'
 os.environ['DEFAULT_LAKE_COLLECTION'] = 'SWOT_L2_HR_LakeSP'
 os.environ['DEFAULT_COLLECTION_VERSION'] = 'D'
 
+from botocore.exceptions import ClientError  # noqa: E402
 from hydrocron.db import HydrocronTable  # noqa: E402
 from hydrocron.db.io import swot_shp  # noqa: E402
 from hydrocron.utils import connection, constants  # noqa: E402
@@ -55,8 +56,9 @@ def create_table(dynamo_resource, table_name, partition_key):
         table.load()
         print(f"  Table {table_name} already exists, skipping creation.")
         return
-    except dynamo_resource.meta.client.exceptions.ResourceNotFoundException:
-        pass
+    except ClientError as e:
+        if e.response.get('Error', {}).get('Code') != 'ResourceNotFoundException':
+            raise
 
     dynamo_resource.create_table(
         TableName=table_name,

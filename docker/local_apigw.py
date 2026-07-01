@@ -37,6 +37,7 @@ def timeseries():
 
     try:
         resp = requests.post(LAMBDA_URL, json=event, timeout=30)
+        resp.raise_for_status()
         try:
             lambda_result = resp.json()
         except ValueError:
@@ -44,7 +45,7 @@ def timeseries():
     except Exception as e:
         return Response(json.dumps({'error': str(e)}), status=502, content_type='application/json')
 
-    if 'errorMessage' in lambda_result:
+    if isinstance(lambda_result, dict) and 'errorMessage' in lambda_result:
         error_msg = lambda_result['errorMessage']
         try:
             status_code = int(error_msg.split(':')[0])
@@ -57,7 +58,7 @@ def timeseries():
             headers={'Access-Control-Allow-Origin': '*'}
         )
 
-    if isinstance(lambda_result, dict) and '__hydrocron_download__' in lambda_result:
+    if isinstance(lambda_result, dict) and lambda_result.get('__hydrocron_download__') is True:
         filename = lambda_result.get('filename', 'hydrocron_download.csv')
         csv_data = lambda_result.get('csv_data', '')
         return Response(
@@ -65,7 +66,7 @@ def timeseries():
             status=200,
             content_type='text/csv',
             headers={
-                'Content-Disposition': f'attachment; filename="{filename}"',
+                'Content-Disposition': f'attachment; filename={filename}',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Expose-Headers': 'Content-Disposition',
             }
