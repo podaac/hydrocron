@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
     - Issue 371 - Hydrocron ingest migration with consolidated cumulus add account ids 
+    - Issue 358 - Add requester-pays support to S3 `download_file` calls
 ### Changed
 ### Deprecated
 ### Removed
