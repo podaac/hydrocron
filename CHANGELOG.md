@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
     - Issue 371 - Hydrocron ingest migration with consolidated cumulus - Add Account IDs 
+    - Issue 358 - Add requester-pays support to S3 `download_file` calls
     - Issue 308 - Add SOS Hydrology V3 products to SWOT_L2_HR_RiverSP_2.0 collection 
 ### Changed
 ### Deprecated
