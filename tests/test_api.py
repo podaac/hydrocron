@@ -2,7 +2,7 @@
 Tests for API queries
 """
 import csv
-import os.path
+import os
 import pathlib
 
 import pytest
@@ -1080,3 +1080,176 @@ def test_timeseries_child_collection_feature_mismatch(hydrocron_api, collection_
     assert "Sub-collection" in str(exc_info.value)
     assert collection_name in str(exc_info.value)
     assert feature in str(exc_info.value)
+
+
+def test_is_fields_valid_sos_reach(hydrocron_api):
+    """Test that SOS discharge fields are valid for Reach 2.0 requests only."""
+    import hydrocron.api.controllers.timeseries
+
+    # SOS fields should be valid for Reach with 2.0 collection
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Reach',
+        'reach_id,time_str,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis',
+        'SWOT_L2_HR_RiverSP_2.0'
+    ) is True
+
+    # SOS fields should NOT be valid for Reach with Version D collection
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Reach',
+        'reach_id,time_str,sos_consensus_q',
+        'SWOT_L2_HR_RiverSP_D'
+    ) is False
+
+    # swot_discharge_reanalysis should NOT be valid for Version D
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Reach',
+        'reach_id,time_str,swot_discharge_reanalysis',
+        'SWOT_L2_HR_RiverSP_D'
+    ) is False
+
+    # SOS fields should NOT be valid for Node with 2.0 collection
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Node',
+        'node_id,time_str,sos_consensus_q',
+        'SWOT_L2_HR_RiverSP_2.0'
+    ) is False
+
+    # SOS fields should NOT be valid for Node with D collection
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'Node',
+        'node_id,time_str,sos_consensus_q',
+        'SWOT_L2_HR_RiverSP_D'
+    ) is False
+
+    # SOS fields should NOT be valid for PriorLake with 2.0 collection
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'PriorLake',
+        'lake_id,time_str,sos_consensus_q',
+        'SWOT_L2_HR_LakeSP_2.0'
+    ) is False
+
+    # SOS fields should NOT be valid for PriorLake with D collection
+    assert hydrocron.api.controllers.timeseries.is_fields_valid(
+        'PriorLake',
+        'lake_id,time_str,sos_consensus_q',
+        'SWOT_L2_HR_LakeSP_D'
+    ) is False
+
+
+def test_sos_fields_fill_value_when_missing_in_db(hydrocron_api):
+    """Test that SOS fields return fill value when not present in DynamoDB via lambda handler."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    assert result['status'] == '200 OK'
+    features = result['results']['geojson']['features']
+    assert len(features) > 0
+    for feature in features:
+        props = feature['properties']
+        assert props['sos_consensus_q'] == "-999999999999.0"
+        assert props['sos_hivdi_q'] == "-999999999999.0"
+        assert props['sos_metroman_q'] == "-999999999999.0"
+        assert props['sos_momma_q'] == "-999999999999.0"
+        assert props['sos_sad_q'] == "-999999999999.0"
+        assert props['sos_sic4dvar_q'] == "-999999999999.0"
+        assert props['sos_lakeflow_q'] == "-999999999999.0"
+        assert props['swot_discharge_reanalysis'] == "-999999999999.0"
+
+
+def test_sos_fields_with_values(hydrocron_api):
+    """Test that SOS fields return values when present via lambda handler."""
+    import hydrocron.api.controllers.timeseries
+    import hydrocron.utils.connection
+
+    # Add SOS values to reach 71224100223 in the test DB (simulating SOS ingest)
+    table = hydrocron.utils.connection.dynamodb_resource.Table(
+        "hydrocron-swot-reach-table"
+    )
+    table.update_item(
+        Key={"reach_id": "71224100223", "range_start_time": "2023-06-10T19:33:37Z"},
+        UpdateExpression="SET sos_consensus_q = :cq, sos_sic4dvar_q = :sq, sos_lakeflow_q = :lq",
+        ExpressionAttributeValues={
+            ":cq": "460.756",
+            ":sq": "513.42",
+            ":lq": "21.315",
+        }
+    )
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,sos_consensus_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+
+    context = "_"
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    assert result['status'] == '200 OK'
+    features = result['results']['geojson']['features']
+    assert len(features) == 1
+
+    props = features[0]['properties']
+
+    # Fields that were written by simulated SOS ingest
+    assert props['sos_consensus_q'] == "460.756"
+    assert props['sos_sic4dvar_q'] == "513.42"
+    assert props['sos_lakeflow_q'] == "21.315"
+    # Fields that were NOT written — should get fill value
+    assert props['sos_metroman_q'] == "-999999999999.0"
+    assert props['sos_momma_q'] == "-999999999999.0"
+    assert props['sos_sad_q'] == "-999999999999.0"
+    # Alias should match consensus
+    assert props['swot_discharge_reanalysis'] == "460.756"
+    assert props['swot_discharge_reanalysis'] == props['sos_consensus_q']
+
+
+def test_sos_fields_error_message_without_collection_name(hydrocron_api):
+    """Test that requesting SOS fields without collection_name returns error (defaults to vD)."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "fields": "reach_id,time_str,sos_consensus_q"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+
+    context = "_"
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    assert 'SOS Discharge fields are not available for the SWOT vD collection' in str(exc_info.value)
+    assert 'collection_name=SWOT_L2_HR_RiverSP_2.0' in str(exc_info.value)

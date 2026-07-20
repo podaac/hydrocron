@@ -453,6 +453,69 @@ def test_track_ingest_publish_cnm(track_ingest_cnm_fixture):
     assert actual == expected
 
 
+@pytest.mark.parametrize("xml_content,expected_version", [
+    (
+        '<root><global_attributes>'
+        '<xref_prior_river_db_files>SWOT_RiverDatabase_Cal_011_256R_20200101T000000_21000101T000000_20230414T153800_v215.nc</xref_prior_river_db_files>'
+        '</global_attributes></root>',
+        "15"
+    ),
+    (
+        '<root><global_attributes>'
+        '<xref_prior_river_db_files>SWOT_RiverDatabase_Nom_149_262R_20200101T000000_21000101T000000_20230808T191400_v216.nc</xref_prior_river_db_files>'
+        '</global_attributes></root>',
+        "16"
+    ),
+    (
+        '<root><global_attributes>'
+        '<xref_prior_river_db_files>SWOT_RiverDatabase_Nom_058_233R_20200101T000000_21000101T000000_20250326T114000_v217b.nc</xref_prior_river_db_files>'
+        '</global_attributes></root>',
+        "17b"
+    ),
+])
+def test_parse_sword_version(xml_content, expected_version):
+    """Test SWORD version extraction from shp.xml for v1, v2, and vD files."""
+    import xml.etree.ElementTree as ET
+    from hydrocron.db.io.swot_shp import parse_metadata_from_shpxml
+
+    xml_elem = ET.fromstring(xml_content)
+    metadata_attrs = parse_metadata_from_shpxml(xml_elem)
+    assert metadata_attrs['sword_version'] == expected_version
+
+
+@pytest.mark.parametrize("filepath,expected_collection,expected_version", [
+    (
+        "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_2.0/SWOT_L2_HR_RiverSP_Reach_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip",
+        "SWOT_L2_HR_RiverSP_2.0",
+        "2.0"
+    ),
+    (
+        "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_RiverSP_D/SWOT_L2_HR_RiverSP_Reach_049_058_AU_20260419T185249_20260419T190852_PID0_01.zip",
+        "SWOT_L2_HR_RiverSP_D",
+        "D"
+    ),
+    (
+        "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_LakeSP_2.0/SWOT_L2_HR_LakeSP_Prior_018_100_GR_20240713T111741_20240713T112027_PIC0_01.zip",
+        "SWOT_L2_HR_LakeSP_2.0",
+        "2.0"
+    ),
+    (
+        "s3://podaac-swot-ops-cumulus-protected/SWOT_L2_HR_LakeSP_D/SWOT_L2_HR_LakeSP_Prior_033_506_AU_20250605T225724_20250605T230824_PID0_01.zip",
+        "SWOT_L2_HR_LakeSP_D",
+        "D"
+    ),
+])
+def test_parse_collection_version(filepath, expected_collection, expected_version):
+    """Test collection_version extraction from filepath for v2 and vD (issue #288)."""
+    from hydrocron.db.io.swot_shp import parse_from_filename
+
+    attrs = parse_from_filename(filepath)
+    assert attrs['collection_shortname'] == expected_collection, \
+        f"collection_shortname = '{attrs['collection_shortname']}', expected '{expected_collection}'"
+    assert attrs['collection_version'] == expected_version, \
+        f"collection_version = '{attrs['collection_version']}', expected '{expected_version}'"
+
+
 @patch("hydrocron.utils.constants.SHORTNAME", SHORTNAME)
 @patch("hydrocron.utils.constants.TABLE_COLLECTION_INFO", TABLE_COLLECTION_INFO)
 def test_track_ingest_mismatch(track_ingest_fixture):

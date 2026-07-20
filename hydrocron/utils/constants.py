@@ -326,6 +326,21 @@ NODE_DATA_COLUMNS = [
 NODE_VERSION_D_ONLY_FIELDS = ['wse_sm', 'wse_sm_u', 'wse_sm_q', 'wse_sm_q_b']
 PRIOR_LAKE_VERSION_D_ONLY_FIELDS = ['qual_f_b']
 
+# Fill value returned by the API for any column missing from a DynamoDB row.
+# Future work: remove all fill-value columns from the database to reduce storage size and cost.
+FILL_VALUE = "-999999999999.0"
+
+# Version 2.0 specific fields (not available in D)
+REACH_VERSION_2_0_ONLY_FIELDS = [
+    'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
+    'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis'
+]
+
+# Field aliases — virtual fields that map to another column in DynamoDB
+FIELD_ALIASES = {
+    'swot_discharge_reanalysis': 'sos_consensus_q',
+}
+
 PRIOR_LAKE_DATA_COLUMNS = [
     'wse', 'wse_u', 'wse_r_u', 'wse_std',
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
@@ -364,6 +379,9 @@ REACH_ALL_COLUMNS = [
     'obs_frac_n', 'xovr_cal_q', 'geoid_hght', 'geoid_slop',
     'solid_tide', 'load_tidef', 'load_tideg', 'pole_tide',
     'dry_trop_c', 'wet_trop_c', 'iono_c', 'xovr_cal_c',
+    'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
+    'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q',
+    'swot_discharge_reanalysis',
     'n_reach_up', 'n_reach_dn', 'rch_id_up', 'rch_id_dn',
     'p_wse', 'p_wse_var', 'p_width', 'p_wid_var', 'p_n_nodes', 'p_dist_out',
     'p_length', 'p_maf', 'p_dam_id', 'p_n_ch_max', 'p_n_ch_mod', 'p_low_slp',

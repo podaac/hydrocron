@@ -1,6 +1,6 @@
 ## Overview
 
-Hydrocron is an API that repackages hydrology datasets from the Surface Water and Ocean Topography (SWOT) satellite into formats that make time-series analysis easier, including GeoJSON and CSV. To use Hydrocron, see the official documentation with examples and tutorials here: [https://podaac.github.io/hydrocron/intro.html](https://podaac.github.io/hydrocron/intro.html)
+Hydrocron is an API that repackages hydrology datasets from the Surface Water and Ocean Topography (SWOT) satellite into formats that make time-series analysis easier, including GeoJSON and CSV. To use Hydrocron, see the official documentation with examples and tutorials here: [https://podaac.github.io/hydrocron/](https://podaac.github.io/hydrocron/)
 
 The following sections of this readme describe how to install and run a development version of Hydrocron locally on your own computer. This is not recommended if you just want to access SWOT data through Hydrocron. To access data, see the documentation linked above.
 

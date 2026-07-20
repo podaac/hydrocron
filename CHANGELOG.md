@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [1.9.0]
+
+### Added
+    - Issue 371 - Hydrocron ingest migration with consolidated cumulus - Add Account IDs 
+    - Issue 358 - Add requester-pays support to S3 `download_file` calls
+    - Issue 308 - Add SOS Hydrology V3 products to SWOT_L2_HR_RiverSP_2.0 collection 
+### Changed
+### Deprecated
+### Removed
+### Fixed
+    - Issue 346 - SWORD version incorrect for version D
+    - Issue 288 - Ensure collection version is populated in Hydrocron DynamoDB table fields
+### Security
+
 ## [1.8.0]
 
 ### Added
