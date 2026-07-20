@@ -95,18 +95,24 @@ def granule_handler(event, _):
     """
     Second Lambda entrypoint for loading individual granules
     """
-    granule_path = event['body']['granule_path']
+    if 'Records' in event:
+        record = json.loads(event['Records'][0]['body'])
+        body = record['body']
+    else:
+        body = event['body']
 
-    load_benchmarking_data = event['body']['load_benchmarking_data']
+    granule_path = body['granule_path']
+
+    load_benchmarking_data = body['load_benchmarking_data']
 
     try:
-        checksum = event['body']['checksum']
+        checksum = body['checksum']
     except KeyError:
         checksum = "Not Found"
         logging.info('No CNM checksum')
 
     try:
-        revision_date = event['body']['revisionDate']
+        revision_date = body['revisionDate']
     except KeyError:
         revision_date = "Not Found"
         logging.info('No CNM revision date')
@@ -160,15 +166,15 @@ def granule_handler(event, _):
 
 def cnm_handler(event, _):
     """
-    Unpacks CNM-R message and invokes granule_load lambda
+    Unpacks CNM-R message and sends granule load messages to SQS
     """
     load_benchmarking_data = "False"
 
-    lambda_client = boto3.client('lambda')
+    sqs_client = boto3.client('sqs')
+    queue_url = os.environ['GRANULE_QUEUE_URL']
 
-    # Parse message
     for message in event['Records']:
-        cnm = json.loads(message['Sns']['Message'])
+        cnm = json.loads(message['body'])
         revision_date = cnm['submissionTime']
 
         logging.info("Begin processing message %s", json.dumps(cnm))
@@ -186,19 +192,23 @@ def cnm_handler(event, _):
                 else:
                     raise MissingTable(f"Error: Cannot load granule: {granule_uri}")
 
-                event2 = ('{"body": {"granule_path": "' + granule_uri
-                          + '","table_name": "' + table_name
-                          + '","track_table": "' + track_table
-                          + '","checksum": "' + checksum
-                          + '","revisionDate": "' + revision_date
-                          + '","load_benchmarking_data": "' + load_benchmarking_data + '"}}')
+                msg_body = json.dumps({
+                    "body": {
+                        "granule_path": granule_uri,
+                        "table_name": table_name,
+                        "track_table": track_table,
+                        "checksum": checksum,
+                        "revisionDate": revision_date,
+                        "load_benchmarking_data": load_benchmarking_data
+                    }
+                })
 
-                logging.info("Invoking granule load lambda with event json %s", str(event2))
+                logging.info("Sending granule load message to SQS: %s", msg_body)
 
-                lambda_client.invoke(
-                    FunctionName=os.environ['GRANULE_LAMBDA_FUNCTION_NAME'],
-                    InvocationType='Event',
-                    Payload=event2)
+                sqs_client.send_message(
+                    QueueUrl=queue_url,
+                    MessageBody=msg_body
+                )
 
 
 def find_new_granules(collection_shortname, start_date, end_date):
