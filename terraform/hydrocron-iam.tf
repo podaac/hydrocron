@@ -279,8 +279,10 @@ data "aws_iam_policy_document" "sns-resource-policy" {
     effect = "Allow"
 
     principals {
-      type        = "AWS"
-      identifiers = ["arn:aws:iam::${var.cross_account_id}:root"]
+      type = "AWS"
+      identifiers = [
+        for account_id in var.cross_account_ids : "arn:aws:iam::${account_id}:root"
+      ]
     }
 
     actions   = ["sns:Publish"]
