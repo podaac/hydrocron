@@ -66,5 +66,5 @@ SoS discharge field name mappings
 
 For full requests and responses, see:
 
-- [Get time series GeoJSON for river reach with discharge](../examples.md)
-- [Get time series CSV for river reach with discharge](../examples.md)
+- [Get time series GeoJSON for river reach with discharge](../examples.md#get-time-series-geojson-for-river-reach-with-discharge)
+- [Get time series CSV for river reach with discharge](../examples.md#get-time-series-csv-for-river-reach-with-discharge)
