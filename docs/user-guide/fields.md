@@ -74,6 +74,7 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 ```
 
 **Lake fields**
+
 ```bash
 'lake_id', 'reach_id', 'obs_id', 'overlap', 'n_overlap',
 'time', 'time_tai', 'time_str', 'wse', 'wse_u', 'wse_r_u', 'wse_std',
@@ -91,12 +92,14 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 
 **SoS Discharge fields**
 
-These fields are added to the Reach feature type from the SWOT Level 4 SoS River Discharge products. They are only available for the version 2.0 river collection. Each represents a discharge estimate (in m³/s) from a different SoS algorithm, matched to the closest SWOT observation time on the reach. `swot_discharge_reanalysis` is an alias for `sos_consensus_q`.
-
 ```bash
 'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
 'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis'
 ```
 
-For details on the discharge algorithms, field naming conventions, fill values, and how discharge is matched to SWOT observation times, see the [discharge guide](discharge.md).
+:::{note}
+SoS discharge fields are available on **river reaches** in the **Version 2.0** collection only (`collection_name=SWOT_L2_HR_RiverSP_2.0`). Values are in m³/s, and `swot_discharge_reanalysis` is an alias for `sos_consensus_q`.
+
+See the [discharge guide](discharge.md) for algorithms, naming conventions, fill values, and time matching.
+:::
 

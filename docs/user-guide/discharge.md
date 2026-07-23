@@ -3,11 +3,11 @@
 
 In addition to the SWOT Level 2 river and lake observations, Hydrocron serves river discharge estimates from the [SWOT Level 4 Sword of Science (SoS) River Discharge Products, Version 3](https://doi.org/10.5067/SWOT-SOS-RD3). These are model-derived discharge (streamflow) estimates produced by SWOT Confluence, matched to the SWOT observation times on each river reach.
 
-## Availability
+## Availability of discharge
 
-SoS discharge fields are:
+SoS discharge is subject to two constraints:
 
-- **Reach only** — they are added to river reach data, not nodes or lakes.
+- **Reach only** — discharge fields are added to river reach data, not nodes or lakes.
 - **Version 2.0 only** — the SoS V3 products are generated from SWOT L2 RiverSP v2.0 (SWORD v16). To request discharge you must set `collection_name=SWOT_L2_HR_RiverSP_2.0`.
 
 If you omit `collection_name` (defaulting to Version D) or request a Version D collection, the discharge fields will not be populated. See the [versioning guide](versioning.md) for more on collection versions.
@@ -54,11 +54,7 @@ The SoS products report discharge against their own timestamps. During ingest, e
 
 ## Field naming conventions
 
-```{note}
-A note on fields naming conventions:
-
 With the implementation of SWOT SoS Discharge data products in Hydrocron, the field names users request through the API are different from the names in the original L4 netCDF, but consistent and corresponding to the respective variable. This was done to help the users discern and track in their request which discharge products they want, given there are several discharge (q) variables in the various groups in the original netCDF, and given the SWOT Level 2 River SP also contains discharge attributes. For example, for L4, consensus_q is renamed sos_consensus_q, hivdi Q is renamed sos_hivdi_q, and so on. This renaming is mapped in the table below. An additional note, that the consensus_q variable from the L4 SoS discharge product can be requested as either sos_consensus_q or swot_discharge_reanalysis, but it is the exact same data. The latter is to discern between the L4-provided discharge and the L2-provided discharge (which has the field names dschg_c or swot_discharge_nrt, again, same data, two difference field names it can be requested by).
-```
 
 ```{figure} sos_field_mappings.png
 :alt: SoS field mappings
@@ -69,4 +65,4 @@ SoS discharge field name mappings
 
 ## Example
 
-For a full request and response, see [Get time series GeoJSON for river reach with discharge](../examples.md) in the examples.
+For full requests and responses, see [Get time series GeoJSON for river reach with discharge](../examples.md) and [Get time series CSV for river reach with discharge](../examples.md) in the examples.
