@@ -259,6 +259,133 @@ Will return GeoJSON:
 
 **NOTE:** Due to the size of the original polygon in the lake (L2_HR_LakeSP) shapefiles, we are only returning the calculated center point of the lake. This is to facilitate conformance with the GeoJSON specification and center points should not be considered accurate.
 
+## Get time series GeoJSON for river reach with discharge
+
+Search for a single river reach by reach ID, requesting the SoS discharge fields. Discharge fields are only available for the version 2.0 river collection, so `collection_name=SWOT_L2_HR_RiverSP_2.0` is specified.
+
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=geojson&fields=reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=geojson&fields=reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis)
+
+Will return GeoJSON:
+
+```json
+{
+    "status": "200 OK",
+    "time": 599.437,
+    "hits": 3,
+    "results": {
+        "csv": "",
+        "geojson": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "id": "0",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "18180900091",
+                        "time_str": "2025-04-08T01:01:01Z",
+                        "wse": "1014.2303",
+                        "sos_consensus_q": "72.91022466338953",
+                        "sos_hivdi_q": "-999999999999.0",
+                        "sos_metroman_q": "-999999999999.0",
+                        "sos_momma_q": "-999999999999.0",
+                        "sos_sad_q": "-999999999999.0",
+                        "sos_sic4dvar_q": "72.91022466338953",
+                        "sos_lakeflow_q": "-999999999999.0",
+                        "swot_discharge_reanalysis": "72.91022466338953",
+                        "wse_units": "m"
+                    },
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [46.935083, -18.315388],
+                            [46.935312, -18.315548],
+                            "...",
+                            [46.927729, -18.384032]
+                        ]
+                    }
+                },
+                {
+                    "id": "1",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "18180900091",
+                        "time_str": "2025-04-15T12:24:12Z",
+                        "wse": "1029.1983",
+                        "sos_consensus_q": "1060.3418312796152",
+                        "sos_hivdi_q": "-999999999999.0",
+                        "sos_metroman_q": "-999999999999.0",
+                        "sos_momma_q": "-999999999999.0",
+                        "sos_sad_q": "-999999999999.0",
+                        "sos_sic4dvar_q": "1060.3418312796152",
+                        "sos_lakeflow_q": "-999999999999.0",
+                        "swot_discharge_reanalysis": "1060.3418312796152",
+                        "wse_units": "m"
+                    },
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [46.935083, -18.315388],
+                            [46.935312, -18.315548],
+                            "...",
+                            [46.927729, -18.384032]
+                        ]
+                    }
+                },
+                {
+                    "id": "2",
+                    "type": "Feature",
+                    "properties": {
+                        "reach_id": "18180900091",
+                        "time_str": "2025-04-28T21:46:06Z",
+                        "wse": "1014.1341",
+                        "sos_consensus_q": "179.12798112357618",
+                        "sos_hivdi_q": "-999999999999.0",
+                        "sos_metroman_q": "295.7076800569933",
+                        "sos_momma_q": "139.43628483322104",
+                        "sos_sad_q": "-999999999999.0",
+                        "sos_sic4dvar_q": "62.548282190159064",
+                        "sos_lakeflow_q": "-999999999999.0",
+                        "swot_discharge_reanalysis": "179.12798112357618",
+                        "wse_units": "m"
+                    },
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [46.935083, -18.315388],
+                            [46.935312, -18.315548],
+                            "...",
+                            [46.927729, -18.384032]
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}
+```
+
+**Note:** Geometry coordinates simplified for this example (284 total coordinates per feature).
+
+## Get time series CSV for river reach with discharge
+
+Search for a single river reach by reach ID, requesting the SoS discharge fields in CSV format. As with the GeoJSON example, `collection_name=SWOT_L2_HR_RiverSP_2.0` is specified since discharge fields are only available for the version 2.0 river collection.
+
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=csv&fields=reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=csv&fields=reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis)
+
+Will return CSV:
+
+```json
+{
+    "status": "200 OK",
+    "time": 564.74,
+    "hits": 3,
+    "results": {
+        "csv": "reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis,wse_units\n18180900091,2025-04-08T01:01:01Z,1014.2303,72.91022466338953,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,72.91022466338953,-999999999999.0,72.91022466338953,m\n18180900091,2025-04-15T12:24:12Z,1029.1983,1060.3418312796152,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,1060.3418312796152,-999999999999.0,1060.3418312796152,m\n18180900091,2025-04-28T21:46:06Z,1014.1341,179.12798112357618,-999999999999.0,295.7076800569933,139.43628483322104,-999999999999.0,62.548282190159064,-999999999999.0,179.12798112357618,m\n",
+        "geojson": {}
+    }
+}
+```
+
 ## Get time series CSV for river reach
 
 Search for a single river reach by ID.

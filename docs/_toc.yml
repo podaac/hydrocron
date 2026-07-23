@@ -12,6 +12,7 @@ parts:
   - file: user-guide/start
     sections:
     - file: user-guide/fields
+    - file: user-guide/discharge
     - file: user-guide/time
     - file: user-guide/versioning
       sections:

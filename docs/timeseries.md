@@ -136,6 +136,8 @@ The name of the collection to query. Allows users to request data from a specifi
 | `SWOT_L2_HR_LakeSP_2.0` | 2.0 | Lake data |
 | `SWOT_L2_HR_LakeSP_prior_2.0` | 2.0 | Prior lakes only |
 
+SoS discharge fields (`sos_consensus_q`, `sos_hivdi_q`, etc.) are only available on river reaches in the Version 2.0 collection. To request them, set `collection_name=SWOT_L2_HR_RiverSP_2.0`. See the [discharge guide](user-guide/discharge.md) for details.
+
 (fields)=
 ### fields : string, required: yes
 
@@ -144,6 +146,8 @@ The SWOT data fields to return in the request.
 This is specified in the form of a comma separated list: `fields=reach_id,time_str,wse,slope`
 
 Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, SWORD and PLD (prior river and lake database names), and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are described in the [](fields-detail) section.
+
+River reaches in the Version 2.0 collection also expose SoS discharge fields (`sos_consensus_q`, `sos_hivdi_q`, `sos_metroman_q`, `sos_momma_q`, `sos_sad_q`, `sos_sic4dvar_q`, `sos_lakeflow_q`, and `swot_discharge_reanalysis`). These require `collection_name=SWOT_L2_HR_RiverSP_2.0`. See the [discharge guide](user-guide/discharge.md) for details.
 
 ## Response Format
 

@@ -18,6 +18,7 @@ project:
         - file: user-guide/start.md
           children:
             - file: user-guide/fields.md
+            - file: user-guide/discharge.md
             - file: user-guide/time.md
             - file: user-guide/versioning.md
               children:
