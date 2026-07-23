@@ -20,9 +20,9 @@ Hydrocron currently includes data from these datasets:
 
 - Reach and node shapefiles from the Level 2 KaRIn high rate river single pass vector product (L2_HR_RiverSP)
 - PLD-oriented shapefiles from the Level 2 KaRIn high rate lake single pass vector product (L2_HR_LakeSP)
-- River reach discharge from the SWOT Level 4 Sword of Science River Discharge Products, Version 3 (SWOT_L4_HR_DAWG_SOS_DISCHARGE_V3)
+- River reach discharge from the SWOT Level 4 Sword of Science (SoS) River Discharge Products, Version 3 (SWOT_L4_HR_DAWG_SOS_DISCHARGE_V3)
 
-SoS discharge fields are added to river **reach** data only and are available only for the Version 2.0 river collection. See the [discharge guide](user-guide/discharge.md) for details.
+These SoS discharge fields are added to river **reach** data only and are available only for the Version 2.0 river collection. See the [discharge guide](user-guide/discharge.md) for details.
 
 See this NASA Earthdata [page](https://www.earthdata.nasa.gov/data/platforms/space-based-platforms/swot/data-access-tools) for more information on SWOT datasets.
 

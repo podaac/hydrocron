@@ -97,7 +97,7 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis'
 ```
 
-:::{note}
+:::{note} SoS Discharge fields
 See the [discharge guide](discharge.md) for availability, algorithms, naming conventions, time matching, and more.
 :::
 
