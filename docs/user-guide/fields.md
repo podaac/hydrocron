@@ -98,6 +98,6 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 ```
 
 :::{note}
-See the [discharge guide](discharge.md) for availability, algorithms, naming conventions, fill values, and time matching.
+See the [discharge guide](discharge.md) for availability, algorithms, naming conventions, fill values, time matching, and more.
 :::
 

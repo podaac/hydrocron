@@ -62,7 +62,7 @@ With the implementation of SWOT SoS Discharge data products in Hydrocron, the fi
 SoS discharge field name mappings
 ```
 
-## Example
+## Examples
 
 For full requests and responses, see:
 
