@@ -98,8 +98,6 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 ```
 
 :::{note}
-SoS discharge fields are available on **river reaches** in the **Version 2.0** collection only (`collection_name=SWOT_L2_HR_RiverSP_2.0`). Values are in m³/s, and `swot_discharge_reanalysis` is an alias for `sos_consensus_q`.
-
-See the [discharge guide](discharge.md) for algorithms, naming conventions, fill values, and time matching.
+See the [discharge guide](discharge.md) for availability, algorithms, naming conventions, fill values, and time matching.
 :::
 

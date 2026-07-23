@@ -8,14 +8,13 @@ In addition to the SWOT Level 2 river and lake observations, Hydrocron serves ri
 SoS discharge is subject to two constraints:
 
 - **Reach only** — discharge fields are added to river reach data, not nodes or lakes.
-- **Version 2.0 only** — the SoS V3 products are generated from SWOT L2 RiverSP v2.0 (SWORD v16). To request discharge you must set `collection_name=SWOT_L2_HR_RiverSP_2.0`.
+- **Version 2.0 only** — the SoS V3 products are generated from SWOT L2 RiverSP v2.0 (SWORD v16).
 
-If you omit `collection_name` (defaulting to Version D) or request a Version D collection, the discharge fields will not be populated. See the [versioning guide](versioning.md) for more on collection versions.
+To request discharge, set `feature=Reach` and `collection_name=SWOT_L2_HR_RiverSP_2.0`. If you omit `collection_name` (defaulting to Version D) or request a Version D collection, the discharge fields will not be populated. See the [versioning guide](versioning.md) for more on collection versions.
 
 ## Discharge algorithms
 
 The SoS products run several independent discharge algorithms. Each is served through Hydrocron as its own field:
-
 | Field | Algorithm | Description |
 |---|---|---|
 | `sos_consensus_q` | consensus | Consensus discharge, combining the individual algorithms |
@@ -65,4 +64,7 @@ SoS discharge field name mappings
 
 ## Example
 
-For full requests and responses, see [Get time series GeoJSON for river reach with discharge](../examples.md) and [Get time series CSV for river reach with discharge](../examples.md) in the examples.
+For full requests and responses, see:
+
+- [Get time series GeoJSON for river reach with discharge](../examples.md)
+- [Get time series CSV for river reach with discharge](../examples.md)
