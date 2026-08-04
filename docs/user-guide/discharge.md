@@ -59,6 +59,7 @@ With the implementation of SWOT SoS Discharge data products in Hydrocron, the fi
 :alt: SoS field mappings
 :align: center
 :width: 75%
+:class: text-center
 
 SoS discharge field name mappings
 ```
