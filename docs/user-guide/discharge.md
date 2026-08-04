@@ -58,7 +58,7 @@ With the implementation of SWOT SoS Discharge data products in Hydrocron, the fi
 ```{figure} sos_field_mappings.png
 :alt: SoS field mappings
 :align: center
-:width: 85%
+:width: 75%
 
 SoS discharge field name mappings
 ```
