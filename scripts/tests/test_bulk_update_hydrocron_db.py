@@ -239,7 +239,9 @@ def test_dry_run_paginates_checkpoints_skips_and_writes_valid_csv(tmp_path, monk
     assert result == 0
     assert not table.update_calls
     assert table.scan_calls[1]["ExclusiveStartKey"] == checkpoint
-    assert "Checkpoint:" in capsys.readouterr().out
+    output = capsys.readouterr().out
+    assert "Started. Scanning but not updating rows (DRY RUN)..." in output
+    assert "Checkpoint:" in output
     with one_output(tmp_path, "dry_run.csv").open(newline="", encoding="utf-8") as handle:
         rows = list(csv.reader(handle))
     assert rows == [
@@ -319,6 +321,34 @@ def test_workers_overlap_and_size_the_connection_pool(tmp_path, monkeypatch):
     assert table.client_config.max_pool_connections == 2
     log = one_output(tmp_path, "log.txt").read_text(encoding="utf-8")
     assert "Workers: 2" in log
+
+
+def test_live_update_prints_time_based_progress_within_a_page(
+    tmp_path, monkeypatch, capsys,
+):
+    table = FakeTable(pages=[{
+        "Items": [
+            {"reach_id": "1", "range_start_time": "t1", "status": "old"},
+            {"reach_id": "2", "range_start_time": "t2", "status": "old"},
+        ],
+        "ScannedCount": 2,
+    }])
+    ticks = iter([0, 11, 11, 11])
+    monkeypatch.setattr(bulk, "monotonic", lambda: next(ticks))
+
+    assert invoke(
+        tmp_path, ["status=new", "--workers", "1", "--progress-seconds", "10"],
+        table, monkeypatch,
+    ) == 0
+    output = capsys.readouterr().out
+    assert "Started. Scanning and updating rows..." in output
+    progress_lines = [
+        line for line in output.splitlines()
+        if line.startswith("  ") and "updated=" in line
+    ]
+    assert len(progress_lines) == 2
+    assert "updated=1" in progress_lines[0]
+    assert "updated=2" in progress_lines[1]
 
 
 def test_interrupt_exits_130_and_records_restart_from_beginning(tmp_path, monkeypatch, capsys):

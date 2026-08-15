@@ -10,6 +10,7 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
+from time import monotonic
 
 import boto3
 from botocore.config import Config
@@ -18,7 +19,7 @@ from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 
 
 CHECKPOINT_PAGES_DEFAULT = 300
-PROGRESS_PAGES_DEFAULT = 10
+PROGRESS_SECONDS_DEFAULT = 10
 WORKERS_DEFAULT = 16
 WORKERS_MAX = 64
 
@@ -180,8 +181,8 @@ def main(argv=None):
         help=f"print a resume checkpoint every N pages (default: {CHECKPOINT_PAGES_DEFAULT})",
     )
     parser.add_argument(
-        "--progress-pages", type=positive_int, default=PROGRESS_PAGES_DEFAULT,
-        help=f"print the progress counters every N pages (default: {PROGRESS_PAGES_DEFAULT})",
+        "--progress-seconds", type=positive_int, default=PROGRESS_SECONDS_DEFAULT,
+        help=f"minimum seconds between periodic progress lines (default: {PROGRESS_SECONDS_DEFAULT})",
     )
     parser.add_argument(
         "--workers", type=worker_count, default=WORKERS_DEFAULT,
@@ -259,6 +260,11 @@ def main(argv=None):
             status = "ABORTED"
         else:
             if args.dry_run:
+                print("Started. Scanning but not updating rows (DRY RUN)...")
+            else:
+                print("Started. Scanning and updating rows...")
+
+            if args.dry_run:
                 dry_file = open(dry_path, "w", newline="", encoding="utf-8")
                 dry_writer = csv.writer(dry_file)
                 dry_writer.writerow([partition_key, sort_key or "", "columns"])
@@ -267,6 +273,17 @@ def main(argv=None):
             projection = ", ".join(f"#p{i}" for i in range(len(all_columns)))
             projection_names = {f"#p{i}": column for i, column in enumerate(all_columns)}
             status = "RUNNING"
+            last_progress_time = monotonic()
+
+            def print_progress():
+                """Print the current main-thread counters."""
+                pct = f"{min(100.0, rows_read / approx_rows * 100):.1f}%" if approx_rows else "?%"
+                print(
+                    f"  {pct} read={rows_read:,} examined={rows_examined:,} updated={rows_updated:,} "
+                    f"changed={rows_changed:,} redundant={redundant_writes:,} "
+                    f"skipped={rows_skipped:,} errors={errors} "
+                    f"read_units={read_capacity_units:,.3f} write_units={write_capacity_units:,.3f}"
+                )
 
             def record_completed_future(future, item, row_updates):
                 """Aggregate one completed worker result on the main thread."""
@@ -373,6 +390,10 @@ def main(argv=None):
                                 processed.add(future)
                                 item, row_updates = futures[future]
                                 record_completed_future(future, item, row_updates)
+                                now = monotonic()
+                                if now - last_progress_time >= args.progress_seconds:
+                                    print_progress()
+                                    last_progress_time = now
                         except KeyboardInterrupt:
                             interrupted = True
                             for future in futures:
@@ -410,14 +431,10 @@ def main(argv=None):
                             resume_key = next_key
 
                     is_last_page = status != "RUNNING" or not next_key
-                    if is_last_page or pages % args.progress_pages == 0:
-                        pct = f"{min(100.0, rows_read / approx_rows * 100):.1f}%" if approx_rows else "?%"
-                        print(
-                            f"  {pct} read={rows_read:,} examined={rows_examined:,} updated={rows_updated:,} "
-                            f"changed={rows_changed:,} redundant={redundant_writes:,} "
-                            f"skipped={rows_skipped:,} errors={errors} "
-                            f"read_units={read_capacity_units:,.3f} write_units={write_capacity_units:,.3f}"
-                        )
+                    now = monotonic()
+                    if is_last_page or now - last_progress_time >= args.progress_seconds:
+                        print_progress()
+                        last_progress_time = now
 
                     if status != "RUNNING":
                         break
