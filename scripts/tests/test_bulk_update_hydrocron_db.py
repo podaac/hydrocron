@@ -1,6 +1,7 @@
 """Tests for the standalone DynamoDB bulk updater (all AWS objects are fakes)."""
 import csv
 import json
+import threading
 from pathlib import Path
 
 import pytest
@@ -32,6 +33,7 @@ class FakeTable:
         self.update_response = update_response or {}
         self.scan_calls = []
         self.update_calls = []
+        self.client_config = None
 
     def scan(self, **kwargs):
         self.scan_calls.append(kwargs)
@@ -40,6 +42,9 @@ class FakeTable:
         return self.pages[len(self.scan_calls) - 1]
 
     def update_item(self, **kwargs):
+        raise AssertionError("the boto3 Table resource must not be used by worker threads")
+
+    def client_update_item(self, **kwargs):
         self.update_calls.append(kwargs)
         if self.update_error:
             raise self.update_error
@@ -47,9 +52,55 @@ class FakeTable:
 
 
 class InterruptingTable(FakeTable):
-    def update_item(self, **kwargs):
+    def client_update_item(self, **kwargs):
         self.update_calls.append(kwargs)
         raise KeyboardInterrupt
+
+
+class ConcurrentTable(FakeTable):
+    """Require two update calls to overlap and record peak concurrency."""
+
+    def __init__(self, pages):
+        super().__init__(pages=pages)
+        self.barrier = threading.Barrier(2)
+        self.lock = threading.Lock()
+        self.active = 0
+        self.max_active = 0
+
+    def client_update_item(self, **kwargs):
+        with self.lock:
+            self.update_calls.append(kwargs)
+            self.active += 1
+            self.max_active = max(self.max_active, self.active)
+        try:
+            self.barrier.wait(timeout=2)
+            return {}
+        finally:
+            with self.lock:
+                self.active -= 1
+
+
+class InterruptDrainTable(ConcurrentTable):
+    """Interrupt one worker after two requests are known to be in flight."""
+
+    def client_update_item(self, **kwargs):
+        with self.lock:
+            self.update_calls.append(kwargs)
+        self.barrier.wait(timeout=2)
+        reach_id = kwargs["Key"]["reach_id"]["S"]
+        if reach_id == "1":
+            raise KeyboardInterrupt
+        return {}
+
+
+class FakeClient:
+    """Low-level DynamoDB client double used by worker threads."""
+
+    def __init__(self, table):
+        self.table = table
+
+    def update_item(self, **kwargs):
+        return self.table.client_update_item(**kwargs)
 
 
 class FakeSession:
@@ -60,6 +111,12 @@ class FakeSession:
         assert service_name == "dynamodb"
         assert config is not None
         return self
+
+    def client(self, service_name, config=None):
+        assert service_name == "dynamodb"
+        assert config is not None
+        self.table.client_config = config
+        return FakeClient(self.table)
 
     def Table(self, table_name):
         assert table_name == "test-table"
@@ -104,6 +161,14 @@ def test_positive_int_rejects_zero_negative_and_non_integer():
             bulk.positive_int(value)
 
 
+def test_worker_count_accepts_safe_range_and_rejects_out_of_range():
+    assert bulk.worker_count("1") == 1
+    assert bulk.worker_count(str(bulk.WORKERS_MAX)) == bulk.WORKERS_MAX
+    for value in ("0", str(bulk.WORKERS_MAX + 1), "nope"):
+        with pytest.raises(Exception):
+            bulk.worker_count(value)
+
+
 def test_key_discovery_uses_key_type_not_list_order():
     partition_key, sort_key, columns = bulk.get_key_columns(KEY_SCHEMA_REVERSED)
     assert partition_key == "reach_id"
@@ -128,12 +193,22 @@ def test_validate_inputs_rejects_key_targets_and_bad_resume_keys():
 
 def test_build_update_is_aliased_and_protects_against_deleted_items():
     result = bulk.build_update_args(
+        "test-table",
         {"reach_id": "1", "range_start_time": "t"},
         {"status": "new", "size": "large"},
         ["reach_id", "range_start_time"],
     )
+    assert result["TableName"] == "test-table"
+    assert result["Key"] == {
+        "reach_id": {"S": "1"},
+        "range_start_time": {"S": "t"},
+    }
     assert result["UpdateExpression"] == "SET #c0 = :v0, #c1 = :v1"
     assert result["ExpressionAttributeNames"]["#c0"] == "status"
+    assert result["ExpressionAttributeValues"] == {
+        ":v0": {"S": "new"},
+        ":v1": {"S": "large"},
+    }
     assert result["ConditionExpression"] == "attribute_exists(#k0) AND attribute_exists(#k1)"
     assert result["ReturnConsumedCapacity"] == "INDEXES"
     assert result["ReturnValues"] == "UPDATED_OLD"
@@ -211,7 +286,7 @@ def test_live_update_only_writes_fields_that_differ(tmp_path, monkeypatch):
     values = table.update_calls[0]["ExpressionAttributeValues"]
     assert "collection_version" not in names.values()
     assert "sword_version" in names.values()
-    assert list(values.values()) == ["17b"]
+    assert list(values.values()) == [{"S": "17b"}]
 
 
 def test_live_update_classifies_redundant_write_without_per_row_file(tmp_path, monkeypatch):
@@ -220,7 +295,7 @@ def test_live_update_classifies_redundant_write_without_per_row_file(tmp_path, m
             "Items": [{"reach_id": "1", "range_start_time": "t1", "status": "stale"}],
             "ScannedCount": 1,
         }],
-        update_response={"Attributes": {"status": "new"}},
+        update_response={"Attributes": {"status": {"S": "new"}}},
     )
 
     assert invoke(tmp_path, ["status=new"], table, monkeypatch) == 0
@@ -228,6 +303,22 @@ def test_live_update_classifies_redundant_write_without_per_row_file(tmp_path, m
     log = one_output(tmp_path, "log.txt").read_text(encoding="utf-8")
     assert "Rows actually changed: 0" in log
     assert "Redundant successful writes: 1" in log
+
+
+def test_workers_overlap_and_size_the_connection_pool(tmp_path, monkeypatch):
+    table = ConcurrentTable(pages=[{
+        "Items": [
+            {"reach_id": "1", "range_start_time": "t1", "status": "old"},
+            {"reach_id": "2", "range_start_time": "t2", "status": "old"},
+        ],
+        "ScannedCount": 2,
+    }])
+
+    assert invoke(tmp_path, ["status=new", "--workers", "2"], table, monkeypatch) == 0
+    assert table.max_active == 2
+    assert table.client_config.max_pool_connections == 2
+    log = one_output(tmp_path, "log.txt").read_text(encoding="utf-8")
+    assert "Workers: 2" in log
 
 
 def test_interrupt_exits_130_and_records_restart_from_beginning(tmp_path, monkeypatch, capsys):
@@ -243,6 +334,22 @@ def test_interrupt_exits_130_and_records_restart_from_beginning(tmp_path, monkey
     log = one_output(tmp_path, "log.txt").read_text(encoding="utf-8")
     assert "Status: INTERRUPTED" in log
     assert "Resume: omit --start-key (restart from the beginning)" in log
+
+
+def test_interrupt_accounts_for_other_in_flight_result(tmp_path, monkeypatch):
+    table = InterruptDrainTable(pages=[{
+        "Items": [
+            {"reach_id": "1", "range_start_time": "t1", "status": "old"},
+            {"reach_id": "2", "range_start_time": "t2", "status": "old"},
+        ],
+        "ScannedCount": 2,
+    }])
+
+    assert invoke(tmp_path, ["status=new", "--workers", "2"], table, monkeypatch) == 130
+    assert len(table.update_calls) == 2
+    log = one_output(tmp_path, "log.txt").read_text(encoding="utf-8")
+    assert "Status: INTERRUPTED" in log
+    assert "Rows updated: 1" in log
 
 
 def test_limit_is_safe_and_distinguishes_read_from_examined(tmp_path, monkeypatch):
@@ -340,7 +447,7 @@ def test_bounded_run_with_row_error_fails_and_restarts_from_original_key(tmp_pat
     )
 
     assert invoke(
-        tmp_path, ["status=new", "--max-rows-read", "2", "--max-errors", "10"],
+        tmp_path, ["status=new", "--max-rows-read", "2"],
         table, monkeypatch,
     ) == 1
     log = one_output(tmp_path, "log.txt").read_text(encoding="utf-8")
@@ -377,7 +484,7 @@ def test_reported_capacity_is_totaled_for_table_and_gsi(tmp_path, monkeypatch):
     assert "Reported GSI write units: 1.000" in log
 
 
-def test_row_error_is_quoted_aborts_at_threshold_and_exits_nonzero(tmp_path, monkeypatch):
+def test_row_error_is_quoted_aborts_wave_and_exits_nonzero(tmp_path, monkeypatch):
     error = ClientError(
         {"Error": {"Code": "ConditionalCheckFailedException", "Message": "deleted, concurrently\nretry"}},
         "UpdateItem",
@@ -390,13 +497,55 @@ def test_row_error_is_quoted_aborts_at_threshold_and_exits_nonzero(tmp_path, mon
         update_error=error,
     )
 
-    assert invoke(tmp_path, ["status=new", "--max-errors", "1"], table, monkeypatch) == 1
+    assert invoke(tmp_path, ["status=new"], table, monkeypatch) == 1
     log = one_output(tmp_path, "log.txt").read_text(encoding="utf-8")
     assert "Status: FAILED" in log
-    assert "aborted after 1 row update errors" in log
+    assert "aborted after 1 row update error(s) in the current worker wave" in log
     with one_output(tmp_path, "errors.csv").open(newline="", encoding="utf-8") as handle:
         rows = list(csv.reader(handle))
     assert rows[1] == ["1", "t1", "deleted, concurrently\nretry"]
+
+
+def test_row_error_stops_before_submitting_another_worker_wave(tmp_path, monkeypatch):
+    error = ClientError(
+        {"Error": {"Code": "InternalServerError", "Message": "failure"}},
+        "UpdateItem",
+    )
+    items = [
+        {"reach_id": str(index), "range_start_time": f"t{index}", "status": "old"}
+        for index in range(1, 9)
+    ]
+    table = FakeTable(
+        pages=[{"Items": items, "ScannedCount": len(items)}],
+        update_error=error,
+    )
+
+    assert invoke(
+        tmp_path, ["status=new", "--workers", "3"],
+        table, monkeypatch,
+    ) == 1
+    assert len(table.update_calls) == 3
+    log = one_output(tmp_path, "log.txt").read_text(encoding="utf-8")
+    assert "Errors: 3" in log
+    with one_output(tmp_path, "errors.csv").open(newline="", encoding="utf-8") as handle:
+        assert len(list(csv.reader(handle))) == 4
+
+
+def test_unexpected_worker_exception_is_counted_and_logged(tmp_path, monkeypatch):
+    table = FakeTable(
+        pages=[{
+            "Items": [{"reach_id": "1", "range_start_time": "t1", "status": "old"}],
+            "ScannedCount": 1,
+        }],
+        update_error=RuntimeError("worker broke"),
+    )
+
+    assert invoke(tmp_path, ["status=new"], table, monkeypatch) == 1
+    log = one_output(tmp_path, "log.txt").read_text(encoding="utf-8")
+    assert "Errors: 1" in log
+    with one_output(tmp_path, "errors.csv").open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.reader(handle))
+    assert rows[1] == ["1", "t1", "RuntimeError: worker broke"]
 
 
 def test_scan_failure_exits_nonzero_and_does_not_print_done(tmp_path, monkeypatch, capsys):

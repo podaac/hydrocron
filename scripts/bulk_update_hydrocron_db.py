@@ -8,20 +8,19 @@ import csv
 import json
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 import boto3
 from botocore.config import Config
-from botocore.exceptions import BotoCoreError, ClientError
+from botocore.exceptions import ClientError
+from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 
 
 CHECKPOINT_PAGES_DEFAULT = 300
 PROGRESS_PAGES_DEFAULT = 10
-MAX_ERRORS_DEFAULT = 10
-
-
-class ErrorLimitReached(RuntimeError):
-    """Raised after the configured number of row update errors."""
+WORKERS_DEFAULT = 16
+WORKERS_MAX = 64
 
 
 def positive_int(value):
@@ -32,6 +31,14 @@ def positive_int(value):
         raise argparse.ArgumentTypeError("must be an integer") from exc
     if parsed <= 0:
         raise argparse.ArgumentTypeError("must be greater than zero")
+    return parsed
+
+
+def worker_count(value):
+    """Parse a safe worker count for argparse."""
+    parsed = positive_int(value)
+    if parsed > WORKERS_MAX:
+        raise argparse.ArgumentTypeError(f"must not exceed {WORKERS_MAX}")
     return parsed
 
 
@@ -101,20 +108,30 @@ def validate_inputs(updates, start_key, key_columns, attribute_definitions):
             raise ValueError(f"--start-key field '{column}' must be a JSON string")
 
 
-def build_update_args(key, updates, key_columns):
-    """Build a conditional update that cannot recreate a deleted item."""
+def build_update_args(table_name, key, updates, key_columns):
+    """Build a low-level client request that cannot recreate a deleted item."""
+    serializer = TypeSerializer()
     set_parts = [f"#c{i} = :v{i}" for i in range(len(updates))]
     names = {f"#c{i}": column for i, column in enumerate(updates)}
     names.update({f"#k{i}": column for i, column in enumerate(key_columns)})
     return {
-        "Key": key,
+        "TableName": table_name,
+        "Key": {column: serializer.serialize(value) for column, value in key.items()},
         "UpdateExpression": "SET " + ", ".join(set_parts),
         "ExpressionAttributeNames": names,
-        "ExpressionAttributeValues": {f":v{i}": value for i, value in enumerate(updates.values())},
+        "ExpressionAttributeValues": {
+            f":v{i}": serializer.serialize(value)
+            for i, value in enumerate(updates.values())
+        },
         "ConditionExpression": " AND ".join(f"attribute_exists(#k{i})" for i in range(len(key_columns))),
         "ReturnConsumedCapacity": "INDEXES",
         "ReturnValues": "UPDATED_OLD",
     }
+
+
+def _run_update(client, request):
+    """Issue one low-level update_item call in a worker thread."""
+    return client.update_item(**request)
 
 
 def write_summary(path, details):
@@ -167,8 +184,8 @@ def main(argv=None):
         help=f"print the progress counters every N pages (default: {PROGRESS_PAGES_DEFAULT})",
     )
     parser.add_argument(
-        "--max-errors", type=positive_int, default=MAX_ERRORS_DEFAULT,
-        help=f"abort after this many row update errors (default: {MAX_ERRORS_DEFAULT})",
+        "--workers", type=worker_count, default=WORKERS_DEFAULT,
+        help=f"concurrent update requests; 1 disables concurrency (default: {WORKERS_DEFAULT})",
     )
     parser.add_argument("--dry-run", action="store_true", help="preview only; make no DynamoDB writes")
     parser.add_argument("-y", "--yes", action="store_true", help="skip confirmation prompt")
@@ -214,11 +231,16 @@ def main(argv=None):
     approx_rows_display = "unknown"
 
     try:
-        config = Config(retries={"max_attempts": 5, "mode": "adaptive"})
+        config = Config(
+            retries={"max_attempts": 5, "mode": "adaptive"},
+            max_pool_connections=args.workers,
+        )
         session = boto3.Session(profile_name=args.aws_profile) if args.aws_profile else boto3.Session()
         table = session.resource("dynamodb", config=config).Table(args.table_name)
+        update_client = session.client("dynamodb", config=config)
         partition_key, sort_key, key_columns = get_key_columns(table.key_schema)
         validate_inputs(updates, initial_start_key, key_columns, table.attribute_definitions)
+        deserializer = TypeDeserializer()
 
         approx_rows = getattr(table, "item_count", None)
         if approx_rows is not None:
@@ -229,7 +251,8 @@ def main(argv=None):
         print(
             f"Table:      {args.table_name}\nUpdates:    {updates_display}\nMode:       {mode}\n"
             f"Approx rows: {approx_rows_display}\n"
-            f"Update cap: {limit_display}\nRead cap:   {read_limit_display}\nStart key:  {start_key_display}"
+            f"Update cap: {limit_display}\nRead cap:   {read_limit_display}\n"
+            f"Workers:    {args.workers}\nStart key:  {start_key_display}"
         )
         print("Note: confirmation occurs before scanning; run --dry-run to obtain the mismatch count.")
         if not args.yes and input("Proceed? [y/N]: ").strip().lower() != "y":
@@ -245,127 +268,168 @@ def main(argv=None):
             projection_names = {f"#p{i}": column for i, column in enumerate(all_columns)}
             status = "RUNNING"
 
-            while status == "RUNNING":
-                scan_args = {
-                    "ProjectionExpression": projection,
-                    "ExpressionAttributeNames": projection_names,
-                    "ReturnConsumedCapacity": "INDEXES",
-                }
-                if page_start_key is not None:
-                    scan_args["ExclusiveStartKey"] = page_start_key
-                if args.max_rows_read is not None:
-                    scan_args["Limit"] = args.max_rows_read - rows_read
-                page = table.scan(**scan_args)
-                pages += 1
-                rows_read += page.get("ScannedCount", len(page.get("Items", [])))
-                scan_units, _, _ = _capacity_breakdown(page)
-                read_capacity_units += scan_units
+            def record_completed_future(future, item, row_updates):
+                """Aggregate one completed worker result on the main thread."""
+                nonlocal rows_updated, rows_changed, redundant_writes, errors
+                nonlocal write_capacity_units, table_write_capacity_units, gsi_write_capacity_units
+                nonlocal error_file, error_writer
 
-                for item in page.get("Items", []):
-                    if args.limit is not None and rows_updated >= args.limit:
-                        status = "LIMITED"
-                        resume_key = page_start_key
-                        break
+                try:
+                    update_response = future.result()
+                    total_units, table_units, index_units = _capacity_breakdown(update_response)
+                    write_capacity_units += total_units
+                    table_write_capacity_units += table_units
+                    gsi_write_capacity_units += index_units
 
-                    rows_examined += 1
-                    row_updates = {
-                        column: value
-                        for column, value in updates.items()
-                        if item.get(column) != value
+                    old_values = {
+                        column: deserializer.deserialize(value)
+                        for column, value in update_response.get("Attributes", {}).items()
                     }
-                    if not row_updates:
-                        rows_skipped += 1
-                        continue
-
-                    key = {column: item[column] for column in key_columns}
-                    if args.dry_run:
-                        row_updates_csv = "; ".join(
-                            f"{column}={value}" for column, value in row_updates.items()
-                        )
-                        dry_writer.writerow(
-                            [item[partition_key], item.get(sort_key, "") if sort_key else "", row_updates_csv]
-                        )
-                        rows_updated += 1
-                        continue
-
-                    try:
-                        update_response = table.update_item(**build_update_args(key, row_updates, key_columns))
-                        total_units, table_units, index_units = _capacity_breakdown(update_response)
-                        write_capacity_units += total_units
-                        table_write_capacity_units += table_units
-                        gsi_write_capacity_units += index_units
-
-                        old_values = update_response.get("Attributes", {})
-                        actually_changed = any(
-                            old_values.get(column) != value
-                            for column, value in row_updates.items()
-                        )
-                        if actually_changed:
-                            rows_changed += 1
-                        else:
-                            redundant_writes += 1
-                        rows_updated += 1
-                    except (ClientError, BotoCoreError) as exc:
-                        errors += 1
-                        if error_file is None:
-                            error_file = open(error_path, "w", newline="", encoding="utf-8")
-                            error_writer = csv.writer(error_file)
-                            error_writer.writerow([partition_key, sort_key or "", "error_message"])
-                        if isinstance(exc, ClientError):
-                            message = exc.response.get("Error", {}).get("Message", str(exc))
-                        else:
-                            message = str(exc)
-                        error_writer.writerow(
-                            [item[partition_key], item.get(sort_key, "") if sort_key else "", message]
-                        )
-                        if errors >= args.max_errors:
-                            raise ErrorLimitReached(f"aborted after {errors} row update errors") from exc
-
-                if dry_file:
-                    dry_file.flush()
-                if error_file:
-                    error_file.flush()
-
-                next_key = page.get("LastEvaluatedKey")
-                if status == "RUNNING" and next_key:
-                    if args.limit is not None and rows_updated >= args.limit:
-                        status = "LIMITED"
-                        resume_key = next_key
-                    elif args.max_rows_read is not None and rows_read >= args.max_rows_read:
-                        status = "READ_LIMITED"
-                        resume_key = next_key
-
-                if errors and status in {"LIMITED", "READ_LIMITED"}:
-                    status = "FAILED"
-                    failure_message = f"{errors} row update(s) failed; rerun to retry unchanged rows"
-                    resume_key = initial_start_key
-
-                is_last_page = status != "RUNNING" or not next_key
-                if is_last_page or pages % args.progress_pages == 0:
-                    pct = f"{min(100.0, rows_read / approx_rows * 100):.1f}%" if approx_rows else "?%"
-                    print(
-                        f"  {pct} read={rows_read:,} examined={rows_examined:,} updated={rows_updated:,} "
-                        f"changed={rows_changed:,} redundant={redundant_writes:,} "
-                        f"skipped={rows_skipped:,} errors={errors} "
-                        f"read_units={read_capacity_units:,.3f} write_units={write_capacity_units:,.3f}"
+                    actually_changed = any(
+                        old_values.get(column) != value
+                        for column, value in row_updates.items()
+                    )
+                    if actually_changed:
+                        rows_changed += 1
+                    else:
+                        redundant_writes += 1
+                    rows_updated += 1
+                except Exception as exc:
+                    errors += 1
+                    if error_file is None:
+                        error_file = open(error_path, "w", newline="", encoding="utf-8")
+                        error_writer = csv.writer(error_file)
+                        error_writer.writerow([partition_key, sort_key or "", "error_message"])
+                    if isinstance(exc, ClientError):
+                        message = exc.response.get("Error", {}).get("Message", str(exc))
+                    else:
+                        message = f"{type(exc).__name__}: {exc}"
+                    error_writer.writerow(
+                        [item[partition_key], item.get(sort_key, "") if sort_key else "", message]
                     )
 
-                if status != "RUNNING":
-                    break
+            with ThreadPoolExecutor(max_workers=args.workers) as executor:
+                while status == "RUNNING":
+                    scan_args = {
+                        "ProjectionExpression": projection,
+                        "ExpressionAttributeNames": projection_names,
+                        "ReturnConsumedCapacity": "INDEXES",
+                    }
+                    if page_start_key is not None:
+                        scan_args["ExclusiveStartKey"] = page_start_key
+                    if args.max_rows_read is not None:
+                        scan_args["Limit"] = args.max_rows_read - rows_read
+                    page = table.scan(**scan_args)
+                    pages += 1
+                    rows_read += page.get("ScannedCount", len(page.get("Items", [])))
+                    scan_units, _, _ = _capacity_breakdown(page)
+                    read_capacity_units += scan_units
 
-                if next_key and pages % args.checkpoint_pages == 0:
-                    print(f"Checkpoint: {_resume_text(next_key)}")
-                if not next_key:
-                    if errors:
-                        status = "FAILED"
-                        failure_message = f"{errors} row update(s) failed; rerun to retry unchanged rows"
-                        resume_key = initial_start_key
-                    else:
+                    # Collect rows needing an update (main thread; cheap in-memory diff).
+                    page_tasks = []
+                    for item in page.get("Items", []):
+                        if args.limit is not None and (rows_updated + len(page_tasks)) >= args.limit:
+                            status = "LIMITED"
+                            resume_key = page_start_key
+                            break
+
+                        rows_examined += 1
+                        row_updates = {
+                            column: value
+                            for column, value in updates.items()
+                            if item.get(column) != value
+                        }
+                        if not row_updates:
+                            rows_skipped += 1
+                            continue
+
+                        key = {column: item[column] for column in key_columns}
+                        if args.dry_run:
+                            row_updates_csv = "; ".join(
+                                f"{column}={value}" for column, value in row_updates.items()
+                            )
+                            dry_writer.writerow(
+                                [item[partition_key], item.get(sort_key, "") if sort_key else "", row_updates_csv]
+                            )
+                            rows_updated += 1
+                            continue
+
+                        request = build_update_args(args.table_name, key, row_updates, key_columns)
+                        page_tasks.append((item, row_updates, request))
+
+                    # Submit bounded waves so a systematic failure can stop the run without
+                    # first submitting an entire scan page.
+                    task_index = 0
+                    while task_index < len(page_tasks):
+                        batch = page_tasks[task_index:task_index + args.workers]
+                        futures = {
+                            executor.submit(_run_update, update_client, request): (item, row_updates)
+                            for item, row_updates, request in batch
+                        }
+                        processed = set()
+                        interrupted = False
+                        try:
+                            for future in as_completed(futures):
+                                processed.add(future)
+                                item, row_updates = futures[future]
+                                record_completed_future(future, item, row_updates)
+                        except KeyboardInterrupt:
+                            interrupted = True
+                            for future in futures:
+                                if not future.done():
+                                    future.cancel()
+                            # Account for every request that was already running. Cancelled queued
+                            # requests are intentionally left for the page-level resume.
+                            for future in as_completed(futures):
+                                if future in processed or future.cancelled():
+                                    continue
+                                processed.add(future)
+                                item, row_updates = futures[future]
+                                record_completed_future(future, item, row_updates)
+
+                        if interrupted:
+                            raise KeyboardInterrupt
+                        task_index += len(batch)
+                        if errors:
+                            raise RuntimeError(
+                                f"aborted after {errors} row update error(s) in the current worker wave"
+                            )
+
+                    if dry_file:
+                        dry_file.flush()
+                    if error_file:
+                        error_file.flush()
+
+                    next_key = page.get("LastEvaluatedKey")
+                    if status == "RUNNING" and next_key:
+                        if args.limit is not None and rows_updated >= args.limit:
+                            status = "LIMITED"
+                            resume_key = next_key
+                        elif args.max_rows_read is not None and rows_read >= args.max_rows_read:
+                            status = "READ_LIMITED"
+                            resume_key = next_key
+
+                    is_last_page = status != "RUNNING" or not next_key
+                    if is_last_page or pages % args.progress_pages == 0:
+                        pct = f"{min(100.0, rows_read / approx_rows * 100):.1f}%" if approx_rows else "?%"
+                        print(
+                            f"  {pct} read={rows_read:,} examined={rows_examined:,} updated={rows_updated:,} "
+                            f"changed={rows_changed:,} redundant={redundant_writes:,} "
+                            f"skipped={rows_skipped:,} errors={errors} "
+                            f"read_units={read_capacity_units:,.3f} write_units={write_capacity_units:,.3f}"
+                        )
+
+                    if status != "RUNNING":
+                        break
+
+                    if next_key and pages % args.checkpoint_pages == 0:
+                        print(f"Checkpoint: {_resume_text(next_key)}")
+                    if not next_key:
                         status = "COMPLETED"
                         resume_key = None
-                    break
-                page_start_key = next_key
-                resume_key = next_key
+                        break
+                    page_start_key = next_key
+                    resume_key = next_key
 
     except KeyboardInterrupt:
         status = "INTERRUPTED"
@@ -386,6 +450,7 @@ def main(argv=None):
             "Table": args.table_name,
             "Updates": updates_display,
             "Mode": mode,
+            "Workers": args.workers,
             "Update limit": args.limit if args.limit is not None else "none",
             "Maximum rows read": args.max_rows_read if args.max_rows_read is not None else "none",
             "Start key": start_key_display,
