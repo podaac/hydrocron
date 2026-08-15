@@ -15,7 +15,7 @@ from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError
 
 
-CHECKPOINT_PAGES_DEFAULT = 10
+CHECKPOINT_PAGES_DEFAULT = 300
 PROGRESS_PAGES_DEFAULT = 10
 MAX_ERRORS_DEFAULT = 10
 
