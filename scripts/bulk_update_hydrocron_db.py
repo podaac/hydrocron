@@ -211,6 +211,7 @@ def main(argv=None):
     updates_display = ", ".join(f"{key}={value}" for key, value in updates.items())
     mode = "DRY RUN" if args.dry_run else "LIVE"
     start_key_display = json.dumps(initial_start_key, separators=(",", ":")) if initial_start_key else "beginning"
+    approx_rows_display = "unknown"
 
     try:
         config = Config(retries={"max_attempts": 5, "mode": "adaptive"})
@@ -219,10 +220,15 @@ def main(argv=None):
         partition_key, sort_key, key_columns = get_key_columns(table.key_schema)
         validate_inputs(updates, initial_start_key, key_columns, table.attribute_definitions)
 
+        approx_rows = getattr(table, "item_count", None)
+        if approx_rows is not None:
+            approx_rows_display = f"~{approx_rows:,}"
+
         limit_display = args.limit if args.limit is not None else "none"
         read_limit_display = args.max_rows_read if args.max_rows_read is not None else "none"
         print(
             f"Table:      {args.table_name}\nUpdates:    {updates_display}\nMode:       {mode}\n"
+            f"Approx rows: {approx_rows_display}\n"
             f"Update cap: {limit_display}\nRead cap:   {read_limit_display}\nStart key:  {start_key_display}"
         )
         print("Note: confirmation occurs before scanning; run --dry-run to obtain the mismatch count.")
@@ -336,8 +342,9 @@ def main(argv=None):
 
                 is_last_page = status != "RUNNING" or not next_key
                 if is_last_page or pages % args.progress_pages == 0:
+                    pct = f"{min(100.0, rows_read / approx_rows * 100):.1f}%" if approx_rows else "?%"
                     print(
-                        f"  read={rows_read:,} examined={rows_examined:,} updated={rows_updated:,} "
+                        f"  {pct} read={rows_read:,} examined={rows_examined:,} updated={rows_updated:,} "
                         f"changed={rows_changed:,} redundant={redundant_writes:,} "
                         f"skipped={rows_skipped:,} errors={errors} "
                         f"read_units={read_capacity_units:,.3f} write_units={write_capacity_units:,.3f}"
@@ -382,6 +389,7 @@ def main(argv=None):
             "Update limit": args.limit if args.limit is not None else "none",
             "Maximum rows read": args.max_rows_read if args.max_rows_read is not None else "none",
             "Start key": start_key_display,
+            "Approximate table rows": approx_rows_display,
             "Started": start_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "Finished": end_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "Duration": end_time - start_time,
