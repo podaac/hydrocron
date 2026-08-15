@@ -230,9 +230,16 @@ def test_dry_run_paginates_checkpoints_skips_and_writes_valid_csv(tmp_path, monk
             "ScannedCount": 1,
         },
     ])
+    tick = [0]
+
+    def advancing_clock():
+        tick[0] += 1
+        return tick[0]
+
+    monkeypatch.setattr(bulk, "monotonic", advancing_clock)
 
     result = invoke(
-        tmp_path, ["status=new", "note=a,b", "--dry-run", "--checkpoint-pages", "1"],
+        tmp_path, ["status=new", "note=a,b", "--dry-run", "--checkpoint-seconds", "1"],
         table, monkeypatch,
     )
 

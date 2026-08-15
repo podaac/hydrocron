@@ -18,7 +18,7 @@ from botocore.exceptions import ClientError
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 
 
-CHECKPOINT_PAGES_DEFAULT = 300
+CHECKPOINT_SECONDS_DEFAULT = 300
 PROGRESS_SECONDS_DEFAULT = 10
 WORKERS_DEFAULT = 16
 WORKERS_MAX = 64
@@ -177,8 +177,8 @@ def main(argv=None):
         help="stop after scanning at most this many rows (for cost-bounded testing)",
     )
     parser.add_argument(
-        "--checkpoint-pages", type=positive_int, default=CHECKPOINT_PAGES_DEFAULT,
-        help=f"print a resume checkpoint every N pages (default: {CHECKPOINT_PAGES_DEFAULT})",
+        "--checkpoint-seconds", type=positive_int, default=CHECKPOINT_SECONDS_DEFAULT,
+        help=f"minimum seconds between resume checkpoints (default: {CHECKPOINT_SECONDS_DEFAULT})",
     )
     parser.add_argument(
         "--progress-seconds", type=positive_int, default=PROGRESS_SECONDS_DEFAULT,
@@ -274,6 +274,7 @@ def main(argv=None):
             projection_names = {f"#p{i}": column for i, column in enumerate(all_columns)}
             status = "RUNNING"
             last_progress_time = monotonic()
+            last_checkpoint_time = last_progress_time
 
             def print_progress():
                 """Print the current main-thread counters."""
@@ -439,8 +440,12 @@ def main(argv=None):
                     if status != "RUNNING":
                         break
 
-                    if next_key and pages % args.checkpoint_pages == 0:
+                    if (
+                        next_key
+                        and now - last_checkpoint_time >= args.checkpoint_seconds
+                    ):
                         print(f"Checkpoint: {_resume_text(next_key)}")
+                        last_checkpoint_time = now
                     if not next_key:
                         status = "COMPLETED"
                         resume_key = None
