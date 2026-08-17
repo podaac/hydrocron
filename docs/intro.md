@@ -7,17 +7,17 @@ Hydrocron is an API that repackages hydrology datasets from the Surface Water an
 
 SWOT data is archived as individually timestamped shapefiles, which would otherwise require users to perform potentially thousands of file IO operations per river feature to view the data as a timeseries. Hydrocron makes this possible with a single API call.
 
-Original SWOT data is archived at NASA's [Physical Oceanography Distributed Active Archive Center (PO.DAAC)](https://podaac.jpl.nasa.gov/SWOT).
+Original SWOT data is archived at NASA's [Earthdata Cloud](https://www.earthdata.nasa.gov/data/platforms/space-based-platforms/swot).
 
 Datasets included in Hydrocron:
 
 ### Version D (Default)
-- [SWOT Level 2 River Single-Pass Vector Data Product, Version D](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_RiverSP_D)
-- [SWOT Level 2 Lake Single-Pass Vector Data Product, Version D](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_LakeSP_D)
+- [SWOT Level 2 River Single-Pass Vector Data Product, Version D](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-d-d)
+- [SWOT Level 2 Lake Single-Pass Vector Data Product, Version D](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-lakesp-d-d)
 
 ### Version 2.0
-- [SWOT Level 2 River Single-Pass Vector Data Product, Version 2.0](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_RiverSP_2.0)
-- [SWOT Level 2 Lake Single-Pass Vector Data Product, Version 2.0](https://podaac.jpl.nasa.gov/dataset/SWOT_L2_HR_LakeSP_2.0)
+- [SWOT Level 2 River Single-Pass Vector Data Product, Version 2.0](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-2.0-2.0)
+- [SWOT Level 2 Lake Single-Pass Vector Data Product, Version 2.0](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-lakesp-2.0-2.0)
 
 :::{important} Version D is the default
 To query Version 2.0 data, use the `collection_name` parameter with one of the Version 2.0 collection names listed in the [versioning guide](user-guide/versioning.md).  Also, some node and reach IDs have changed from version 2.0 to version D. See the [versioning guide](user-guide/versioning.md) and [SWORD Version Differences](user-guide/sword-versions.md) for details.

@@ -13,7 +13,7 @@ class IngestConfig:
     start_reach_id: str | None = None
     stop_reach_id: str | None = None
     limit: int | None = None
-    time_tolerance_seconds: int = 900
+    time_tolerance_seconds: int = 3600
     output_dir: str = "./output"
     algorithms: list[str] = field(default_factory=lambda: ["all"])
     log_level: str = "INFO"

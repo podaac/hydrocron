@@ -50,7 +50,7 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
             bucket_name, key = filepath.replace("s3://", "").split("/", 1)
             logging.info("Opening granule %s from bucket %s", key, bucket_name)
 
-            s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
+            s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file, ExtraArgs={"RequestPayer": "requester"})
 
             shp_file = gpd.read_file('zip://' + lambda_temp_file)
             with zipfile.ZipFile(lambda_temp_file) as archive:
@@ -60,7 +60,7 @@ def read_shapefile(filepath, obscure_data, columns, s3_resource=None):
             _, bucket_name, key = filepath.replace("https://", "").split("/", 2)
             logging.info("Opening granule %s from bucket %s", key, bucket_name)
 
-            s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file)
+            s3_resource.Bucket(bucket_name).download_file(key, lambda_temp_file, ExtraArgs={"RequestPayer": "requester"})
 
             shp_file = gpd.read_file('zip://' + lambda_temp_file)
             with zipfile.ZipFile(lambda_temp_file) as archive:

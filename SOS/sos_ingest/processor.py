@@ -119,13 +119,17 @@ def run(config: IngestConfig) -> ProcessingSummary:
     # Pre-flight summary and confirmation
     if not ui.show_preflight_summary(config, reach_data, reaches_to_process, timesteps_to_process, missing_time_counts):
         signal.signal(signal.SIGINT, original_handler)
-        return ProcessingSummary(
+        summary = ProcessingSummary(
             total_reaches=total_in_file, reaches_processed=0, reaches_skipped=reaches_skipped,
             total_time_steps=0,
             matched=0, updated=0, no_match=0, no_rows=0, ambiguous_match=0,
             skipped_unchanged=0, write_errors=0, dry_run=config.dry_run,
             start_time=start_time, end_time=datetime.now(timezone.utc),
         )
+        error_logger.write_summary(summary, config)
+        error_logger.close()
+        db_client.close()
+        return summary
 
     # Processing loop
     matched = 0

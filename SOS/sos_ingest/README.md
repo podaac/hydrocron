@@ -24,7 +24,7 @@ poetry run sos_ingest --sos-file <path_to_sos_netcdf_file> --aws-profile <profil
 | `--start-reach-id` | None | Reach ID to resume from (skip all IDs before this) |
 | `--stop-reach-id` | None | Reach ID to stop after (inclusive) |
 | `--limit` | None | Max number of reaches to process |
-| `--time-tolerance` | 900 | Max seconds between SOS time and DB `range_start_time` for a match |
+| `--time-tolerance` | 3600 | Max seconds between SOS time and DB `range_start_time` for a match |
 | `--output-dir` | `./output` | Directory for error log and summary report |
 | `--algorithms` | `all` | Comma-separated list of algorithms, or `all` |
 | `--log-level` | `INFO` | Python logging level |
@@ -91,14 +91,14 @@ done
 3. For lakeflow (which has daily resolution), matches each value to the precise SWOT pass time from other algorithms on the same day
 4. Shows a pre-flight summary with reach/time step counts and prompts for confirmation
 5. For each reach, queries DynamoDB for existing rows
-6. Matches SOS timestamps to the closest `range_start_time` within the time tolerance (default 15 minutes)
+6. Matches SOS timestamps to the closest `range_start_time` within the time tolerance (default 1 hour)
 7. Updates matched rows with discharge columns using `update_item`
 8. Skips rows that already have the correct values (idempotent re-runs)
 9. Logs errors to a CSV file and writes a summary report
 
 ## Time Matching
 
-The SOS file stores time as seconds since `2000-01-01T00:00:00Z`. The tool converts these to datetimes and finds the closest DynamoDB `range_start_time` within the configured tolerance (default 900 seconds / 15 minutes). If no match is found, the time step is logged as `no_match` in the error CSV.
+The SOS file stores time as seconds since `2000-01-01T00:00:00Z`. The tool converts these to datetimes and finds the closest DynamoDB `range_start_time` within the configured tolerance (default 3600 seconds / 1 hour). If no match is found, the time step is logged as `no_match` in the error CSV.
 
 ## Resume Capability
 
