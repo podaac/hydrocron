@@ -95,6 +95,7 @@ def capture_reach_fixtures(api_url, test_data, fixtures_dir):
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "geojson",
+            "collection_name": reach_data["collection_name"],
             "fields": fields
         },
         fixtures_dir / "reach" / "reach_basic.geojson"
@@ -109,6 +110,7 @@ def capture_reach_fixtures(api_url, test_data, fixtures_dir):
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "csv",
+            "collection_name": reach_data["collection_name"],
             "fields": fields
         },
         fixtures_dir / "reach" / "reach_basic.csv"
@@ -123,9 +125,25 @@ def capture_reach_fixtures(api_url, test_data, fixtures_dir):
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "csv",
+            "collection_name": reach_data["collection_name"],
             "fields": "reach_id,time_str,wse,dschg_c,dschg_c_u,dschg_c_q"
         },
         fixtures_dir / "reach" / "reach_discharge.csv"
+    )
+
+    # SOS Discharge fields CSV
+    capture_csv_response(
+        api_url,
+        {
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "csv",
+            "collection_name": reach_data["collection_name"],
+            "fields": "reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis"
+        },
+        fixtures_dir / "reach" / "reach_sos_discharge.csv"
     )
 
     # Comprehensive GeoJSON
@@ -137,6 +155,7 @@ def capture_reach_fixtures(api_url, test_data, fixtures_dir):
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "geojson",
+            "collection_name": reach_data["collection_name"],
             "fields": f"{fields},area_total,collection_shortname,crid,geometry"
         },
         fixtures_dir / "reach" / "reach_comprehensive.geojson"
@@ -227,6 +246,7 @@ def capture_node_fixtures(api_url, test_data, fixtures_dir):
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
+            "collection_name": node_data["collection_name"],
             "fields": fields
         },
         fixtures_dir / "node" / "node_basic.geojson"
@@ -241,6 +261,7 @@ def capture_node_fixtures(api_url, test_data, fixtures_dir):
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "csv",
+            "collection_name": node_data["collection_name"],
             "fields": fields
         },
         fixtures_dir / "node" / "node_basic.csv"
@@ -255,6 +276,7 @@ def capture_node_fixtures(api_url, test_data, fixtures_dir):
             "start_time": node_data["start_time"],
             "end_time": node_data["end_time"],
             "output": "geojson",
+            "collection_name": node_data["collection_name"],
             "fields": f"{fields},area_total,collection_shortname,crid,geometry"
         },
         fixtures_dir / "node" / "node_comprehensive.geojson"
@@ -330,6 +352,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
+            "collection_name": lake_data["collection_name"],
             "fields": fields
         },
         fixtures_dir / "priorlake" / "lake_basic.geojson"
@@ -344,6 +367,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "csv",
+            "collection_name": lake_data["collection_name"],
             "fields": fields
         },
         fixtures_dir / "priorlake" / "lake_basic.csv"
@@ -358,6 +382,7 @@ def capture_priorlake_fixtures(api_url, test_data, fixtures_dir):
             "start_time": lake_data["start_time"],
             "end_time": lake_data["end_time"],
             "output": "geojson",
+            "collection_name": lake_data["collection_name"],
             "fields": f"{fields},PLD_version,collection_shortname,crid,geometry"
         },
         fixtures_dir / "priorlake" / "lake_comprehensive.geojson"

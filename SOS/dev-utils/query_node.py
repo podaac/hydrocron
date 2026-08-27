@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""CLI to query a DynamoDB reach and display columns/values per time step.
+"""CLI to query a DynamoDB node and display columns/values per time step.
 
 Usage:
-    python SOS/dev-utils/query_reach.py <table_name> <reach_id> --profile <aws_profile>
+    python SOS/dev-utils/query_node.py <table_name> <node_id> --profile <aws_profile>
 
 Examples:
-    python SOS/dev-utils/query_reach.py hydrocron-swot-reach-table 18180900091 --profile podaac-services-ops
+    python SOS/dev-utils/query_node.py hydrocron-swot-node-table 18180900091011 --profile podaac-services-ops
 """
 import argparse
 import re
@@ -20,18 +20,18 @@ FILL_VALUE_TIME = -999999999999.0
 
 SKIP_COLUMNS = {"geometry"}
 
-HEADER_COLUMNS = ["reach_id", "time_str", "cycle_id", "pass_id", "range_start_time"]
+HEADER_COLUMNS = ["node_id", "reach_id", "time_str", "cycle_id", "pass_id", "range_start_time"]
 
 RST_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 
-def query_reach(table, reach_id: str) -> list[dict]:
-    """Query all rows for a reach_id with pagination. Filters fill-value rows."""
-    response = table.query(KeyConditionExpression=Key("reach_id").eq(reach_id))
+def query_node(table, node_id: str) -> list[dict]:
+    """Query all rows for a node_id with pagination. Filters fill-value rows."""
+    response = table.query(KeyConditionExpression=Key("node_id").eq(node_id))
     items = response["Items"]
     while "LastEvaluatedKey" in response:
         response = table.query(
-            KeyConditionExpression=Key("reach_id").eq(reach_id),
+            KeyConditionExpression=Key("node_id").eq(node_id),
             ExclusiveStartKey=response["LastEvaluatedKey"],
         )
         items.extend(response["Items"])
@@ -54,9 +54,10 @@ def print_timestep(item: dict, index: int, total: int):
     time_str = item.get("time_str", "?")
     cycle = item.get("cycle_id", "?")
     pass_id = item.get("pass_id", "?")
+    reach_id = item.get("reach_id", "?")
 
     print(f"\n{'─' * 70}")
-    print(f"  [{index}/{total}]  time_str={time_str}  cycle={cycle}  pass={pass_id}")
+    print(f"  [{index}/{total}]  time_str={time_str}  cycle={cycle}  pass={pass_id}  reach={reach_id}")
     print(f"{'─' * 70}")
 
     cols = sorted(k for k in item.keys() if k not in SKIP_COLUMNS)
@@ -69,10 +70,10 @@ def print_timestep(item: dict, index: int, total: int):
 
 
 def main():
-    """Parse arguments and display time-series data for a single reach."""
-    parser = argparse.ArgumentParser(description="Query a DynamoDB reach and display time-series data.")
+    """Parse arguments and display time-series data for a single node."""
+    parser = argparse.ArgumentParser(description="Query a DynamoDB node and display time-series data.")
     parser.add_argument("table_name", help="DynamoDB table name")
-    parser.add_argument("reach_id", help="Reach ID to query")
+    parser.add_argument("node_id", help="Node ID to query")
     parser.add_argument("--profile", required=True, help="AWS profile (from ~/.aws/credentials)")
     parser.add_argument("--region", default="us-west-2", help="AWS region (default: us-west-2)")
     parser.add_argument("--limit", type=int, default=None, help="Max time steps to display")
@@ -84,8 +85,8 @@ def main():
     dynamodb = session.resource("dynamodb", config=config)
     table = dynamodb.Table(args.table_name)
 
-    print(f"Querying {args.table_name} for reach_id={args.reach_id} ...")
-    items = query_reach(table, args.reach_id)
+    print(f"Querying {args.table_name} for node_id={args.node_id} ...")
+    items = query_node(table, args.node_id)
 
     if not items:
         print("No items found.")
@@ -97,7 +98,7 @@ def main():
     if bad_rst:
         print(f"\n  WARNING: {len(bad_rst)} row(s) with invalid range_start_time:")
         for item in bad_rst:
-            print(f"    reach_id={item.get('reach_id')}  range_start_time={item.get('range_start_time')!r}")
+            print(f"    node_id={item.get('node_id')}  range_start_time={item.get('range_start_time')!r}")
         print()
 
     if args.limit:

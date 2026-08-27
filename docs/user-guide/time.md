@@ -7,10 +7,16 @@ To retain times where there was a satellite pass but no observation was made, Hy
 
 ## Example
 
-| reach_id    |  time               | range_start_time    | range_end_time      | wse           | ... |
-|-------------|---------------------|---------------------|---------------------|---------------|-----|
-| 71224100223 | 2023-08-01T12:30:45 |2023-08-01T12:30:30  |2023-08-01T12:40:30  | 316.8713      |     |
-| 71224100223 | no_data             |2023-09-01T12:30:30  |2023-09-01T12:40:30  | -99999999.0000|     |
-| 71224100223 | 2023-10-01T12:30:42 |2023-10-01T12:30:30  |2023-10-01T12:40:30  | 286.2983      |     |
+| reach_id    |  time               | range_start_time    | range_end_time      | wse              |
+|-------------|---------------------|---------------------|---------------------|------------------|
+| 72558200021 | 2024-01-18T18:28:58Z|2024-01-18T18:25:07Z |2024-01-18T18:36:12Z | 177.4408         |
+| 72558200021 | no_data             |2024-01-21T07:38:51Z |2024-01-21T07:53:21Z | -999999999999.0  |
+| 72558200021 | 2024-01-31T06:10:05Z|2024-01-31T06:01:05Z |2024-01-31T06:15:32Z | 177.3027         |
 
-In this simplified example, querying Hydrocron using a start_time of 2023-08-01T12:30:00 and an end_time of 2023-10-01T13:00:00 will return all three features, becasue it is the pass start time that is used in the query. The returned data will include the actual observation time, including the no_data value for the feature that was not observed.
+In this example, querying Hydrocron using a start_time of 2024-01-18T00:00:00Z and an end_time of 2024-02-01T00:00:00Z will return all three features, because it is the pass start time that is used in the query. The returned data will include the actual observation time, including the no_data value for the feature that was not observed.
+
+:::{tip}
+Try this query yourself:
+
+[`GET /timeseries?feature=Reach&feature_id=72558200021&start_time=2024-01-18T00:00:00Z&end_time=2024-02-01T00:00:00Z&output=csv&fields=reach_id,time_str,range_start_time,range_end_time,wse`](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=72558200021&start_time=2024-01-18T00%3A00%3A00Z&end_time=2024-02-01T00%3A00%3A00Z&output=csv&fields=reach_id,time_str,range_start_time,range_end_time,wse)
+:::
