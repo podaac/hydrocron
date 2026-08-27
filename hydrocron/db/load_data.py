@@ -190,7 +190,8 @@ def cnm_handler(event, _):
                         track_table = table_info['track_table']
                         break
                 else:
-                    raise MissingTable(f"Error: Cannot load granule: {granule_uri}")
+                    logging.error("Cannot load granule, no matching table: %s", granule_uri)
+                    continue
 
                 msg_body = json.dumps({
                     "body": {
