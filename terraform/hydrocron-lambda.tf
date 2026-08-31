@@ -190,7 +190,7 @@ resource "aws_lambda_function" "hydrocron_lambda_cnm" {
   tags = var.default_tags
   environment {
     variables = {
-      GRANULE_LAMBDA_FUNCTION_NAME = aws_lambda_function.hydrocron_lambda_load_granule.function_name
+      GRANULE_QUEUE_URL = aws_sqs_queue.hydrocron_granule_queue.url
     }
   }
 }
@@ -203,13 +203,6 @@ resource "aws_lambda_permission" "allow_lambda" {
   source_arn    = aws_lambda_function.hydrocron_lambda_load_data.arn
 }
 
-resource "aws_lambda_permission" "allow_lambda_from_cnm" {
-  statement_id  = "AllowExecutionFromLambdaCNM"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.hydrocron_lambda_load_granule.function_name
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_lambda_function.hydrocron_lambda_cnm.arn
-}
 
 
 resource "aws_lambda_function" "hydrocron_lambda_track_ingest" {
