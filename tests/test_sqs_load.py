@@ -3,6 +3,7 @@ Tests for SQS-based CNM and granule load handlers.
 """
 
 import json
+import logging
 import os
 from unittest.mock import patch, MagicMock
 
@@ -93,15 +94,16 @@ def test_granule_handler_sqs_record_format():
 
 
 @moto.mock_aws
-def test_cnm_handler_missing_table():
-    """Test that cnm_handler raises MissingTable for unknown collection."""
+def test_cnm_handler_missing_table(caplog):
+    """Test that cnm_handler logs when collection table is missing."""
 
     os.environ["AWS_DEFAULT_REGION"] = "us-west-2"
+
     sqs = boto3.client("sqs", region_name="us-west-2")
     queue = sqs.create_queue(QueueName="test-granule-queue")
     os.environ["GRANULE_QUEUE_URL"] = queue["QueueUrl"]
 
-    from hydrocron.db.load_data import cnm_handler, MissingTable
+    from hydrocron.db.load_data import cnm_handler
 
     bad_cnm = {
         "submissionTime": "2024-09-09T01:25:25.739Z",
@@ -120,5 +122,8 @@ def test_cnm_handler_missing_table():
         ]
     }
 
-    with pytest.raises(MissingTable):
+    with caplog.at_level(logging.ERROR):
         cnm_handler(event, None)
+
+    assert "UNKNOWN_COLLECTION" in caplog.text
+    assert "table" in caplog.text.lower()
