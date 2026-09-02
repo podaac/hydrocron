@@ -37,13 +37,21 @@ def timeseries():
 
     try:
         resp = requests.post(LAMBDA_URL, json=event, timeout=30)
-        resp.raise_for_status()
-        try:
-            lambda_result = resp.json()
-        except ValueError:
-            lambda_result = resp.text
-    except Exception as e:
+    except requests.RequestException as e:
         return Response(json.dumps({'error': str(e)}), status=502, content_type='application/json')
+
+    try:
+        lambda_result = resp.json()
+    except ValueError:
+        lambda_result = resp.text
+
+    if resp.status_code >= 400:
+        return Response(
+            resp.text,
+            status=resp.status_code,
+            content_type=resp.headers.get('Content-Type', 'application/json'),
+            headers={'Access-Control-Allow-Origin': '*'}
+        )
 
     if isinstance(lambda_result, dict) and 'errorMessage' in lambda_result:
         error_msg = lambda_result['errorMessage']
@@ -74,7 +82,7 @@ def timeseries():
 
     accept = request.headers.get('Accept', '*/*')
 
-    if accept == 'text/csv':
+    if 'text/csv' in accept:
         if isinstance(lambda_result, str):
             return Response(lambda_result, status=200, content_type='text/csv',
                             headers={'Access-Control-Allow-Origin': '*'})
@@ -82,7 +90,7 @@ def timeseries():
         return Response(csv_data, status=200, content_type='text/csv',
                         headers={'Access-Control-Allow-Origin': '*'})
 
-    if accept == 'application/geo+json':
+    if 'application/geo+json' in accept:
         if isinstance(lambda_result, dict) and 'type' in lambda_result:
             body = json.dumps(lambda_result)
         else:

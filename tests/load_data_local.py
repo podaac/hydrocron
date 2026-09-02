@@ -87,6 +87,7 @@ def create_table(dynamo_resource, table_name, partition_key):
             "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
         }]
     )
+    dynamo_resource.Table(table_name).wait_until_exists()
     print(f"  Created table {table_name}")
 
 
