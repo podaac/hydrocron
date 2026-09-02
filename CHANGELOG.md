@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 384 - Add units (m^3/s) to the SoS discharge fields, served as constants in the API response
 ### Changed
+    - Issue 220 - Update terraform aws provider to 6.0 
+    - Issue 389 - Added SQS queues after SNS for CNM responses to enable retries and a dead-letter queue
 ### Deprecated
 ### Removed
 ### Fixed
+    - Issue 382 - Large timeseries queries failed with an out-of-memory error shown to clients as "Endpoint request timed out"; resolved by increasing the Lambda memory from 128 MB to 1024 MB, which also improved response time (~9x faster)
+    - Fixed the 6 MB response-size guard, which used `sys.getsizeof()` on the results container (~200 bytes) and never fired; it now measures the real result size and returns a fast 413
 ### Security
 
 ## [1.9.0]
@@ -20,14 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 358 - Add requester-pays support to S3 `download_file` calls
     - Issue 308 - Add SOS Hydrology V3 products to SWOT_L2_HR_RiverSP_2.0 collection 
 ### Changed
-    - Issue 220 - Update terraform aws provider to 6.0 
-    - Added SQS queues after SNS for CNM responses to enable retries and a dead-letter queue
 ### Deprecated
 ### Removed
 ### Fixed
     - Issue 346 - SWORD version incorrect for version D
     - Issue 288 - Ensure collection version is populated in Hydrocron DynamoDB table fields
-    - Issue 358 - Add requester-pays support to S3 `download_file` calls
 ### Security
 
 ## [1.8.0]

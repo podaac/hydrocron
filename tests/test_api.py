@@ -239,6 +239,25 @@ def test_add_units():
     assert expected_columns == columns
 
 
+def test_add_units_sos_discharge():
+    """SoS discharge fields get constant units (m^3/s) injected, since they are not stored per row."""
+    import hydrocron.api.controllers.timeseries
+
+    test_data = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+                 .joinpath('test_data').joinpath('api_query_results_items_reach.json'))
+    with open(test_data) as jf:
+        items = json.load(jf)
+    gdf = hydrocron.api.controllers.timeseries.convert_to_df(items)
+
+    columns = ["reach_id", "sos_consensus_q", "swot_discharge_reanalysis", "geometry"]
+    result = hydrocron.api.controllers.timeseries.add_units(gdf, columns)
+
+    assert "sos_consensus_q_units" in result
+    assert "swot_discharge_reanalysis_units" in result
+    assert (gdf["sos_consensus_q_units"] == "m^3/s").all()
+    assert (gdf["swot_discharge_reanalysis_units"] == "m^3/s").all()
+
+
 def test_timeseries_lambda_handler_missing():
     """
     Test the lambda handler for the timeseries endpoint for missing parameters
@@ -439,6 +458,33 @@ def test_timeseries_lambda_handler_not_found():
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as e:
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
         assert "400: Results with the specified Feature ID 71224100227 were not found" in str(e.value)
+
+
+def test_timeseries_get_413_when_results_exceed_6mb(hydrocron_api, monkeypatch):
+    """A result set larger than 6MB returns 413 based on the actual serialized result size."""
+    import hydrocron.api.controllers.timeseries
+    from hydrocron.api.data_access.db import DynamoDataRepository
+
+    big_geometry = "LINESTRING (" + ", ".join(["-127.330039 54.992390"] * 300) + ")"
+    row = {
+        "reach_id": "81181700021", "time_str": "2024-01-01T00:00:00Z",
+        "wse": "386.9557", "slope": "-0.0019823218", "geometry": big_geometry,
+    }
+    big_results = {"Items": [dict(row) for _ in range(3000)]}
+    monkeypatch.setattr(
+        DynamoDataRepository, "get_series_by_feature_id",
+        lambda self, *args, **kwargs: big_results,
+    )
+
+    data, hits = hydrocron.api.controllers.timeseries.timeseries_get(
+        "SWOT_L2_HR_RiverSP_reach_D", "Reach", "81181700021",
+        "2023-10-01T00:00:00Z", "2026-06-03T00:00:00Z", "geojson",
+        ["reach_id", "time_str", "wse", "slope"],
+    )
+
+    assert data["http_code"] == "413 Payload Too Large"
+    assert "Query exceeds 6MB" in data["error_message"]
+    assert hits == 0
 
 
 def test_timeseries_lambda_handler_elastic_agent():
