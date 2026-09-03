@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 317 - Ability to download CSV file
+    - Issue 252 - Get skeleton local install working again and update readme instructions
 ### Changed
 ### Deprecated
 ### Removed
