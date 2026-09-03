@@ -45,7 +45,7 @@ def test_timeseries_lambda_handler_json_reach(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
            
 
 def test_timeseries_lambda_handler_json_lake(hydrocron_api):
@@ -80,7 +80,7 @@ def test_timeseries_lambda_handler_json_lake(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
 
 
 def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
@@ -509,7 +509,7 @@ def test_timeseries_lambda_handler_geojson_accept(hydrocron_api):
                  .joinpath('test_data').joinpath('api_query_results_geojson.json'))
     with open(test_data) as jf:
         expected = json.load(jf)
-    assert result == expected
+    assert json.loads(json.dumps(result)) == expected
 
 
 def test_timeseries_lambda_handler_csv_accept(hydrocron_api):
@@ -610,7 +610,7 @@ def test_timeseries_lambda_handler_json_no_output(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
 
 
 def test_timeseries_lambda_handler_json_multi_accept(hydrocron_api):
@@ -645,7 +645,7 @@ def test_timeseries_lambda_handler_json_multi_accept(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
 
 
 def test_timeseries_lambda_handler_unsupported():
@@ -735,7 +735,7 @@ def test_timeseries_lambda_handler_json_compact(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
 
 
 def test_timeseries_lambda_handler_geojson_accept_compact(hydrocron_api):
@@ -769,7 +769,7 @@ def test_timeseries_lambda_handler_geojson_accept_compact(hydrocron_api):
                  .joinpath('test_data').joinpath('api_query_results_geojson_compact.json'))
     with open(test_data) as jf:
         expected = json.load(jf)
-    assert result == expected
+    assert json.loads(json.dumps(result)) == expected
 
 
 def test_get_collection_name():

@@ -415,7 +415,8 @@ def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
         columns.append('geometry')   # Add geometry to convert to geoJSON
     gdf = _fill_missing_columns(gdf, columns)
     gdf = gdf[columns]
-    gdf_json = json.loads(gdf.to_json())
+    # Build the GeoJSON FeatureCollection dict directly; it is serialized once at the response boundary.
+    gdf_json = gdf.to_geo_dict()
 
     data = {
         'http_code': '200 OK',
