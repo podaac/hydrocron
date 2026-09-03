@@ -574,6 +574,11 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
     logging.info('response: %s', json.dumps({'status': results['http_code'], 'time': elapsed, 'hits': hits}))
-    logging.info('response_size: %s', str(len(json.dumps(data, default=str).encode('utf-8'))))
+    # CSV responses are already a string; only serialize dict responses.
+    if isinstance(data, str):
+        response_size = len(data.encode('utf-8'))
+    else:
+        response_size = len(json.dumps(data, default=str).encode('utf-8'))
+    logging.info('response_size: %s', str(response_size))
 
     return data
