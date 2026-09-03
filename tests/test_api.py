@@ -479,7 +479,7 @@ def test_timeseries_get_413_when_results_exceed_6mb(hydrocron_api, monkeypatch):
     data, hits = hydrocron.api.controllers.timeseries.timeseries_get(
         "SWOT_L2_HR_RiverSP_reach_D", "Reach", "81181700021",
         "2023-10-01T00:00:00Z", "2026-06-03T00:00:00Z", "geojson",
-        ["reach_id", "time_str", "wse", "slope"],
+        "reach_id,time_str,wse,slope",
     )
 
     assert data["http_code"] == "413 Payload Too Large"
