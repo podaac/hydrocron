@@ -23,6 +23,8 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 ACCEPT_TYPES = ['application/json', 'text/csv', 'application/geo+json']
+# Maximum response size allowed by API Gateway; larger result sets return a 413.
+MAX_RESPONSE_SIZE_BYTES = 6 * 1024 * 1024
 DEFAULT_RIVER_COLLECTION = os.environ['DEFAULT_RIVER_COLLECTION']
 DEFAULT_LAKE_COLLECTION = os.environ['DEFAULT_LAKE_COLLECTION']
 DEFAULT_COLLECTION_VERSION = os.environ['DEFAULT_COLLECTION_VERSION']
@@ -324,9 +326,9 @@ def timeseries_get(collection_name, feature, feature_id, start_time, end_time, o
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
         data['error_message'] = f'400: Results with the specified Feature ID {feature_id} were not found'
-    elif results_size > 6291456:
+    elif results_size > MAX_RESPONSE_SIZE_BYTES:
         data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds 6MB with {len(results["Items"])} hits'
+        data['error_message'] = f'413: Query exceeds {MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)}MB with {len(results["Items"])} hits'
     else:
         logging.info('query_size: %s', str(results_size))
         gdf = convert_to_df(results['Items'])
