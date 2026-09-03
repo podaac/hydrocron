@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
     - Issue 384 - Add units (m^3/s) to the SoS discharge fields, served as constants in the API response
+    - Issue 317 - Ability to download CSV file
+    - Issue 252 - Get skeleton local install working again and update readme instructions
 ### Changed
     - Issue 220 - Update terraform aws provider to 6.0 
     - Issue 389 - Added SQS queues after SNS for CNM responses to enable retries and a dead-letter queue
