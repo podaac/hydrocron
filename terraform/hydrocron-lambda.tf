@@ -68,7 +68,7 @@ resource "aws_lambda_function" "hydrocron_lambda_timeseries" {
   function_name = local.timeseries_function_name
   role          = aws_iam_role.hydrocron-lambda-execution-role.arn
   timeout       = 30
-  memory_size = 1024
+  memory_size   = 1024
   vpc_config {
     subnet_ids         = data.aws_subnets.private_application_subnets.ids
     security_group_ids = data.aws_security_groups.vpc_default_sg.ids
