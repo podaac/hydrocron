@@ -13,7 +13,7 @@ services:
     networks:
       - hydrocron
   hydrocron-load-data:
-    image: "hydrocron:latest"
+    image: "${HYDROCRON_IMAGE:-hydrocron:latest}"
     container_name: hydrocron-load-data
     entrypoint: python
     command: /var/task/tests/load_data_local.py
@@ -34,7 +34,7 @@ services:
       DEFAULT_LAKE_COLLECTION: SWOT_L2_HR_LakeSP
       DEFAULT_COLLECTION_VERSION: D
   hydrocron-lambda:
-    image: "hydrocron:latest"
+    image: "${HYDROCRON_IMAGE:-hydrocron:latest}"
     container_name: hydrocron-lambda
     ports:
       - "9000:8080"

@@ -1449,7 +1449,34 @@ def test_csv_file_invalid_with_non_json_accept():
     }
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
         hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    # The error must name the caller's actual output value (csv_file), not the translated 'csv'.
     assert "Invalid combination of Accept header" in str(exc_info.value)
+    assert "(csv_file)" in str(exc_info.value)
+    assert "(csv)" not in str(exc_info.value)
+
+
+def test_csv_file_output_no_data_raises_error(hydrocron_api):
+    """output=csv_file with a feature_id that has no data must raise, not return a download wrapper."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "00000000000000",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv_file",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert "were not found" in str(exc_info.value)
 
 
 def test_sanitize_filename(hydrocron_api):

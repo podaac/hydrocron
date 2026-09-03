@@ -42,6 +42,13 @@ Launch DynamoDB local on port 8001, Hydrocron Lambda on port 9000, and local API
 docker compose up
 ```
 
+By default Compose uses the locally built `hydrocron:latest` image. If you pulled the pre-built GHCR
+image instead, point Compose at it with the `HYDROCRON_IMAGE` environment variable:
+
+```bash
+HYDROCRON_IMAGE=ghcr.io/podaac/hydrocron:latest docker compose up
+```
+
 ### 3. Load Test Data
 
 If you have not setup a python environment yet, use poetry to first initialize the virtual environment.
