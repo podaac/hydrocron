@@ -70,8 +70,8 @@ services:
     environment:
       LAMBDA_URL: http://hydrocron-lambda:8080/2015-03-31/functions/function/invocations
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf 'http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2020-06-04T00:00:00Z&end_time=2026-06-23T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse' || exit 1"]
-      interval: 10s
+      test: ["CMD-SHELL", "curl -sf 'http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2023-06-04T00:00:00Z&end_time=2023-06-23T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse' || exit 1"]
+      interval: 30s
       timeout: 5s
       retries: 3
       start_period: 15s
