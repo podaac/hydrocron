@@ -1,7 +1,7 @@
 (fields-detail)=
 # Fields
 
-Hydrocron will return every field that is available in the archived source data. For SWOT River and Lake data products, these fields are the attributes that are available in the shapefiles.
+Hydrocron will return every field that is available in the archived source data. For SWOT River and Lake data products, these fields are the attributes that are available in the shapefiles.  For SWOT Level 4 Sos River Dishcarge data products, these fields are the time-varying variables available in the netCDFs.
 
 In addition to the shapefile attributes, some additional fields are available through Hydrocron that are pulled from other locations such as the shapefile metadata (xml) and the filename. These include things like the cycle and pass numbers, CRID, granule name, continent ID, units, collection name, etc.
 
@@ -9,7 +9,7 @@ The [](fields) parameter is required, and you must list every field that you wan
 
 We strongly recommend returning and using the quality flags on the fields that have them to avoid degraded observations.
 
-For each feature type, the full list of currently supported fields is below. Full descriptions of what these fields are and how to use them are available in the SWOT Product Description Documents available on the Earthdata collection landing pages for [Rivers](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-d-d) and [Lakes](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-lakesp-d-d)
+The full list of currently supported fields for each feature type is below. For full descriptions of what these fields are and how to use them, see the SWOT Product Description Documents on the Earthdata collection landing pages for [Rivers](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-d-d) and [Lakes](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-lakesp-d-d). River reaches also include discharge fields from the SoS Discharge collection; for descriptions, see the SWOT Confluence User Guide on the [SWOT Level 4 Sword of Science River Discharge Products, Version 3](https://doi.org/10.5067/SWOT-SOS-RD3) page.
 
 Occasionally new fields may be added to the SWOT data products. If there are fields you find in the SWOT shapefiles that are not returned from Hydrocron, please open an issue on the [Hydrocron GitHub repository](https://github.com/podaac/hydrocron/issues).
 
@@ -74,6 +74,7 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 ```
 
 **Lake fields**
+
 ```bash
 'lake_id', 'reach_id', 'obs_id', 'overlap', 'n_overlap',
 'time', 'time_tai', 'time_str', 'wse', 'wse_u', 'wse_r_u', 'wse_std',
@@ -88,3 +89,15 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 'crid', 'geometry', 'PLD_version', 'collection_shortname', 'collection_version',
 'granuleUR', 'ingest_time'
 ```
+
+**SoS Discharge fields**
+
+```bash
+'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
+'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis'
+```
+
+:::{note} SoS Discharge fields
+See the [discharge guide](discharge.md) for availability, algorithms, naming conventions, time matching, and more.
+:::
+

@@ -4,6 +4,8 @@ SWOT data periodically undergoes reprocessing, where data products are recreated
 
 Hydrocron supports multiple versions of SWOT data collections. As of version 1.8.0, Version D is the default — omitting the optional _collection_name_ parameter will return Version D data. To retrieve data from a specific collection version, use the [](collection_name) request parameter.
 
+As of version 1.9.0, Hydrocron also supports the SWOT Level 4 SoS Discharge products, which themselves are generated using (in part) SWOT Level 2 data from an associated version. To request SWOT_L4_HR_DAWG_SOS_DISCHARGE_V3, corresponding to SWOT L2 RiverSP v2.0, please specify `collection_name=SWOT_L2_HR_RiverSP_2.0` in your request
+
 SWOT collection names supported by Hydrocron include:
 
 Version D (default):
@@ -21,6 +23,7 @@ Version 2.0:
 - SWOT_L2_HR_RiverSP_node_2.0
 - SWOT_L2_HR_LakeSP_2.0
 - SWOT_L2_HR_LakeSP_prior_2.0
+- SWOT_L4_HR_DAWG_SOS_DISCHARGE_V3
 
 ## SWORD Version and Feature ID Compatibility
 
