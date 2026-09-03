@@ -1488,6 +1488,7 @@ def test_sanitize_filename(hydrocron_api):
     assert sanitize_filename("../../etc/passwd") == ".._.._etc_passwd.csv"
     assert sanitize_filename("already.csv") == "already.csv"
     assert sanitize_filename("special!@#$%^&*chars") == "special________chars.csv"
+    assert sanitize_filename(123) == "123.csv"
     result = sanitize_filename("a" * 300)
     assert len(result) <= 200
     assert result.endswith('.csv')

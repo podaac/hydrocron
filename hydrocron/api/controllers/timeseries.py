@@ -293,7 +293,8 @@ def sanitize_time(start_time, end_time):
 
 def sanitize_filename(filename):
     """Sanitize user-provided filename, keeping only safe characters."""
-    sanitized = re.sub(r'[^a-zA-Z0-9_\-.]', '_', filename)
+    # Coerce to str so non-string inputs don't raise.
+    sanitized = re.sub(r'[^a-zA-Z0-9_\-.]', '_', str(filename))
     if not sanitized.lower().endswith('.csv'):
         sanitized += '.csv'
     if len(sanitized) > 200:
