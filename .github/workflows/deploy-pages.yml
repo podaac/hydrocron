@@ -60,6 +60,12 @@ jobs:
           poetry install --only docs
           NPM_CONFIG_CACHE=/tmp/npm-cache poetry -P . -C docs run jupyter-book build --html
 
+      - name: Add legacy intro.html redirect
+        # Redirect the old /intro.html URL to the home page so external links keep working.
+        run: |
+          printf '<!doctype html><meta http-equiv="refresh" content="0; url=./">\n' \
+            > docs/_build/html/intro.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v6
 
