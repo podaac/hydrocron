@@ -21,14 +21,14 @@ Python 3.12+
 
 ### 1. Build or Pull Hydrocron Docker
 
-Build the docker container:
+Compose builds the Hydrocron image from `docker/Dockerfile` for you (see step 2), so no separate build
+step is required for local development. To build the image on its own:
 
 ```bash
-
 docker build . -f docker/Dockerfile -t hydrocron:latest
 ```
 
-Pull a pre-built image from [https://github.com/podaac/hydrocron/pkgs/container/hydrocron](https://github.com/podaac/hydrocron/pkgs/container/hydrocron):
+Alternatively, pull a pre-built image from [https://github.com/podaac/hydrocron/pkgs/container/hydrocron](https://github.com/podaac/hydrocron/pkgs/container/hydrocron):
 
 ```bash
 docker pull ghcr.io/podaac/hydrocron:latest
@@ -39,11 +39,14 @@ docker pull ghcr.io/podaac/hydrocron:latest
 Launch DynamoDB local on port 8001, Hydrocron Lambda on port 9000, and local API Gateway on port 8080:
 
 ```bash
-docker compose up
+docker compose up --build
 ```
 
-By default Compose uses the locally built `hydrocron:latest` image. If you pulled the pre-built GHCR
-image instead, point Compose at it with the `HYDROCRON_IMAGE` environment variable:
+Use `--build` when developing locally so Compose rebuilds the Hydrocron image from `docker/Dockerfile`
+and you never debug against a stale image. Plain `docker compose up` reuses the previously built image.
+
+To run the pre-built GHCR image instead of building, point Compose at it with the `HYDROCRON_IMAGE`
+environment variable (omit `--build`):
 
 ```bash
 HYDROCRON_IMAGE=ghcr.io/podaac/hydrocron:latest docker compose up
@@ -80,10 +83,20 @@ http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time
 http://localhost:8080/timeseries?feature=Node&feature_id=31241400580011&start_time=2026-02-01T00:00:00Z&end_time=2026-02-28T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_D&fields=node_id,time_str,wse,wse_sm,wse_sm_u,wse_sm_q
 ```
 
+```
+http://localhost:8080/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_D&fields=reach_id,time_str,wse,slope,width
+```
+
 CSV file download (triggers browser Save As):
 
 ```
 http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2023-06-04T00:00:00Z&end_time=2023-06-23T00:00:00Z&output=csv_file&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse
+```
+
+CSV file download with a custom filename (saved as `my_reach_data.csv`):
+
+```
+http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2023-06-04T00:00:00Z&end_time=2023-06-23T00:00:00Z&output=csv_file&filename=my_reach_data&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse
 ```
 
 You can also invoke the Lambda container directly via POST on port 9000. For example:

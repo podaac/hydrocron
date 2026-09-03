@@ -13,6 +13,9 @@ services:
     networks:
       - hydrocron
   hydrocron-load-data:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     image: "${HYDROCRON_IMAGE:-hydrocron:latest}"
     container_name: hydrocron-load-data
     entrypoint: python
@@ -34,6 +37,7 @@ services:
       DEFAULT_LAKE_COLLECTION: SWOT_L2_HR_LakeSP
       DEFAULT_COLLECTION_VERSION: D
   hydrocron-lambda:
+    # Reuses the image built by hydrocron-load-data (same tag).
     image: "${HYDROCRON_IMAGE:-hydrocron:latest}"
     container_name: hydrocron-lambda
     ports:

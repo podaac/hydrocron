@@ -401,7 +401,7 @@ Example CSV response:
 
 ### CSV File Download
 
-When the `output` parameter is set to `csv_file`, the response triggers a file download in the browser. The response has `Content-Type: text/csv` and a `Content-Disposition: attachment; filename="..."` header that causes the browser to prompt a Save As dialog.
+When the `output` parameter is set to `csv_file`, the response triggers a file download in the browser. The response has `Content-Type: text/csv` and a `Content-Disposition: attachment; filename=...` header that causes the browser to prompt a Save As dialog.
 
 Example request with default filename:
 
