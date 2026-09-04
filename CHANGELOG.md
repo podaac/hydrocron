@@ -7,15 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [1.10.0]
+
+### Added
     - Issue 384 - Add units (m^3/s) to the SoS discharge fields, served as constants in the API response
     - Issue 317 - Ability to download CSV file
-    - Issue 252 - Get skeleton local install working again and update readme instructions
 ### Changed
     - Issue 220 - Update terraform aws provider to 6.0 
     - Issue 389 - Added SQS queues after SNS for CNM responses to enable retries and a dead-letter queue
 ### Deprecated
 ### Removed
 ### Fixed
+    - Issue 252 - Get skeleton local Docker install working again and update readme instructions
     - Issue 382 - Large timeseries queries failed with an out-of-memory error shown to clients as "Endpoint request timed out"; resolved by increasing the Lambda memory from 128 MB to 1024 MB, which also improved response time (~9x faster)
     - Fixed the 6 MB response-size guard, which used `sys.getsizeof()` on the results container (~200 bytes) and never fired; it now measures the real result size and returns a fast 413
 ### Security
