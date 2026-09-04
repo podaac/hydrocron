@@ -45,7 +45,7 @@ def test_timeseries_lambda_handler_json_reach(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
            
 
 def test_timeseries_lambda_handler_json_lake(hydrocron_api):
@@ -80,7 +80,7 @@ def test_timeseries_lambda_handler_json_lake(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
 
 
 def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
@@ -237,6 +237,25 @@ def test_add_units():
     expected_columns = ["reach_id", "wse", "width", "slope", "slope2", "geometry", "wse_units", "width_units",
                         "slope_units", "slope2_units"]
     assert expected_columns == columns
+
+
+def test_add_units_sos_discharge():
+    """SoS discharge fields get constant units (m^3/s) injected, since they are not stored per row."""
+    import hydrocron.api.controllers.timeseries
+
+    test_data = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
+                 .joinpath('test_data').joinpath('api_query_results_items_reach.json'))
+    with open(test_data) as jf:
+        items = json.load(jf)
+    gdf = hydrocron.api.controllers.timeseries.convert_to_df(items)
+
+    columns = ["reach_id", "sos_consensus_q", "swot_discharge_reanalysis", "geometry"]
+    result = hydrocron.api.controllers.timeseries.add_units(gdf, columns)
+
+    assert "sos_consensus_q_units" in result
+    assert "swot_discharge_reanalysis_units" in result
+    assert (gdf["sos_consensus_q_units"] == "m^3/s").all()
+    assert (gdf["swot_discharge_reanalysis_units"] == "m^3/s").all()
 
 
 def test_timeseries_lambda_handler_missing():
@@ -441,6 +460,33 @@ def test_timeseries_lambda_handler_not_found():
         assert "400: Results with the specified Feature ID 71224100227 were not found" in str(e.value)
 
 
+def test_timeseries_get_413_when_results_exceed_6mb(hydrocron_api, monkeypatch):
+    """A result set larger than 6MB returns 413 based on the actual serialized result size."""
+    import hydrocron.api.controllers.timeseries
+    from hydrocron.api.data_access.db import DynamoDataRepository
+
+    big_geometry = "LINESTRING (" + ", ".join(["-127.330039 54.992390"] * 300) + ")"
+    row = {
+        "reach_id": "81181700021", "time_str": "2024-01-01T00:00:00Z",
+        "wse": "386.9557", "slope": "-0.0019823218", "geometry": big_geometry,
+    }
+    big_results = {"Items": [dict(row) for _ in range(3000)]}
+    monkeypatch.setattr(
+        DynamoDataRepository, "get_series_by_feature_id",
+        lambda self, *args, **kwargs: big_results,
+    )
+
+    data, hits = hydrocron.api.controllers.timeseries.timeseries_get(
+        "SWOT_L2_HR_RiverSP_reach_D", "Reach", "81181700021",
+        "2023-10-01T00:00:00Z", "2026-06-03T00:00:00Z", "geojson",
+        "reach_id,time_str,wse,slope",
+    )
+
+    assert data["http_code"] == "413 Payload Too Large"
+    assert "Query exceeds 6MB" in data["error_message"]
+    assert hits == 0
+
+
 def test_timeseries_lambda_handler_elastic_agent():
     """
     Test the lambda handler for cases where invoked by Elastic Agent.
@@ -509,7 +555,7 @@ def test_timeseries_lambda_handler_geojson_accept(hydrocron_api):
                  .joinpath('test_data').joinpath('api_query_results_geojson.json'))
     with open(test_data) as jf:
         expected = json.load(jf)
-    assert result == expected
+    assert json.loads(json.dumps(result)) == expected
 
 
 def test_timeseries_lambda_handler_csv_accept(hydrocron_api):
@@ -610,7 +656,7 @@ def test_timeseries_lambda_handler_json_no_output(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
 
 
 def test_timeseries_lambda_handler_json_multi_accept(hydrocron_api):
@@ -645,7 +691,7 @@ def test_timeseries_lambda_handler_json_multi_accept(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
 
 
 def test_timeseries_lambda_handler_unsupported():
@@ -735,7 +781,7 @@ def test_timeseries_lambda_handler_json_compact(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
-           result['results']['geojson'] == expected
+           json.loads(json.dumps(result['results']['geojson'])) == expected
 
 
 def test_timeseries_lambda_handler_geojson_accept_compact(hydrocron_api):
@@ -769,7 +815,7 @@ def test_timeseries_lambda_handler_geojson_accept_compact(hydrocron_api):
                  .joinpath('test_data').joinpath('api_query_results_geojson_compact.json'))
     with open(test_data) as jf:
         expected = json.load(jf)
-    assert result == expected
+    assert json.loads(json.dumps(result)) == expected
 
 
 def test_get_collection_name():
@@ -1253,3 +1299,254 @@ def test_sos_fields_error_message_without_collection_name(hydrocron_api):
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
     assert 'SOS Discharge fields are not available for the SWOT vD collection' in str(exc_info.value)
     assert 'collection_name=SWOT_L2_HR_RiverSP_2.0' in str(exc_info.value)
+
+
+def test_csv_file_output_returns_download_wrapper(hydrocron_api):
+    """Test that output=csv_file returns the download wrapper with default filename."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv_file",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert result['__hydrocron_download__'] is True
+    assert 'reach_id,time_str,wse' in result['csv_data']
+    assert result['filename'] == 'hydrocron_Reach_71224100223_2023-06-04_2023-06-23.csv'
+
+
+def test_csv_file_output_with_custom_filename(hydrocron_api):
+    """Test that filename param is used and .csv is appended."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv_file",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse",
+            "filename": "my_export"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert result['filename'] == 'my_export.csv'
+
+
+def test_csv_file_output_filename_already_has_extension(hydrocron_api):
+    """Test that filename with .csv extension is used as-is."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv_file",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse",
+            "filename": "report.csv"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert result['filename'] == 'report.csv'
+
+
+def test_csv_file_filename_sanitized(hydrocron_api):
+    """Test that unsafe characters in filename are replaced."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv_file",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse",
+            "filename": "../../etc/passwd"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert '/' not in result['filename']
+    assert result['filename'].endswith('.csv')
+
+
+def test_csv_file_filename_max_length(hydrocron_api):
+    """Test that long filenames are truncated to 200 chars max."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv_file",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse",
+            "filename": "a" * 300
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert len(result['filename']) <= 200
+    assert result['filename'].endswith('.csv')
+
+
+def test_csv_file_filename_ignored_when_output_is_csv(hydrocron_api):
+    """Test that filename param is silently ignored when output=csv."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse",
+            "filename": "custom"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert result['status'] == '200 OK'
+    assert '__hydrocron_download__' not in result
+
+
+def test_csv_file_filename_ignored_when_output_is_geojson(hydrocron_api):
+    """Test that filename param is silently ignored when output=geojson."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "geojson",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse",
+            "filename": "custom"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert result['status'] == '200 OK'
+    assert '__hydrocron_download__' not in result
+
+
+def test_csv_file_invalid_with_non_json_accept():
+    """Test that output=csv_file with Accept: text/csv returns 400."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv_file",
+            "fields": "reach_id,time_str,wse"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1",
+            "Accept": "text/csv"
+        }
+    }
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    # The error must name the caller's actual output value (csv_file), not the translated 'csv'.
+    assert "Invalid combination of Accept header" in str(exc_info.value)
+    assert "(csv_file)" in str(exc_info.value)
+    assert "(csv)" not in str(exc_info.value)
+
+
+def test_csv_file_output_no_data_raises_error(hydrocron_api):
+    """output=csv_file with a feature_id that has no data must raise, not return a download wrapper."""
+    import hydrocron.api.controllers.timeseries
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "00000000000000",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": "csv_file",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse"
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert "were not found" in str(exc_info.value)
+
+
+def test_sanitize_filename(hydrocron_api):
+    """Test sanitize_filename with various inputs."""
+    from hydrocron.api.controllers.timeseries import sanitize_filename
+
+    assert sanitize_filename("simple") == "simple.csv"
+    assert sanitize_filename("my file (1)") == "my_file__1_.csv"
+    assert sanitize_filename("../../etc/passwd") == ".._.._etc_passwd.csv"
+    assert sanitize_filename("already.csv") == "already.csv"
+    assert sanitize_filename("special!@#$%^&*chars") == "special________chars.csv"
+    assert sanitize_filename(123) == "123.csv"
+    result = sanitize_filename("a" * 300)
+    assert len(result) <= 200
+    assert result.endswith('.csv')
+
+
+def test_build_default_filename(hydrocron_api):
+    """Test build_default_filename across feature types."""
+    from hydrocron.api.controllers.timeseries import build_default_filename
+
+    assert build_default_filename("Reach", "71224100223", "2023-06-04T00:00:00Z", "2023-06-23T00:00:00Z") == \
+        "hydrocron_Reach_71224100223_2023-06-04_2023-06-23.csv"
+    assert build_default_filename("Node", "31241400580011", "2024-01-01T00:00:00Z", "2024-12-31T23:59:59Z") == \
+        "hydrocron_Node_31241400580011_2024-01-01_2024-12-31.csv"
+    assert build_default_filename("PriorLake", "9120274662", "2024-06-22T00:00:00-00:00", "2024-07-13T23:59:59-00:00") == \
+        "hydrocron_PriorLake_9120274662_2024-06-22_2024-07-13.csv"
