@@ -90,7 +90,7 @@ resource "aws_cloudwatch_log_group" "hydrocron-api-gateway-logs" {
 
 
 output "url" {
-  value = "${aws_api_gateway_deployment.hydrocron-api-gateway-deployment.invoke_url}/api"
+  value = "${aws_api_gateway_stage.hydrocron-api-gateway-stage.invoke_url}/api"
 }
 
 

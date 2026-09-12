@@ -7,7 +7,7 @@ import datetime
 import json
 import logging
 import os
-import sys
+import re
 import time
 
 from accept_types import get_best_match
@@ -24,6 +24,8 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 ACCEPT_TYPES = ['application/json', 'text/csv', 'application/geo+json']
+# Maximum response size allowed by API Gateway; larger result sets return a 413.
+MAX_RESPONSE_SIZE_BYTES = 6 * 1024 * 1024
 DEFAULT_RIVER_COLLECTION = os.environ['DEFAULT_RIVER_COLLECTION']
 DEFAULT_LAKE_COLLECTION = os.environ['DEFAULT_LAKE_COLLECTION']
 DEFAULT_COLLECTION_VERSION = os.environ['DEFAULT_COLLECTION_VERSION']
@@ -74,6 +76,7 @@ def get_request_parameters(event, accept_header):
         parameters['compact'] = 'false' if 'compact' not in event['body'].keys() else event['body']['compact']
         if accept_header == 'application/geo+json':   # Default is different for geo+json
             parameters['compact'] = 'true' if 'compact' not in event['body'].keys() else event['body']['compact']
+        parameters['filename'] = '' if 'filename' not in event['body'].keys() else event['body']['filename']
         parameters['collection_name'] = get_collection_name(event)
     except KeyError as e:
         raise RequestError(f'400: This required parameter is missing: {e}') from e
@@ -120,7 +123,8 @@ def get_return_type(accept_header, output):
     :param accept_header: Accept request header
     :type accept_header: str
 
-    :param output: Output type requested by user
+    :param output: Output type requested by user: 'default', 'csv', 'geojson', or 'csv_file'.
+        'csv_file' is validated like 'csv' (a JSON Accept is required) and then mapped to 'csv'.
     :type output: str
 
     :rtype: str, str
@@ -143,6 +147,11 @@ def get_return_type(accept_header, output):
             output = 'geojson'
         elif return_type == 'text/csv':
             output = 'csv'
+
+    # csv_file validates like output=csv above (a JSON Accept is required), then maps to csv for
+    # downstream formatting; the caller detects csv_file separately to wrap the download.
+    if output == 'csv_file':
+        output = 'csv'
 
     return return_type, output
 
@@ -177,8 +186,8 @@ def validate_parameters(parameters):
         error_message = ('400: start_time and end_time parameters must conform '
                          'to format: YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS-00:00')
 
-    elif parameters['output'] not in ('csv', 'geojson', 'default'):
-        error_message = f'400: output parameter should be csv or geojson, not: {parameters["output"]}'
+    elif parameters['output'] not in ('csv', 'geojson', 'csv_file', 'default'):
+        error_message = f'400: output parameter should be csv, geojson, or csv_file, not: {parameters["output"]}'
 
     elif parameters['feature'] == 'Reach' and parameters['collection_name'].endswith('_D') and \
             any(f in constants.REACH_VERSION_2_0_ONLY_FIELDS for f in parameters['fields'].split(',')):
@@ -283,6 +292,24 @@ def sanitize_time(start_time, end_time):
     return start_time, end_time
 
 
+def sanitize_filename(filename):
+    """Sanitize user-provided filename, keeping only safe characters."""
+    # Coerce to str so non-string inputs don't raise.
+    sanitized = re.sub(r'[^a-zA-Z0-9_\-.]', '_', str(filename))
+    if not sanitized.lower().endswith('.csv'):
+        sanitized += '.csv'
+    if len(sanitized) > 200:
+        sanitized = sanitized[:196] + '.csv'
+    return sanitized
+
+
+def build_default_filename(feature, feature_id, start_time, end_time):
+    """Build default download filename from request parameters."""
+    start_date = start_time[:10]
+    end_date = end_time[:10]
+    return f"hydrocron_{feature}_{feature_id}_{start_date}_{end_date}.csv"
+
+
 def timeseries_get(collection_name, feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-arguments,too-many-positional-arguments
     """Get Timeseries for a particular Reach, Node, or LakeID
 
@@ -318,14 +345,18 @@ def timeseries_get(collection_name, feature, feature_id, start_time, end_time, o
         data['error_message'] = str(e)
         return data, hits
 
+    # Measure the serialized payload size (default=str handles the Decimals boto3 returns)
+    # before the expensive DataFrame conversion so large queries return 413 quickly.
+    results_size = len(json.dumps(results['Items'], default=str).encode('utf-8'))
+
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
         data['error_message'] = f'400: Results with the specified Feature ID {feature_id} were not found'
-    elif sys.getsizeof(results) > 6291456:
+    elif results_size > MAX_RESPONSE_SIZE_BYTES:
         data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds 6MB with {sys.getsizeof(results)} hits'
+        data['error_message'] = f'413: Query exceeds {MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)}MB with {len(results["Items"])} hits'
     else:
-        logging.info('query_size: %s', str(sys.getsizeof(results)))
+        logging.info('query_size: %s', str(results_size))
         gdf = convert_to_df(results['Items'])
         if output == 'geojson':
             data, hits = format_json(gdf, fields)
@@ -390,7 +421,8 @@ def format_json(gdf, fields):  # noqa: E501 # pylint: disable=W0613,R0912
         columns.append('geometry')   # Add geometry to convert to geoJSON
     gdf = _fill_missing_columns(gdf, columns)
     gdf = gdf[columns]
-    gdf_json = json.loads(gdf.to_json())
+    # Build the GeoJSON FeatureCollection dict directly; it is serialized once at the response boundary.
+    gdf_json = gdf.to_geo_dict()
 
     data = {
         'http_code': '200 OK',
@@ -435,6 +467,13 @@ def add_units(gdf, columns):
     :param columns: List of columns to return in response
     :type columns: list of str
     """
+
+    # Inject units for fields not carried in the source data (e.g. SoS discharge), served as
+    # constants, without overwriting any units already present from ingest.
+    for column in columns:
+        unit = constants.FIELD_UNITS.get(column)
+        if unit is not None and f"{column}_units" not in gdf.columns:
+            gdf[f"{column}_units"] = unit
 
     gdf_columns = gdf.columns.values.tolist()
     unit_columns = [f"{column}_units" for column in columns if f"{column}_units" in gdf_columns]
@@ -486,6 +525,39 @@ def get_response(results, hits, elapsed, return_type, output, compact):  # pylin
         raise RequestError(results['error_message'])
 
     return data
+
+
+def build_csv_file_response(results, parameters):
+    """Wrap a successful CSV result as a file download.
+
+    Raises RequestError for non-200 results (matching get_response) so the caller's error handling
+    stays uniform, and avoids building the JSON wrapper that a csv_file request would discard.
+
+    :param results: Dictionary of SWOT timeseries results (must contain a CSV 'response')
+    :type results: dict
+    :param parameters: Request parameters (feature, feature_id, start_time, end_time, filename)
+    :type parameters: dict
+
+    :rtype: dict
+    """
+
+    if results['http_code'] != '200 OK':
+        raise RequestError(results['error_message'])
+
+    filename = parameters['filename']
+    if filename:
+        filename = sanitize_filename(filename)
+    else:
+        filename = sanitize_filename(build_default_filename(
+            parameters['feature'], parameters['feature_id'],
+            parameters['start_time'], parameters['end_time']
+        ))
+
+    return {
+        '__hydrocron_download__': True,
+        'csv_data': results['response'],
+        'filename': filename
+    }
 
 
 def compact_results(results):
@@ -558,12 +630,21 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     elapsed = round((end - start) * 1000, 3)
 
     try:
-        data = get_response(results, hits, elapsed, return_type, output, parameters['compact'])
+        if parameters['output'] == 'csv_file':
+            data = build_csv_file_response(results, parameters)
+        else:
+            data = get_response(results, hits, elapsed, return_type, output, parameters['compact'])
     except RequestError as e:
         error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
         logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
+
     logging.info('response: %s', json.dumps({'status': results['http_code'], 'time': elapsed, 'hits': hits}))
-    logging.info('response_size: %s', str(sys.getsizeof(data)))
+    # CSV responses are already a string; only serialize dict responses.
+    if isinstance(data, str):
+        response_size = len(data.encode('utf-8'))
+    else:
+        response_size = len(json.dumps(data, default=str).encode('utf-8'))
+    logging.info('response_size: %s', str(response_size))
 
     return data

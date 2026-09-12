@@ -164,7 +164,6 @@ jobs:
           terraform init -backend=false
           terraform validate -no-color
       - name: Run Snyk as a blocking step
-        if: false
         uses: snyk/actions/python-3.12@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -176,7 +175,6 @@ jobs:
             --severity-threshold=high
             --fail-on=all
       - name: Run Snyk on Python
-        if: false
         uses: snyk/actions/python-3.12@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -316,9 +314,34 @@ jobs:
         run: |
           echo TARGET_ENV_LOWERCASE=${{ needs.build.outputs.deploy_env }} | tr '[:upper:]' '[:lower:]' >> "$GITHUB_OUTPUT"
 
+      - name: Get Lauchpad Token
+        id: launchpad_token_generator
+        if: |
+          github.ref == 'refs/heads/main'    ||
+          startsWith(github.ref, 'refs/heads/release')
+        run: |
+          OUTPUT_FILE=result.json
+
+          PAYLOAD=$(echo '{"client_id": "L2SSpyGithubAction", "minimum_alive_secs": 300}' | base64)
+
+          aws lambda invoke \
+            --function-name ${{ env.venue }}-launchpad_token_dispenser \
+            --payload "$PAYLOAD" \
+            $OUTPUT_FILE > /dev/null 2>&1
+
+          if jq -e 'has("errorMessage")' "$OUTPUT_FILE" > /dev/null; then
+            echo "Error detected in Lambda response:"
+            cat "$OUTPUT_FILE"
+            exit 1
+          fi
+
+          RESULT=$(jq -r '.sm_token' < "$OUTPUT_FILE")
+          echo "::add-mask::$RESULT"
+          echo "result=$RESULT" >> $GITHUB_OUTPUT
+
       - name: Publish UMM-S with new version
         id: publish-umm-s
-        uses: podaac/cmr-umm-updater@0.7.1
+        uses: podaac/cmr-umm-updater@0.8.0
         if: |
           github.ref == 'refs/heads/main'    ||
           startsWith(github.ref, 'refs/heads/release')
@@ -334,9 +357,9 @@ jobs:
           umm_version: 1.5.2
           url_value: ${{ vars.HYDROCRON_BASE_URL }}
         env:
-          LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
-          LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
-          LAUNCHPAD_TOKEN_OPS: ${{secrets.LAUNCHPAD_TOKEN_OPS}}
+          LAUNCHPAD_TOKEN_SIT: ${{ steps.launchpad_token_generator.outputs.result }}
+          LAUNCHPAD_TOKEN_UAT: ${{ steps.launchpad_token_generator.outputs.result }}
+          LAUNCHPAD_TOKEN_OPS: ${{ steps.launchpad_token_generator.outputs.result }}
         continue-on-error: true
 
       - name: Wait to retry publishing UMM-S
@@ -346,7 +369,7 @@ jobs:
           
       - name: Publish UMM-S with new version retry
         id: publish-umm-s-retry
-        uses: podaac/cmr-umm-updater@0.7.1
+        uses: podaac/cmr-umm-updater@0.8.0
         if: |
           steps.publish-umm-s.outcome == 'failure'
         with:
@@ -361,9 +384,9 @@ jobs:
           umm_version: 1.5.2
           url_value: ${{ vars.HYDROCRON_BASE_URL }}
         env:
-          LAUNCHPAD_TOKEN_SIT: ${{secrets.LAUNCHPAD_TOKEN_SIT}}
-          LAUNCHPAD_TOKEN_UAT: ${{secrets.LAUNCHPAD_TOKEN_UAT}}
-          LAUNCHPAD_TOKEN_OPS: ${{secrets.LAUNCHPAD_TOKEN_OPS}}
+          LAUNCHPAD_TOKEN_SIT: ${{ steps.launchpad_token_generator.outputs.result }}
+          LAUNCHPAD_TOKEN_UAT: ${{ steps.launchpad_token_generator.outputs.result }}
+          LAUNCHPAD_TOKEN_OPS: ${{ steps.launchpad_token_generator.outputs.result }}
 
   deploy:
     name: Deploy

@@ -33,6 +33,7 @@ STABLE_TEST_DATA_OPS = {
             "basic_geojson": "reach/reach_basic.geojson",
             "basic_csv": "reach/reach_basic.csv",
             "discharge_csv": "reach/reach_discharge.csv",
+            "sos_discharge_csv": "reach/reach_sos_discharge.csv",
             "comprehensive_geojson": "reach/reach_comprehensive.geojson"
         }
     },

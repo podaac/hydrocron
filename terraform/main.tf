@@ -57,7 +57,7 @@ data "aws_ssm_parameter" "edl_password" {
 locals {
   environment = var.stage
   account_id  = data.aws_caller_identity.current.account_id
-  region      = data.aws_region.current.name
+  region      = data.aws_region.current.id
 
   # This is the convention we use to know what belongs to each other
   aws_resource_prefix = terraform.workspace == "default" ? "svc-${var.app_name}-${local.environment}" : "svc-${var.app_name}-${local.environment}-${terraform.workspace}"

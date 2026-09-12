@@ -1,0 +1,12 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir flask requests
+
+COPY local_apigw.py .
+
+EXPOSE 8080
+
+CMD ["python", "local_apigw.py"]
