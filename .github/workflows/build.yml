@@ -314,7 +314,7 @@ jobs:
         run: |
           echo TARGET_ENV_LOWERCASE=${{ needs.build.outputs.deploy_env }} | tr '[:upper:]' '[:lower:]' >> "$GITHUB_OUTPUT"
 
-      - name: Get Lauchpad Token
+      - name: Get Launchpad Token
         id: launchpad_token_generator
         if: |
           github.ref == 'refs/heads/main'    ||
@@ -322,10 +322,10 @@ jobs:
         run: |
           OUTPUT_FILE=result.json
 
-          PAYLOAD=$(echo '{"client_id": "L2SSpyGithubAction", "minimum_alive_secs": 300}' | base64)
+          PAYLOAD=$(echo '{"client_id": "HydrocronGithubAction", "minimum_alive_secs": 300}' | base64)
 
           aws lambda invoke \
-            --function-name ${{ env.venue }}-launchpad_token_dispenser \
+            --function-name ${{ steps.lowercase.outputs.TARGET_ENV_LOWERCASE }}-launchpad_token_dispenser \
             --payload "$PAYLOAD" \
             $OUTPUT_FILE > /dev/null 2>&1
 
