@@ -272,6 +272,89 @@ class TestRawCSVFormat:
             f"Content-Type should contain 'text/csv', got {content_type}"
 
 
+class TestCSVFileDownload:
+    """Test output=csv_file returns a browser file-download response"""
+
+    def test_csv_file_triggers_browser_download(self, api_client, stable_test_data):
+        """Test output=csv_file returns the headers a browser needs to auto-download the CSV.
+
+        A Content-Type of text/csv plus a Content-Disposition: attachment header are what make
+        the browser save the response as a file (Save As) instead of rendering it inline.
+        """
+        reach_data = stable_test_data["reach_d"]
+
+        response, _ = api_client.query({
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "csv_file",
+            "fields": "reach_id,time_str,wse"
+        })
+
+        assert_http_success(response)
+
+        # text/csv so the browser treats the body as a downloadable file
+        content_type = response.headers.get("Content-Type", "")
+        assert "text/csv" in content_type.lower(), \
+            f"csv_file should return text/csv, got {content_type}"
+
+        # Content-Disposition: attachment; filename=... is what triggers the download prompt
+        disposition = response.headers.get("Content-Disposition", "")
+        assert "attachment" in disposition.lower(), \
+            f"csv_file should set Content-Disposition: attachment, got '{disposition}'"
+
+        # With no filename provided, the download uses the auto-generated default:
+        # hydrocron_{feature}_{feature_id}_{start_date}_{end_date}.csv
+        expected_filename = (
+            f'hydrocron_Reach_{reach_data["feature_id"]}'
+            f'_{reach_data["start_time"][:10]}_{reach_data["end_time"][:10]}.csv'
+        )
+        assert f"filename={expected_filename}" in disposition, \
+            f"Content-Disposition should carry the auto-generated filename '{expected_filename}', got '{disposition}'"
+
+        # Body is raw CSV, not a JSON wrapper ({...}) or JSON-encoded string ("...")
+        body = response.text.lstrip()
+        assert body.startswith("reach_id,time_str,wse"), \
+            f"csv_file body should be raw CSV starting with the 'reach_id,time_str,wse' header, got: {response.text[:60]!r}"
+        validate_csv_structure(response.text, expected_fields=["reach_id", "time_str", "wse"])
+
+    def test_csv_file_custom_filename_in_content_disposition(self, api_client, stable_test_data):
+        """Test a custom filename still produces a browser auto-download, named as provided (with .csv)."""
+        reach_data = stable_test_data["reach_d"]
+
+        response, _ = api_client.query({
+            "feature": "Reach",
+            "feature_id": reach_data["feature_id"],
+            "start_time": reach_data["start_time"],
+            "end_time": reach_data["end_time"],
+            "output": "csv_file",
+            "filename": "my_reach_export",
+            "fields": "reach_id,time_str,wse"
+        })
+
+        assert_http_success(response)
+
+        # text/csv + Content-Disposition: attachment are what make the browser auto-download
+        content_type = response.headers.get("Content-Type", "")
+        assert "text/csv" in content_type.lower(), \
+            f"csv_file should return text/csv, got {content_type}"
+
+        disposition = response.headers.get("Content-Disposition", "")
+        assert "attachment" in disposition.lower(), \
+            f"csv_file should set Content-Disposition: attachment, got '{disposition}'"
+
+        # The download is saved under the provided filename, with .csv appended
+        assert "filename=my_reach_export.csv" in disposition, \
+            f"Content-Disposition should carry the custom filename as my_reach_export.csv, got '{disposition}'"
+
+        # Body is raw CSV, not a JSON wrapper ({...}) or JSON-encoded string ("...")
+        body = response.text.lstrip()
+        assert body.startswith("reach_id,time_str,wse"), \
+            f"csv_file body should be raw CSV starting with the 'reach_id,time_str,wse' header, got: {response.text[:60]!r}"
+        validate_csv_structure(response.text, expected_fields=["reach_id", "time_str", "wse"])
+
+
 class TestOutputParameterVsAcceptHeader:
     """Test interaction between output parameter and Accept header"""
 

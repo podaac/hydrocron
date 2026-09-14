@@ -10,7 +10,7 @@
         "wse": "1014.5819",
         "slope": "0.0026479936",
         "width": "341.771911",
-        "sword_version": "7b",
+        "sword_version": "17b",
         "wse_units": "m",
         "slope_units": "m/m",
         "width_units": "m"
@@ -1146,7 +1146,7 @@
         "wse": "1015.6602",
         "slope": "0.00262138369",
         "width": "342.315179",
-        "sword_version": "7b",
+        "sword_version": "17b",
         "wse_units": "m",
         "slope_units": "m/m",
         "width_units": "m"
@@ -2282,7 +2282,7 @@
         "wse": "1013.8288",
         "slope": "0.00279625014",
         "width": "713.303986",
-        "sword_version": "7b",
+        "sword_version": "17b",
         "wse_units": "m",
         "slope_units": "m/m",
         "width_units": "m"

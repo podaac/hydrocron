@@ -341,6 +341,10 @@ FIELD_ALIASES = {
     'swot_discharge_reanalysis': 'sos_consensus_q',
 }
 
+# Units for fields that are not carried in the source data and are served as constants.
+# The SoS discharge fields are all volumetric flow rate in cubic meters per second.
+FIELD_UNITS = {field: 'm^3/s' for field in REACH_VERSION_2_0_ONLY_FIELDS}
+
 PRIOR_LAKE_DATA_COLUMNS = [
     'wse', 'wse_u', 'wse_r_u', 'wse_std',
     'area_total', 'area_tot_u', 'area_detct', 'area_det_u',
