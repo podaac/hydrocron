@@ -314,6 +314,22 @@ jobs:
         run: |
           echo TARGET_ENV_LOWERCASE=${{ needs.build.outputs.deploy_env }} | tr '[:upper:]' '[:lower:]' >> "$GITHUB_OUTPUT"
 
+      - name: Configure AWS credentials for UAT
+        if: needs.build.outputs.deploy_env == 'UAT'
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_CUMULUS_UAT }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_CUMULUS_UAT }}
+          aws-region: us-west-2
+
+      - name: Configure AWS credentials for OPS
+        if: needs.build.outputs.deploy_env == 'OPS'
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_CUMULUS_OPS }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_CUMULUS_OPS }}
+          aws-region: us-west-2
+
       - name: Get Launchpad Token
         id: launchpad_token_generator
         if: |
