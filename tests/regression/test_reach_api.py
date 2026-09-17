@@ -141,6 +141,13 @@ class TestReachSosFields:
         for field in expected_fields:
             assert field in props, f"SOS field '{field}' not found in properties"
 
+        # Each SoS discharge field carries a constant unit of m^3/s
+        for field in expected_fields:
+            units_field = f"{field}_units"
+            assert units_field in props, f"Units field '{units_field}' not found in properties"
+            assert props[units_field] == "m^3/s", \
+                f"Expected '{units_field}' == 'm^3/s', got '{props[units_field]}'"
+
         # First row should have fill value for momma (no momma data at this time step)
         assert props['sos_momma_q'] == "-999999999999.0", \
             f"Expected fill value for 'sos_momma_q', got '{props['sos_momma_q']}'"
