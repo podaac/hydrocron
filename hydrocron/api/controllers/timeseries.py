@@ -355,10 +355,10 @@ def timeseries_get(collection_name, feature, feature_id, start_time, end_time, o
         if output == 'csv':
             data, hits = format_csv(gdf, fields)
 
-        # Enforce API Gateway's response size limit on the actual response payload.
+        # Enforce the API Gateway size limit
         response = data['response']
-        response_size = len(response.encode('utf-8')) if isinstance(response, str) \
-            else len(json.dumps(response, default=str).encode('utf-8'))
+        serialized = response if isinstance(response, str) else json.dumps(response, default=str)
+        response_size = len(serialized.encode('utf-8'))
         if response_size > MAX_RESPONSE_SIZE_BYTES:
             size_mb = response_size / (1024 * 1024)
             limit_mb = MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)
