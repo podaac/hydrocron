@@ -345,23 +345,29 @@ def timeseries_get(collection_name, feature, feature_id, start_time, end_time, o
         data['error_message'] = str(e)
         return data, hits
 
-    # Measure the serialized payload size (default=str handles the Decimals boto3 returns)
-    # before the expensive DataFrame conversion so large queries return 413 quickly.
-    results_size = len(json.dumps(results['Items'], default=str).encode('utf-8'))
-
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
         data['error_message'] = f'400: Results with the specified Feature ID {feature_id} were not found'
-    elif results_size > MAX_RESPONSE_SIZE_BYTES:
-        data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds {MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)}MB with {len(results["Items"])} hits'
     else:
-        logging.info('query_size: %s', str(results_size))
         gdf = convert_to_df(results['Items'])
         if output == 'geojson':
             data, hits = format_json(gdf, fields)
         if output == 'csv':
             data, hits = format_csv(gdf, fields)
+
+        # Enforce API Gateway's response size limit on the actual response payload.
+        response = data['response']
+        response_size = len(response.encode('utf-8')) if isinstance(response, str) \
+            else len(json.dumps(response, default=str).encode('utf-8'))
+        if response_size > MAX_RESPONSE_SIZE_BYTES:
+            size_mb = response_size / (1024 * 1024)
+            limit_mb = MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)
+            data = {
+                'http_code': '413 Payload Too Large',
+                'error_message': f'413: Query response is {size_mb:.1f}MB ({hits} hits), exceeding the {limit_mb}MB '
+                                 f'limit. Reduce the time range or number of requested fields.'
+            }
+            hits = 0
 
     return data, hits
 

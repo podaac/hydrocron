@@ -460,8 +460,13 @@ def test_timeseries_lambda_handler_not_found():
         assert "400: Results with the specified Feature ID 71224100227 were not found" in str(e.value)
 
 
-def test_timeseries_get_413_when_results_exceed_6mb(hydrocron_api, monkeypatch):
-    """A result set larger than 6MB returns 413 based on the actual serialized result size."""
+def _timeseries_get_with_large_records(monkeypatch, output, fields, row_count=3000):
+    """Run timeseries_get against `row_count` records whose raw geometry is large.
+
+    Each record carries a full-resolution LINESTRING geometry, so the raw records far exceed 6MB
+    while a narrow response (few fields, no geometry) does not. Used to exercise the 6MB response
+    size guard. Returns (data, hits).
+    """
     import hydrocron.api.controllers.timeseries
     from hydrocron.api.data_access.db import DynamoDataRepository
 
@@ -470,21 +475,43 @@ def test_timeseries_get_413_when_results_exceed_6mb(hydrocron_api, monkeypatch):
         "reach_id": "81181700021", "time_str": "2024-01-01T00:00:00Z",
         "wse": "386.9557", "slope": "-0.0019823218", "geometry": big_geometry,
     }
-    big_results = {"Items": [dict(row) for _ in range(3000)]}
+    big_results = {"Items": [dict(row) for _ in range(row_count)]}
     monkeypatch.setattr(
         DynamoDataRepository, "get_series_by_feature_id",
         lambda self, *args, **kwargs: big_results,
     )
 
-    data, hits = hydrocron.api.controllers.timeseries.timeseries_get(
+    return hydrocron.api.controllers.timeseries.timeseries_get(
         "SWOT_L2_HR_RiverSP_reach_D", "Reach", "81181700021",
-        "2023-10-01T00:00:00Z", "2026-06-03T00:00:00Z", "geojson",
-        "reach_id,time_str,wse,slope",
+        "2023-10-01T00:00:00Z", "2026-06-03T00:00:00Z", output, fields,
     )
 
+
+def test_timeseries_get_413_when_results_exceed_6mb(hydrocron_api, monkeypatch):
+    """A result set whose formatted response exceeds 6MB returns 413 (geojson includes geometry)."""
+    data, hits = _timeseries_get_with_large_records(monkeypatch, "geojson", "reach_id,time_str,wse,slope")
+
     assert data["http_code"] == "413 Payload Too Large"
-    assert "Query exceeds 6MB" in data["error_message"]
+    assert "exceeding the 6MB limit" in data["error_message"]
+    assert "MB (" in data["error_message"]  # reports the actual response size and hit count
     assert hits == 0
+
+
+def test_timeseries_get_no_413_when_response_small_despite_large_records(hydrocron_api, monkeypatch):
+    """A CSV request for a few narrow fields must not 413 just because the underlying records are large.
+
+    Regression: the size guard must measure the formatted response (requested fields only), not the
+    raw records. The same oversized records that trip the geojson 413 above stay well under the limit
+    as a CSV of reach_id,time_str,wse (no geometry), so the request must succeed.
+    """
+    import hydrocron.api.controllers.timeseries
+
+    data, hits = _timeseries_get_with_large_records(monkeypatch, "csv", "reach_id,time_str,wse")
+
+    assert data["http_code"] == "200 OK"
+    assert hits == 3000
+    # The narrow CSV response is far under the limit, even though the raw records would exceed it.
+    assert len(data["response"].encode("utf-8")) < hydrocron.api.controllers.timeseries.MAX_RESPONSE_SIZE_BYTES
 
 
 def test_timeseries_lambda_handler_elastic_agent():
