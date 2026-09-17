@@ -1722,14 +1722,14 @@ profile = ["gprof2dot (>=2022.7.29)"]
 
 [[package]]
 name = "earthaccess"
-version = "0.18.0"
+version = "0.19.0"
 description = "Client library for NASA Earthdata APIs"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "earthaccess-0.18.0-py3-none-any.whl", hash = "sha256:888bff5a2f206ece0269a8ead0841d0432fff5b1b4564f6da37ac1a7c73f8195"},
-    {file = "earthaccess-0.18.0.tar.gz", hash = "sha256:5733316a7a524b8bbed3d551ddf2b3fd5c624e302a2acd123547a65ef34627cf"},
+    {file = "earthaccess-0.19.0-py3-none-any.whl", hash = "sha256:ca5535d80447714d89d733f91d7e427be68aa5fcc64f4c2f4d1819e6113b8a6d"},
+    {file = "earthaccess-0.19.0.tar.gz", hash = "sha256:dc22ff4fdad5b6ca9e278ed3da0892d5187878dc0b0b7a7dd912d2b729f78fdf"},
 ]
 
 [package.dependencies]
@@ -5649,4 +5649,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "8f70cbb836347d49687b812faeb891aca739f6903b35fc1bffe9aa266742025d"
+content-hash = "02c4b95d9330869a4f551a87f7dcf7d8d210c75cba30ac45561a4840c21ca38b"
