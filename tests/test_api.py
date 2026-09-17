@@ -1207,16 +1207,17 @@ def test_sos_fields_fill_value_when_missing_in_db(hydrocron_api):
     assert result['status'] == '200 OK'
     features = result['results']['geojson']['features']
     assert len(features) > 0
+    sos_fields = [
+        'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
+        'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis'
+    ]
     for feature in features:
         props = feature['properties']
-        assert props['sos_consensus_q'] == "-999999999999.0"
-        assert props['sos_hivdi_q'] == "-999999999999.0"
-        assert props['sos_metroman_q'] == "-999999999999.0"
-        assert props['sos_momma_q'] == "-999999999999.0"
-        assert props['sos_sad_q'] == "-999999999999.0"
-        assert props['sos_sic4dvar_q'] == "-999999999999.0"
-        assert props['sos_lakeflow_q'] == "-999999999999.0"
-        assert props['swot_discharge_reanalysis'] == "-999999999999.0"
+        for field in sos_fields:
+            # Value is the fill value (no SoS data ingested)...
+            assert props[field] == "-999999999999.0"
+            # ...but units are served as constants (m^3/s) regardless of value.
+            assert props[f'{field}_units'] == "m^3/s"
 
 
 def test_sos_fields_with_values(hydrocron_api):
@@ -1273,6 +1274,11 @@ def test_sos_fields_with_values(hydrocron_api):
     # Alias should match consensus
     assert props['swot_discharge_reanalysis'] == "460.756"
     assert props['swot_discharge_reanalysis'] == props['sos_consensus_q']
+
+    # Units are served as constants (m^3/s) for every requested SoS discharge field
+    for field in ('sos_consensus_q', 'sos_metroman_q', 'sos_momma_q', 'sos_sad_q',
+                  'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis'):
+        assert props[f'{field}_units'] == "m^3/s"
 
 
 def test_sos_fields_error_message_without_collection_name(hydrocron_api):
