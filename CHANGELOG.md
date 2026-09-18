@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+### Security
+
+## [1.10.1]
+
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
     - Fixed false 413 errors by measuring the actual response payload against the size limit
 ### Security
 

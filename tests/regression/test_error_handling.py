@@ -10,6 +10,8 @@ Tests various error conditions and validates proper HTTP status codes:
 These tests ensure the API properly validates requests and returns
 meaningful error messages.
 """
+import os
+
 import pytest
 from .utils import assert_http_error
 
@@ -306,31 +308,84 @@ class TestNoDataInTimeRange:
 
 
 @pytest.mark.slow
+@pytest.mark.skipif(
+    os.environ.get("HYDROCRON_ENV", "").lower() != "ops",
+    reason="Payload-size thresholds are calibrated to OPS data volume; UAT/other envs lack the data to exceed the cap",
+)
 class TestPayloadSizeLimits:
     """Test 413 Payload Too Large errors"""
 
-    @pytest.mark.skip(reason="Requires known large dataset - update feature_id before enabling")
-    def test_large_payload_returns_413(self, api_client):
-        """Test response exceeding 6MB limit returns 413"""
-        # Note: This test requires a feature_id known to have large amounts of data
-        # Update the feature_id and time range to match your test environment
+    def test_large_geojson_payload_returns_413(self, api_client):
+        """A wide GeoJSON reach request whose response exceeds the 6MB limit returns a clean 413.
 
+        Regression for the reported production failure: a multi-year reach GeoJSON query returns a
+        full-resolution geometry per feature, so the response far exceeds API Gateway's 6MB cap and
+        must return a 413 (not a timeout or an opaque 5xx). The reach and time range below are
+        calibrated to OPS coverage; adjust the feature_id if running against an environment with
+        different data.
+        """
         response, _ = api_client.query({
             "feature": "Reach",
-            "feature_id": "LARGE_FEATURE_ID",  # Replace with known large feature
-            "start_time": "2024-01-01T00:00:00Z",
-            "end_time": "2024-12-31T23:59:59Z",
+            "feature_id": "33150300651",
+            "start_time": "2024-07-01T00:00:00Z",
+            "end_time": "2026-10-30T00:00:00Z",
             "output": "geojson",
-            "compact": "false",  # Expanded format is larger
-            "fields": "reach_id,time_str,wse,slope,width,area_total,area_detct,area_wse,layovr_val,node_dist,loc_offset,xtrk_dist,dschg_c,dschg_c_q,dschg_csf,dschg_c_u,dschg_gc,dschg_gc_q,dschg_gcsf,dschg_gc_u,dschg_m,dschg_m_q,dschg_msf,dschg_m_u,dschg_gm,dschg_gm_q,dschg_gmsf,dschg_gm_u,dschg_b,dschg_b_q,dschg_bsf,dschg_b_u,dschg_gb,dschg_gb_q,dschg_gbsf,dschg_gb_u,dschg_h,dschg_h_q,dschg_hsf,dschg_h_u,dschg_gh,dschg_gh_q,dschg_ghsf,dschg_gh_u,dschg_o,dschg_o_q,dschg_osf,dschg_o_u,dschg_go,dschg_go_q,dschg_gosf,dschg_go_u,dschg_s,dschg_s_q,dschg_ssf,dschg_s_u,dschg_gs,dschg_gs_q,dschg_gssf,dschg_gs_u,dschg_n,dschg_n_q,dschg_nsf,dschg_n_u,dschg_gn,dschg_gn_q,dschg_gnsf,dschg_gn_u,dschg_q_b,dschg_gq_b"
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "fields": "reach_id,time_str,river_name,wse,slope,width,area_total,dschg_c"
         }, timeout=60)
 
-        # Should return 413 if payload exceeds 6MB
-        if response.status_code == 413:
-            assert response.status_code == 413
-        else:
-            # If doesn't exceed limit, test passes (dataset not large enough)
-            pytest.skip("Dataset not large enough to trigger 413 error")
+        assert response.status_code == 413, \
+            f"Expected 413 for an oversized GeoJSON response, got {response.status_code}: {response.text[:200]}"
+        # The 413 message reports the actual response size and hit count, e.g.
+        # "413: Query response is 6.9MB (973 hits), exceeding the 6MB limit. ..."
+        assert "exceeding the 6MB limit" in response.text, \
+            f"Expected the size-limit message in the 413 body, got: {response.text[:200]}"
+        assert "MB (" in response.text, \
+            f"Expected the 413 body to report the response size and hit count, got: {response.text[:200]}"
+
+    def test_large_reach_csv_payload_returns_200(self, api_client):
+        """The same wide range that exceeds 6MB as GeoJSON is well under the limit as CSV.
+
+        Regression for the false-413 bug: CSV excludes the per-feature geometry, so the actual
+        response is a small fraction of the GeoJSON size. The guard must measure the real response
+        (not the raw records), so this identical range/fields returns 200 as CSV even though it 413s
+        as GeoJSON above.
+        """
+        response, _ = api_client.query({
+            "feature": "Reach",
+            "feature_id": "33150300651",
+            "start_time": "2020-01-01T00:00:00Z",
+            "end_time": "2026-10-30T00:00:00Z",
+            "output": "csv",
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "fields": "reach_id,time_str,river_name,wse,slope,width,area_total,dschg_c"
+        }, timeout=60)
+
+        assert response.status_code == 200, \
+            f"Expected 200 for the CSV response of the same wide range, got {response.status_code}: {response.text[:200]}"
+        # The wide range returns a large row count that would exceed 6MB as GeoJSON.
+        hits = response.json()["hits"]
+        assert hits > 1300, f"Expected over 1300 rows for this wide range, got {hits}"
+
+    def test_near_limit_geojson_payload_returns_200(self, api_client):
+        """A GeoJSON reach response just under the 6MB cap (~5.8MB) must return 200, not 413.
+
+        Companion to the oversized 413 test above: confirms the size guard does not reject a response
+        that is large but still within the limit. Calibrated against OPS (~5.8MB / 851 features);
+        adjust the start_time if running against an environment with different data.
+        """
+        response, _ = api_client.query({
+            "feature": "Reach",
+            "feature_id": "33150300651",
+            "start_time": "2024-10-09T00:00:00Z",
+            "end_time": "2026-10-30T00:00:00Z",
+            "output": "geojson",
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
+            "fields": "reach_id,time_str,river_name,wse,slope,width,area_total,dschg_c"
+        }, timeout=60)
+
+        assert response.status_code == 200, \
+            f"Expected 200 for a near-limit (~5.8MB) response, got {response.status_code}: {response.text[:200]}"
 
 
 class TestFieldValidation:
