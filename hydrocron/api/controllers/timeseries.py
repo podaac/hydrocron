@@ -345,18 +345,10 @@ def timeseries_get(collection_name, feature, feature_id, start_time, end_time, o
         data['error_message'] = str(e)
         return data, hits
 
-    # Measure the serialized payload size (default=str handles the Decimals boto3 returns)
-    # before the expensive DataFrame conversion so large queries return 413 quickly.
-    results_size = len(json.dumps(results['Items'], default=str).encode('utf-8'))
-
     if len(results['Items']) == 0:
         data['http_code'] = '400 Bad Request'
         data['error_message'] = f'400: Results with the specified Feature ID {feature_id} were not found'
-    elif results_size > MAX_RESPONSE_SIZE_BYTES:
-        data['http_code'] = '413 Payload Too Large'
-        data['error_message'] = f'413: Query exceeds {MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)}MB with {len(results["Items"])} hits'
     else:
-        logging.info('query_size: %s', str(results_size))
         gdf = convert_to_df(results['Items'])
         if output == 'geojson':
             data, hits = format_json(gdf, fields)
@@ -639,12 +631,22 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
 
-    logging.info('response: %s', json.dumps({'status': results['http_code'], 'time': elapsed, 'hits': hits}))
     # CSV responses are already a string; only serialize dict responses.
     if isinstance(data, str):
         response_size = len(data.encode('utf-8'))
     else:
         response_size = len(json.dumps(data, default=str).encode('utf-8'))
-    logging.info('response_size: %s', str(response_size))
+
+    # Enforce the API Gateway size limit on the final response, after compaction and any wrappers.
+    if response_size > MAX_RESPONSE_SIZE_BYTES:
+        size_mb = response_size / (1024 * 1024)
+        limit_mb = MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)
+        error_message = (f'413: Query response is {size_mb:.1f}MB ({hits} hits), exceeding the {limit_mb}MB '
+                         f'limit. Reduce the time range or number of requested fields.')
+        logging.error(json.dumps({'http_code': 413, 'error_message': error_message}))
+        raise RequestError(error_message)
+
+    logging.info('response: %s', json.dumps(
+        {'status': results['http_code'], 'time': elapsed, 'hits': hits, 'response_size': response_size}))
 
     return data

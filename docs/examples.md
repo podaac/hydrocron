@@ -122,7 +122,15 @@ Will return GeoJSON:
                         "sos_sic4dvar_q": "72.91022466338953",
                         "sos_lakeflow_q": "-999999999999.0",
                         "swot_discharge_reanalysis": "72.91022466338953",
-                        "wse_units": "m"
+                        "wse_units": "m",
+                        "sos_consensus_q_units": "m^3/s",
+                        "sos_hivdi_q_units": "m^3/s",
+                        "sos_metroman_q_units": "m^3/s",
+                        "sos_momma_q_units": "m^3/s",
+                        "sos_sad_q_units": "m^3/s",
+                        "sos_sic4dvar_q_units": "m^3/s",
+                        "sos_lakeflow_q_units": "m^3/s",
+                        "swot_discharge_reanalysis_units": "m^3/s"
                     },
                     "geometry": {
                         "type": "LineString",
@@ -149,7 +157,15 @@ Will return GeoJSON:
                         "sos_sic4dvar_q": "1060.3418312796152",
                         "sos_lakeflow_q": "-999999999999.0",
                         "swot_discharge_reanalysis": "1060.3418312796152",
-                        "wse_units": "m"
+                        "wse_units": "m",
+                        "sos_consensus_q_units": "m^3/s",
+                        "sos_hivdi_q_units": "m^3/s",
+                        "sos_metroman_q_units": "m^3/s",
+                        "sos_momma_q_units": "m^3/s",
+                        "sos_sad_q_units": "m^3/s",
+                        "sos_sic4dvar_q_units": "m^3/s",
+                        "sos_lakeflow_q_units": "m^3/s",
+                        "swot_discharge_reanalysis_units": "m^3/s"
                     },
                     "geometry": {
                         "type": "LineString",
@@ -176,7 +192,15 @@ Will return GeoJSON:
                         "sos_sic4dvar_q": "62.548282190159064",
                         "sos_lakeflow_q": "-999999999999.0",
                         "swot_discharge_reanalysis": "179.12798112357618",
-                        "wse_units": "m"
+                        "wse_units": "m",
+                        "sos_consensus_q_units": "m^3/s",
+                        "sos_hivdi_q_units": "m^3/s",
+                        "sos_metroman_q_units": "m^3/s",
+                        "sos_momma_q_units": "m^3/s",
+                        "sos_sad_q_units": "m^3/s",
+                        "sos_sic4dvar_q_units": "m^3/s",
+                        "sos_lakeflow_q_units": "m^3/s",
+                        "swot_discharge_reanalysis_units": "m^3/s"
                     },
                     "geometry": {
                         "type": "LineString",
@@ -400,7 +424,7 @@ Will return CSV:
     "time": 564.74,
     "hits": 3,
     "results": {
-        "csv": "reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis,wse_units\n18180900091,2025-04-08T01:01:01Z,1014.2303,72.91022466338953,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,72.91022466338953,-999999999999.0,72.91022466338953,m\n18180900091,2025-04-15T12:24:12Z,1029.1983,1060.3418312796152,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,1060.3418312796152,-999999999999.0,1060.3418312796152,m\n18180900091,2025-04-28T21:46:06Z,1014.1341,179.12798112357618,-999999999999.0,295.7076800569933,139.43628483322104,-999999999999.0,62.548282190159064,-999999999999.0,179.12798112357618,m\n",
+        "csv": "reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis,wse_units,sos_consensus_q_units,sos_hivdi_q_units,sos_metroman_q_units,sos_momma_q_units,sos_sad_q_units,sos_sic4dvar_q_units,sos_lakeflow_q_units,swot_discharge_reanalysis_units\n18180900091,2025-04-08T01:01:01Z,1014.2303,72.91022466338953,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,72.91022466338953,-999999999999.0,72.91022466338953,m,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s\n18180900091,2025-04-15T12:24:12Z,1029.1983,1060.3418312796152,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,1060.3418312796152,-999999999999.0,1060.3418312796152,m,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s\n18180900091,2025-04-28T21:46:06Z,1014.1341,179.12798112357618,-999999999999.0,295.7076800569933,139.43628483322104,-999999999999.0,62.548282190159064,-999999999999.0,179.12798112357618,m,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s\n",
         "geojson": {}
     }
 }

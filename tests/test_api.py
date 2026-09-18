@@ -460,8 +460,13 @@ def test_timeseries_lambda_handler_not_found():
         assert "400: Results with the specified Feature ID 71224100227 were not found" in str(e.value)
 
 
-def test_timeseries_get_413_when_results_exceed_6mb(hydrocron_api, monkeypatch):
-    """A result set larger than 6MB returns 413 based on the actual serialized result size."""
+def _lambda_handler_with_large_records(monkeypatch, output, fields, compact="false", row_count=3000):
+    """Invoke lambda_handler against `row_count` records whose raw geometry is large.
+
+    Each record carries a full-resolution LINESTRING geometry, so an uncompact geojson response far
+    exceeds 6MB while a narrow CSV response (or a compacted geojson response) does not. Exercises the
+    final-response size guard. Returns the lambda_handler result, or raises RequestError on a 413.
+    """
     import hydrocron.api.controllers.timeseries
     from hydrocron.api.data_access.db import DynamoDataRepository
 
@@ -470,21 +475,62 @@ def test_timeseries_get_413_when_results_exceed_6mb(hydrocron_api, monkeypatch):
         "reach_id": "81181700021", "time_str": "2024-01-01T00:00:00Z",
         "wse": "386.9557", "slope": "-0.0019823218", "geometry": big_geometry,
     }
-    big_results = {"Items": [dict(row) for _ in range(3000)]}
+    big_results = {"Items": [dict(row) for _ in range(row_count)]}
     monkeypatch.setattr(
         DynamoDataRepository, "get_series_by_feature_id",
         lambda self, *args, **kwargs: big_results,
     )
 
-    data, hits = hydrocron.api.controllers.timeseries.timeseries_get(
-        "SWOT_L2_HR_RiverSP_reach_D", "Reach", "81181700021",
-        "2023-10-01T00:00:00Z", "2026-06-03T00:00:00Z", "geojson",
-        "reach_id,time_str,wse,slope",
-    )
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "81181700021",
+            "start_time": "2023-10-01T00:00:00Z",
+            "end_time": "2026-06-03T00:00:00Z",
+            "output": output,
+            "compact": compact,
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": fields,
+        },
+        "headers": {"User-Agent": "pytest", "X-Forwarded-For": "127.0.0.1"},
+    }
+    return hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
 
-    assert data["http_code"] == "413 Payload Too Large"
-    assert "Query exceeds 6MB" in data["error_message"]
-    assert hits == 0
+
+def test_timeseries_413_when_response_exceeds_limit(hydrocron_api, monkeypatch):
+    """An uncompact geojson response over the limit raises a 413 reporting the size and a hint."""
+    import hydrocron.api.controllers.timeseries
+
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
+        _lambda_handler_with_large_records(monkeypatch, "geojson", "reach_id,time_str,wse,slope")
+
+    message = str(exc_info.value)
+    assert "exceeding the 6MB limit" in message
+    assert "MB (" in message  # reports the actual response size and hit count
+
+
+def test_timeseries_no_413_when_response_small_despite_large_records(hydrocron_api, monkeypatch):
+    """A CSV request for a few narrow fields must not 413 just because the underlying records are large.
+
+    Regression: the guard must measure the final response (requested fields only, no geometry), not the
+    raw records. The same oversized records that trip the geojson 413 above stay well under the limit as
+    a CSV of reach_id,time_str,wse, so the request must succeed.
+    """
+    result = _lambda_handler_with_large_records(monkeypatch, "csv", "reach_id,time_str,wse")
+
+    assert result["status"] == "200 OK"
+    assert result["hits"] == 3000
+    assert "reach_id,time_str,wse" in result["results"]["csv"]
+
+
+def test_timeseries_compact_geojson_not_413_when_uncompact_would_exceed(hydrocron_api, monkeypatch):
+    """Compact GeoJSON is sized after compaction, so a request whose uncompact form exceeds the limit
+    but whose compacted response (a single aggregated feature) is small must succeed.
+    """
+    result = _lambda_handler_with_large_records(monkeypatch, "geojson", "reach_id,time_str,wse,slope", compact="true")
+
+    assert result["status"] == "200 OK"
+    assert result["results"]["geojson"]["type"] == "FeatureCollection"
 
 
 def test_timeseries_lambda_handler_elastic_agent():
