@@ -355,20 +355,6 @@ def timeseries_get(collection_name, feature, feature_id, start_time, end_time, o
         if output == 'csv':
             data, hits = format_csv(gdf, fields)
 
-        # Enforce the API Gateway size limit
-        response = data['response']
-        serialized = response if isinstance(response, str) else json.dumps(response, default=str)
-        response_size = len(serialized.encode('utf-8'))
-        if response_size > MAX_RESPONSE_SIZE_BYTES:
-            size_mb = response_size / (1024 * 1024)
-            limit_mb = MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)
-            data = {
-                'http_code': '413 Payload Too Large',
-                'error_message': f'413: Query response is {size_mb:.1f}MB ({hits} hits), exceeding the {limit_mb}MB '
-                                 f'limit. Reduce the time range or number of requested fields.'
-            }
-            hits = 0
-
     return data, hits
 
 
@@ -645,12 +631,22 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
 
-    logging.info('response: %s', json.dumps({'status': results['http_code'], 'time': elapsed, 'hits': hits}))
     # CSV responses are already a string; only serialize dict responses.
     if isinstance(data, str):
         response_size = len(data.encode('utf-8'))
     else:
         response_size = len(json.dumps(data, default=str).encode('utf-8'))
-    logging.info('response_size: %s', str(response_size))
+
+    # Enforce the API Gateway size limit on the final response, after compaction and any wrappers.
+    if response_size > MAX_RESPONSE_SIZE_BYTES:
+        size_mb = response_size / (1024 * 1024)
+        limit_mb = MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)
+        error_message = (f'413: Query response is {size_mb:.1f}MB ({hits} hits), exceeding the {limit_mb}MB '
+                         f'limit. Reduce the time range or number of requested fields.')
+        logging.error(json.dumps({'http_code': 413, 'error_message': error_message}))
+        raise RequestError(error_message)
+
+    logging.info('response: %s', json.dumps(
+        {'status': results['http_code'], 'time': elapsed, 'hits': hits, 'response_size': response_size}))
 
     return data

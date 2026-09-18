@@ -26,11 +26,7 @@ The SoS products run several independent discharge algorithms. Each is served th
 | `sos_lakeflow_q` | LakeFlow | Discharge derived from connected lake storage change |
 | `swot_discharge_reanalysis` | consensus (alias) | Identical data to `sos_consensus_q` (see below) |
 
-All discharge values are in cubic meters per second (m³/s).
-
-:::{note}
-**Units are not yet returned for discharge fields.** Unlike `wse` or `area_total`, the discharge fields do not currently have a corresponding `_units` field in the Hydrocron response. This is a known gap that will be addressed in a future release. Until then, treat all `sos_*` discharge values as m³/s.
-:::
+All discharge values are in cubic meters per second (m³/s). As with other Hydrocron measurements, each discharge field is returned with a corresponding `_units` field in the response.
 
 ## Consensus and reanalysis
 
