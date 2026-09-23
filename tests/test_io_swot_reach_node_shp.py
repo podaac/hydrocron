@@ -69,12 +69,13 @@ def test_read_reach_shapefile():
 
 
 def test_assemble_attributes_stringifies_nan():
-    """A NaN in a numeric column must not survive as a Python float.
+    """A NaN in a numeric column must be replaced by the fill value, not survive as a Python float.
 
     Regression: DynamoDB's batch writer rejects Python floats ("Float types are not supported"),
     so a genuine NaN (not the -999... fill value) in a numeric field crashed the whole granule
-    load and sent it to the DLQ. astype(str) leaves NaN as a float, so assemble_attributes must
-    handle it. Every value in every item must be DynamoDB-safe (no Python float).
+    load and sent it to the DLQ. On pandas 3.0, astype(str) leaves NaN as a Python float (it no
+    longer renders it as the string "nan"), so assemble_attributes must fill it first. Assert both
+    the fix's contract (NaN -> FILL_VALUE) and the invariant (no Python float in any item).
     """
     geodf = gpd.GeoDataFrame(
         {
@@ -88,6 +89,13 @@ def test_assemble_attributes_stringifies_nan():
 
     items = swot_shp.assemble_attributes(geodf, {"granuleUR": "test_granule.zip"})
 
+    # NaN cells become the fill value; real values still stringify.
+    assert items[0]["xtrk_dist"] == constants.FILL_VALUE
+    assert items[1]["wse"] == constants.FILL_VALUE
+    assert items[0]["wse"] == "12.3"
+    assert items[1]["xtrk_dist"] == "4.5"
+
+    # No Python float leaks into any item.
     float_values = [(k, v) for item in items for k, v in item.items() if isinstance(v, float)]
     assert not float_values, \
         f"NaN/float leaked into items; DynamoDB rejects Python floats: {float_values}"

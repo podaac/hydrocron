@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
-    - Fixed "Float types are not supported" ingest error - discovered with DLQ
+    - Issue 399 - Fixed "Float types are not supported" ingest error - discovered with DLQ
 ### Security
 
 ## [1.10.1]
