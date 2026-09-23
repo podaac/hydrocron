@@ -9,6 +9,7 @@ Unit tests for unpacking swot reach and node shapefiles.
 from datetime import datetime, timedelta, timezone
 import pytz
 import numpy as np
+import geopandas as gpd
 from shapely import Polygon, Point, geometry, wkt, centroid
 from hydrocron.utils import constants
 
@@ -65,6 +66,31 @@ def test_read_reach_shapefile():
     assert len(items) == 687
     for key, val in constants.TEST_REACH_ITEM_DICT.items():
         assert val == items[2][key]
+
+
+def test_assemble_attributes_stringifies_nan():
+    """A NaN in a numeric column must not survive as a Python float.
+
+    Regression: DynamoDB's batch writer rejects Python floats ("Float types are not supported"),
+    so a genuine NaN (not the -999... fill value) in a numeric field crashed the whole granule
+    load and sent it to the DLQ. astype(str) leaves NaN as a float, so assemble_attributes must
+    handle it. Every value in every item must be DynamoDB-safe (no Python float).
+    """
+    geodf = gpd.GeoDataFrame(
+        {
+            "reach_id": ["11111111111", "22222222222"],
+            "wse": [12.3, np.nan],
+            "xtrk_dist": [np.nan, 4.5],
+            "geometry": [Point(0, 0), Point(1, 1)],
+        },
+        geometry="geometry",
+    )
+
+    items = swot_shp.assemble_attributes(geodf, {"granuleUR": "test_granule.zip"})
+
+    float_values = [(k, v) for item in items for k, v in item.items() if isinstance(v, float)]
+    assert not float_values, \
+        f"NaN/float leaked into items; DynamoDB rejects Python floats: {float_values}"
 
 
 def test_read_lake_shapefile():
