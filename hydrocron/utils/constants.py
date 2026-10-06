@@ -21,6 +21,14 @@ TEST_REACH_FILENAME = (
     "SWOT_L2_HR_RiverSP_Reach_548_011_NA_"
     "20230610T193337_20230610T193344_PIA1_01.zip")
 
+# Reach granule with NaN in a numeric field (xtrk_dist); reproduces the DynamoDB
+# "Float types are not supported" error before the assemble_attributes NaN fill fix.
+TEST_REACH_NAN_SHAPEFILE_PATH = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    '../..', 'tests', 'data',
+    'SWOT_L2_HR_RiverSP_Reach_056_174_AS_20260916T232529_20260916T233730_PID0_03.zip'  # noqa E501
+))
+
 TEST_REACH_ITEM_DICT = {
     "reach_id": "71224100223",
     "time": "739741183.129",
