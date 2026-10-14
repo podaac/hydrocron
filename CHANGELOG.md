@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 255 - Added `node_fields` parameter to return a reach and all of its nodes in one request (new `ReachIdIndex` GSI on the node tables)
 ### Changed
 ### Deprecated
 ### Removed
 ### Fixed
     - Issue 399 - Fixed "Float types are not supported" ingest error - discovered with DLQ
+    - Fixed the 6 MB response size check to measure responses as Lambda returns them (CSV JSON-encoded, Unicode unescaped)
 ### Security
 
 ## [1.10.1]

@@ -73,6 +73,10 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 'granuleUR', 'ingest_time'
 ```
 
+:::{note} Node fields with a reach request
+The node fields are also the valid values for the [](node_fields) parameter, used to return a reach together with all of its nodes. `wse_sm`, `wse_sm_u`, `wse_sm_q` and `wse_sm_q_b` are Version D only.
+:::
+
 **Lake fields**
 
 ```bash

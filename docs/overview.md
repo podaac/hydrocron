@@ -2,7 +2,7 @@
 
 Hydrocron has a main API endpoint:
 
-- [timeseries/](/timeseries) which returns all of the timesteps for a single feature ID.
+- [timeseries/](/timeseries) which returns all of the timesteps for a single feature ID, or for a reach and all of its nodes ([](node_fields)).
 
 ## Feature ID
 
@@ -29,6 +29,8 @@ See this NASA Earthdata [page](https://www.earthdata.nasa.gov/data/platforms/spa
 ## Limitations
 
 Data return size is limited to **6 MB**. If your query response is larger than this a 413 error will be returned.
+
+Requests for a reach together with its nodes ([](node_fields)) are also limited to **25,000 node rows** in the requested time range; above that a 413 error is returned. Reduce the time range to fit.
 
 **For Lake data:** Due to the size of the original polygon in the lake (L2_HR_LakeSP) shapefiles, we are only returning the calculated center point of the lake. This is to facilitate conformance with the GeoJSON specification and center points should not be considered accurate.
 
