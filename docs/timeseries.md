@@ -120,7 +120,7 @@ Format of the data returned. Either: "csv", "geojson", or "csv_file"
 
 Custom filename for the downloaded CSV file. Only used when `output=csv_file`. If not provided, a default filename is generated in the format: `hydrocron_{feature}_{feature_id}_{start_date}_{end_date}.csv`
 
-For reach and node requests ([](node_fields)), the default is `hydrocron_Reach_nodes_{feature_id}_{start_date}_{end_date}.csv`.
+For reach and node requests ([](#node_fields)), the default is `hydrocron_Reach_nodes_{feature_id}_{start_date}_{end_date}.csv`.
 
 The filename is sanitized to only allow safe characters (`a-z`, `A-Z`, `0-9`, `_`, `-`, `.`). If the filename does not end with `.csv`, the extension is appended automatically. Maximum length is 200 characters.
 
@@ -157,7 +157,7 @@ The SWOT data fields to return in the request.
 
 This is specified in the form of a comma separated list: `fields=reach_id,time_str,wse,slope`
 
-Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, SWORD and PLD (prior river and lake database names), and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are described in the [](fields-detail) section.
+Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, SWORD and PLD (prior river and lake database names), and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are described in the [](#fields-detail) section.
 
 River reaches in the Version 2.0 collection also expose SoS discharge fields (`sos_consensus_q`, `sos_hivdi_q`, `sos_metroman_q`, `sos_momma_q`, `sos_sad_q`, `sos_sic4dvar_q`, `sos_lakeflow_q`, and `swot_discharge_reanalysis`). These require `collection_name=SWOT_L2_HR_RiverSP_2.0`. See the [discharge guide](user-guide/discharge.md) for details.
 
@@ -166,15 +166,15 @@ River reaches in the Version 2.0 collection also expose SoS discharge fields (`s
 
 Return a reach **and all of its nodes** in one request. Only valid with `feature=Reach`.
 
-When `node_fields` is present, the response contains the reach's time series and the time series of every node on that reach. [](fields) sets the reach columns and `node_fields` sets the node columns, in the same comma separated form: `node_fields=node_id,time_str,wse,node_q`
+When `node_fields` is present, the response contains the reach's time series and the time series of every node on that reach. [](#fields) sets the reach columns and `node_fields` sets the node columns, in the same comma separated form: `node_fields=node_id,time_str,wse,node_q`
 
-- Valid node fields are listed in the [](fields-detail) section. Units are returned automatically, as with [](fields).
-- Nodes come from the same collection version as the reach ([](collection_name)).
+- Valid node fields are listed in the [](#fields-detail) section. Units are returned automatically, as with [](#fields).
+- Nodes come from the same collection version as the reach ([](#collection_name)).
 - Version D only node fields (`wse_sm`, `wse_sm_u`, `wse_sm_q`, `wse_sm_q_b`) return a 400 with a Version 2.0 collection.
 - A 400 is returned if `node_fields` is used with `feature=Node` or `feature=PriorLake`, is empty, or contains a field that is not a node field.
 - A 413 is returned if the reach has more than 25,000 node rows in the requested time range. Reduce the time range.
 
-See [](reach-and-node-responses) for the response layout.
+See [](#reach-and-node-responses) for the response layout.
 
 ## Response Format
 
@@ -451,15 +451,15 @@ Excel reformats long numbers when it opens a CSV. For example, 14-digit `node_id
 (reach-and-node-responses)=
 ### Reach and node responses
 
-When [](node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV file download) holds both the reach and its nodes:
+When [](#node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV file download) holds both the reach and its nodes:
 
 - **Rows:** reach rows first, then node rows in `node_id` order. Each node's rows are in time order.
-- **Added columns:** every row starts with `feature_type`, `reach_id` and `node_id`, even if not requested. `feature_type` is `Reach` or `Node` (the same values as the [](feature) parameter). `node_id` is empty on reach rows.
-- **Column order:** `feature_type`, `reach_id`, `node_id`, then the requested [](fields), then any new fields from [](node_fields), then units. A field in both lists appears once.
+- **Added columns:** every row starts with `feature_type`, `reach_id` and `node_id`, even if not requested. `feature_type` is `Reach` or `Node` (the same values as the [](#feature) parameter). `node_id` is empty on reach rows.
+- **Column order:** `feature_type`, `reach_id`, `node_id`, then the requested [](#fields), then any new fields from [](#node_fields), then units. A field in both lists appears once.
 - **Not applicable vs missing:** a column that doesn't apply to a row's feature type (e.g. `slope` on a node row) is **empty** in CSV and **null** in GeoJSON. A value that applies but is missing keeps the fill value `-999999999999.0`, as in other responses.
 - **Units:** unit columns come from the rows returned. If only the reach or only nodes have data, the other feature type's requested fields still appear (empty), but their unit columns may not.
 - **Unobserved nodes** are included with `time_str` of `no_data` and fill values, the same as `feature=Node` requests.
-- **Geometry:** GeoJSON always includes it — a LineString for the reach and a Point for each node. CSV includes it only if `geometry` is requested (in [](fields) for reach rows, in [](node_fields) for node rows).
+- **Geometry:** GeoJSON always includes it — a LineString for the reach and a Point for each node. CSV includes it only if `geometry` is requested (in [](#fields) for reach rows, in [](#node_fields) for node rows).
 - **Compact:** `compact=true` returns one Feature for the reach and one for each node, each with its values as lists.
 - **`hits`:** the total number of reach and node rows, before compaction.
 - If only the reach or only nodes have data in the time range, that data is returned. A 400 is returned only if neither has data.
@@ -552,7 +552,7 @@ Example compact GeoJSON response for the same request with `Accept: application/
 | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 200     | Request has succeeded and response has been returned to the user.                                                                                                           |
 | 400*    | 'Bad Request': This indicates that the end user entered the parameters incorrectly in their query or time series data could not be located for the feature ID. The API attempts to send a response as to which parameter was incorrect. |
-| 413     | 'Payload Too Large': The user attempted to retrieve a response that was too large. This is triggered for queries that exceed 6mb, and for [](node_fields) requests where the reach has more than 25,000 node rows in the time range. |
+| 413     | 'Payload Too Large': The user attempted to retrieve a response that was too large. This is triggered for queries that exceed 6mb, and for [](#node_fields) requests where the reach has more than 25,000 node rows in the time range. |
 | 500     | 'Internal Server Error': Internal API error.                                                                                                                                |
 | 415     | 'Unsupported Media Type': The user send an invalid `Accept` header.                                                                                                         |
 

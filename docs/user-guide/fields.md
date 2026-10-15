@@ -5,7 +5,7 @@ Hydrocron will return every field that is available in the archived source data.
 
 In addition to the shapefile attributes, some additional fields are available through Hydrocron that are pulled from other locations such as the shapefile metadata (xml) and the filename. These include things like the cycle and pass numbers, CRID, granule name, continent ID, units, collection name, etc.
 
-The [](fields) parameter is required, and you must list every field that you want to return in a comma-separated list, with no spaces. Units are a special case in that they will be automatically returned for any fields you request that have units attached. You do not need to explicitly list the units fields separately.
+The [](#fields) parameter is required, and you must list every field that you want to return in a comma-separated list, with no spaces. Units are a special case in that they will be automatically returned for any fields you request that have units attached. You do not need to explicitly list the units fields separately.
 
 We strongly recommend returning and using the quality flags on the fields that have them to avoid degraded observations.
 
@@ -74,7 +74,7 @@ Occasionally new fields may be added to the SWOT data products. If there are fie
 ```
 
 :::{note} Node fields with a reach request
-The node fields are also the valid values for the [](node_fields) parameter, used to return a reach together with all of its nodes. `wse_sm`, `wse_sm_u`, `wse_sm_q` and `wse_sm_q_b` are Version D only.
+The node fields are also the valid values for the [](#node_fields) parameter, used to return a reach together with all of its nodes. `wse_sm`, `wse_sm_u`, `wse_sm_q` and `wse_sm_q_b` are Version D only.
 :::
 
 **Lake fields**

@@ -318,7 +318,7 @@ Will return GeoJSON:
 
 ## Get time series GeoJSON for river reach and its nodes
 
-Search for a river reach and all of its nodes in one request. [](fields) sets the reach fields and [](node_fields) sets the node fields. See [](reach-and-node-responses) for the response layout.
+Search for a river reach and all of its nodes in one request. [](#fields) sets the reach fields and [](#node_fields) sets the node fields. See [](#reach-and-node-responses) for the response layout.
 
 [https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&output=geojson&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&output=geojson&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q)
 
