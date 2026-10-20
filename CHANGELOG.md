@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+    - Issue 397 - Add paging capability to the API
 ### Changed
 ### Deprecated
 ### Removed
