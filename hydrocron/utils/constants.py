@@ -159,6 +159,14 @@ SWOT_REACH_SORT_KEY = "range_start_time"
 SWOT_NODE_SORT_KEY = "range_start_time"
 SWOT_PRIOR_LAKE_SORT_KEY = "range_start_time"
 
+# KEYS_ONLY GSI on the node tables: reach_id (hash) + range_start_time (range)
+SWOT_NODE_REACH_INDEX_NAME = "ReachIdIndex"
+
+# Reach + node requests (node_fields): threads for the parallel per-node queries, and the
+# GSI key count above which the request is rejected (413) before any node is fetched.
+REACH_AND_NODE_QUERY_THREADS = int(os.environ.get('HYDROCRON_REACH_AND_NODE_QUERY_THREADS', '32'))
+MAX_REACH_NODE_ITEMS = int(os.environ.get('HYDROCRON_MAX_REACH_NODE_ITEMS', '25000'))
+
 TABLE_COLLECTION_INFO = [
     {'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
      'table_name': 'hydrocron-swot-reach-table',

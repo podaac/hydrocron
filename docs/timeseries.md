@@ -120,6 +120,8 @@ Format of the data returned. Either: "csv", "geojson", or "csv_file"
 
 Custom filename for the downloaded CSV file. Only used when `output=csv_file`. If not provided, a default filename is generated in the format: `hydrocron_{feature}_{feature_id}_{start_date}_{end_date}.csv`
 
+For reach and node requests ([](#node_fields)), the default is `hydrocron_Reach_nodes_{feature_id}_{start_date}_{end_date}.csv`.
+
 The filename is sanitized to only allow safe characters (`a-z`, `A-Z`, `0-9`, `_`, `-`, `.`). If the filename does not end with `.csv`, the extension is appended automatically. Maximum length is 200 characters.
 
 ### compact: string, required: no
@@ -155,9 +157,24 @@ The SWOT data fields to return in the request.
 
 This is specified in the form of a comma separated list: `fields=reach_id,time_str,wse,slope`
 
-Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, SWORD and PLD (prior river and lake database names), and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are described in the [](fields-detail) section.
+Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, SWORD and PLD (prior river and lake database names), and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are described in the [](#fields-detail) section.
 
 River reaches in the Version 2.0 collection also expose SoS discharge fields (`sos_consensus_q`, `sos_hivdi_q`, `sos_metroman_q`, `sos_momma_q`, `sos_sad_q`, `sos_sic4dvar_q`, `sos_lakeflow_q`, and `swot_discharge_reanalysis`). These require `collection_name=SWOT_L2_HR_RiverSP_2.0`. See the [discharge guide](user-guide/discharge.md) for details.
+
+(node_fields)=
+### node_fields : string, required: no
+
+Return a reach **and all of its nodes** in one request. Only valid with `feature=Reach`.
+
+When `node_fields` is present, the response contains the reach's time series and the time series of every node on that reach. [](#fields) sets the reach columns and `node_fields` sets the node columns, in the same comma separated form: `node_fields=node_id,time_str,wse,node_q`
+
+- Valid node fields are listed in the [](#fields-detail) section. Units are returned automatically, as with [](#fields).
+- Nodes come from the same collection version as the reach ([](#collection_name)).
+- Version D only node fields (`wse_sm`, `wse_sm_u`, `wse_sm_q`, `wse_sm_q_b`) return a 400 with a Version 2.0 collection.
+- A 400 is returned if `node_fields` is used with `feature=Node` or `feature=PriorLake`, is empty, or contains a field that is not a node field.
+- A 413 is returned if the reach has more than 25,000 node rows in the requested time range. Reduce the time range.
+
+See [](#reach-and-node-responses) for the response layout.
 
 ## Response Format
 
@@ -423,13 +440,119 @@ curl -OJ --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/ti
 
 Downloads as: `my_analysis.csv`
 
+:::{tip} Opening CSV files in Excel
+Excel reformats long numbers when it opens a CSV. For example, 14-digit `node_id` values show as `5.7203E+13` and the fill value `-999999999999.0` shows as `-1E+12`. The CSV file has the full values.
+
+- To keep every value exactly as returned, import the file with Data → From Text/CSV and set the columns to **Text** — at least the ID columns (`node_id`, `reach_id`, `lake_id`) and any column with fill values.
+- If you filter out missing data, check for the fill value `-999999999999.0` in the original CSV, not Excel's displayed `-1E+12`.
+- Don't save the file back to CSV from Excel after values are reformatted, as the full values can be lost.
+:::
+
+(reach-and-node-responses)=
+### Reach and node responses
+
+When [](#node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV file download) holds both the reach and its nodes:
+
+- **Rows:** reach rows first, then node rows in `node_id` order. Each node's rows are in time order.
+- **Added columns:** every row starts with `feature_type`, `reach_id` and `node_id`, even if not requested. `feature_type` is `Reach` or `Node` (the same values as the [](#feature) parameter). `node_id` is empty on reach rows.
+- **Column order:** `feature_type`, `reach_id`, `node_id`, then the requested [](#fields), then any new fields from [](#node_fields), then units. A field in both lists appears once.
+- **Not applicable vs missing:** a column that doesn't apply to a row's feature type (e.g. `slope` on a node row) is **empty** in CSV and **null** in GeoJSON. A value that applies but is missing keeps the fill value `-999999999999.0`, as in other responses.
+- **Units:** unit columns come from the rows returned. If only the reach or only nodes have data, the other feature type's requested fields still appear (empty), but their unit columns may not.
+- **Unobserved nodes** are included with `time_str` of `no_data` and fill values, the same as `feature=Node` requests.
+- **Geometry:** GeoJSON always includes it — a LineString for the reach and a Point for each node. CSV includes it only if `geometry` is requested (in [](#fields) for reach rows, in [](#node_fields) for node rows).
+- **Compact:** `compact=true` returns one Feature for the reach and one for each node, each with its values as lists.
+- **`hits`:** the total number of reach and node rows, before compaction.
+- If only the reach or only nodes have data in the time range, that data is returned. A 400 is returned only if neither has data.
+
+Example CSV request (Version D reach `57203000041`, one pass):
+
+```bash
+curl --header "Accept: text/csv" --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q'
+```
+
+```
+feature_type,reach_id,node_id,time_str,wse,slope,node_q,wse_units,slope_units
+Reach,57203000041,,2026-04-19T19:08:16Z,7.6096,0.00135545806,,m,m/m
+Node,57203000041,57203000040011,no_data,-999999999999.0,,3,m,
+...
+Node,57203000041,57203000040201,2026-04-19T19:08:16Z,6.06841,,0,m,
+...
+```
+
+The reach row has an empty `node_id` and `node_q`; node rows have an empty `slope` and `slope_units`. Node `57203000040011` was not observed on this pass, so it has `no_data` and fill values.
+
+Example compact GeoJSON response for the same request with `Accept: application/geo+json` (2 of the 52 node Features shown):
+
+```json
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "id": "0",
+            "type": "Feature",
+            "properties": {
+                "feature_type": ["Reach"],
+                "reach_id": ["57203000041"],
+                "node_id": [null],
+                "time_str": ["2026-04-19T19:08:16Z"],
+                "wse": ["7.6096"],
+                "slope": ["0.00135545806"],
+                "node_q": [null],
+                "wse_units": ["m"],
+                "slope_units": ["m/m"]
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [[171.24103, -42.454014], [171.241175, -42.453743], "...", [171.341708, -42.437007]]
+            }
+        },
+        {
+            "id": "1",
+            "type": "Feature",
+            "properties": {
+                "feature_type": ["Node"],
+                "reach_id": ["57203000041"],
+                "node_id": ["57203000040011"],
+                "time_str": ["no_data"],
+                "wse": ["-999999999999.0"],
+                "slope": [null],
+                "node_q": ["3"],
+                "wse_units": ["m"],
+                "slope_units": [null]
+            },
+            "geometry": {"type": "Point", "coordinates": [171.241318, -42.452933]}
+        },
+        "...",
+        {
+            "id": "20",
+            "type": "Feature",
+            "properties": {
+                "feature_type": ["Node"],
+                "reach_id": ["57203000041"],
+                "node_id": ["57203000040201"],
+                "time_str": ["2026-04-19T19:08:16Z"],
+                "wse": ["6.06841"],
+                "slope": [null],
+                "node_q": ["0"],
+                "wse_units": ["m"],
+                "slope_units": [null]
+            },
+            "geometry": {"type": "Point", "coordinates": [171.280862, -42.452075]}
+        },
+        "..."
+    ]
+}
+```
+
+% TODO: example output is from local test data (one pass, April 2026); replace with production output once node_fields is released.
+
 ## Response Codes
 
 | Code    | Reason                                                                                                                                                                      |
 | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 200     | Request has succeeded and response has been returned to the user.                                                                                                           |
 | 400*    | 'Bad Request': This indicates that the end user entered the parameters incorrectly in their query or time series data could not be located for the feature ID. The API attempts to send a response as to which parameter was incorrect. |
-| 413     | 'Payload Too Large': The user attempted to retrieve a response that was too large. This is triggered for queries that exceed 6mb.                                           |
+| 413     | 'Payload Too Large': The user attempted to retrieve a response that was too large. This is triggered for queries that exceed 6mb, and for [](#node_fields) requests where the reach has more than 25,000 node rows in the time range. |
 | 500     | 'Internal Server Error': Internal API error.                                                                                                                                |
 | 415     | 'Unsupported Media Type': The user send an invalid `Accept` header.                                                                                                         |
 

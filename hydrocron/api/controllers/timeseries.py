@@ -9,13 +9,14 @@ import logging
 import os
 import re
 import time
+from concurrent.futures import wait
 
 from accept_types import get_best_match
 import pandas as pd
 import geopandas as gpd
 from shapely.wkt import loads
 
-from hydrocron.api.data_access.db import DynamoDataRepository
+from hydrocron.api.data_access.db import DynamoDataRepository, ItemLimitExceeded, NODE_QUERY_POOL
 from hydrocron.utils import connection
 from hydrocron.utils import constants
 
@@ -24,8 +25,10 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 ACCEPT_TYPES = ['application/json', 'text/csv', 'application/geo+json']
-# Maximum response size allowed by API Gateway; larger result sets return a 413.
+# Lambda's synchronous response payload limit (6 MB; API Gateway REST allows 10 MB); larger responses return a 413.
 MAX_RESPONSE_SIZE_BYTES = 6 * 1024 * 1024
+# Columns added first to every row of a reach + node (node_fields) response.
+REACH_AND_NODE_ID_COLUMNS = ['feature_type', 'reach_id', 'node_id']
 DEFAULT_RIVER_COLLECTION = os.environ['DEFAULT_RIVER_COLLECTION']
 DEFAULT_LAKE_COLLECTION = os.environ['DEFAULT_LAKE_COLLECTION']
 DEFAULT_COLLECTION_VERSION = os.environ['DEFAULT_COLLECTION_VERSION']
@@ -34,6 +37,13 @@ DEFAULT_COLLECTION_VERSION = os.environ['DEFAULT_COLLECTION_VERSION']
 class RequestError(Exception):
     """
     Exception thrown if there is an error encoutered with request
+    """
+
+
+class DataIntegrityError(Exception):
+    """
+    Exception thrown if stored data is inconsistent (e.g. a node's reach_id differs from the reach it was found for).
+    Not a RequestError: its message doesn't start with an HTTP code, so API Gateway returns 500.
     """
 
 
@@ -87,6 +97,11 @@ def get_request_parameters(event, accept_header):
     # remove spaces from fields list
     parameters['fields'] = [field.strip() for field in parameters['fields'].split(',') if field.strip()]
     parameters['fields'] = ','.join(parameters['fields'])
+
+    # node_fields (optional): its presence requests the reach's node data too
+    parameters['node_fields'] = event['body'].get('node_fields')
+    if parameters['node_fields'] is not None:
+        parameters['node_fields'] = ','.join(field.strip() for field in parameters['node_fields'].split(',') if field.strip())
 
     error_message = validate_parameters(parameters)
     if error_message:
@@ -197,6 +212,13 @@ def validate_parameters(parameters):
 
     elif not is_fields_valid(parameters['feature'], parameters['fields'], parameters['collection_name']):
         error_message = '400: fields parameter should contain valid SWOT fields'
+
+    elif parameters.get('node_fields') is not None and parameters['feature'] != 'Reach':
+        error_message = '400: node_fields parameter is only valid when feature=Reach'
+
+    elif parameters.get('node_fields') is not None and \
+            (not parameters['node_fields'] or not is_fields_valid('Node', parameters['node_fields'], parameters['collection_name'])):
+        error_message = '400: node_fields parameter should contain valid SWOT node fields'
 
     elif parameters['compact'] not in ('true', 'false'):
         error_message = f'400: compact parameter should be true or false, not {parameters["compact"]}'
@@ -310,7 +332,8 @@ def build_default_filename(feature, feature_id, start_time, end_time):
     return f"hydrocron_{feature}_{feature_id}_{start_date}_{end_date}.csv"
 
 
-def timeseries_get(collection_name, feature, feature_id, start_time, end_time, output, fields):  # pylint: disable=too-many-arguments,too-many-positional-arguments
+def timeseries_get(collection_name, feature, feature_id, start_time, end_time, output, fields,  # pylint: disable=too-many-arguments,too-many-positional-arguments
+                   node_fields=None):
     """Get Timeseries for a particular Reach, Node, or LakeID
 
     Get Timeseries for a particular Reach, Node, or LakeID # noqa: E501
@@ -329,9 +352,14 @@ def timeseries_get(collection_name, feature, feature_id, start_time, end_time, o
     :type output: str
     :param fields: List of requested columns
     :type fields: str
+    :param node_fields: List of requested node columns; if set (feature=Reach), the reach's nodes are returned too
+    :type node_fields: str
 
     :rtype: Dict, integer
     """
+
+    if node_fields is not None:
+        return timeseries_get_reach_and_nodes(collection_name, feature_id, start_time, end_time, output, fields, node_fields)
 
     results = {'Items': []}
     data = {}
@@ -356,6 +384,97 @@ def timeseries_get(collection_name, feature, feature_id, start_time, end_time, o
             data, hits = format_csv(gdf, fields)
 
     return data, hits
+
+
+def timeseries_get_reach_and_nodes(collection_name, reach_id, start_time, end_time, output, fields,  # pylint: disable=too-many-arguments,too-many-positional-arguments
+                                   node_fields):
+    """Get the time series for a reach and all of its nodes.
+
+    The reach query and the ReachIdIndex lookup run in parallel; node rows are then fetched with
+    one projected query per node. Returns a 413 before fetching nodes if the reach has more node
+    rows than constants.MAX_REACH_NODE_ITEMS.
+
+    :param collection_name: Name of collection to query data for (reach and node tables of the same version)
+    :type collection_name: str
+    :param reach_id: ID of the reach to retrieve
+    :type reach_id: str
+    :param start_time: Start time of the timeseries
+    :type start_time: str
+    :param end_time: End time of the timeseries
+    :type end_time: str
+    :param output: Format of the data returned
+    :type output: str
+    :param fields: List of requested reach columns
+    :type fields: str
+    :param node_fields: List of requested node columns
+    :type node_fields: str
+
+    :rtype: Dict, integer
+    """
+
+    data = {}
+    hits = 0
+
+    data_repository = DynamoDataRepository(connection.dynamodb_resource, connection.dynamodb_client)
+    reach_future = NODE_QUERY_POOL.submit(data_repository.get_series_by_feature_id,
+                                          collection_name, 'Reach', reach_id, start_time, end_time)
+    try:
+        node_ids, node_row_count = data_repository.get_node_ids_by_reach_id(collection_name, reach_id, start_time, end_time,
+                                                                            constants.MAX_REACH_NODE_ITEMS)
+    except ItemLimitExceeded as e:
+        data['http_code'] = '413 Payload Too Large'
+        data['error_message'] = (f'413: Reach {reach_id} has more than {e.limit} node rows in the requested time range. '
+                                 'Reduce the time range.')
+        return data, hits
+    finally:
+        # Never return with the reach query still running: Lambda freezes leftover threads and resumes them
+        # in the next invocation (and the boto3 resource it uses isn't thread-safe).
+        wait([reach_future])
+
+    try:
+        reach_items = reach_future.result()['Items']
+    except ValueError as e:
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = str(e)
+        return data, hits
+
+    node_items = data_repository.get_node_series(collection_name, node_ids, start_time, end_time, build_node_projection(node_fields))
+    logging.info('reach_and_nodes: %s', json.dumps(
+        {'reach_id': reach_id, 'reach_rows': len(reach_items), 'nodes': len(node_ids),
+         'node_keys': node_row_count, 'node_rows': len(node_items)}))
+
+    for item in node_items:
+        if item.get('reach_id') != reach_id:
+            logging.error(json.dumps({'error': 'node reach_id mismatch', 'node_id': item.get('node_id'),
+                                      'stored_reach_id': item.get('reach_id'), 'requested_reach_id': reach_id}))
+            raise DataIntegrityError(f"Data integrity error: node {item.get('node_id')} has reach_id "
+                                     f"{item.get('reach_id')}, expected {reach_id}")
+
+    if not reach_items and not node_items:
+        data['http_code'] = '400 Bad Request'
+        data['error_message'] = f'400: Results with the specified Feature ID {reach_id} were not found'
+    else:
+        data, hits = format_reach_and_nodes(reach_items, node_items, fields, node_fields, output)
+
+    return data, hits
+
+
+def build_node_projection(node_fields):
+    """Return the node attributes to fetch: requested fields, their units, alias sources, keys and geometry.
+
+    Geometry is always fetched (convert_to_df requires it; a node point is small).
+
+    :param node_fields: List of requested node columns
+    :type node_fields: str
+
+    :rtype: list of str
+    """
+
+    fields_list = node_fields.split(',')
+    attributes = fields_list + ['node_id', 'reach_id', 'range_start_time', 'geometry']
+    attributes += [f'{field}_units' for field in fields_list]
+    attributes += [constants.FIELD_ALIASES[field] for field in fields_list if field in constants.FIELD_ALIASES]
+    return list(dict.fromkeys(attributes))
 
 
 def convert_to_df(items) -> gpd.GeoDataFrame:
@@ -451,6 +570,72 @@ def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
     return data, hits
 
 
+def format_reach_and_nodes(reach_items, node_items, fields, node_fields, output):  # pylint: disable=too-many-locals
+    """Format reach rows then node rows into one GeoJSON FeatureCollection or CSV.
+
+    Each feature type is filled for its own fields (real missing -> fill value), then all rows are
+    reindexed to one union of columns, so columns that don't apply to a row's feature type are
+    blank (CSV) or null (GeoJSON). Column order: feature_type, reach_id, node_id, requested fields
+    (fields first, then new node_fields), then units.
+
+    :param reach_items: Reach rows
+    :type reach_items: list of dict
+    :param node_items: Node rows, in node_id then time order
+    :type node_items: list of dict
+    :param fields: List of requested reach columns
+    :type fields: str
+    :param node_fields: List of requested node columns
+    :type node_fields: str
+    :param output: 'geojson' or 'csv'
+    :type output: str
+
+    :rtype: dict, integer
+    """
+
+    reach_columns = list(dict.fromkeys(fields.split(',')))
+    node_columns = list(dict.fromkeys(node_fields.split(',')))
+    frames = []
+    unit_columns = []
+    for feature_type, items, columns in (('Reach', reach_items, reach_columns), ('Node', node_items, node_columns)):
+        if not items:
+            continue
+        gdf = convert_to_df(items)
+        ids = {'feature_type': feature_type, 'reach_id': gdf['reach_id'],
+               'node_id': gdf['node_id'] if feature_type == 'Node' else None}
+        columns_with_units = add_units(gdf, columns)
+        unit_columns.extend(columns_with_units[len(columns):])
+        if output == 'geojson' and 'geometry' not in columns_with_units:
+            columns_with_units.append('geometry')
+        gdf = _fill_missing_columns(gdf, columns_with_units)
+        frame = gdf[columns_with_units].assign(**ids)
+        if output == 'csv':
+            frame = pd.DataFrame(frame)
+            if 'geometry' in frame.columns:
+                frame['geometry'] = frame['geometry'].apply(lambda geometry: geometry.wkt)
+        frames.append(frame)
+
+    requested = [column for column in dict.fromkeys(reach_columns + node_columns) if column not in REACH_AND_NODE_ID_COLUMNS]
+    if output == 'geojson':
+        requested = [column for column in requested if column != 'geometry']
+    union = REACH_AND_NODE_ID_COLUMNS + requested + list(dict.fromkeys(unit_columns))
+    if output == 'geojson':
+        union.append('geometry')
+
+    combined = pd.concat([frame.reindex(columns=union) for frame in frames], ignore_index=True)
+    if output == 'geojson':
+        response = gpd.GeoDataFrame(combined, geometry='geometry').to_geo_dict()
+    else:
+        response = combined.to_csv(index=False)
+
+    data = {
+        'http_code': '200 OK',
+        'response': response
+    }
+    hits = combined.shape[0]
+
+    return data, hits
+
+
 def add_units(gdf, columns):
     """Add units to list of columns to return in response
 
@@ -472,7 +657,7 @@ def add_units(gdf, columns):
     return columns + unit_columns
 
 
-def get_response(results, hits, elapsed, return_type, output, compact):  # pylint: disable=too-many-positional-arguments
+def get_response(results, hits, elapsed, return_type, output, compact, group_by_feature=False):  # pylint: disable=too-many-arguments,too-many-positional-arguments
     """Create and return HTTP response based on results.
 
     :param results: Dictionary of SWOT timeseries results
@@ -487,6 +672,8 @@ def get_response(results, hits, elapsed, return_type, output, compact):  # pylin
     :type output: str
     :param compact: Whether to return compact GeoJSON response
     :type compact: str
+    :param group_by_feature: Compact per reach / node (reach + node responses)
+    :type group_by_feature: bool
 
     rtype: dict
     """
@@ -495,7 +682,7 @@ def get_response(results, hits, elapsed, return_type, output, compact):  # pylin
 
         if return_type in ('text/csv', 'application/geo+json'):
             if compact == 'true' and return_type == 'application/geo+json':
-                data = compact_results(results['response'])
+                data = compact_results(results['response'], group_by_feature)
             else:
                 data = results['response']
 
@@ -510,7 +697,7 @@ def get_response(results, hits, elapsed, return_type, output, compact):  # pylin
                     }
                 }
             if output == 'geojson' and compact == 'true':
-                results['response'] = compact_results(results['response'])
+                results['response'] = compact_results(results['response'], group_by_feature)
             data['results'][output] = results['response']
 
     else:
@@ -540,8 +727,9 @@ def build_csv_file_response(results, parameters):
     if filename:
         filename = sanitize_filename(filename)
     else:
+        feature = f"{parameters['feature']}_nodes" if parameters.get('node_fields') else parameters['feature']
         filename = sanitize_filename(build_default_filename(
-            parameters['feature'], parameters['feature_id'],
+            feature, parameters['feature_id'],
             parameters['start_time'], parameters['end_time']
         ))
 
@@ -552,31 +740,41 @@ def build_csv_file_response(results, parameters):
     }
 
 
-def compact_results(results):
+def compact_results(results, group_by_feature=False):
     """Compact GeoJSON results to return a properties object with aggregated
     time series data.
 
     :param results: Dictionary of SWOT timeseries results
     :type results: dict
+    :param group_by_feature: Compact each reach and each node separately (reach + node responses),
+        keyed on feature_type and node_id (nodes) or reach_id (reaches), in first-seen order
+    :type group_by_feature: bool
 
     rtype: dict
     """
 
+    groups = {}
+    for feature in results['features']:
+        key = None
+        if group_by_feature:
+            properties = feature['properties']
+            key = (properties['feature_type'], properties['node_id'] if properties['feature_type'] == 'Node' else properties['reach_id'])
+        groups.setdefault(key, []).append(feature)
+
     response = {
         'type': 'FeatureCollection',
-        'features': [
-            {
-                'id': '0',
-                'type': 'Feature',
-                'properties': {},
-                'geometry': results['features'][0]['geometry']   # Grab first geometry
-            }
-        ]
+        'features': []
     }
-
-    fields = list(results['features'][0]['properties'].keys())
-    for field in fields:
-        response['features'][0]['properties'][field] = [feature['properties'][field] for feature in results['features']]
+    for index, features in enumerate(groups.values()):
+        compact_feature = {
+            'id': str(index),
+            'type': 'Feature',
+            'properties': {},
+            'geometry': features[0]['geometry']   # Grab first geometry
+        }
+        for field in features[0]['properties'].keys():
+            compact_feature['properties'][field] = [feature['properties'][field] for feature in features]
+        response['features'].append(compact_feature)
 
     return response
 
@@ -615,7 +813,8 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         parameters['start_time'],
         parameters['end_time'],
         output,
-        parameters['fields']
+        parameters['fields'],
+        parameters['node_fields']
     )
 
     end = time.time()
@@ -625,19 +824,18 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
         if parameters['output'] == 'csv_file':
             data = build_csv_file_response(results, parameters)
         else:
-            data = get_response(results, hits, elapsed, return_type, output, parameters['compact'])
+            data = get_response(results, hits, elapsed, return_type, output, parameters['compact'],
+                                parameters['node_fields'] is not None)
     except RequestError as e:
         error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
         logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
         raise e
 
-    # CSV responses are already a string; only serialize dict responses.
-    if isinstance(data, str):
-        response_size = len(data.encode('utf-8'))
-    else:
-        response_size = len(json.dumps(data, default=str).encode('utf-8'))
+    # Size the final response (after compaction and any wrappers) as the Lambda Python 3.12+ runtime
+    # serializes it: JSON with Unicode unescaped. A CSV string grows when JSON-encoded (quotes, \n escapes).
+    response_size = len(json.dumps(data, default=str, ensure_ascii=False).encode('utf-8'))
 
-    # Enforce the API Gateway size limit on the final response, after compaction and any wrappers.
+    # Enforce Lambda's response payload limit.
     if response_size > MAX_RESPONSE_SIZE_BYTES:
         size_mb = response_size / (1024 * 1024)
         limit_mb = MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)
