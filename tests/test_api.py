@@ -12,6 +12,8 @@ import json
 import numpy as np
 from numpy.testing import assert_almost_equal
 
+from tests.geojson_validation import assert_valid_geojson
+
 
 def test_timeseries_lambda_handler_json_reach(hydrocron_api):
     """
@@ -46,7 +48,8 @@ def test_timeseries_lambda_handler_json_reach(hydrocron_api):
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
            json.loads(json.dumps(result['results']['geojson'])) == expected
-           
+    assert_valid_geojson(result['results']['geojson'])
+
 
 def test_timeseries_lambda_handler_json_lake(hydrocron_api):
     """
@@ -81,6 +84,7 @@ def test_timeseries_lambda_handler_json_lake(hydrocron_api):
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
            json.loads(json.dumps(result['results']['geojson'])) == expected
+    assert_valid_geojson(result['results']['geojson'])
 
 
 def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
@@ -111,6 +115,7 @@ def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
     context = "_"
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
     assert geojson.loads(json.dumps((result['results']['geojson']))).is_valid
+    assert_valid_geojson(result['results']['geojson'])
 
 
 def test_timeseries_lambda_handler_csv(hydrocron_api):
@@ -697,6 +702,7 @@ def test_timeseries_lambda_handler_geojson_accept(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert json.loads(json.dumps(result)) == expected
+    assert_valid_geojson(result)
 
 
 def test_timeseries_lambda_handler_csv_accept(hydrocron_api):

@@ -340,11 +340,9 @@ Will return GeoJSON (1 reach Feature and 52 node Features; 2 nodes shown):
                     "properties": {
                         "feature_type": "Reach",
                         "reach_id": "57203000041",
-                        "node_id": null,
                         "time_str": "2026-04-19T19:08:16Z",
                         "wse": "7.6096",
                         "slope": "0.00135545806",
-                        "node_q": null,
                         "wse_units": "m",
                         "slope_units": "m/m"
                     },
@@ -367,10 +365,8 @@ Will return GeoJSON (1 reach Feature and 52 node Features; 2 nodes shown):
                         "node_id": "57203000040011",
                         "time_str": "no_data",
                         "wse": "-999999999999.0",
-                        "slope": null,
                         "node_q": "3",
-                        "wse_units": "m",
-                        "slope_units": null
+                        "wse_units": "m"
                     },
                     "geometry": {
                         "type": "Point",
@@ -390,10 +386,8 @@ Will return GeoJSON (1 reach Feature and 52 node Features; 2 nodes shown):
                         "node_id": "57203000040201",
                         "time_str": "2026-04-19T19:08:16Z",
                         "wse": "6.06841",
-                        "slope": null,
                         "node_q": "0",
-                        "wse_units": "m",
-                        "slope_units": null
+                        "wse_units": "m"
                     },
                     "geometry": {
                         "type": "Point",
@@ -410,7 +404,7 @@ Will return GeoJSON (1 reach Feature and 52 node Features; 2 nodes shown):
 }
 ```
 
-**Note:** Geometry coordinates simplified for this example (324 total coordinates for the reach). Fields that don't apply to a feature type are `null` (e.g. `slope` on nodes).
+**Note:** Geometry coordinates simplified for this example (324 total coordinates for the reach). Each Feature has only its own feature type's properties (e.g. no `node_id` or `node_q` on the reach, no `slope` on nodes).
 
 % TODO: example output is from local test data; replace with production output once node_fields is released.
 

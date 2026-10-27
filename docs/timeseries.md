@@ -454,10 +454,13 @@ Excel reformats long numbers when it opens a CSV. For example, 14-digit `node_id
 When [](#node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV file download) holds both the reach and its nodes:
 
 - **Rows:** reach rows first, then node rows in `node_id` order. Each node's rows are in time order.
-- **Added columns:** every row starts with `feature_type`, `reach_id` and `node_id`, even if not requested. `feature_type` is `Reach` or `Node` (the same values as the [](#feature) parameter). `node_id` is empty on reach rows.
+- **Added columns:** every row starts with `feature_type`, `reach_id` and `node_id` (node rows), even if not requested. `feature_type` is `Reach` or `Node` (the same values as the [](#feature) parameter).
 - **Column order:** `feature_type`, `reach_id`, `node_id`, then the requested [](#fields), then any new fields from [](#node_fields), then units. A field in both lists appears once.
-- **Not applicable vs missing:** a column that doesn't apply to a row's feature type (e.g. `slope` on a node row) is **empty** in CSV and **null** in GeoJSON. A value that applies but is missing keeps the fill value `-999999999999.0`, as in other responses.
-- **Units:** unit columns come from the rows returned. If only the reach or only nodes have data, the other feature type's requested fields still appear (empty), but their unit columns may not.
+- **Fields that don't apply:**
+  - **CSV** has one header for all rows, so a column that doesn't apply to a row's feature type is **empty** (e.g. `node_id` and `node_q` on the reach row, `slope` on node rows).
+  - **GeoJSON:** each Feature has only its own feature type's properties. Reach Features have no `node_id` and no node-only fields; node Features have no reach-only fields.
+  - A value that applies but is missing keeps the fill value `-999999999999.0`, as in other responses.
+- **Units:** unit columns come from the rows returned. In CSV, if only the reach or only nodes have data, the other feature type's requested fields still appear (empty), but their unit columns may not.
 - **Unobserved nodes** are included with `time_str` of `no_data` and fill values, the same as `feature=Node` requests.
 - **Geometry:** GeoJSON always includes it — a LineString for the reach and a Point for each node. CSV includes it only if `geometry` is requested (in [](#fields) for reach rows, in [](#node_fields) for node rows).
 - **Compact:** `compact=true` returns one Feature for the reach and one for each node, each with its values as lists.
@@ -493,11 +496,9 @@ Example compact GeoJSON response for the same request with `Accept: application/
             "properties": {
                 "feature_type": ["Reach"],
                 "reach_id": ["57203000041"],
-                "node_id": [null],
                 "time_str": ["2026-04-19T19:08:16Z"],
                 "wse": ["7.6096"],
                 "slope": ["0.00135545806"],
-                "node_q": [null],
                 "wse_units": ["m"],
                 "slope_units": ["m/m"]
             },
@@ -515,10 +516,8 @@ Example compact GeoJSON response for the same request with `Accept: application/
                 "node_id": ["57203000040011"],
                 "time_str": ["no_data"],
                 "wse": ["-999999999999.0"],
-                "slope": [null],
                 "node_q": ["3"],
-                "wse_units": ["m"],
-                "slope_units": [null]
+                "wse_units": ["m"]
             },
             "geometry": {"type": "Point", "coordinates": [171.241318, -42.452933]}
         },
@@ -532,10 +531,8 @@ Example compact GeoJSON response for the same request with `Accept: application/
                 "node_id": ["57203000040201"],
                 "time_str": ["2026-04-19T19:08:16Z"],
                 "wse": ["6.06841"],
-                "slope": [null],
                 "node_q": ["0"],
-                "wse_units": ["m"],
-                "slope_units": [null]
+                "wse_units": ["m"]
             },
             "geometry": {"type": "Point", "coordinates": [171.280862, -42.452075]}
         },

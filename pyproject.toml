@@ -37,6 +37,7 @@ pytest-dynamodb = "^3.0.0"
 pylint = "^4.0.0"
 flake8 = "^7.1.0"
 pytest-cov = "^7.0.0"
+jsonschema = "^4.26.0"
 
 [tool.poetry.group.docs]
 optional = true

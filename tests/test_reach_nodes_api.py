@@ -7,6 +7,7 @@ import io
 import pytest
 
 from hydrocron.utils.constants import FILL_VALUE
+from tests.geojson_validation import assert_valid_geojson
 
 REACH_D = '57203000041'                   # D: 52 nodes; passes 2026-04-19 (cycle 049) and 2026-05-10 (cycle 050)
 REACH_D_START = '2026-04-01T00:00:00Z'
@@ -93,22 +94,22 @@ def test_reach_and_nodes_csv_duplicate_fields(hydrocron_api):
 
 
 def test_reach_and_nodes_geojson(hydrocron_api):
-    """GeoJSON: one Feature per row, unique ids, same property keys everywhere, null where not applicable."""
+    """GeoJSON: one Feature per row, unique ids, each Feature carries only its own type's properties."""
     result = _handler(_event(output='geojson'))
     features = result['results']['geojson']['features']
 
     assert result['hits'] == len(features) == 1 + REACH_D_NODES
     assert [f['id'] for f in features] == [str(i) for i in range(len(features))]
-    keys = list(features[0]['properties'])
-    assert keys == ['feature_type', 'reach_id', 'node_id', 'time_str', 'wse', 'slope', 'flow_angle',
-                    'wse_units', 'slope_units', 'flow_angle_units']
-    assert all(list(f['properties']) == keys for f in features)
 
     reach, nodes = features[0], features[1:]
-    assert reach['properties']['node_id'] is None and reach['properties']['flow_angle'] is None
+    assert list(reach['properties']) == ['feature_type', 'reach_id', 'time_str', 'wse', 'slope', 'wse_units', 'slope_units']
+    node_keys = ['feature_type', 'reach_id', 'node_id', 'time_str', 'wse', 'flow_angle', 'wse_units', 'flow_angle_units']
+    assert all(list(n['properties']) == node_keys for n in nodes)
     assert reach['geometry']['type'] == 'LineString'
-    assert all(n['properties']['slope'] is None for n in nodes)
     assert all(n['geometry']['type'] == 'Point' for n in nodes)
+    # no nulls: fields that don't apply are absent, real missing values keep the fill value
+    assert all(value is not None for f in features for value in f['properties'].values())
+    assert any(n['properties']['wse'] == FILL_VALUE for n in nodes)
 
 
 def test_reach_and_nodes_geojson_compact(hydrocron_api):
@@ -121,9 +122,38 @@ def test_reach_and_nodes_geojson_compact(hydrocron_api):
     assert [f['id'] for f in features] == [str(i) for i in range(len(features))]
     assert features[0]['properties']['feature_type'] == ['Reach']
     assert features[0]['geometry']['type'] == 'LineString'
+    assert 'node_id' not in features[0]['properties'] and 'flow_angle' not in features[0]['properties']
+    assert all('slope' not in f['properties'] for f in features[1:])
     node_ids = [f['properties']['node_id'][0] for f in features[1:]]
     assert node_ids == sorted(set(node_ids))
     assert all(isinstance(value, list) for f in features for value in f['properties'].values())
+
+
+VERSION_2_0_TWO_PASSES = {'feature_id': '71140300273', 'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
+                          'start_time': '2024-08-01T00:00:00Z', 'end_time': '2024-09-30T00:00:00Z'}
+REACH_ONLY = {'feature_id': '71224100223', 'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
+              'start_time': '2023-06-04T00:00:00Z', 'end_time': '2023-06-23T00:00:00Z'}
+
+
+@pytest.mark.parametrize("event_args", [
+    {'output': 'geojson'},
+    {'output': 'geojson', 'compact': 'true'},
+    {'output': 'geojson', 'end_time': TWO_PASS_END},
+    {'output': 'geojson', 'compact': 'true', 'end_time': TWO_PASS_END},
+    {'output': 'geojson', 'fields': 'reach_id,time_str,wse,geometry'},
+    {'output': 'geojson', 'compact': 'true', **VERSION_2_0_TWO_PASSES},
+    {'output': 'geojson', 'node_fields': 'node_id,flow_angle', **REACH_ONLY},
+    {'accept': 'application/geo+json'},
+    {'output': 'geojson', 'node_fields': None},   # normal reach response, no nodes
+], ids=['plain', 'compact', 'two_passes', 'compact_two_passes', 'geometry_in_fields', '2_0_compact_two_passes',
+        'reach_only', 'geo_json_accept', 'no_node_fields'])
+def test_geojson_is_valid(hydrocron_api, event_args):
+    """Every GeoJSON shape is valid GeoJSON (automates pasting the response into geojson.io)."""
+    result = _handler(_event(**event_args))
+    collection = result if 'accept' in event_args else result['results']['geojson']
+
+    assert collection['features'], 'Expected Features'
+    assert_valid_geojson(collection)
 
 
 def test_reach_and_nodes_two_passes_csv(hydrocron_api):
@@ -208,7 +238,7 @@ def test_reach_and_nodes_2_0_two_passes(hydrocron_api, compact):
     else:
         assert len(features) == 2 * (1 + 56)
         reach_times = [f['properties']['time_str'] for f in features if f['properties']['feature_type'] == 'Reach']
-        node_times = [f['properties']['time_str'] for f in features if f['properties']['node_id'] == '71140300270313']
+        node_times = [f['properties']['time_str'] for f in features if f['properties'].get('node_id') == '71140300270313']
 
     assert reach_times == ['2024-08-25T23:27:23Z', '2024-09-15T20:12:30Z']
     assert [t[:10] for t in node_times] == ['2024-08-25', '2024-09-15']   # observed on both passes
@@ -318,6 +348,15 @@ def test_reach_and_nodes_unit_columns_follow_returned_rows(hydrocron_api):
     header = text.splitlines()[0].split(',')
 
     assert header == ['feature_type', 'reach_id', 'node_id', 'time_str', 'wse', 'flow_angle', 'wse_units']
+
+
+def test_reach_only_geojson_has_only_reach_properties(hydrocron_api):
+    """GeoJSON reach-only result: no node_id and no requested node-only field on the reach Feature."""
+    features = _handler(_event(feature_id='71224100223', collection_name='SWOT_L2_HR_RiverSP_2.0', output='geojson',
+                               start_time='2023-06-04T00:00:00Z', end_time='2023-06-23T00:00:00Z',
+                               fields='reach_id,time_str,wse', node_fields='node_id,flow_angle'))['results']['geojson']['features']
+
+    assert [list(f['properties']) for f in features] == [['feature_type', 'reach_id', 'time_str', 'wse', 'wse_units']]
 
 
 def test_reach_and_nodes_integrity_error(hydrocron_api, monkeypatch, caplog):

@@ -573,10 +573,11 @@ def format_csv(gdf, fields):  # noqa: E501 # pylint: disable=W0613
 def format_reach_and_nodes(reach_items, node_items, fields, node_fields, output):  # pylint: disable=too-many-locals
     """Format reach rows then node rows into one GeoJSON FeatureCollection or CSV.
 
-    Each feature type is filled for its own fields (real missing -> fill value), then all rows are
-    reindexed to one union of columns, so columns that don't apply to a row's feature type are
-    blank (CSV) or null (GeoJSON). Column order: feature_type, reach_id, node_id, requested fields
-    (fields first, then new node_fields), then units.
+    Each feature type is filled for its own fields (real missing -> fill value). CSV: all rows are
+    reindexed to one union of columns, so columns that don't apply to a row's feature type are blank.
+    GeoJSON: each Feature carries only its own type's columns (no node_id on reaches, no node-only
+    fields on reaches, no reach-only fields on nodes). Column order: feature_type, reach_id, node_id,
+    requested fields (fields first, then new node_fields), then units.
 
     :param reach_items: Reach rows
     :type reach_items: list of dict
@@ -600,8 +601,9 @@ def format_reach_and_nodes(reach_items, node_items, fields, node_fields, output)
         if not items:
             continue
         gdf = convert_to_df(items)
-        ids = {'feature_type': feature_type, 'reach_id': gdf['reach_id'],
-               'node_id': gdf['node_id'] if feature_type == 'Node' else None}
+        ids = {'feature_type': feature_type, 'reach_id': gdf['reach_id']}
+        if feature_type == 'Node' or output == 'csv':   # GeoJSON reaches get no node_id
+            ids['node_id'] = gdf['node_id'] if feature_type == 'Node' else None
         columns_with_units = add_units(gdf, columns)
         unit_columns.extend(columns_with_units[len(columns):])
         if output == 'geojson' and 'geometry' not in columns_with_units:
@@ -621,17 +623,25 @@ def format_reach_and_nodes(reach_items, node_items, fields, node_fields, output)
     if output == 'geojson':
         union.append('geometry')
 
-    combined = pd.concat([frame.reindex(columns=union) for frame in frames], ignore_index=True)
     if output == 'geojson':
-        response = gpd.GeoDataFrame(combined, geometry='geometry').to_geo_dict()
+        # Each type keeps only its own columns, in union order; Feature ids are assigned once
+        features = []
+        for frame in frames:
+            own_columns = [column for column in union if column in frame.columns]
+            features.extend(gpd.GeoDataFrame(frame[own_columns], geometry='geometry').to_geo_dict()['features'])
+        for index, feature in enumerate(features):
+            feature['id'] = str(index)
+        response = {'type': 'FeatureCollection', 'features': features}
+        hits = len(features)
     else:
+        combined = pd.concat([frame.reindex(columns=union) for frame in frames], ignore_index=True)
         response = combined.to_csv(index=False)
+        hits = combined.shape[0]
 
     data = {
         'http_code': '200 OK',
         'response': response
     }
-    hits = combined.shape[0]
 
     return data, hits
 

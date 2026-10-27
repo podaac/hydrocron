@@ -183,10 +183,12 @@ class TestReachNodesGeojson:
 
     @pytest.mark.parametrize("reach_key", REACH_KEYS)
     def test_reach_nodes_geojson(self, api_client, stable_test_data, reach_key):
-        """One Feature per row; reaches are lines, nodes are points; all Features share keys"""
+        """One Feature per row; reaches are lines, nodes are points; each Feature has only its own type's properties"""
         reach_data = stable_test_data[reach_key]
+        params = reach_nodes_params(reach_data, output="geojson", fields="reach_id,time_str,wse,slope",
+                                    node_fields="node_id,time_str,wse,node_q")
 
-        response, _ = api_client.query(reach_nodes_params(reach_data, output="geojson"), timeout=30)
+        response, _ = api_client.query(params, timeout=30)
 
         with on_failure_show_curl(response):
             assert_http_success(response)
@@ -202,9 +204,13 @@ class TestReachNodesGeojson:
             assert len(reach_features) == reach_data["expected_count"]
             assert node_features, "Expected node Features"
 
-            keys = set(features[0]["properties"])
-            assert all(set(f["properties"]) == keys for f in features), "All Features must have the same property keys"
-            assert all(f["properties"]["node_id"] is None for f in reach_features), "node_id must be null on reach Features"
+            for f in reach_features:
+                assert "slope" in f["properties"], "Reach Features must have reach fields"
+                assert "node_id" not in f["properties"] and "node_q" not in f["properties"], "Reach Features must not have node fields"
+            for f in node_features:
+                assert "node_q" in f["properties"], "Node Features must have node fields"
+                assert "slope" not in f["properties"], "Node Features must not have reach-only fields"
+            assert all(value is not None for f in features for value in f["properties"].values()), "No null properties expected"
             assert all(f["geometry"]["type"] == "Point" for f in node_features), "Node geometry must be a Point"
             assert all(f["geometry"]["type"] != "Point" for f in reach_features), "Reach geometry must not be a Point"
             assert_node_ids_belong_to_reach([f["properties"]["node_id"] for f in node_features], reach_data["feature_id"])
