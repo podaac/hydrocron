@@ -75,9 +75,11 @@ resource "aws_lambda_function" "hydrocron_lambda_timeseries" {
   }
   environment {
     variables = {
-      DEFAULT_COLLECTION_VERSION = "D"
-      DEFAULT_LAKE_COLLECTION    = "SWOT_L2_HR_LakeSP"
-      DEFAULT_RIVER_COLLECTION   = "SWOT_L2_HR_RiverSP"
+      DEFAULT_COLLECTION_VERSION             = "D"
+      DEFAULT_LAKE_COLLECTION                = "SWOT_L2_HR_LakeSP"
+      DEFAULT_RIVER_COLLECTION               = "SWOT_L2_HR_RiverSP"
+      HYDROCRON_REACH_AND_NODE_QUERY_THREADS = 32
+      HYDROCRON_MAX_REACH_NODE_ITEMS         = 25000
     }
   }
   tags = var.default_tags
