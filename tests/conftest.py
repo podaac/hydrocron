@@ -2,6 +2,7 @@
 conftest file to set up local dynamodb connection
 """
 import datetime
+import functools
 import os.path
 
 import boto3
@@ -63,6 +64,56 @@ TEST_SHAPEFILE_PATH_LAKE_VERSION_D = os.path.join(
     'SWOT_L2_HR_LakeSP_Prior_033_506_AU_20250605T225724_20250605T230824_PID0_01.zip'  # noqa
 )
 
+# Node files matching existing reach files (same pass/tile/CRID), for reach + node requests.
+# Node rows are grouped by reach in file order:
+#   2.0: rows 0-54 = 71140100251 (no observed nodes), rows 134-189 = 71140300273 (56 nodes, 23 observed)
+#   D:   rows 0-22 = 57203000033 (no observed nodes), rows 23-74 = 57203000041 (52 nodes, 16 observed)
+TEST_SHAPEFILE_PATH_NODE_REACH_MATCH = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_RiverSP_Node_020_149_NA_20240825T231711_20240825T231722_PIC0_01.zip'  # noqa
+)
+
+TEST_SHAPEFILE_PATH_NODE_REACH_MATCH_VERSION_D = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_RiverSP_Node_049_058_AU_20260419T185249_20260419T190852_PID0_01.zip'  # noqa
+)
+
+# 2.0 second pass (next cycle, 2024-09-15), same reaches/nodes and row layout as 020: gives
+# 71140300273 a second time step (reach observed; 19 nodes observed on both passes).
+TEST_SHAPEFILE_PATH_REACH_TRACK_PASS_2 = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_RiverSP_Reach_021_149_NA_20240915T200226_20240915T200228_PIC0_01.zip'  # noqa
+)
+
+TEST_SHAPEFILE_PATH_NODE_REACH_MATCH_PASS_2 = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_RiverSP_Node_021_149_NA_20240915T200226_20240915T200228_PIC0_01.zip'  # noqa
+)
+
+# D second pass (next cycle, 2026-05-10), same reaches/nodes and row layout as 049: gives
+# 57203000041 a second time step (reach observed; 19 nodes observed, 17 of them also in 049).
+TEST_SHAPEFILE_PATH_REACH_VERSION_D_PASS_2 = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_RiverSP_Reach_050_058_AU_20260510T153753_20260510T155356_PID0_02.zip'  # noqa
+)
+
+TEST_SHAPEFILE_PATH_NODE_REACH_MATCH_VERSION_D_PASS_2 = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'data',
+    'SWOT_L2_HR_RiverSP_Node_050_058_AU_20260510T153753_20260510T155356_PID0_02.zip'  # noqa
+)
+
+
+@functools.lru_cache(maxsize=None)
+def read_shapefile_cached(path, columns):
+    """Read a shapefile once per test session (columns as a tuple, for caching)."""
+    return swot_shp.read_shapefile(path, obscure_data=False, columns=list(columns))
+
 dynamo_test_proc = factories.dynamodb_proc(
     dynamodb_dir=os.path.join(os.path.dirname(os.path.realpath(__file__)),
                               'dynamodb_local'), port=8000)
@@ -70,16 +121,52 @@ dynamo_test_proc = factories.dynamodb_proc(
 dynamo_db_resource = factories.dynamodb("dynamo_test_proc")
 
 
-def create_tables(dynamo_db, table_name, feature_id, non_key_atts):
-    """Create DynamoDB tables for testing."""
+def create_tables(dynamo_db, table_name, feature_id, non_key_atts, reach_index=False):
+    """Create DynamoDB tables for testing. reach_index adds the node tables' ReachIdIndex."""
+
+    attribute_definitions = [
+        {'AttributeName': feature_id, 'AttributeType': 'S'},
+        {'AttributeName': 'range_start_time', 'AttributeType': 'S'},
+        {'AttributeName': 'granuleUR', 'AttributeType': 'S'}
+    ]
+    indexes = [
+        {
+            "IndexName": "GranuleURIndex",
+            "KeySchema": [
+                {
+                    "AttributeName": "granuleUR",
+                    "KeyType": "HASH"
+                },
+                {
+                    "AttributeName": "range_start_time",
+                    "KeyType": "RANGE"
+                }
+            ],
+            "Projection": {
+                "ProjectionType": "INCLUDE",
+                "NonKeyAttributes": non_key_atts
+            },
+            "ProvisionedThroughput": {
+                "ReadCapacityUnits": 5,
+                "WriteCapacityUnits": 5
+            }
+        }
+    ]
+    if reach_index:
+        attribute_definitions.append({'AttributeName': 'reach_id', 'AttributeType': 'S'})
+        indexes.append({
+            "IndexName": constants.SWOT_NODE_REACH_INDEX_NAME,
+            "KeySchema": [
+                {"AttributeName": "reach_id", "KeyType": "HASH"},
+                {"AttributeName": "range_start_time", "KeyType": "RANGE"}
+            ],
+            "Projection": {"ProjectionType": "KEYS_ONLY"},
+            "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
+        })
 
     dynamo_db.create_table(
         TableName=table_name,
-        AttributeDefinitions=[
-            {'AttributeName': feature_id, 'AttributeType': 'S'},
-            {'AttributeName': 'range_start_time', 'AttributeType': 'S'},
-            {'AttributeName': 'granuleUR', 'AttributeType': 'S'}
-        ],
+        AttributeDefinitions=attribute_definitions,
         KeySchema=[
             {
                 'AttributeName': feature_id,
@@ -95,29 +182,7 @@ def create_tables(dynamo_db, table_name, feature_id, non_key_atts):
             'ReadCapacityUnits': 10,
             'WriteCapacityUnits': 10
         },
-        GlobalSecondaryIndexes=[
-            {
-                "IndexName": "GranuleURIndex",
-                "KeySchema": [
-                    {
-                        "AttributeName": "granuleUR",
-                        "KeyType": "HASH"
-                    },
-                    {
-                        "AttributeName": "range_start_time",
-                        "KeyType": "RANGE"
-                    }
-                ],
-                "Projection": {
-                    "ProjectionType": "INCLUDE",
-                    "NonKeyAttributes": non_key_atts
-                },
-                "ProvisionedThroughput": {
-                    "ReadCapacityUnits": 5,
-                    "WriteCapacityUnits": 5
-                }
-            }
-        ]
+        GlobalSecondaryIndexes=indexes
     )
 
 
@@ -153,14 +218,16 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         dynamo_db,
         constants.API_TEST_NODE_TABLE_NAME,
         'node_id',
-        ['node_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
+        ['node_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time'],
+        reach_index=True
     )
 
     create_tables(
         dynamo_db,
         constants.API_TEST_NODE_TABLE_NAME_D,
         'node_id',
-        ['node_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time']
+        ['node_id', 'collection_shortname', 'collection_version', 'crid', 'cycle_id', 'pass_id', 'continent_id', 'ingest_time'],
+        reach_index=True
     )
 
     create_tables(
@@ -220,6 +287,31 @@ def hydrocron_dynamo_instance(request, dynamo_test_proc):
         obscure_data=False,
         columns=constants.NODE_DATA_COLUMNS)
     for item_attrs in node_items[:100]:  # Limit to 100 records for test speed
+        node_hydro_table.add_data(**item_attrs)
+
+    # reach + node data: reaches with matching nodes (see TEST_SHAPEFILE_PATH_NODE_REACH_MATCH)
+    reach_match_items = read_shapefile_cached(TEST_SHAPEFILE_PATH_REACH_TRACK, tuple(constants.REACH_DATA_COLUMNS))
+    for item_attrs in reach_match_items[:4]:  # reaches 71140100251 (row 0) and 71140300273 (row 2)
+        reach_hydro_table.add_data(**item_attrs)
+    node_match_items = read_shapefile_cached(TEST_SHAPEFILE_PATH_NODE_REACH_MATCH, tuple(constants.NODE_DATA_COLUMNS))
+    for item_attrs in node_match_items[:55] + node_match_items[134:190]:
+        node_2_hydro_table.add_data(**item_attrs)
+
+    # 2.0 second pass (2024-09-15) for the same reaches and nodes
+    for item_attrs in read_shapefile_cached(TEST_SHAPEFILE_PATH_REACH_TRACK_PASS_2, tuple(constants.REACH_DATA_COLUMNS))[:4]:
+        reach_hydro_table.add_data(**item_attrs)
+    node_2_pass_2_items = read_shapefile_cached(TEST_SHAPEFILE_PATH_NODE_REACH_MATCH_PASS_2, tuple(constants.NODE_DATA_COLUMNS))
+    for item_attrs in node_2_pass_2_items[:55] + node_2_pass_2_items[134:190]:
+        node_2_hydro_table.add_data(**item_attrs)
+    node_match_d_items = read_shapefile_cached(TEST_SHAPEFILE_PATH_NODE_REACH_MATCH_VERSION_D, tuple(constants.NODE_DATA_COLUMNS))
+    for item_attrs in node_match_d_items[:75]:  # reaches 57203000033 and 57203000041
+        node_hydro_table.add_data(**item_attrs)
+
+    # D second pass (2026-05-10) for the same reaches and nodes
+    for item_attrs in read_shapefile_cached(TEST_SHAPEFILE_PATH_REACH_VERSION_D_PASS_2, tuple(constants.REACH_DATA_COLUMNS)):
+        reach_d_hydro_table.add_data(**item_attrs)
+    node_pass_2_items = read_shapefile_cached(TEST_SHAPEFILE_PATH_NODE_REACH_MATCH_VERSION_D_PASS_2, tuple(constants.NODE_DATA_COLUMNS))
+    for item_attrs in node_pass_2_items[:75]:  # reaches 57203000033 and 57203000041
         node_hydro_table.add_data(**item_attrs)
 
     # load lake table (Version D with qual_f_b field)
@@ -339,6 +431,14 @@ def hydrocron_api(hydrocron_dynamo_instance, dynamo_test_proc, mock_ssm):
     os.environ['DEFAULT_COLLECTION_VERSION'] = 'D'
     import hydrocron.utils.connection    # noqa: E501 # pylint: disable=import-outside-toplevel
     hydrocron.utils.connection._dynamodb_resource = hydrocron_dynamo_instance
+    # Plain low-level client (not resource.meta.client, which re-serializes typed values)
+    hydrocron.utils.connection._dynamodb_client = boto3.client(
+        "dynamodb",
+        endpoint_url=f"http://{dynamo_test_proc.host}:{dynamo_test_proc.port}",
+        aws_access_key_id='fakeMyKeyId',
+        aws_secret_access_key='fakeSecretAccessKey',
+        region_name='us-west-2',
+    )
 
 
 @pytest.fixture()
