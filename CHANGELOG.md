@@ -7,8 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-    - Issue 255 - Added `node_fields` parameter to return a reach and all of its nodes in one request (new `ReachIdIndex` GSI on the node tables)
     - Issue 397 - Add paging capability to the API
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [1.11.0]
+
+### Added
+    - Issue 255 - Added `node_fields` parameter to return a reach and all of its nodes in one request (new `ReachIdIndex` GSI on the node tables)
 ### Changed
 ### Deprecated
 ### Removed
