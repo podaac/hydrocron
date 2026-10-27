@@ -458,7 +458,6 @@ When [](#node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV
 - **Column order:** `feature_type`, `reach_id`, `node_id`, then the requested [](#fields), then any new fields from [](#node_fields), then units. A field in both lists appears once.
 - **Fields that don't apply:**
   - **CSV** has one header for all rows, so a column that doesn't apply to a row's feature type is **empty** (e.g. `node_id` and `node_q` on the reach row, `slope` on node rows).
-  - **GeoJSON:** each Feature has only its own feature type's properties. Reach Features have no `node_id` and no node-only fields; node Features have no reach-only fields.
   - A value that applies but is missing keeps the fill value `-999999999999.0`, as in other responses.
 - **Units:** unit columns come from the rows returned. In CSV, if only the reach or only nodes have data, the other feature type's requested fields still appear (empty), but their unit columns may not.
 - **Unobserved nodes** are included with `time_str` of `no_data` and fill values, the same as `feature=Node` requests.

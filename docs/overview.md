@@ -1,8 +1,6 @@
 # Overview
 
-Hydrocron has a main API endpoint:
-
-- [timeseries/](/timeseries) which returns all of the timesteps for a single feature ID, or for a reach and all of its nodes ([](#node_fields)).
+Hydrocron's main API endpoint, [timeseries/](/timeseries), returns the time series of SWOT observations for river reaches, nodes, and lakes.
 
 ## Feature ID
 
