@@ -11,7 +11,11 @@ import sys
 import boto3
 from boto3.resources.base import ServiceResource
 import botocore
+import botocore.config
 from botocore.client import BaseClient
+
+# Local imports
+from hydrocron.utils import constants
 
 
 class Connection(ModuleType):
@@ -26,6 +30,7 @@ class Connection(ModuleType):
         super().__init__(name)
         self.env = os.getenv('HYDROCRON_ENV', 'prod')
         self._dynamodb_resource = None
+        self._dynamodb_client = None
         self._dynamodb_endpoint = self._get_dynamodb_endpoint()
         self._s3_resource = None
         self._ssm_client = None
@@ -59,6 +64,22 @@ class Connection(ModuleType):
             else:
                 self._dynamodb_resource = session.resource('dynamodb')
         return self._dynamodb_resource
+
+    @property
+    def dynamodb_client(self) -> BaseClient:
+        """Return low-level DynamoDB client, shared by the parallel per-node queries.
+
+        Clients are thread-safe (resources are not); the pool is sized to the thread count.
+        """
+
+        if not self._dynamodb_client:
+            session = boto3.session.Session()
+            config = botocore.config.Config(max_pool_connections=constants.REACH_AND_NODE_QUERY_THREADS)
+            if self._dynamodb_endpoint:
+                self._dynamodb_client = session.client('dynamodb', endpoint_url=self._dynamodb_endpoint, config=config)
+            else:
+                self._dynamodb_client = session.client('dynamodb', config=config)
+        return self._dynamodb_client
 
     @property
     def s3_resource(self) -> ServiceResource:
@@ -96,6 +117,7 @@ class Connection(ModuleType):
 
 
 dynamodb_resource: ServiceResource
+dynamodb_client: BaseClient
 s3_resource: ServiceResource
 ssm_client: BaseClient
 sns_client: BaseClient

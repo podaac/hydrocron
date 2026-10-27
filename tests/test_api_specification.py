@@ -49,6 +49,15 @@ def test_csv_file_response_headers_are_declared():
     assert "Access-Control-Expose-Headers" in headers
 
 
+def test_node_fields_parameter_is_declared():
+    """node_fields is documented as an optional query string parameter."""
+    parameters = {p["name"]: p for p in _load_spec()["paths"]["/timeseries"]["get"]["parameters"]}
+
+    assert parameters["node_fields"]["in"] == "query"
+    assert parameters["node_fields"]["required"] is False
+    assert parameters["node_fields"]["schema"]["type"] == "string"
+
+
 def test_cors_options_exposes_content_disposition():
     """OPTIONS response must include the configured exposed-header value."""
     response_parameters = (
