@@ -110,11 +110,13 @@ Example:
 
 ### output : string, required: no
 
-Format of the data returned. Either: "csv", "geojson", or "csv_file"
+Format of the data returned. One of: `geojson`, `csv`, `csv_file`.
 
-- `csv` — returns CSV data in the JSON response body
-- `geojson` — returns GeoJSON data in the JSON response body
-- `csv_file` — triggers a CSV file download in the browser with a `Content-Disposition: attachment` header
+- `geojson` **(default)** — returns GeoJSON in the `results` field of the JSON response
+- `csv` — returns CSV in the `results` field of the JSON response
+- `csv_file` — returns the data as a CSV file download (the browser prompts to save it)
+
+Use `output` only with no Accept header, `*/*`, or `application/json`. Setting `output` with the Accept header `text/csv` or `application/geo+json` returns a 400.
 
 ### filename : string, required: no
 
