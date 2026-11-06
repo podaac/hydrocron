@@ -180,6 +180,18 @@ paths:
                 type: array
                 items:
                   type: string
+        "500":
+          description: "500 error. Internal error; the message has a request ID to report."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+        "503":
+          description: "503 error. Service busy; retry in a few seconds."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
       x-openapi-router-controller: hydrocron_api.controllers.timeseries
 
       x-amazon-apigateway-integration:
@@ -246,6 +258,24 @@ paths:
                 }
           ^415.*:
             statusCode: "415"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: |-
+                {
+                  "error" : "$input.path('$.errorMessage')"
+                }
+          ^500.*:
+            statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: |-
+                {
+                  "error" : "$input.path('$.errorMessage')"
+                }
+          ^503.*:
+            statusCode: "503"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:

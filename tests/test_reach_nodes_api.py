@@ -360,19 +360,18 @@ def test_reach_only_geojson_has_only_reach_properties(hydrocron_api):
 
 
 def test_reach_and_nodes_integrity_error(hydrocron_api, monkeypatch, caplog):
-    """A node row whose reach_id differs from the request is logged and raises a 500-class error."""
+    """A node row whose reach_id differs from the request is logged and returns the generic 500 (detail in logs only)."""
     import hydrocron.api.controllers.timeseries
     from hydrocron.api.data_access.db import DynamoDataRepository
 
     monkeypatch.setattr(DynamoDataRepository, 'get_node_series', lambda self, *args, **kwargs: [
         {'node_id': '57203000040011', 'reach_id': '99999999999', 'range_start_time': 't', 'geometry': 'POINT (0 0)'}])
-    with pytest.raises(hydrocron.api.controllers.timeseries.DataIntegrityError) as exc_info:
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
         _handler(_event())
 
     message = str(exc_info.value)
-    assert not isinstance(exc_info.value, hydrocron.api.controllers.timeseries.RequestError)
-    assert message.startswith('Data integrity error') and not message[0].isdigit()
-    assert 'node reach_id mismatch' in caplog.text and '99999999999' in caplog.text
+    assert message.startswith('500: Internal error (request ID ') and '99999999999' not in message
+    assert 'node reach_id mismatch' in caplog.text and 'DataIntegrityError' in caplog.text
 
 
 def test_build_node_projection():

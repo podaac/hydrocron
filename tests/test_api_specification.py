@@ -58,6 +58,17 @@ def test_node_fields_parameter_is_declared():
     assert parameters["node_fields"]["schema"]["type"] == "string"
 
 
+def test_error_codes_are_mapped():
+    """Every status the Lambda raises has an error regex, and every mapped status has a method response."""
+    get = _load_spec()["paths"]["/timeseries"]["get"]
+    integration_responses = get["x-amazon-apigateway-integration"]["responses"]
+
+    for status in ("400", "404", "413", "415", "500", "503"):
+        assert integration_responses[f"^{status}.*"]["statusCode"] == status
+    for response in integration_responses.values():
+        assert response["statusCode"] in get["responses"]
+
+
 def test_cors_options_exposes_content_disposition():
     """OPTIONS response must include the configured exposed-header value."""
     response_parameters = (
