@@ -292,6 +292,8 @@ jobs:
           file: docker/Dockerfile
           push: true
           pull: true
+          provenance: false       # Lambda rejects attestations (Docker 29+ adds them)
+          sbom: false             # same: keep a plain manifest Lambda accepts
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Set output
