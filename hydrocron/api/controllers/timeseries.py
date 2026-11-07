@@ -12,6 +12,7 @@ import time
 from concurrent.futures import wait
 
 from accept_types import get_best_match
+from botocore.exceptions import ClientError
 import pandas as pd
 import geopandas as gpd
 from shapely.wkt import loads
@@ -32,18 +33,34 @@ REACH_AND_NODE_ID_COLUMNS = ['feature_type', 'reach_id', 'node_id']
 DEFAULT_RIVER_COLLECTION = os.environ['DEFAULT_RIVER_COLLECTION']
 DEFAULT_LAKE_COLLECTION = os.environ['DEFAULT_LAKE_COLLECTION']
 DEFAULT_COLLECTION_VERSION = os.environ['DEFAULT_COLLECTION_VERSION']
+ISSUES_URL = 'https://github.com/podaac/hydrocron/issues'
+# AWS error codes that mean "busy, retry later" (503); any other AWS error is a 500.
+RETRYABLE_AWS_ERROR_CODES = ('ProvisionedThroughputExceededException', 'ThrottlingException', 'RequestLimitExceeded',
+                             'InternalServerError', 'ServiceUnavailable')
+# Default log code per HTTP status, for errors raised without a specific code.
+DEFAULT_ERROR_CODES = {400: 'BAD_REQUEST', 404: 'NOT_FOUND', 413: 'RESPONSE_TOO_LARGE', 415: 'UNSUPPORTED_MEDIA_TYPE',
+                       500: 'INTERNAL_ERROR', 503: 'SERVICE_BUSY'}
 
 
 class RequestError(Exception):
     """
-    Exception thrown if there is an error encoutered with request
+    Exception thrown if there is an error encountered with the request.
+
+    The message starts with the HTTP status ('400: ...'); API Gateway picks the status from it.
+    code is a short name for logs (e.g. FEATURE_NOT_FOUND); defaults by status.
     """
+
+    def __init__(self, message, code=None):
+        super().__init__(message)
+        status = message.split(':', 1)[0]
+        self.http_code = int(status) if status.isdigit() else 500
+        self.code = code or DEFAULT_ERROR_CODES.get(self.http_code, 'ERROR')
 
 
 class DataIntegrityError(Exception):
     """
     Exception thrown if stored data is inconsistent (e.g. a node's reach_id differs from the reach it was found for).
-    Not a RequestError: its message doesn't start with an HTTP code, so API Gateway returns 500.
+    Not a RequestError: lambda_handler logs it and returns the generic 500 message (detail stays in logs).
     """
 
 
@@ -789,32 +806,123 @@ def compact_results(results, group_by_feature=False):
     return response
 
 
-def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
+def to_gateway_error(error):
+    """Return the exception to raise to API Gateway for an error, its message JSON-escaped once.
+
+    The integration response templates put errorMessage inside a JSON string without escaping, so a quote,
+    backslash, or control character (e.g. %0A in echoed user input) would break the body, and a newline would
+    break the status regex (-> HTTP 200). Escape here only; logs keep the plain text.
+    Remove with the proxy switch (the Lambda then json.dumps the body), or text gets double-escaped.
+
+    :param error: The error to return
+    :type error: RequestError
+
+    :rtype: RequestError
     """
-    This function queries the database for relevant results
+
+    return RequestError(json.dumps(str(error))[1:-1], error.code)
+
+
+def internal_error(context):
+    """Return the generic 500 error: request ID only, no internal detail.
+
+    :param context: Lambda context
+    :type context: LambdaContext
+
+    :rtype: RequestError
+    """
+
+    request_id = getattr(context, 'aws_request_id', 'unknown')
+    return RequestError(f'500: Internal error (request ID {request_id}). Please report it at {ISSUES_URL}.')
+
+
+def log_response(level, request_info, elapsed, http_code, code, **fields):  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    """Log one structured line per response: success and error lines share the same keys.
+
+    Success lines keep today's 'response: ' prefix and INFO level; error lines stay plain JSON at ERROR
+    (the Kibana panel counts http_code from them).
+
+    :param level: logging level
+    :type level: int
+    :param request_info: collection and feature of the request (None if not parsed yet)
+    :type request_info: dict
+    :param elapsed: milliseconds since the request started
+    :type elapsed: float
+    :param http_code: HTTP status
+    :type http_code: int
+    :param code: Short name for the outcome (OK, FEATURE_NOT_FOUND, INTERNAL_ERROR, ...)
+    :type code: str
+    :param fields: Extra keys (error_message, hits, response_size, status)
+    """
+
+    entry = json.dumps({'http_code': http_code, 'code': code, **request_info, 'time': elapsed, **fields})
+    if level == logging.INFO:
+        logging.info('response: %s', entry)
+    else:
+        logging.log(level, entry)
+
+
+def lambda_handler(event, context):
+    """
+    This function queries the database for relevant results.
+
+    Every error leaves as a RequestError whose message starts with the HTTP status: AWS throttling -> 503,
+    any other exception -> 500 with the request ID only (full traceback in logs).
     """
 
     start = time.time()
+    request_info = {'collection': None, 'feature': None}
 
     logging.info('headers: %s', json.dumps(event['headers']))
     logging.info('request: %s', json.dumps(event['body']))
 
     try:
-        headers = get_request_headers(event)
-        # The cloud metrics Elastic Heartbeat is a Health check that occurs
-        # every 15 seconds. The following statement checks if the current request is an Elastic Heartbeat
-        # and if it is, simply return success immediately instead of further processing the request
-        # More background: https://github.com/podaac/hydrocron/issues/89
-        if event['body'] == {} and 'Elastic-Heartbeat' in headers['user_agent']:
-            return {}
-        logging.info('user_ip: %s', headers['user_ip'])
-        parameters = get_request_parameters(event, headers['accept'])
-        logging.info('collection_name: %s', parameters['collection_name'])
-        return_type, output = get_return_type(headers['accept'], parameters['output'])
+        return handle_request(event, start, request_info)
     except RequestError as e:
-        error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
-        logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
-        raise e
+        error = e
+    except ClientError as e:
+        aws_code = e.response.get('Error', {}).get('Code')
+        if aws_code in RETRYABLE_AWS_ERROR_CODES:
+            logging.warning('Retryable AWS error: %s', aws_code)
+            error = RequestError('503: Service busy. Retry in a few seconds.')
+        else:
+            logging.exception('Unhandled AWS error')
+            error = internal_error(context)
+    except Exception:  # pylint: disable=broad-exception-caught
+        logging.exception('Unhandled error')
+        error = internal_error(context)
+
+    log_response(logging.ERROR, request_info, round((time.time() - start) * 1000, 3), error.http_code, error.code,
+                 error_message=str(error))
+    raise to_gateway_error(error)
+
+
+def handle_request(event, start, request_info):
+    """Validate the request, query, and build the response. Errors propagate to lambda_handler.
+
+    :param event: Request data dictionary
+    :type event: dict
+    :param start: Request start time (time.time())
+    :type start: float
+    :param request_info: Filled with the request's collection and feature, for the response log line
+    :type request_info: dict
+
+    :rtype: dict
+    """
+
+    headers = get_request_headers(event)
+    # The cloud metrics Elastic Heartbeat is a Health check that occurs
+    # every 15 seconds. The following statement checks if the current request is an Elastic Heartbeat
+    # and if it is, simply return success immediately instead of further processing the request
+    # More background: https://github.com/podaac/hydrocron/issues/89
+    if event['body'] == {} and 'Elastic-Heartbeat' in headers['user_agent']:
+        return {}
+    logging.info('user_ip: %s', headers['user_ip'])
+    parameters = get_request_parameters(event, headers['accept'])
+    request_info['collection'] = parameters['collection_name']
+    request_info['feature'] = parameters['feature']
+    logging.info('collection_name: %s', parameters['collection_name'])
+    return_type, output = get_return_type(headers['accept'], parameters['output'])
 
     results, hits = timeseries_get(
         parameters['collection_name'],
@@ -830,16 +938,11 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     end = time.time()
     elapsed = round((end - start) * 1000, 3)
 
-    try:
-        if parameters['output'] == 'csv_file':
-            data = build_csv_file_response(results, parameters)
-        else:
-            data = get_response(results, hits, elapsed, return_type, output, parameters['compact'],
-                                parameters['node_fields'] is not None)
-    except RequestError as e:
-        error_code = int(str(e).split(':')[0])    # pylint: disable=use-maxsplit-arg
-        logging.error(json.dumps({'http_code': error_code, 'error_message': str(e)}))
-        raise e
+    if parameters['output'] == 'csv_file':
+        data = build_csv_file_response(results, parameters)
+    else:
+        data = get_response(results, hits, elapsed, return_type, output, parameters['compact'],
+                            parameters['node_fields'] is not None)
 
     # Size the final response (after compaction and any wrappers) as the Lambda Python 3.12+ runtime
     # serializes it: JSON with Unicode unescaped. A CSV string grows when JSON-encoded (quotes, \n escapes).
@@ -849,12 +952,10 @@ def lambda_handler(event, context):  # noqa: E501 # pylint: disable=W0613
     if response_size > MAX_RESPONSE_SIZE_BYTES:
         size_mb = response_size / (1024 * 1024)
         limit_mb = MAX_RESPONSE_SIZE_BYTES // (1024 * 1024)
-        error_message = (f'413: Query response is {size_mb:.1f}MB ({hits} hits), exceeding the {limit_mb}MB '
-                         f'limit. Reduce the time range or number of requested fields.')
-        logging.error(json.dumps({'http_code': 413, 'error_message': error_message}))
-        raise RequestError(error_message)
+        raise RequestError(f'413: Query response is {size_mb:.1f}MB ({hits} hits), exceeding the {limit_mb}MB '
+                           f'limit. Reduce the time range or number of requested fields.')
 
-    logging.info('response: %s', json.dumps(
-        {'status': results['http_code'], 'time': elapsed, 'hits': hits, 'response_size': response_size}))
+    log_response(logging.INFO, request_info, elapsed, 200, 'OK',
+                 status=results['http_code'], hits=hits, response_size=response_size)
 
     return data
