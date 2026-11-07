@@ -265,15 +265,6 @@ paths:
                 {
                   "error" : "$input.path('$.errorMessage')"
                 }
-          ^500.*:
-            statusCode: "500"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-            responseTemplates:
-              application/json: |-
-                {
-                  "error" : "$input.path('$.errorMessage')"
-                }
           ^503.*:
             statusCode: "503"
             responseParameters:
@@ -283,15 +274,27 @@ paths:
                 {
                   "error" : "$input.path('$.errorMessage')"
                 }
-          ^[^1-5].*:
+          # One entry per status code: API Gateway keeps only one integration response per status.
+          # 500 = our "500: ..." messages, plus any message not starting with 1-5 (Lambda runtime errors).
+          # (?s): runtime errors can be multiline; without it "." stops at a newline and the default (200) wins.
+          "(?s)^(500|[^1-5]).*":
             statusCode: "500"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
+              # Our 500s are JSON-escaped by the Lambda: echo them. Raw runtime errors aren't (and may hold
+              # internal detail): return a fixed message with API Gateway's request ID instead.
               application/json: |-
+                #set($msg = $input.path('$.errorMessage'))
+                #if($msg.startsWith('500:'))
                 {
-                  "error" : "$input.path('$.errorMessage')"
+                  "error" : "$msg"
                 }
+                #else
+                {
+                  "error" : "500: Internal error (request ID $context.requestId). Please report it at https://github.com/podaac/hydrocron/issues."
+                }
+                #end
         requestTemplates:
           application/json: |-
             #set($queryParams = $input.params().querystring)
