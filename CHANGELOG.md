@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Issue 399 - Fixed "Float types are not supported" ingest error - discovered with DLQ
     - Fixed the 6 MB response size check to measure responses as Lambda returns them (CSV JSON-encoded, Unicode unescaped)
 ### Security
+    - Docker image: apply latest Amazon Linux 2023 OS security updates (glibc, rpm, and others) and stop shipping pip in the Lambda package (its vendored setuptools/urllib3/msgpack were flagged as High CVEs)
 
 ## [1.10.1]
 
