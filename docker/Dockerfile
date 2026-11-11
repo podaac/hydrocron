@@ -29,8 +29,9 @@ FROM public.ecr.aws/lambda/python:3.12
 ARG FUNCTION_DIR
 WORKDIR ${FUNCTION_DIR}
 
-# Apply OS security fixes the AWS base image hasn't picked up yet (repo is locked to the base's release without --releasever)
-RUN dnf --releasever=latest upgrade -y && dnf clean all
+# Patch OS packages the AWS base hasn't updated yet (needs --releasever) and drop the unused base pip
+RUN dnf --releasever=latest upgrade -y && dnf clean all && \
+    python3 -m pip uninstall -y pip
 
 COPY --from=build_image ${FUNCTION_DIR} ${LAMBDA_TASK_ROOT}
 ENV PATH="${PATH}:${LAMBDA_TASK_ROOT}/bin"
