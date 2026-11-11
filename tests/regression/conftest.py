@@ -90,6 +90,14 @@ STABLE_TEST_DATA_OPS = {
             "comprehensive_geojson": "priorlake/lake_comprehensive.geojson"
         }
     },
+    # Largest known reach + nodes request (99 nodes, 20,394 node rows on 2026-10-07); full range
+    "reach_nodes_worst": {
+        "feature_id": "28324500213",
+        "start_time": "2023-01-01T00:00:00Z",
+        "end_time": "2026-12-31T23:59:59Z",
+        "collection_name": "SWOT_L2_HR_RiverSP_D",
+        "max_seconds": 20
+    },
     "priorlake_d": {
         "feature_id": "7230381002",
         "start_time": "2024-06-29T00:00:00Z",

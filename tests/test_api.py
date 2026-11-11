@@ -12,6 +12,8 @@ import json
 import numpy as np
 from numpy.testing import assert_almost_equal
 
+from tests.geojson_validation import assert_valid_geojson
+
 
 def test_timeseries_lambda_handler_json_reach(hydrocron_api):
     """
@@ -46,7 +48,8 @@ def test_timeseries_lambda_handler_json_reach(hydrocron_api):
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
            json.loads(json.dumps(result['results']['geojson'])) == expected
-           
+    assert_valid_geojson(result['results']['geojson'])
+
 
 def test_timeseries_lambda_handler_json_lake(hydrocron_api):
     """
@@ -81,6 +84,7 @@ def test_timeseries_lambda_handler_json_lake(hydrocron_api):
         expected = json.load(jf)
     assert result['status'] == '200 OK' and \
            json.loads(json.dumps(result['results']['geojson'])) == expected
+    assert_valid_geojson(result['results']['geojson'])
 
 
 def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
@@ -111,6 +115,7 @@ def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
     context = "_"
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
     assert geojson.loads(json.dumps((result['results']['geojson']))).is_valid
+    assert_valid_geojson(result['results']['geojson'])
 
 
 def test_timeseries_lambda_handler_csv(hydrocron_api):
@@ -533,6 +538,101 @@ def test_timeseries_compact_geojson_not_413_when_uncompact_would_exceed(hydrocro
     assert result["results"]["geojson"]["type"] == "FeatureCollection"
 
 
+def _runtime_size(result):
+    """Response size as the Lambda Python 3.12+ runtime serializes it (JSON, Unicode unescaped)."""
+    return len(json.dumps(result, ensure_ascii=False).encode('utf-8'))
+
+
+def _size_event(accept=None, **body):
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": "reach_id,time_str,wse",
+            **body
+        },
+        "headers": {"User-Agent": "pytest", "X-Forwarded-For": "127.0.0.1"}
+    }
+    if accept:
+        event["headers"]["Accept"] = accept
+    return event
+
+
+def _assert_413_boundary(monkeypatch, event, size):
+    """At the limit: 200 (same response). One byte under: 413."""
+    import hydrocron.api.controllers.timeseries
+
+    monkeypatch.setattr(hydrocron.api.controllers.timeseries, 'MAX_RESPONSE_SIZE_BYTES', size)
+    assert _runtime_size(hydrocron.api.controllers.timeseries.lambda_handler(event, "_")) == size
+
+    monkeypatch.setattr(hydrocron.api.controllers.timeseries, 'MAX_RESPONSE_SIZE_BYTES', size - 1)
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    assert str(exc_info.value).startswith('413: Query response is')
+
+
+def test_timeseries_413_csv_string_measured_json_encoded(hydrocron_api, monkeypatch):
+    """A raw CSV response (Accept: text/csv) is sized JSON-encoded, as Lambda returns it.
+
+    Regression: the raw string undercounts (Lambda adds quotes and escapes each newline), so a CSV
+    that fits raw but not encoded must 413 instead of failing at Lambda.
+    """
+    import hydrocron.api.controllers.timeseries
+
+    event = _size_event(accept="text/csv")
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    raw_size = len(result.encode('utf-8'))
+    encoded_size = _runtime_size(result)
+    assert encoded_size == raw_size + 2 + result.count('\n')   # quotes + one extra byte per escaped newline
+
+    _assert_413_boundary(monkeypatch, event, encoded_size)
+
+    # Fits raw, too big encoded -> 413
+    monkeypatch.setattr(hydrocron.api.controllers.timeseries, 'MAX_RESPONSE_SIZE_BYTES', raw_size)
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError):
+        hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+
+
+def test_timeseries_413_unicode_measured_unescaped(hydrocron_api, monkeypatch):
+    """Non-ASCII text is sized unescaped (Python 3.12+ runtime), not as \\uXXXX escapes."""
+    import hydrocron.api.controllers.timeseries
+    from hydrocron.api.data_access.db import DynamoDataRepository
+
+    rows = {"Items": [{"reach_id": "71224100223", "time_str": "2023-06-10T19:39:43Z", "river_name": "Río São Ñandú",
+                       "geometry": "LINESTRING (0 0, 1 1)"}]}
+    monkeypatch.setattr(DynamoDataRepository, "get_series_by_feature_id", lambda self, *args, **kwargs: rows)
+    event = _size_event(accept="application/geo+json", fields="reach_id,time_str,river_name")
+
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+    size = _runtime_size(result)
+    assert len(json.dumps(result).encode('utf-8')) > size   # escaped form is bigger
+
+    _assert_413_boundary(monkeypatch, event, size)
+
+
+def test_timeseries_413_csv_file_wrapper(hydrocron_api, monkeypatch):
+    """output=csv_file is sized as the download wrapper dict Lambda returns."""
+    import hydrocron.api.controllers.timeseries
+
+    event = _size_event(output="csv_file")
+    size = _runtime_size(hydrocron.api.controllers.timeseries.lambda_handler(event, "_"))
+    _assert_413_boundary(monkeypatch, event, size)
+
+
+def test_timeseries_413_reach_and_nodes(hydrocron_api, monkeypatch):
+    """Reach + node responses go through the same size check."""
+    import hydrocron.api.controllers.timeseries
+
+    event = _size_event(accept="text/csv", feature_id="57203000041", collection_name="SWOT_L2_HR_RiverSP_D",
+                        start_time="2026-04-01T00:00:00Z", end_time="2026-04-30T00:00:00Z",
+                        node_fields="node_id,time_str,wse")
+    size = _runtime_size(hydrocron.api.controllers.timeseries.lambda_handler(event, "_"))
+    _assert_413_boundary(monkeypatch, event, size)
+
+
 def test_timeseries_lambda_handler_elastic_agent():
     """
     Test the lambda handler for cases where invoked by Elastic Agent.
@@ -602,6 +702,7 @@ def test_timeseries_lambda_handler_geojson_accept(hydrocron_api):
     with open(test_data) as jf:
         expected = json.load(jf)
     assert json.loads(json.dumps(result)) == expected
+    assert_valid_geojson(result)
 
 
 def test_timeseries_lambda_handler_csv_accept(hydrocron_api):

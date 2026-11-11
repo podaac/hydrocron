@@ -10,6 +10,8 @@ from typing import Dict, List, Any, Optional
 
 import pytest
 
+from ..geojson_validation import assert_valid_geojson
+
 
 def format_curl_command(response) -> str:
     """
@@ -74,6 +76,9 @@ def validate_geojson_structure(data):
         assert feature['type'] == 'Feature', f"Feature {i} type must be 'Feature'"
         assert 'geometry' in feature, f"Feature {i} must have 'geometry' field"
         assert 'properties' in feature, f"Feature {i} must have 'properties' field"
+
+    # Full GeoJSON validity (schema, geometry, coordinate ranges), as geojson.io would check
+    assert_valid_geojson(data)
 
 
 def validate_csv_structure(csv_text, expected_fields=None):

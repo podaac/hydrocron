@@ -21,6 +21,14 @@ TEST_REACH_FILENAME = (
     "SWOT_L2_HR_RiverSP_Reach_548_011_NA_"
     "20230610T193337_20230610T193344_PIA1_01.zip")
 
+# Reach granule with NaN in a numeric field (xtrk_dist); reproduces the DynamoDB
+# "Float types are not supported" error before the assemble_attributes NaN fill fix.
+TEST_REACH_NAN_SHAPEFILE_PATH = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    '../..', 'tests', 'data',
+    'SWOT_L2_HR_RiverSP_Reach_056_174_AS_20260916T232529_20260916T233730_PID0_03.zip'  # noqa E501
+))
+
 TEST_REACH_ITEM_DICT = {
     "reach_id": "71224100223",
     "time": "739741183.129",
@@ -150,6 +158,14 @@ SWOT_PRIOR_LAKE_PARTITION_KEY = "lake_id"
 SWOT_REACH_SORT_KEY = "range_start_time"
 SWOT_NODE_SORT_KEY = "range_start_time"
 SWOT_PRIOR_LAKE_SORT_KEY = "range_start_time"
+
+# KEYS_ONLY GSI on the node tables: reach_id (hash) + range_start_time (range)
+SWOT_NODE_REACH_INDEX_NAME = "ReachIdIndex"
+
+# Reach + node requests (node_fields): threads for the parallel per-node queries, and the
+# GSI key count above which the request is rejected (413) before any node is fetched.
+REACH_AND_NODE_QUERY_THREADS = int(os.environ.get('HYDROCRON_REACH_AND_NODE_QUERY_THREADS', '32'))
+MAX_REACH_NODE_ITEMS = int(os.environ.get('HYDROCRON_MAX_REACH_NODE_ITEMS', '25000'))
 
 TABLE_COLLECTION_INFO = [
     {'collection_name': 'SWOT_L2_HR_RiverSP_2.0',

@@ -197,6 +197,11 @@ def assemble_attributes(geodf, attributes):
 
     items = []
 
+    # Replace missing values with the fill value before stringifying, so no NaN (a Python float,
+    # which DynamoDB rejects) reaches an item. Geometry nulls are handled separately.
+    value_columns = [column for column in geodf.columns if column != 'geometry']
+    geodf[value_columns] = geodf[value_columns].fillna(constants.FILL_VALUE)
+
     geodf = geodf.astype(str)
     geodf = geodf.assign(**attributes)
     items = geodf.to_dict('records')
