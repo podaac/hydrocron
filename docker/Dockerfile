@@ -3,9 +3,11 @@ ARG FUNCTION_DIR="/function"
 
 FROM public.ecr.aws/lambda/python:3.12 AS build_image
 ARG FUNCTION_DIR
+# Pinned Poetry; CI passes build.yml's POETRY_VERSION, default is for local builds
+ARG POETRY_VERSION=2.3.2
 ENV BUILD_DIR=/hydrocron
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN curl -sSL https://install.python-poetry.org | python3 - --version ${POETRY_VERSION}
 
 WORKDIR $BUILD_DIR
 COPY ./hydrocron ./hydrocron
