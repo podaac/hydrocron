@@ -11,8 +11,8 @@ RUN curl -sSL https://install.python-poetry.org | python3 - --version ${POETRY_V
 
 WORKDIR $BUILD_DIR
 COPY ./hydrocron ./hydrocron
-
 COPY poetry.lock pyproject.toml README.md ./
+
 # Create the venv without pip: not a runtime dep, and scanners flag its vendored libs
 ENV POETRY_VIRTUALENVS_OPTIONS_NO_PIP=true
 RUN ~/.local/bin/poetry lock
