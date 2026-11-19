@@ -73,6 +73,10 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
     name = "granuleUR"
     type = "S"
   }
+  attribute {
+    name = "reach_id"
+    type = "S"
+  }
 
   global_secondary_index {
     name               = "GranuleURIndex"
@@ -80,6 +84,12 @@ resource "aws_dynamodb_table" "hydrocron-swot-node-table" {
     range_key          = "range_start_time"
     projection_type    = "INCLUDE"
     non_key_attributes = ["node_id", "collection_shortname", "collection_version", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
+  }
+  global_secondary_index {
+    name            = "ReachIdIndex"
+    hash_key        = "reach_id"
+    range_key       = "range_start_time"
+    projection_type = "KEYS_ONLY"
   }
   point_in_time_recovery {
     enabled = var.stage == "ops" ? true : false
@@ -103,6 +113,10 @@ resource "aws_dynamodb_table" "hydrocron-SWOT_L2_HR_RiverSP_D-node-table" {
     name = "granuleUR"
     type = "S"
   }
+  attribute {
+    name = "reach_id"
+    type = "S"
+  }
 
   global_secondary_index {
     name               = "GranuleURIndex"
@@ -110,6 +124,12 @@ resource "aws_dynamodb_table" "hydrocron-SWOT_L2_HR_RiverSP_D-node-table" {
     range_key          = "range_start_time"
     projection_type    = "INCLUDE"
     non_key_attributes = ["node_id", "collection_shortname", "collection_version", "crid", "cycle_id", "pass_id", "continent_id", "ingest_time"]
+  }
+  global_secondary_index {
+    name            = "ReachIdIndex"
+    hash_key        = "reach_id"
+    range_key       = "range_start_time"
+    projection_type = "KEYS_ONLY"
   }
   point_in_time_recovery {
     enabled = var.stage == "ops" ? true : false

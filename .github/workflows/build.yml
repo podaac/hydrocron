@@ -54,16 +54,10 @@ jobs:
       version: ${{ steps.poetry-build.outputs.the_version }}
       pyproject_name: ${{ steps.poetry-build.outputs.pyproject_name }}
     steps:
-      - uses: getsentry/action-github-app-token@v4.0.0
-        name: podaac cicd token
-        id: podaac-cicd
-        with:
-          app_id: ${{ secrets.CICD_APP_ID }}
-          private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
       - uses: actions/checkout@v6
         with:
           repository: ${{ github.repository }}
-          token: ${{ steps.podaac-cicd.outputs.token }}
+          persist-credentials: false
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -216,6 +210,17 @@ jobs:
         with:
           name: ${{ steps.poetry-build.outputs.pyproject_name }}-dist
           path: dist/*
+      # minted here: app tokens expire after 1 h
+      - uses: getsentry/action-github-app-token@v4.0.0
+        name: podaac cicd token
+        id: podaac-cicd
+        if: |
+          steps.alpha.conclusion == 'success'   ||
+          steps.rc.conclusion == 'success'      ||
+          steps.release.conclusion == 'success'
+        with:
+          app_id: ${{ secrets.CICD_APP_ID }}
+          private_key: ${{ secrets.CICD_APP_PRIVATE_KEY }}
       - name: Commit Version Bump
         # If building an alpha, release candidate, or release then we commit the version bump back to the repo
         if: |
@@ -225,6 +230,7 @@ jobs:
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${{ steps.podaac-cicd.outputs.token }}@github.com/${{ github.repository }}.git"
           git commit -am "/version ${{ env.software_version }}"
           git push
       - name: Push Tag
@@ -292,6 +298,8 @@ jobs:
           file: docker/Dockerfile
           push: true
           pull: true
+          provenance: false       # Lambda rejects attestations (Docker 29+ adds them)
+          sbom: false             # same: keep a plain manifest Lambda accepts
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Set output

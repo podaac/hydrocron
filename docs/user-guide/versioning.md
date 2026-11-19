@@ -2,7 +2,7 @@
 
 SWOT data periodically undergoes reprocessing, where data products are recreated from the original observations with updated processing algorithms. This results in a new data collection version.
 
-Hydrocron supports multiple versions of SWOT data collections. As of version 1.8.0, Version D is the default — omitting the optional _collection_name_ parameter will return Version D data. To retrieve data from a specific collection version, use the [](collection_name) request parameter.
+Hydrocron supports multiple versions of SWOT data collections. As of version 1.8.0, Version D is the default — omitting the optional _collection_name_ parameter will return Version D data. To retrieve data from a specific collection version, use the [](#collection_name) request parameter.
 
 As of version 1.9.0, Hydrocron also supports the SWOT Level 4 SoS Discharge products, which themselves are generated using (in part) SWOT Level 2 data from an associated version. To request SWOT_L4_HR_DAWG_SOS_DISCHARGE_V3, corresponding to SWOT L2 RiverSP v2.0, please specify `collection_name=SWOT_L2_HR_RiverSP_2.0` in your request
 
@@ -48,9 +48,9 @@ The SWOT Product Description Documents for SWOT Rivers and Lakes contain more in
 
 ## Collection name and feature type
 
-Specifying sub collections in requests to Hydrocron is not necessary to distinguish the type of data to return, as you also specify whether you are looking for Reach, Node, or PriorLake data with the [](feature) parameter.
+Specifying sub collections in requests to Hydrocron is not necessary to distinguish the type of data to return, as you also specify whether you are looking for Reach, Node, or PriorLake data with the [](#feature) parameter.
 
-Note that if you mix feature types in the [](feature) and [](collection_name) parameters, the [](collection_name) parameter takes precedence. If you request [](feature_id) for a feature type that is different that what you request in [](collection_name), you will get an error.
+Note that if you mix feature types in the [](#feature) and [](#collection_name) parameters, the [](#collection_name) parameter takes precedence. If you request [](#feature_id) for a feature type that is different that what you request in [](#collection_name), you will get an error.
 
 For example, here we request feature=Reach with feature_id=78340600051 (a reach feature), but collection_name=SWOT_L2_HR_LakeSP_2.0. In this case you will get an error because Hydrocron will try to query the Lakes table for the given reach_id.
 

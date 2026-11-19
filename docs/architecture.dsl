@@ -23,7 +23,7 @@ workspace "Hydrocron" "C4 model of the Hydrocron SWOT hydrology timeseries API a
 
             ssmParams = container "SSM Parameter Store" "Holds API keys, Earthdata Login credentials, and per-collection last-run timestamps." "AWS Systems Manager Parameter Store" "Store"
             reachTable = container "Reach Table(s)" "Reach-level timeseries, keyed by reach_id and range_start_time, with a GranuleUR GSI. One table pair per collection version." "Amazon DynamoDB" "Database"
-            nodeTable = container "Node Table(s)" "Node-level timeseries, keyed by node_id and range_start_time, with a GranuleUR GSI. One table pair per collection version." "Amazon DynamoDB" "Database"
+            nodeTable = container "Node Table(s)" "Node-level timeseries, keyed by node_id and range_start_time, with a GranuleUR GSI and a KEYS_ONLY ReachIdIndex GSI (reach_id, range_start_time) to find a reach's nodes. One table pair per collection version." "Amazon DynamoDB" "Database"
             priorLakeTable = container "Prior Lake Table(s)" "Prior-lake-level timeseries, keyed by lake_id and range_start_time, with a GranuleUR GSI. One table pair per collection version." "Amazon DynamoDB" "Database"
             trackIngestTable = container "Ingest Status Table(s)" "Tracks per-granule ingest status (to_ingest/ingested/failed) and feature counts, keyed by granuleUR and revision_date." "Amazon DynamoDB" "Database"
         }
@@ -34,7 +34,7 @@ workspace "Hydrocron" "C4 model of the Hydrocron SWOT hydrology timeseries API a
         authorizerLambda -> ssmParams "Reads stored default/trusted API keys" "AWS SDK"
         apiGateway -> timeseriesLambda "Routes authorized request to" "AWS Lambda invoke"
         timeseriesLambda -> reachTable "Queries reach timeseries by feature ID and time range" "AWS SDK (boto3)"
-        timeseriesLambda -> nodeTable "Queries node timeseries by feature ID and time range" "AWS SDK (boto3)"
+        timeseriesLambda -> nodeTable "Queries node timeseries by feature ID and time range; for node_fields requests, finds the reach's nodes via ReachIdIndex and queries them in parallel" "AWS SDK (boto3)"
         timeseriesLambda -> priorLakeTable "Queries prior lake timeseries by feature ID and time range" "AWS SDK (boto3)"
         timeseriesLambda -> dataUser "Returns timeseries as CSV, JSON, or GeoJSON"
 

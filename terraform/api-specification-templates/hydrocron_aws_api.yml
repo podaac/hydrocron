@@ -75,6 +75,15 @@ paths:
           type: string
           default: feature_id, time_str, wse, geometry
         example: feature_id, time_str, wse, geometry
+      - name: node_fields
+        in: query
+        description: Node fields to return with the reach's nodes. Only valid when feature=Reach; its presence adds the reach's node data to the response
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        example: node_id,time_str,wse,node_q
       - name: compact
         in: query
         description: Whether to return a compact GeoJSON response

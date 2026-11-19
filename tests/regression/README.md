@@ -35,6 +35,7 @@ tests/regression/
 ├── test_reach_api.py               # Reach-specific tests
 ├── test_node_api.py                # Node-specific tests (includes Version D)
 ├── test_priorlake_api.py           # PriorLake-specific tests (includes Version D)
+├── test_reach_nodes_api.py         # Reach + node tests (node_fields)
 │
 ├── test_compact_parameter.py       # Compact parameter behavior
 ├── test_error_handling.py          # Comprehensive error handling
