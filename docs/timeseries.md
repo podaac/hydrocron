@@ -175,6 +175,7 @@ When `node_fields` is present, the response contains the reach's time series and
 - Version D only node fields (`wse_sm`, `wse_sm_u`, `wse_sm_q`, `wse_sm_q_b`) return a 400 with a Version 2.0 collection.
 - A 400 is returned if `node_fields` is used with `feature=Node` or `feature=PriorLake`, is empty, or contains a field that is not a node field.
 - A 413 is returned if the reach has more than 25,000 node rows in the requested time range. Reduce the time range.
+- Responses are also limited to 6 MB, which GeoJSON often reaches well before 25,000 rows. For long time ranges use CSV and request only the fields you need. The 413 message says which limit was hit.
 
 See [](#reach-and-node-responses) for the response layout.
 
@@ -453,7 +454,7 @@ Excel reformats long numbers when it opens a CSV. For example, 14-digit `node_id
 (reach-and-node-responses)=
 ### Reach and node responses
 
-When [](#node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV file download) holds both the reach and its nodes:
+When [](#node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV file download) holds both the reach and its nodes. In GeoJSON, "rows" below means Features and "columns" means properties.
 
 - **Rows:** reach rows first, then node rows in `node_id` order. Each node's rows are in time order.
 - **Added columns:** every row starts with `feature_type`, `reach_id` and `node_id` (node rows), even if not requested. `feature_type` is `Reach` or `Node` (the same values as the [](#feature) parameter).
@@ -469,16 +470,11 @@ When [](#node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV
 Example CSV request (Version D reach `57203000041`, one pass):
 
 ```bash
-curl --header "Accept: text/csv" --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q'
+curl --header "Accept: text/csv" --location 'https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-19T00:00:00Z&end_time=2026-04-20T00:00:00Z&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q'
 ```
 
 ```
-feature_type,reach_id,node_id,time_str,wse,slope,node_q,wse_units,slope_units
-Reach,57203000041,,2026-04-19T19:08:16Z,7.6096,0.00135545806,,m,m/m
-Node,57203000041,57203000040011,no_data,-999999999999.0,,3,m,
-...
-Node,57203000041,57203000040201,2026-04-19T19:08:16Z,6.06841,,0,m,
-...
+"feature_type,reach_id,node_id,time_str,wse,slope,node_q,wse_units,slope_units\nReach,57203000041,,2026-04-19T19:08:16Z,7.6096,0.00135545806,,m,m/m\nNode,57203000041,57203000040011,no_data,-999999999999.0,,3,m,\n...\nNode,57203000041,57203000040201,2026-04-19T19:08:16Z,6.06841,,0,m,\n...\n"
 ```
 
 The reach row has an empty `node_id` and `node_q`; node rows have an empty `slope` and `slope_units`. Node `57203000040011` was not observed on this pass, so it has `no_data` and fill values.
@@ -540,8 +536,6 @@ Example compact GeoJSON response for the same request with `Accept: application/
 }
 ```
 
-% TODO: example output is from local test data (one pass, April 2026); replace with production output once node_fields is released.
-
 ## Response Codes
 
 | Code    | Reason                                                                                                                                                                      |
@@ -549,8 +543,9 @@ Example compact GeoJSON response for the same request with `Accept: application/
 | 200     | Request has succeeded and response has been returned to the user.                                                                                                           |
 | 400*    | 'Bad Request': This indicates that the end user entered the parameters incorrectly in their query or time series data could not be located for the feature ID. The API attempts to send a response as to which parameter was incorrect. |
 | 413     | 'Payload Too Large': The user attempted to retrieve a response that was too large. This is triggered for queries that exceed 6mb, and for [](#node_fields) requests where the reach has more than 25,000 node rows in the time range. |
+| 415     | 'Unsupported Media Type': The user sends an invalid `Accept` header.                                                                                                        |
 | 500     | 'Internal Server Error': Internal API error.                                                                                                                                |
-| 415     | 'Unsupported Media Type': The user send an invalid `Accept` header.                                                                                                         |
+| 504     | 'Gateway Timeout': The request took longer than 29 seconds. This can happen with [](#node_fields) requests that ask for many fields over a long time range. Reduce the time range or the number of fields. |
 
 *The 400 code is also currently returned for queries where no time series data could be located for the request specified feature ID. The message returned with the response indicates this and it can be helpful to adjust the date ranges you are searching.
 

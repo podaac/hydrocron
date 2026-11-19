@@ -320,14 +320,14 @@ Will return GeoJSON:
 
 Search for a river reach and all of its nodes in one request. [](#fields) sets the reach fields and [](#node_fields) sets the node fields. See [](#reach-and-node-responses) for the response layout.
 
-[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&output=geojson&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&output=geojson&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q)
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-19T00:00:00Z&end_time=2026-04-20T00:00:00Z&output=geojson&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-19T00:00:00Z&end_time=2026-04-20T00:00:00Z&output=geojson&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q)
 
 Will return GeoJSON (1 reach Feature and 52 node Features; 2 nodes shown):
 
 ```json
 {
     "status": "200 OK",
-    "time": 43.54,
+    "time": 846.187,
     "hits": 53,
     "results": {
         "csv": "",
@@ -405,8 +405,6 @@ Will return GeoJSON (1 reach Feature and 52 node Features; 2 nodes shown):
 ```
 
 **Note:** Geometry coordinates simplified for this example (324 total coordinates for the reach). Each Feature has only its own feature type's properties (e.g. no `node_id` or `node_q` on the reach, no `slope` on nodes).
-
-% TODO: example output is from local test data; replace with production output once node_fields is released.
 
 ## Get time series GeoJSON for a lake
 
@@ -546,14 +544,14 @@ Will return CSV:
 
 Search for a river reach and all of its nodes in one request, as CSV.
 
-[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&output=csv&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&output=csv&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q)
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-19T00:00:00Z&end_time=2026-04-20T00:00:00Z&output=csv&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-19T00:00:00Z&end_time=2026-04-20T00:00:00Z&output=csv&fields=reach_id,time_str,wse,slope&node_fields=node_id,time_str,wse,node_q)
 
 Will return CSV (1 reach row and 52 node rows; truncated):
 
 ```json
 {
     "status": "200 OK",
-    "time": 37.635,
+    "time": 1106.641,
     "hits": 53,
     "results": {
         "csv": "feature_type,reach_id,node_id,time_str,wse,slope,node_q,wse_units,slope_units\nReach,57203000041,,2026-04-19T19:08:16Z,7.6096,0.00135545806,,m,m/m\nNode,57203000041,57203000040011,no_data,-999999999999.0,,3,m,\n...\nNode,57203000041,57203000040201,2026-04-19T19:08:16Z,6.06841,,0,m,\n...\n",
@@ -562,9 +560,7 @@ Will return CSV (1 reach row and 52 node rows; truncated):
 }
 ```
 
-Use `output=csv_file` to download the same data as a file, named `hydrocron_Reach_nodes_57203000041_2026-04-01_2026-04-30.csv` by default.
-
-% TODO: example output is from local test data; replace with production output once node_fields is released.
+Use `output=csv_file` to download the same data as a file, named `hydrocron_Reach_nodes_57203000041_2026-04-19_2026-04-20.csv` by default.
 
 ## Get time series CSV for lake
 
