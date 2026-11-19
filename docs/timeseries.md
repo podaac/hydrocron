@@ -454,7 +454,7 @@ Excel reformats long numbers when it opens a CSV. For example, 14-digit `node_id
 (reach-and-node-responses)=
 ### Reach and node responses
 
-When [](#node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV file download) holds both the reach and its nodes:
+When [](#node_fields) is present, every response format (JSON, GeoJSON, CSV, CSV file download) holds both the reach and its nodes. In GeoJSON, "rows" below means Features and "columns" means properties.
 
 - **Rows:** reach rows first, then node rows in `node_id` order. Each node's rows are in time order.
 - **Added columns:** every row starts with `feature_type`, `reach_id` and `node_id` (node rows), even if not requested. `feature_type` is `Reach` or `Node` (the same values as the [](#feature) parameter).
@@ -543,8 +543,9 @@ Example compact GeoJSON response for the same request with `Accept: application/
 | 200     | Request has succeeded and response has been returned to the user.                                                                                                           |
 | 400*    | 'Bad Request': This indicates that the end user entered the parameters incorrectly in their query or time series data could not be located for the feature ID. The API attempts to send a response as to which parameter was incorrect. |
 | 413     | 'Payload Too Large': The user attempted to retrieve a response that was too large. This is triggered for queries that exceed 6mb, and for [](#node_fields) requests where the reach has more than 25,000 node rows in the time range. |
+| 415     | 'Unsupported Media Type': The user sends an invalid `Accept` header.                                                                                                        |
 | 500     | 'Internal Server Error': Internal API error.                                                                                                                                |
-| 415     | 'Unsupported Media Type': The user send an invalid `Accept` header.                                                                                                         |
+| 504     | 'Gateway Timeout': The request took longer than 29 seconds. This can happen with [](#node_fields) requests that ask for many fields over a long time range. Reduce the time range or the number of fields. |
 
 *The 400 code is also currently returned for queries where no time series data could be located for the request specified feature ID. The message returned with the response indicates this and it can be helpful to adjust the date ranges you are searching.
 

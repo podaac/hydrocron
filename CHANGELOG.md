@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
     - Issue 255 - Updated `node_fields` docs examples with production output and added a response size tip
+    - Issue 255 - Added a `node_fields` tip to the docs intro page and a 504 row to the docs response codes
+    - Added a Version 2.0 retirement notice (December 1, 2026) to the docs intro page
 ### Deprecated
 ### Removed
 ### Fixed
