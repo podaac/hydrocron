@@ -9,6 +9,10 @@ SWOT data is archived as individually timestamped shapefiles, which would otherw
 
 Original SWOT data is archived at NASA's [Earthdata Cloud](https://www.earthdata.nasa.gov/data/platforms/space-based-platforms/swot).
 
+:::{tip} ✨ **NEW:** Get a river reach and all of its nodes in one request ✨
+Use the [](#node_fields) parameter to get a reach and all of its nodes in a single request, instead of one request per node. See the [example](examples.md#get-time-series-geojson-for-river-reach-and-its-nodes).
+:::
+
 Datasets included in Hydrocron:
 
 ### Version D (Default)
@@ -19,6 +23,10 @@ Datasets included in Hydrocron:
 - [SWOT Level 2 River Single-Pass Vector Data Product, Version 2.0](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-2.0-2.0)
 - [SWOT Level 2 Lake Single-Pass Vector Data Product, Version 2.0](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-lakesp-2.0-2.0)
 - [SWOT Level 4 Sword of Science River Discharge Products, Version 3](https://doi.org/10.5067/SWOT-SOS-RD3)
+
+:::{warning} Version 2.0 retirement
+Version 2.0 data will be retired from Hydrocron on **December 1, 2026**. The SoS discharge fields and non-measurement fields (such as IDs and times) will remain available.
+:::
 
 :::{important} Version D is the default
 To query Version 2.0 data, use the `collection_name` parameter with one of the Version 2.0 collection names listed in the [versioning guide](user-guide/versioning.md).  Also, some node and reach IDs have changed from version 2.0 to version D. See the [versioning guide](user-guide/versioning.md) and [SWORD Version Differences](user-guide/sword-versions.md) for details.
