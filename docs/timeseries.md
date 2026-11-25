@@ -144,13 +144,13 @@ The name of the collection to query. Allows users to request data from a specifi
 | `SWOT_L2_HR_RiverSP_node_D` | D | Nodes only |
 | `SWOT_L2_HR_LakeSP_D` | D (default) | Lake data |
 | `SWOT_L2_HR_LakeSP_prior_D` | D | Prior lakes only |
-| `SWOT_L2_HR_RiverSP_2.0` | 2.0 | All river data (reaches and nodes) |
-| `SWOT_L2_HR_RiverSP_reach_2.0` | 2.0 | Reaches only |
-| `SWOT_L2_HR_RiverSP_node_2.0` | 2.0 | Nodes only |
-| `SWOT_L2_HR_LakeSP_2.0` | 2.0 | Lake data |
-| `SWOT_L2_HR_LakeSP_prior_2.0` | 2.0 | Prior lakes only |
+| `SWOT_L2_HR_RiverSP_2.0` | 2.0 | Reaches only, [Version 2.0 reach fields](#version-2-0-reach-fields) (SoS discharge, IDs, times, SWORD fields). Nodes retired (410) |
+| `SWOT_L2_HR_RiverSP_reach_2.0` | 2.0 | Same as `SWOT_L2_HR_RiverSP_2.0` |
+| `SWOT_L2_HR_RiverSP_node_2.0` | 2.0 | Retired (410) |
+| `SWOT_L2_HR_LakeSP_2.0` | 2.0 | Retired (410) |
+| `SWOT_L2_HR_LakeSP_prior_2.0` | 2.0 | Retired (410) |
 
-SoS discharge fields (`sos_consensus_q`, `sos_hivdi_q`, etc.) are only available on river reaches in the Version 2.0 collection. To request them, set `collection_name=SWOT_L2_HR_RiverSP_2.0`. See the [discharge guide](user-guide/discharge.md) for details.
+SoS discharge fields (`sos_consensus_q`, `sos_hivdi_q`, etc.) are only available on river reaches in the Version 2.0 collection. To request them, set `collection_name=SWOT_L2_HR_RiverSP_2.0`, with only the [Version 2.0 reach fields](#version-2-0-reach-fields). See the [discharge guide](user-guide/discharge.md) for details.
 
 (fields)=
 ### fields : string, required: yes
@@ -161,7 +161,7 @@ This is specified in the form of a comma separated list: `fields=reach_id,time_s
 
 Hydrocron includes additional fields beyond the source data shapefile attributes, including units fields on measurements, cycle and pass information, SWORD and PLD (prior river and lake database names), and collection versions. **NOTE: Units are always returned for fields that have corresponding units stored in Hydrocron, they do not need to be requested.** The complete list of input fields that are available through Hydrocron are described in the [](#fields-detail) section.
 
-River reaches in the Version 2.0 collection also expose SoS discharge fields (`sos_consensus_q`, `sos_hivdi_q`, `sos_metroman_q`, `sos_momma_q`, `sos_sad_q`, `sos_sic4dvar_q`, `sos_lakeflow_q`, and `swot_discharge_reanalysis`). These require `collection_name=SWOT_L2_HR_RiverSP_2.0`. See the [discharge guide](user-guide/discharge.md) for details.
+River reaches in the Version 2.0 collection also expose SoS discharge fields (`sos_consensus_q`, `sos_hivdi_q`, `sos_metroman_q`, `sos_momma_q`, `sos_sad_q`, `sos_sic4dvar_q`, `sos_lakeflow_q`, and `swot_discharge_reanalysis`). These require `collection_name=SWOT_L2_HR_RiverSP_2.0`, where only the [Version 2.0 reach fields](#version-2-0-reach-fields) are served. See the [discharge guide](user-guide/discharge.md) for details.
 
 (node_fields)=
 ### node_fields : string, required: no
@@ -171,8 +171,7 @@ Return a reach **and all of its nodes** in one request. Only valid with `feature
 When `node_fields` is present, the response contains the reach's time series and the time series of every node on that reach. [](#fields) sets the reach columns and `node_fields` sets the node columns, in the same comma separated form: `node_fields=node_id,time_str,wse,node_q`
 
 - Valid node fields are listed in the [](#fields-detail) section. Units are returned automatically, as with [](#fields).
-- Nodes come from the same collection version as the reach ([](#collection_name)).
-- Version D only node fields (`wse_sm`, `wse_sm_u`, `wse_sm_q`, `wse_sm_q_b`) return a 400 with a Version 2.0 collection.
+- Nodes come from the same collection version as the reach ([](#collection_name)). Version D only: `node_fields` with a Version 2.0 collection returns a 410.
 - A 400 is returned if `node_fields` is used with `feature=Node` or `feature=PriorLake`, is empty, or contains a field that is not a node field.
 - A 413 is returned if the reach has more than 25,000 node rows in the requested time range. Reduce the time range.
 - Responses are also limited to 6 MB, which GeoJSON often reaches well before 25,000 rows. For long time ranges use CSV and request only the fields you need. The 413 message says which limit was hit.
@@ -542,9 +541,11 @@ Example compact GeoJSON response for the same request with `Accept: application/
 | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 200     | Request has succeeded and response has been returned to the user.                                                                                                           |
 | 400*    | 'Bad Request': This indicates that the end user entered the parameters incorrectly in their query or time series data could not be located for the feature ID. The API attempts to send a response as to which parameter was incorrect. |
+| 410     | 'Gone': The requested Version 2.0 data has been retired: a Version 2.0 node or lake collection, `feature=Node` or [](#node_fields) with a Version 2.0 river collection, or a reach field that is not a [Version 2.0 reach field](#version-2-0-reach-fields). The message names the collection to use instead. |
 | 413     | 'Payload Too Large': The user attempted to retrieve a response that was too large. This is triggered for queries that exceed 6mb, and for [](#node_fields) requests where the reach has more than 25,000 node rows in the time range. |
 | 415     | 'Unsupported Media Type': The user sends an invalid `Accept` header.                                                                                                        |
-| 500     | 'Internal Server Error': Internal API error.                                                                                                                                |
+| 500     | 'Internal Server Error': Internal API error. The message includes a request ID; please include it when you report the error on [GitHub](https://github.com/podaac/hydrocron/issues). |
+| 503     | 'Service Unavailable': The service is busy. Retry in a few seconds.                                                                                                        |
 | 504     | 'Gateway Timeout': The request took longer than 29 seconds. This can happen with [](#node_fields) requests that ask for many fields over a long time range. Reduce the time range or the number of fields. |
 
 *The 400 code is also currently returned for queries where no time series data could be located for the request specified feature ID. The message returned with the response indicates this and it can be helpful to adjust the date ranges you are searching.

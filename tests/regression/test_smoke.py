@@ -8,6 +8,7 @@ Usage:
 """
 import pytest
 from .utils import assert_http_success, validate_geojson_structure, validate_csv_structure
+from .test_retired_2_0 import query_params, assert_gone, RIVER_D_HINT, RETIRED_FIELDS_HINT
 
 
 @pytest.mark.smoke
@@ -83,7 +84,7 @@ class TestOutputFormats:
             "end_time": "2024-02-11T00:00:00Z",
             "output": output_format,
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse"
+            "fields": "reach_id,time_str,sword_version"   # 2.0 reaches serve only REACH_2_0_FIELDS
         })
 
         assert_http_success(response)
@@ -102,7 +103,7 @@ class TestOutputFormats:
             assert 'csv' in data['results']
             from .utils import extract_csv_from_response
             csv_text = extract_csv_from_response(data)
-            validate_csv_structure(csv_text, expected_fields=["reach_id", "time_str", "wse"])
+            validate_csv_structure(csv_text, expected_fields=["reach_id", "time_str", "sword_version"])
 
 
 @pytest.mark.smoke
@@ -132,3 +133,20 @@ class TestErrorHandling:
 
         assert response.status_code == 400, \
             f"Expected error status, got {response.status_code}"
+
+
+@pytest.mark.smoke
+class TestRetired2_0:
+    """Retired 2.0 data returns HTTP 410 (proves the API Gateway ^410 mapping; more cases in test_retired_2_0.py)"""
+
+    def test_node_2_0_returns_410(self, api_client, stable_test_data):
+        """feature=Node on the 2.0 river collection"""
+        response, _ = api_client.query(query_params(stable_test_data["node"], "Node", "node_id,time_str,wse"))
+
+        assert_gone(response, f"410: Node data for SWOT_L2_HR_RiverSP_2.0 has been retired from Hydrocron. {RIVER_D_HINT}")
+
+    def test_dropped_reach_field_returns_410(self, api_client, stable_test_data):
+        """Known reach fields not on the 2.0 allowlist return 410, each listed"""
+        response, _ = api_client.query(query_params(stable_test_data["reach"], "Reach", "reach_id,time_str,wse,dschg_c"))
+
+        assert_gone(response, f"410: These fields are no longer served for SWOT_L2_HR_RiverSP_2.0: wse, dschg_c. {RETIRED_FIELDS_HINT}")

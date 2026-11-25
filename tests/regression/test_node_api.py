@@ -21,7 +21,7 @@ from .utils import (
 class TestNodeBasicQueries:
     """Test basic node queries"""
 
-    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    @pytest.mark.parametrize("node_key", ["node_d"])   # 2.0 node data is retired (410)
     def test_node_geojson_query(self, api_client, stable_test_data, node_key):
         """Test node query with GeoJSON output"""
         node_data = stable_test_data[node_key]
@@ -59,7 +59,7 @@ class TestNodeBasicQueries:
             assert 'node_id' in feature['properties']
             assert 'wse' in feature['properties']
 
-    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    @pytest.mark.parametrize("node_key", ["node_d"])   # 2.0 node data is retired (410)
     def test_node_csv_query(self, api_client, stable_test_data, node_key):
         """Test node query with CSV output"""
         node_data = stable_test_data[node_key]
@@ -253,23 +253,6 @@ class TestNodeVersionDFields:
 
         assert_http_error(response_lake)
 
-    def test_wse_sm_not_available_in_2_0(self, api_client, stable_test_data):
-        """Test wse_sm fields are not available in 2.0 collection"""
-        node_data = stable_test_data["node"]  # Use 2.0 node data
-
-        response, _ = api_client.query({
-            "feature": "Node",
-            "feature_id": node_data["feature_id"],
-            "start_time": node_data["start_time"],
-            "end_time": node_data["end_time"],
-            "output": "csv",
-            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "node_id,time_str,wse_sm"  # wse_sm not valid for 2.0
-        })
-
-        # Should return field validation error
-        assert_http_error(response)
-
 
 class TestNodePerformance:
     """Test node query performance"""
@@ -319,7 +302,7 @@ class TestNodeGoldenFiles:
         HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature node
     """
 
-    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    @pytest.mark.parametrize("node_key", ["node_d"])   # 2.0 node data is retired (410)
     def test_node_basic_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
         """Test basic node GeoJSON matches reference file"""
         node_data = stable_test_data[node_key]
@@ -347,7 +330,7 @@ class TestNodeGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    @pytest.mark.parametrize("node_key", ["node_d"])   # 2.0 node data is retired (410)
     def test_node_basic_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
         """Test basic node CSV matches reference file"""
         node_data = stable_test_data[node_key]
@@ -375,7 +358,7 @@ class TestNodeGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    @pytest.mark.parametrize("node_key", ["node_d"])   # 2.0 node data is retired (410)
     def test_node_comprehensive_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
         """Test comprehensive node GeoJSON matches reference file"""
         node_data = stable_test_data[node_key]
@@ -404,7 +387,7 @@ class TestNodeGoldenFiles:
         )
 
     @pytest.mark.skip(reason="Not finished yet, will update soon")
-    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    @pytest.mark.parametrize("node_key", ["node_d"])   # 2.0 node data is retired (410)
     def test_node_geojson_accept_header_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
         """Test node GeoJSON response via Accept: application/geo+json matches reference file"""
         node_data = stable_test_data[node_key]
@@ -433,7 +416,7 @@ class TestNodeGoldenFiles:
             )
 
     @pytest.mark.skip(reason="Not finished yet, will update soon")
-    @pytest.mark.parametrize("node_key", ["node", "node_d"])
+    @pytest.mark.parametrize("node_key", ["node_d"])   # 2.0 node data is retired (410)
     def test_node_csv_accept_header_matches_reference(self, api_client, stable_test_data, fixtures_dir, node_key):
         """Test node CSV response via Accept: text/csv matches reference file"""
         node_data = stable_test_data[node_key]

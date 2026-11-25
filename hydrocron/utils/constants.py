@@ -258,6 +258,15 @@ COLLECTIONS_LIST = [
     "SWOT_L2_HR_LakeSP_prior"
 ]
 
+# Features valid for each COLLECTIONS_LIST name (any version); other features get a 400 mismatch.
+COLLECTION_FEATURES = {
+    "SWOT_L2_HR_RiverSP": ["Reach", "Node"],
+    "SWOT_L2_HR_RiverSP_reach": ["Reach"],
+    "SWOT_L2_HR_RiverSP_node": ["Node"],
+    "SWOT_L2_HR_LakeSP": ["PriorLake"],
+    "SWOT_L2_HR_LakeSP_prior": ["PriorLake"]
+}
+
 CURRENT_VERSION_LIST = [
     "2.0",
     "D"
@@ -350,6 +359,31 @@ FILL_VALUE = "-999999999999.0"
 REACH_VERSION_2_0_ONLY_FIELDS = [
     'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
     'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis'
+]
+
+# Retired Version 2.0 data: requests return 410 before any DB call.
+# Collections retired whole: collection_name -> (feature, replacement collection).
+RETIRED_COLLECTIONS = {
+    'SWOT_L2_HR_LakeSP_2.0': ('PriorLake', 'SWOT_L2_HR_LakeSP_D'),
+    'SWOT_L2_HR_LakeSP_prior_2.0': ('PriorLake', 'SWOT_L2_HR_LakeSP_D'),
+    'SWOT_L2_HR_RiverSP_node_2.0': ('Node', 'SWOT_L2_HR_RiverSP_D'),
+}
+# Version 2.0 river collections that still serve reaches (REACH_2_0_FIELDS only); their node data is retired.
+REACH_2_0_COLLECTIONS = ['SWOT_L2_HR_RiverSP_2.0', 'SWOT_L2_HR_RiverSP_reach_2.0']
+# Replacement for retired Version 2.0 river data (nodes, node_fields, and reach fields not in REACH_2_0_FIELDS).
+RETIRED_RIVER_REPLACEMENT = 'SWOT_L2_HR_RiverSP_D'
+
+# The only fields still served for Version 2.0 reaches: SoS discharge, IDs, time, pass/granule, geometry,
+# SWORD topology and SWORD prior (p_*) fields. Other known reach fields return 410.
+REACH_2_0_FIELDS = [
+    'reach_id', 'time', 'time_tai', 'time_str', 'p_lat', 'p_lon', 'river_name',
+    'sos_consensus_q', 'sos_hivdi_q', 'sos_metroman_q', 'sos_momma_q',
+    'sos_sad_q', 'sos_sic4dvar_q', 'sos_lakeflow_q', 'swot_discharge_reanalysis',
+    'range_start_time', 'range_end_time', 'cycle_id', 'pass_id', 'continent_id', 'crid',
+    'sword_version', 'collection_shortname', 'collection_version', 'granuleUR', 'ingest_time',
+    'geometry', 'rch_id_up', 'rch_id_dn', 'n_reach_up', 'n_reach_dn',
+    'p_maf', 'p_length', 'p_dist_out', 'p_width', 'p_wse', 'p_n_nodes', 'p_dam_id',
+    'p_wse_var', 'p_wid_var', 'p_n_ch_max', 'p_n_ch_mod', 'p_low_slp'
 ]
 
 # Field aliases — virtual fields that map to another column in DynamoDB
