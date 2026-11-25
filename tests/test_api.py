@@ -80,7 +80,7 @@ def test_timeseries_lambda_handler_json_lake_2_0_retired(hydrocron_api):
     with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
         hydrocron.api.controllers.timeseries.lambda_handler(event, context)
     assert str(exc_info.value) == ('410: PriorLake data for SWOT_L2_HR_LakeSP_2.0 has been retired from Hydrocron. '
-                                   'Use collection_name=SWOT_L2_HR_LakeSP_D.')
+                                   'Use collection_name=SWOT_L2_HR_LakeSP_D')
 
 
 def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
