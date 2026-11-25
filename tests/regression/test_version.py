@@ -5,7 +5,7 @@ Verifies that version fields are populated correctly in DynamoDB
 and returned in API responses.
 
 Expected collection_version values:
-  - SWOT_L2_HR_RiverSP_2.0 / SWOT_L2_HR_LakeSP_2.0 -> "2.0"
+  - SWOT_L2_HR_RiverSP_2.0 -> "2.0" (reaches only; 2.0 node and lake data are retired: 410)
   - SWOT_L2_HR_RiverSP_D / SWOT_L2_HR_LakeSP_D -> "D"
 
 Expected sword_version values:
@@ -24,8 +24,6 @@ from .utils import assert_http_success, extract_csv_from_response, extract_geojs
 
 @pytest.mark.parametrize("data_key,expected_version", [
     ("reach", "2.0"),
-    ("node", "2.0"),
-    ("priorlake", "2.0"),
     ("reach_d", "D"),
     ("node_d", "D"),
     ("priorlake_d", "D"),
@@ -113,7 +111,6 @@ class TestCollectionVersion:
 
 @pytest.mark.parametrize("data_key,expected_sword_version", [
     ("reach", "16"),
-    ("node", "16"),
     ("reach_d", "17b"),
     ("node_d", "17b"),
 ])

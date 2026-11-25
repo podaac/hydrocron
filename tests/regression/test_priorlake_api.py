@@ -21,7 +21,7 @@ from .utils import (
 class TestPriorLakeBasicQueries:
     """Test basic PriorLake queries"""
 
-    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    @pytest.mark.parametrize("lake_key", ["priorlake_d"])   # 2.0 lake data is retired (410)
     def test_lake_geojson_with_standard_fields(self, api_client, stable_test_data, lake_key):
         """Test prior lake query with standard fields"""
         lake_data = stable_test_data[lake_key]
@@ -60,7 +60,7 @@ class TestPriorLakeBasicQueries:
             assert 'wse' in props
             assert 'area_total' in props
 
-    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    @pytest.mark.parametrize("lake_key", ["priorlake_d"])   # 2.0 lake data is retired (410)
     def test_lake_csv_query(self, api_client, stable_test_data, lake_key):
         """Test prior lake query with CSV output"""
         lake_data = stable_test_data[lake_key]
@@ -223,8 +223,8 @@ class TestPriorLakeQualityFields:
 class TestPriorLakeCollectionVersions:
     """Test PriorLake queries across collection versions"""
 
-    def test_lake_2_0_collection(self, api_client, stable_test_data):
-        """Test querying 2.0 collection explicitly"""
+    def test_lake_2_0_collection_is_retired(self, api_client, stable_test_data):
+        """Test querying the retired 2.0 collection explicitly returns 410"""
         lake_data = stable_test_data["priorlake"]
 
         response, _ = api_client.query({
@@ -237,9 +237,7 @@ class TestPriorLakeCollectionVersions:
             "fields": "lake_id,time_str,wse"
         })
 
-        # Stable test data should always exist - 404 is a failure
-        assert_http_success(response)
-        assert_result_count(response, lake_data["expected_count"], output_format="csv")
+        assert_http_error(response, expected_status_range=(410, 410))
 
     @pytest.mark.version_d
     def test_lake_d_collection(self, api_client, stable_test_data, test_env):
@@ -364,23 +362,6 @@ class TestPriorLakeVersionDFields:
 
         assert_http_error(response_node)
 
-    def test_qual_f_b_not_available_in_2_0(self, api_client, stable_test_data):
-        """Test qual_f_b field is not available in 2.0 collection"""
-        lake_data = stable_test_data["priorlake"]  # Use 2.0 lake data
-
-        response, _ = api_client.query({
-            "feature": "PriorLake",
-            "feature_id": lake_data["feature_id"],
-            "start_time": lake_data["start_time"],
-            "end_time": lake_data["end_time"],
-            "output": "csv",
-            "collection_name": "SWOT_L2_HR_LakeSP_2.0",
-            "fields": "lake_id,time_str,qual_f_b"  # qual_f_b not valid for 2.0
-        })
-
-        # Should return field validation error
-        assert_http_error(response)
-
     def test_priorlake_backward_compatibility(self, api_client, stable_test_data):
         """Test queries without new Version D fields still work for PriorLake"""
         lake_data = stable_test_data["priorlake_d"]
@@ -411,7 +392,7 @@ class TestPriorLakeGoldenFiles:
         HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature priorlake
     """
 
-    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    @pytest.mark.parametrize("lake_key", ["priorlake_d"])   # 2.0 lake data is retired (410)
     def test_lake_basic_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, lake_key):
         """Test basic lake GeoJSON matches reference file"""
         lake_data = stable_test_data[lake_key]
@@ -439,7 +420,7 @@ class TestPriorLakeGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    @pytest.mark.parametrize("lake_key", ["priorlake_d"])   # 2.0 lake data is retired (410)
     def test_lake_basic_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir, lake_key):
         """Test basic lake CSV matches reference file"""
         lake_data = stable_test_data[lake_key]
@@ -467,7 +448,7 @@ class TestPriorLakeGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    @pytest.mark.parametrize("lake_key", ["priorlake", "priorlake_d"])
+    @pytest.mark.parametrize("lake_key", ["priorlake_d"])   # 2.0 lake data is retired (410)
     def test_lake_comprehensive_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, lake_key):
         """Test comprehensive lake GeoJSON matches reference file"""
         lake_data = stable_test_data[lake_key]

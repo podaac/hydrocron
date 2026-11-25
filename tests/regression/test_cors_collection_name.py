@@ -18,7 +18,8 @@ from .utils import (
 class TestCORSWithCollectionName:
     """Test CORS functionality when using collection_name parameter"""
 
-    @pytest.mark.parametrize("data_key", ["reach", "reach_d", "node", "node_d", "priorlake", "priorlake_d"])
+    # 2.0 node / lake are retired: their 410 carries CORS too (test_retired_2_0.py)
+    @pytest.mark.parametrize("data_key", ["reach", "reach_d", "node_d", "priorlake_d"])
     def test_cors_with_explicit_collection_name(self, api_client, stable_test_data, data_key):
         """Test CORS headers with explicit collection_name parameter for all feature types and versions"""
         test_data = stable_test_data[data_key]

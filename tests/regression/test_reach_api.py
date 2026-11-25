@@ -5,6 +5,8 @@ Tests Reach feature queries including basic queries, field validation,
 output formats, and collection version handling.
 """
 import pytest
+
+from hydrocron.utils.constants import REACH_2_0_FIELDS
 from .utils import (
     assert_http_success,
     validate_geojson_structure,
@@ -336,11 +338,12 @@ class TestReachCollectionVersions:
             "end_time": reach_data["end_time"],
             "output": "csv",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]   # 2.0 reaches serve only REACH_2_0_FIELDS
         })
 
         # Stable test data should always exist - 404 is a failure
         assert_http_success(response)
+        assert_result_count(response, reach_data["expected_count"], output_format="csv")
 
     @pytest.mark.version_d
     def test_reach_d_collection(self, api_client, stable_test_data, test_env):
@@ -406,7 +409,7 @@ class TestReachGoldenFiles:
         HYDROCRON_ENV=uat poetry run python tests/regression/dev-utils/capture_reference_files.py --feature reach
     """
 
-    @pytest.mark.parametrize("reach_key", ["reach", "reach_d"])
+    @pytest.mark.parametrize("reach_key", ["reach_d"])   # 2.0 reach L2 fields are retired (410)
     def test_reach_basic_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, reach_key):
         """Test basic reach GeoJSON matches reference file"""
         reach_data = stable_test_data[reach_key]
@@ -434,7 +437,7 @@ class TestReachGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    @pytest.mark.parametrize("reach_key", ["reach", "reach_d"])
+    @pytest.mark.parametrize("reach_key", ["reach_d"])   # 2.0 reach L2 fields are retired (410)
     def test_reach_basic_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir, reach_key):
         """Test basic reach CSV matches reference file"""
         reach_data = stable_test_data[reach_key]
@@ -462,7 +465,7 @@ class TestReachGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    @pytest.mark.parametrize("reach_key", ["reach", "reach_d"])
+    @pytest.mark.parametrize("reach_key", ["reach_d"])   # 2.0 reach L2 fields are retired (410)
     def test_reach_discharge_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir, reach_key):
         """Test reach discharge fields CSV matches reference file"""
         reach_data = stable_test_data[reach_key]
@@ -491,7 +494,7 @@ class TestReachGoldenFiles:
         )
 
     def test_reach_sos_discharge_csv_matches_reference(self, api_client, stable_test_data, fixtures_dir):
-        """Test reach SOS discharge fields CSV matches reference file (v2.0 collection only for now)"""
+        """Test reach 2.0 CSV with REACH_2_0_FIELDS except geometry (SoS discharge + the other kept fields) matches reference file"""
         reach_data = stable_test_data["reach"]
 
         params = {
@@ -500,7 +503,7 @@ class TestReachGoldenFiles:
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "output": "csv",
-            "fields": "reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis"
+            "fields": ",".join(field for field in REACH_2_0_FIELDS if field != "geometry")   # geometry: fixed, ~85% of the file
         }
 
         if "collection_name" in reach_data:
@@ -517,7 +520,7 @@ class TestReachGoldenFiles:
             ignore_fields=['ingest_time', 'crid', 'granuleUR']
         )
 
-    @pytest.mark.parametrize("reach_key", ["reach", "reach_d"])
+    @pytest.mark.parametrize("reach_key", ["reach_d"])   # 2.0 reach L2 fields are retired (410)
     def test_reach_comprehensive_geojson_matches_reference(self, api_client, stable_test_data, fixtures_dir, reach_key):
         """Test comprehensive reach GeoJSON matches reference file"""
         reach_data = stable_test_data[reach_key]

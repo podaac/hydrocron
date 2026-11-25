@@ -17,6 +17,7 @@ REACH_D_NODES = 52
 PASS_1_TIME = '2026-04-19T19:08:16Z'
 PASS_2_TIME = '2026-05-10T15:53:20Z'
 NODE_OBSERVED_BOTH = '57203000040201'     # observed on both passes
+REACH_D_NO_NODES = '57205900041'          # D: observed 2026-04-19, no nodes loaded
 
 
 def _event(node_fields='node_id,time_str,wse,flow_angle', fields='reach_id,time_str,wse,slope', accept=None,
@@ -129,10 +130,7 @@ def test_reach_and_nodes_geojson_compact(hydrocron_api):
     assert all(isinstance(value, list) for f in features for value in f['properties'].values())
 
 
-VERSION_2_0_TWO_PASSES = {'feature_id': '71140300273', 'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
-                          'start_time': '2024-08-01T00:00:00Z', 'end_time': '2024-09-30T00:00:00Z'}
-REACH_ONLY = {'feature_id': '71224100223', 'collection_name': 'SWOT_L2_HR_RiverSP_2.0',
-              'start_time': '2023-06-04T00:00:00Z', 'end_time': '2023-06-23T00:00:00Z'}
+REACH_ONLY = {'feature_id': REACH_D_NO_NODES}
 
 
 @pytest.mark.parametrize("event_args", [
@@ -141,11 +139,10 @@ REACH_ONLY = {'feature_id': '71224100223', 'collection_name': 'SWOT_L2_HR_RiverS
     {'output': 'geojson', 'end_time': TWO_PASS_END},
     {'output': 'geojson', 'compact': 'true', 'end_time': TWO_PASS_END},
     {'output': 'geojson', 'fields': 'reach_id,time_str,wse,geometry'},
-    {'output': 'geojson', 'compact': 'true', **VERSION_2_0_TWO_PASSES},
     {'output': 'geojson', 'node_fields': 'node_id,flow_angle', **REACH_ONLY},
     {'accept': 'application/geo+json'},
     {'output': 'geojson', 'node_fields': None},   # normal reach response, no nodes
-], ids=['plain', 'compact', 'two_passes', 'compact_two_passes', 'geometry_in_fields', '2_0_compact_two_passes',
+], ids=['plain', 'compact', 'two_passes', 'compact_two_passes', 'geometry_in_fields',
         'reach_only', 'geo_json_accept', 'no_node_fields'])
 def test_geojson_is_valid(hydrocron_api, event_args):
     """Every GeoJSON shape is valid GeoJSON (automates pasting the response into geojson.io)."""
@@ -215,39 +212,18 @@ def test_reach_and_nodes_sub_collection(hydrocron_api, collection_name):
     assert len(rows) == 1 + REACH_D_NODES
 
 
-def test_reach_and_nodes_2_0(hydrocron_api):
-    """2.0 collection: nodes come from the 2.0 node table."""
-    rows = _csv_rows(_handler(_event(feature_id='71140300273', collection_name='SWOT_L2_HR_RiverSP_2.0',
-                                     start_time='2024-08-01T00:00:00Z', end_time='2024-08-31T00:00:00Z'))['results']['csv'])
-    assert rows[0]['feature_type'] == 'Reach'
-    assert len(rows) == 1 + 56
-
-
-@pytest.mark.parametrize("compact", ['false', 'true'])
-def test_reach_and_nodes_2_0_two_passes(hydrocron_api, compact):
-    """2.0 over two passes (2024-08-25, 2024-09-15): both reach rows, and each node's two time steps in order."""
-    result = _handler(_event(feature_id='71140300273', collection_name='SWOT_L2_HR_RiverSP_2.0', output='geojson', compact=compact,
-                             start_time='2024-08-01T00:00:00Z', end_time='2024-09-30T00:00:00Z'))
-    features = result['results']['geojson']['features']
-    assert result['hits'] == 2 * (1 + 56)
-
-    if compact == 'true':
-        assert len(features) == 1 + 56
-        reach_times = features[0]['properties']['time_str']
-        node_times = next(f for f in features[1:] if f['properties']['node_id'][0] == '71140300270313')['properties']['time_str']
-    else:
-        assert len(features) == 2 * (1 + 56)
-        reach_times = [f['properties']['time_str'] for f in features if f['properties']['feature_type'] == 'Reach']
-        node_times = [f['properties']['time_str'] for f in features if f['properties'].get('node_id') == '71140300270313']
-
-    assert reach_times == ['2024-08-25T23:27:23Z', '2024-09-15T20:12:30Z']
-    assert [t[:10] for t in node_times] == ['2024-08-25', '2024-09-15']   # observed on both passes
+def test_reach_and_nodes_2_0_retired(hydrocron_api):
+    """2.0 collection: node data is retired (410), even though the 2.0 node table still has rows for the reach."""
+    import hydrocron.api.controllers.timeseries
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
+        _handler(_event(feature_id='71140300273', collection_name='SWOT_L2_HR_RiverSP_2.0', fields='reach_id,time_str',
+                        start_time='2024-08-01T00:00:00Z', end_time='2024-08-31T00:00:00Z'))
+    assert str(exc_info.value).startswith('410: Node data for SWOT_L2_HR_RiverSP_2.0 has been retired from Hydrocron.')
 
 
 def test_reach_only_when_no_nodes(hydrocron_api):
     """A reach with no nodes in the table returns just the reach rows."""
-    rows = _csv_rows(_handler(_event(feature_id='71224100223', collection_name='SWOT_L2_HR_RiverSP_2.0',
-                                     start_time='2023-06-04T00:00:00Z', end_time='2023-06-23T00:00:00Z'))['results']['csv'])
+    rows = _csv_rows(_handler(_event(feature_id=REACH_D_NO_NODES))['results']['csv'])
     assert [row['feature_type'] for row in rows] == ['Reach']
     assert rows[0]['node_id'] == ''
 
@@ -281,7 +257,6 @@ def test_reach_and_nodes_not_found(hydrocron_api):
     ({'node_fields': ''}, 'node_fields parameter should contain valid SWOT node fields'),
     ({'node_fields': ' , '}, 'node_fields parameter should contain valid SWOT node fields'),
     ({'node_fields': 'node_id,slope'}, 'node_fields parameter should contain valid SWOT node fields'),
-    ({'node_fields': 'node_id,wse_sm', 'collection_name': 'SWOT_L2_HR_RiverSP_2.0'}, 'node_fields parameter should contain valid SWOT node fields'),
 ])
 def test_reach_and_nodes_400(hydrocron_api, body, message):
     """Invalid node_fields requests are rejected with a 400."""
@@ -342,9 +317,7 @@ def test_reach_and_nodes_413_waits_for_reach_query(hydrocron_api, monkeypatch):
 def test_reach_and_nodes_unit_columns_follow_returned_rows(hydrocron_api):
     """Unit columns come from the rows returned: a reach-only result keeps the requested node field
     column (empty) but has no unit column for it, since there are no node rows to take units from."""
-    text = _handler(_event(feature_id='71224100223', collection_name='SWOT_L2_HR_RiverSP_2.0',
-                           start_time='2023-06-04T00:00:00Z', end_time='2023-06-23T00:00:00Z',
-                           fields='reach_id,time_str,wse', node_fields='node_id,flow_angle'))['results']['csv']
+    text = _handler(_event(feature_id=REACH_D_NO_NODES, fields='reach_id,time_str,wse', node_fields='node_id,flow_angle'))['results']['csv']
     header = text.splitlines()[0].split(',')
 
     assert header == ['feature_type', 'reach_id', 'node_id', 'time_str', 'wse', 'flow_angle', 'wse_units']
@@ -352,8 +325,7 @@ def test_reach_and_nodes_unit_columns_follow_returned_rows(hydrocron_api):
 
 def test_reach_only_geojson_has_only_reach_properties(hydrocron_api):
     """GeoJSON reach-only result: no node_id and no requested node-only field on the reach Feature."""
-    features = _handler(_event(feature_id='71224100223', collection_name='SWOT_L2_HR_RiverSP_2.0', output='geojson',
-                               start_time='2023-06-04T00:00:00Z', end_time='2023-06-23T00:00:00Z',
+    features = _handler(_event(feature_id=REACH_D_NO_NODES, output='geojson',
                                fields='reach_id,time_str,wse', node_fields='node_id,flow_angle'))['results']['geojson']['features']
 
     assert [list(f['properties']) for f in features] == [['feature_type', 'reach_id', 'time_str', 'wse', 'wse_units']]

@@ -17,55 +17,40 @@ Golden file testing validates that API responses haven't changed unexpectedly. T
 fixtures/
 ├── uat/                                    # UAT environment reference files
 │   ├── reach/
-│   │   ├── reach_basic.geojson             # Basic reach query (GeoJSON, Version 2.0)
-│   │   ├── reach_basic.csv                 # Basic reach query (CSV, Version 2.0)
-│   │   ├── reach_discharge.csv             # Reach with discharge fields (Version 2.0)
-│   │   ├── reach_comprehensive.geojson     # Reach with many fields (Version 2.0)
+│   │   ├── reach_sos_discharge.csv         # Reach with REACH_2_0_FIELDS except geometry: SoS discharge + other kept fields (Version 2.0)
 │   │   ├── reach_d_basic.geojson           # Basic reach query (GeoJSON, Version D)
 │   │   ├── reach_d_basic.csv               # Basic reach query (CSV, Version D)
 │   │   ├── reach_d_discharge.csv           # Reach with discharge fields (Version D)
 │   │   └── reach_d_comprehensive.geojson   # Reach with many fields (Version D)
 │   ├── node/
-│   │   ├── node_basic.geojson              # Basic node query (GeoJSON, Version 2.0)
-│   │   ├── node_basic.csv                  # Basic node query (CSV, Version 2.0)
-│   │   ├── node_comprehensive.geojson      # Node with many fields (Version 2.0)
 │   │   ├── node_d_basic.geojson            # Basic node query (GeoJSON, Version D)
 │   │   ├── node_d_basic.csv                # Basic node query (CSV, Version D)
 │   │   └── node_d_comprehensive.geojson    # Node with many fields (Version D)
 │   └── priorlake/
-│       ├── lake_basic.geojson              # Basic lake query (GeoJSON, Version 2.0)
-│       ├── lake_basic.csv                  # Basic lake query (CSV, Version 2.0)
-│       ├── lake_comprehensive.geojson      # Lake with many fields (Version 2.0)
 │       ├── lake_d_basic.geojson            # Basic lake query (GeoJSON, Version D)
 │       ├── lake_d_basic.csv                # Basic lake query (CSV, Version D)
 │       └── lake_d_comprehensive.geojson    # Lake with many fields (Version D)
 └── ops/                                    # OPS environment reference files
     ├── reach/
-    │   ├── reach_basic.geojson
-    │   ├── reach_basic.csv
-    │   ├── reach_discharge.csv
-    │   ├── reach_comprehensive.geojson
+    │   ├── reach_sos_discharge.csv
     │   ├── reach_d_basic.geojson
     │   ├── reach_d_basic.csv
     │   ├── reach_d_discharge.csv
     │   └── reach_d_comprehensive.geojson
     ├── node/
-    │   ├── node_basic.geojson
-    │   ├── node_basic.csv
-    │   ├── node_comprehensive.geojson
     │   ├── node_d_basic.geojson
     │   ├── node_d_basic.csv
     │   └── node_d_comprehensive.geojson
     └── priorlake/
-        ├── lake_basic.geojson
-        ├── lake_basic.csv
-        ├── lake_comprehensive.geojson
         ├── lake_d_basic.geojson
         ├── lake_d_basic.csv
         └── lake_d_comprehensive.geojson
 ```
 
 **Note**: Reference files are environment-specific because UAT and OPS have different feature IDs and data availability.
+
+**Version 2.0** (retired in 1.12.0): 2.0 node and lake requests return 410, so they have no reference files. 2.0 reaches
+serve only SoS discharge, ID, time and SWORD fields; their only reference file is `reach_sos_discharge.csv`.
 
 ## Capturing Reference Files
 

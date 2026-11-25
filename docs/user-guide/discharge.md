@@ -10,7 +10,7 @@ SoS discharge is subject to two constraints:
 - **Reach only** — discharge fields are added to river reach data, not nodes or lakes.
 - **Version 2.0 only** — the SoS V3 products are generated from SWOT L2 RiverSP v2.0 (SWORD v16).
 
-To request discharge, set `feature=Reach` and `collection_name=SWOT_L2_HR_RiverSP_2.0`. If you omit `collection_name` (defaulting to Version D) or request a Version D collection, the discharge fields will not be populated. See the [versioning guide](versioning.md) for more on collection versions.
+To request discharge, set `feature=Reach` and `collection_name=SWOT_L2_HR_RiverSP_2.0`. If you omit `collection_name` (defaulting to Version D) or request a Version D collection, a request for discharge fields returns HTTP 400. Version 2.0 reaches serve only the discharge fields and the [Version 2.0 reach fields](#version-2-0-reach-fields); other fields (such as `wse`) return HTTP 410. See the [versioning guide](versioning.md) for more on collection versions.
 
 ## Discharge algorithms
 
@@ -33,9 +33,9 @@ All discharge values are in cubic meters per second (m³/s). As with other Hydro
 `swot_discharge_reanalysis` and `sos_consensus_q` return the **exact same data** — the SoS consensus discharge. The two names exist to distinguish the source of the estimate:
 
 - `swot_discharge_reanalysis` / `sos_consensus_q` — the L4 SoS (reanalysis) discharge.
-- `dschg_c` / `swot_discharge_nrt` — the L2-provided (near-real-time) discharge that ships in the RiverSP product itself.
+- `dschg_c` — the L2-provided (near-real-time) discharge that ships in the RiverSP product itself.
 
-The L2 near-real-time discharge (`dschg_*` fields) and the L4 reanalysis discharge (`sos_*` fields) are produced by different processing chains and should not be conflated. Both are available on Version 2.0 reaches.
+The L2 near-real-time discharge (`dschg_*` fields) and the L4 reanalysis discharge (`sos_*` fields) are produced by different processing chains and should not be conflated. The `dschg_*` fields are available on Version D reaches only; the `sos_*` fields on Version 2.0 reaches only.
 
 ## Fill values and sparse coverage
 
@@ -49,7 +49,7 @@ The SoS products report discharge against their own timestamps. During ingest, e
 
 ## Field naming conventions
 
-With the implementation of SWOT SoS Discharge data products in Hydrocron, the field names users request through the API are different from the names in the original L4 netCDF, but consistent and corresponding to the respective variable. This was done to help the users discern and track in their request which discharge products they want, given there are several discharge (q) variables in the various groups in the original netCDF, and given the SWOT Level 2 River SP also contains discharge attributes. For example, for L4, consensus_q is renamed sos_consensus_q, hivdi Q is renamed sos_hivdi_q, and so on. This renaming is mapped in the table below. An additional note, that the consensus_q variable from the L4 SoS discharge product can be requested as either sos_consensus_q or swot_discharge_reanalysis, but it is the exact same data. The latter is to discern between the L4-provided discharge and the L2-provided discharge (which has the field names dschg_c or swot_discharge_nrt, again, same data, two difference field names it can be requested by).
+With the implementation of SWOT SoS Discharge data products in Hydrocron, the field names users request through the API are different from the names in the original L4 netCDF, but consistent and corresponding to the respective variable. This was done to help the users discern and track in their request which discharge products they want, given there are several discharge (q) variables in the various groups in the original netCDF, and given the SWOT Level 2 River SP also contains discharge attributes. For example, for L4, consensus_q is renamed sos_consensus_q, hivdi Q is renamed sos_hivdi_q, and so on. This renaming is mapped in the table below. An additional note, that the consensus_q variable from the L4 SoS discharge product can be requested as either sos_consensus_q or swot_discharge_reanalysis, but it is the exact same data. The latter is to discern between the L4-provided discharge and the L2-provided discharge (field name dschg_c, Version D only).
 
 ```{figure} sos_field_mappings.png
 :alt: SoS field mappings

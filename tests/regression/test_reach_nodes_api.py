@@ -15,7 +15,7 @@ from .utils import (
     on_failure_show_curl
 )
 
-REACH_KEYS = ["reach", "reach_d"]
+REACH_KEYS = ["reach_d"]   # Version 2.0 node data is retired: node_fields on 2.0 returns 410 (test_retired_2_0.py)
 ID_COLUMNS = ["feature_type", "reach_id", "node_id"]
 
 
@@ -248,11 +248,10 @@ class TestReachNodesValidation:
         ({"feature": "Node", "feature_id": "18180900090011"}, "node_fields parameter is only valid when feature=Reach"),
         ({"node_fields": ""}, "node_fields parameter should contain valid SWOT node fields"),
         ({"node_fields": "node_id,not_a_field"}, "node_fields parameter should contain valid SWOT node fields"),
-        ({"node_fields": "node_id,wse_sm"}, "node_fields parameter should contain valid SWOT node fields"),
-    ], ids=["feature_node", "empty", "invalid_field", "version_d_field_on_2_0"])
+    ], ids=["feature_node", "empty", "invalid_field"])
     def test_node_fields_rejected(self, api_client, stable_test_data, overrides, message):
         """Invalid node_fields requests return 400 with a clear message"""
-        reach_data = stable_test_data["reach"]
+        reach_data = stable_test_data["reach_d"]
 
         response, _ = api_client.query(reach_nodes_params(reach_data, output="csv", **overrides))
 

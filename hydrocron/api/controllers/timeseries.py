@@ -3,6 +3,7 @@ Hydrocron API timeseries controller
 """
 # pylint: disable=R0801
 # pylint: disable=C0103
+# pylint: disable=C0302
 import datetime
 import json
 import logging
@@ -38,7 +39,7 @@ ISSUES_URL = 'https://github.com/podaac/hydrocron/issues'
 RETRYABLE_AWS_ERROR_CODES = ('ProvisionedThroughputExceededException', 'ThrottlingException', 'RequestLimitExceeded',
                              'InternalServerError', 'ServiceUnavailable')
 # Default log code per HTTP status, for errors raised without a specific code.
-DEFAULT_ERROR_CODES = {400: 'BAD_REQUEST', 404: 'NOT_FOUND', 413: 'RESPONSE_TOO_LARGE', 415: 'UNSUPPORTED_MEDIA_TYPE',
+DEFAULT_ERROR_CODES = {400: 'BAD_REQUEST', 404: 'NOT_FOUND', 410: 'GONE', 413: 'RESPONSE_TOO_LARGE', 415: 'UNSUPPORTED_MEDIA_TYPE',
                        500: 'INTERNAL_ERROR', 503: 'SERVICE_BUSY'}
 
 
@@ -192,6 +193,8 @@ def validate_parameters(parameters):
     """
     Determine if all parameters are present and in the correct format. Return 400
     Bad Request if any errors are found alongside 0 hits.
+    Checks collection and feature first; then raises a 410 RequestError if the request asks for retired
+    Version 2.0 data (check_retired); then checks the rest.
 
     :param parameters: Dictionary of query parameters
     :type parameters: dict
@@ -199,19 +202,13 @@ def validate_parameters(parameters):
     :rtype: str
     """
 
-    error_message = ''
+    error_message = validate_collection_and_feature(parameters['collection_name'], parameters['feature'])
+    if error_message:
+        return error_message
 
-    collections_list = []
-    for version in constants.CURRENT_VERSION_LIST:
-        collections_list.extend([f"{collection}_{version}" for collection in constants.COLLECTIONS_LIST])
+    check_retired(parameters['collection_name'], parameters['feature'], parameters['fields'], parameters.get('node_fields'))
 
-    if parameters['collection_name'] not in collections_list:
-        error_message = f'400: collection_name parameter should be one of the following: {", ".join(collections_list)}'
-
-    elif parameters['feature'] not in ('Node', 'Reach', 'PriorLake'):
-        error_message = f'400: feature parameter should be Reach, Node, or PriorLake, not: {parameters["feature"]}'
-
-    elif not parameters['feature_id'].isdigit():
+    if not parameters['feature_id'].isdigit():
         error_message = f'400: feature_id cannot contain letters: {parameters["feature_id"]}'
 
     elif not is_date_valid(parameters['start_time']) or not is_date_valid(parameters['end_time']):
@@ -244,6 +241,73 @@ def validate_parameters(parameters):
         parameters['start_time'], parameters['end_time'] = sanitize_time(parameters['start_time'], parameters['end_time'])
 
     return error_message
+
+
+def validate_collection_and_feature(collection_name, feature):
+    """
+    Return a 400 error message if the collection name or feature is invalid, or the feature doesn't belong to the
+    collection (e.g. a lake collection with feature=Reach); else ''.
+
+    :param collection_name: Name of collection being queried
+    :type collection_name: str
+    :param feature: The type of feature, either 'Reach', 'Node', or 'PriorLake'
+    :type feature: str
+
+    :rtype: str
+    """
+
+    collections_list = []
+    for version in constants.CURRENT_VERSION_LIST:
+        collections_list.extend([f"{collection}_{version}" for collection in constants.COLLECTIONS_LIST])
+
+    if collection_name not in collections_list:
+        return f'400: collection_name parameter should be one of the following: {", ".join(collections_list)}'
+
+    if feature not in ('Node', 'Reach', 'PriorLake'):
+        return f'400: feature parameter should be Reach, Node, or PriorLake, not: {feature}'
+
+    if feature not in constants.COLLECTION_FEATURES[collection_name.rsplit('_', 1)[0]]:
+        kind = 'Sub-collection' if collection_name in constants.SUBCOLLECTION_FEATURE_TYPE else 'Collection'
+        return f"400: {kind} '{collection_name}' is not valid for feature type '{feature}'."
+
+    return ''
+
+
+def check_retired(collection_name, feature, fields, node_fields):
+    """
+    Raise a 410 RequestError if the request asks for retired Version 2.0 data: a lake or node collection,
+    feature=Node or node_fields on a 2.0 river collection, or reach fields not in REACH_2_0_FIELDS.
+    Expects a valid collection + feature pair (validate_collection_and_feature). Unknown fields skip the field
+    check, so the request gets the usual 400. Runs before any DB call.
+
+    :param collection_name: Name of collection being queried
+    :type collection_name: str
+    :param feature: The type of feature, either 'Reach', 'Node', or 'PriorLake'
+    :type feature: str
+    :param fields: List of requested columns
+    :type fields: str
+    :param node_fields: List of requested node columns, or None
+    :type node_fields: str
+    """
+
+    if collection_name in constants.RETIRED_COLLECTIONS:
+        retired_feature, replacement = constants.RETIRED_COLLECTIONS[collection_name]
+        raise RequestError(f'410: {retired_feature} data for {collection_name} has been retired from Hydrocron. '
+                           f'Use collection_name={replacement}.', 'RETIRED_COLLECTION')
+
+    if collection_name not in constants.REACH_2_0_COLLECTIONS:
+        return
+
+    if feature == 'Node' or node_fields is not None:
+        raise RequestError(f'410: Node data for {collection_name} has been retired from Hydrocron. '
+                           f'Use collection_name={constants.RETIRED_RIVER_REPLACEMENT}.', 'RETIRED_COLLECTION')
+
+    fields_list = fields.split(',')
+    retired_fields = [field for field in dict.fromkeys(fields_list) if field not in constants.REACH_2_0_FIELDS]
+    if feature == 'Reach' and retired_fields and all(field in constants.REACH_ALL_COLUMNS for field in fields_list):
+        raise RequestError(f'410: These fields are no longer served for {collection_name}: {", ".join(retired_fields)}. '
+                           'Version 2.0 reaches serve only SoS discharge, ID, time and SWORD fields. '
+                           f'Use collection_name={constants.RETIRED_RIVER_REPLACEMENT}.', 'RETIRED_FIELD')
 
 
 def is_date_valid(query_date):
@@ -918,6 +982,9 @@ def handle_request(event, start, request_info):
     if event['body'] == {} and 'Elastic-Heartbeat' in headers['user_agent']:
         return {}
     logging.info('user_ip: %s', headers['user_ip'])
+    # Raw values first, so a validation error's log line still names the collection and feature
+    request_info['collection'] = event['body'].get('collection_name')
+    request_info['feature'] = event['body'].get('feature')
     parameters = get_request_parameters(event, headers['accept'])
     request_info['collection'] = parameters['collection_name']
     request_info['feature'] = parameters['feature']

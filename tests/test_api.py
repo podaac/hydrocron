@@ -32,7 +32,7 @@ def test_timeseries_lambda_handler_json_reach(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
+            "fields": "reach_id,time_str,sword_version,collection_shortname,crid"
         },
         "headers": {
             "User-Agent": "curl/8.4.0",
@@ -51,9 +51,9 @@ def test_timeseries_lambda_handler_json_reach(hydrocron_api):
     assert_valid_geojson(result['results']['geojson'])
 
 
-def test_timeseries_lambda_handler_json_lake(hydrocron_api):
+def test_timeseries_lambda_handler_json_lake_2_0_retired(hydrocron_api):
     """
-    Test the lambda handler for the timeseries endpoint for lake data
+    Test the lambda handler returns 410 for Version 2.0 lake data, even though the 2.0 lake table still has rows
     Parameters
     ----------
     hydrocron_api: Fixture ensuring the database is configured for the api
@@ -77,14 +77,10 @@ def test_timeseries_lambda_handler_json_lake(hydrocron_api):
     }
 
     context = "_"
-    result = hydrocron.api.controllers.timeseries.lambda_handler(event, context)
-    test_data = (pathlib.Path(os.path.dirname(os.path.realpath(__file__)))
-                 .joinpath('test_data').joinpath('api_query_results_geojson_lakes.json'))
-    with open(test_data) as jf:
-        expected = json.load(jf)
-    assert result['status'] == '200 OK' and \
-           json.loads(json.dumps(result['results']['geojson'])) == expected
-    assert_valid_geojson(result['results']['geojson'])
+    with pytest.raises(hydrocron.api.controllers.timeseries.RequestError) as exc_info:
+        hydrocron.api.controllers.timeseries.lambda_handler(event, context)
+    assert str(exc_info.value) == ('410: PriorLake data for SWOT_L2_HR_LakeSP_2.0 has been retired from Hydrocron. '
+                                   'Use collection_name=SWOT_L2_HR_LakeSP_D.')
 
 
 def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
@@ -99,11 +95,11 @@ def test_timeseries_lambda_handler_validate_geojson_reach(hydrocron_api):
     event = {
         "body": {
             "feature": "Reach",
-            "feature_id": "71224100223",
-            "start_time": "2023-06-04T00:00:00Z",
-            "end_time": "2023-06-23T00:00:00Z",
+            "feature_id": "57203000041",
+            "start_time": "2026-04-01T00:00:00Z",
+            "end_time": "2026-04-30T00:00:00Z",
             "output": "geojson",
-            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
             "fields": "reach_id,time_str,wse,slope,time"
         },
         "headers": {
@@ -136,7 +132,7 @@ def test_timeseries_lambda_handler_csv(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid,geometry"
+            "fields": "reach_id,time_str,sword_version,collection_shortname,crid,geometry"
         },
         "headers": {
             "User-Agent": "curl/8.4.0",
@@ -494,7 +490,7 @@ def _lambda_handler_with_large_records(monkeypatch, output, fields, compact="fal
             "end_time": "2026-06-03T00:00:00Z",
             "output": output,
             "compact": compact,
-            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
             "fields": fields,
         },
         "headers": {"User-Agent": "pytest", "X-Forwarded-For": "127.0.0.1"},
@@ -547,10 +543,10 @@ def _size_event(accept=None, **body):
     event = {
         "body": {
             "feature": "Reach",
-            "feature_id": "71224100223",
-            "start_time": "2023-06-04T00:00:00Z",
-            "end_time": "2023-06-23T00:00:00Z",
-            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "feature_id": "57203000041",
+            "start_time": "2026-04-01T00:00:00Z",
+            "end_time": "2026-04-30T00:00:00Z",
+            "collection_name": "SWOT_L2_HR_RiverSP_D",
             "fields": "reach_id,time_str,wse",
             **body
         },
@@ -626,9 +622,7 @@ def test_timeseries_413_reach_and_nodes(hydrocron_api, monkeypatch):
     """Reach + node responses go through the same size check."""
     import hydrocron.api.controllers.timeseries
 
-    event = _size_event(accept="text/csv", feature_id="57203000041", collection_name="SWOT_L2_HR_RiverSP_D",
-                        start_time="2026-04-01T00:00:00Z", end_time="2026-04-30T00:00:00Z",
-                        node_fields="node_id,time_str,wse")
+    event = _size_event(accept="text/csv", node_fields="node_id,time_str,wse")
     size = _runtime_size(hydrocron.api.controllers.timeseries.lambda_handler(event, "_"))
     _assert_413_boundary(monkeypatch, event, size)
 
@@ -685,7 +679,7 @@ def test_timeseries_lambda_handler_geojson_accept(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid",
+            "fields": "reach_id,time_str,sword_version,collection_shortname,crid",
             "compact": "false"
         },
         "headers": {
@@ -722,7 +716,7 @@ def test_timeseries_lambda_handler_csv_accept(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid,geometry"
+            "fields": "reach_id,time_str,sword_version,collection_shortname,crid,geometry"
         },
         "headers": {
             "User-Agent": "curl/8.4.0",
@@ -788,7 +782,7 @@ def test_timeseries_lambda_handler_json_no_output(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
+            "fields": "reach_id,time_str,sword_version,collection_shortname,crid"
         },
         "headers": {
             "User-Agent": "curl/8.4.0",
@@ -822,7 +816,7 @@ def test_timeseries_lambda_handler_json_multi_accept(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid"
+            "fields": "reach_id,time_str,sword_version,collection_shortname,crid"
         },
         "headers": {
             "User-Agent": "curl/8.4.0",
@@ -912,7 +906,7 @@ def test_timeseries_lambda_handler_json_compact(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid",
+            "fields": "reach_id,time_str,sword_version,collection_shortname,crid",
             "compact": "true"
         },
         "headers": {
@@ -947,7 +941,7 @@ def test_timeseries_lambda_handler_geojson_accept_compact(hydrocron_api):
             "start_time": "2023-06-04T00:00:00Z",
             "end_time": "2023-06-23T00:00:00Z",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse,sword_version,collection_shortname,crid",
+            "fields": "reach_id,time_str,sword_version,collection_shortname,crid",
         },
         "headers": {
             "User-Agent": "curl/8.4.0",
@@ -1182,10 +1176,9 @@ def test_timeseries_priorlake_qual_f_b_field(hydrocron_api):
     ("SWOT_L2_HR_RiverSP_reach_D",   "Reach", "57203000041",    "2026-04-01T00:00:00Z", "2026-04-30T00:00:00Z", "reach_id"),
     ("SWOT_L2_HR_RiverSP_node_D",    "Node",  "31241400580011", "2026-02-01T00:00:00Z", "2026-02-28T00:00:00Z", "node_id"),
     ("SWOT_L2_HR_RiverSP_reach_2.0", "Reach", "71224100223",    "2023-06-04T00:00:00Z", "2023-06-23T00:00:00Z", "reach_id"),
-    ("SWOT_L2_HR_RiverSP_node_2.0",  "Node",  "35196000110061", "2025-05-01T00:00:00Z", "2025-05-31T00:00:00Z", "node_id"),
 ])
 def test_timeseries_child_collection_river(hydrocron_api, collection_name, feature, feature_id, start_time, end_time, id_field):
-    """Test that child RiverSP collection names resolve to the correct DynamoDB table and return data."""
+    """Test that child RiverSP collection names resolve to the correct DynamoDB table and return data (2.0: reach fields only)."""
     import hydrocron.api.controllers.timeseries
 
     event = {
@@ -1196,7 +1189,7 @@ def test_timeseries_child_collection_river(hydrocron_api, collection_name, featu
             "end_time": end_time,
             "output": "csv",
             "collection_name": collection_name,
-            "fields": f"{id_field},time_str,wse"
+            "fields": f"{id_field},time_str" if collection_name.endswith('_2.0') else f"{id_field},time_str,wse"
         },
         "headers": {
             "User-Agent": "pytest",
@@ -1211,7 +1204,6 @@ def test_timeseries_child_collection_river(hydrocron_api, collection_name, featu
 
 @pytest.mark.parametrize("collection_name,feature_id,start_time,end_time", [
     ("SWOT_L2_HR_LakeSP_prior_D",   "5160001832", "2025-06-01T00:00:00-00:00", "2025-06-30T23:59:59-00:00"),
-    ("SWOT_L2_HR_LakeSP_prior_2.0", "9120274662", "2024-06-22T00:00:00-00:00", "2024-07-13T23:59:59-00:00"),
 ])
 def test_timeseries_child_collection_lake(hydrocron_api, collection_name, feature_id, start_time, end_time):
     """Test that child LakeSP collection names resolve to the correct DynamoDB table and return data."""
@@ -1240,16 +1232,17 @@ def test_timeseries_child_collection_lake(hydrocron_api, collection_name, featur
 
 @pytest.mark.parametrize("collection_name,feature", [
     ("SWOT_L2_HR_RiverSP_reach_D",   "Node"),
-    ("SWOT_L2_HR_RiverSP_reach_2.0", "Node"),
     ("SWOT_L2_HR_RiverSP_reach_D",   "PriorLake"),
     ("SWOT_L2_HR_RiverSP_node_D",    "Reach"),
-    ("SWOT_L2_HR_RiverSP_node_2.0",  "Reach"),
     ("SWOT_L2_HR_RiverSP_node_D",    "PriorLake"),
     ("SWOT_L2_HR_LakeSP_prior_D",    "Reach"),
+    ("SWOT_L2_HR_RiverSP_reach_2.0", "Node"),
+    ("SWOT_L2_HR_RiverSP_reach_2.0", "PriorLake"),
+    ("SWOT_L2_HR_RiverSP_node_2.0",  "Reach"),
     ("SWOT_L2_HR_LakeSP_prior_2.0",  "Node"),
 ])
 def test_timeseries_child_collection_feature_mismatch(hydrocron_api, collection_name, feature):
-    """Test that a mismatched sub-collection and feature type returns a 400 error."""
+    """Test that a mismatched sub-collection and feature type returns a 400 error (before any 2.0 retirement 410)."""
     import hydrocron.api.controllers.timeseries
 
     event = {
@@ -1428,6 +1421,39 @@ def test_sos_fields_with_values(hydrocron_api):
         assert props[f'{field}_units'] == "m^3/s"
 
 
+@pytest.mark.parametrize("output", ['csv', 'geojson'])
+def test_reach_2_0_all_kept_fields(hydrocron_api, output):
+    """A 2.0 reach request with all REACH_2_0_FIELDS returns data; the output holds only those fields and their units."""
+    import hydrocron.api.controllers.timeseries
+    from hydrocron.utils import constants
+
+    event = {
+        "body": {
+            "feature": "Reach",
+            "feature_id": "71224100223",
+            "start_time": "2023-06-04T00:00:00Z",
+            "end_time": "2023-06-23T00:00:00Z",
+            "output": output,
+            "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+            "fields": ",".join(constants.REACH_2_0_FIELDS)
+        },
+        "headers": {
+            "User-Agent": "pytest",
+            "X-Forwarded-For": "127.0.0.1"
+        }
+    }
+    result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
+
+    assert result['status'] == '200 OK' and result['hits'] == 1
+    if output == 'csv':
+        columns = result['results']['csv'].splitlines()[0].split(',')
+    else:
+        columns = list(result['results']['geojson']['features'][0]['properties']) + ['geometry']
+    kept = set(constants.REACH_2_0_FIELDS)
+    assert set(columns) - kept == {column for column in columns if column.endswith('_units') and column[:-len('_units')] in kept}
+    assert kept <= set(columns)
+
+
 def test_sos_fields_error_message_without_collection_name(hydrocron_api):
     """Test that requesting SOS fields without collection_name returns error (defaults to vD)."""
     import hydrocron.api.controllers.timeseries
@@ -1466,7 +1492,7 @@ def test_csv_file_output_returns_download_wrapper(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv_file",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse"
+            "fields": "reach_id,time_str,p_lat"
         },
         "headers": {
             "User-Agent": "pytest",
@@ -1475,7 +1501,7 @@ def test_csv_file_output_returns_download_wrapper(hydrocron_api):
     }
     result = hydrocron.api.controllers.timeseries.lambda_handler(event, "_")
     assert result['__hydrocron_download__'] is True
-    assert 'reach_id,time_str,wse' in result['csv_data']
+    assert 'reach_id,time_str,p_lat' in result['csv_data']
     assert result['filename'] == 'hydrocron_Reach_71224100223_2023-06-04_2023-06-23.csv'
 
 
@@ -1491,7 +1517,7 @@ def test_csv_file_output_with_custom_filename(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv_file",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse",
+            "fields": "reach_id,time_str,p_lat",
             "filename": "my_export"
         },
         "headers": {
@@ -1515,7 +1541,7 @@ def test_csv_file_output_filename_already_has_extension(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv_file",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse",
+            "fields": "reach_id,time_str,p_lat",
             "filename": "report.csv"
         },
         "headers": {
@@ -1539,7 +1565,7 @@ def test_csv_file_filename_sanitized(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv_file",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse",
+            "fields": "reach_id,time_str,p_lat",
             "filename": "../../etc/passwd"
         },
         "headers": {
@@ -1564,7 +1590,7 @@ def test_csv_file_filename_max_length(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv_file",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse",
+            "fields": "reach_id,time_str,p_lat",
             "filename": "a" * 300
         },
         "headers": {
@@ -1589,7 +1615,7 @@ def test_csv_file_filename_ignored_when_output_is_csv(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse",
+            "fields": "reach_id,time_str,p_lat",
             "filename": "custom"
         },
         "headers": {
@@ -1614,7 +1640,7 @@ def test_csv_file_filename_ignored_when_output_is_geojson(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "geojson",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse",
+            "fields": "reach_id,time_str,p_lat",
             "filename": "custom"
         },
         "headers": {
@@ -1666,7 +1692,7 @@ def test_csv_file_output_no_data_raises_error(hydrocron_api):
             "end_time": "2023-06-23T00:00:00Z",
             "output": "csv_file",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse"
+            "fields": "reach_id,time_str,p_lat"
         },
         "headers": {
             "User-Agent": "pytest",

@@ -24,7 +24,7 @@ class TestBasicISO8601Formats:
             "start_time": reach_data["start_time"],
             "end_time": reach_data["end_time"],
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         assert_http_success(response)
@@ -39,7 +39,7 @@ class TestBasicISO8601Formats:
             "start_time": "2024-02-10T00:00:00",
             "end_time": "2024-05-03T23:59:59",
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         # Should return error
@@ -55,7 +55,7 @@ class TestBasicISO8601Formats:
             "start_time": "2024-02-10T00:00:00.000Z",
             "end_time": "2024-05-03T23:59:59.999Z",
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         # Should return error
@@ -81,7 +81,7 @@ class TestUTCOffsets:
             "start_time": start_time_encoded,
             "end_time": end_time_encoded,
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         }
 
         # Use params_str to avoid re-encoding
@@ -103,7 +103,7 @@ class TestUTCOffsets:
             "start_time": "2024-02-09T16:00:00-08:00",
             "end_time": "2024-05-03T15:59:59-08:00",
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         # Negative offset doesn't need encoding, should work
@@ -124,7 +124,7 @@ class TestUTCOffsets:
             f"start_time={start_time_encoded}&"
             f"end_time={end_time_encoded}&"
             f"collection_name={reach_data['collection_name']}&"
-            f"fields=reach_id,time_str,wse"
+            f"fields={reach_data['fields']}"
         )
         full_url = f"{url}?{params_str}"
 
@@ -152,7 +152,7 @@ class TestURLEncoding:
             f"start_time=2024-02-10T00:00:00+00:00&"  # Literal + (wrong)
             f"end_time=2024-05-03T23:59:59+00:00&"
             f"collection_name={reach_data['collection_name']}&"
-            f"fields=reach_id,time_str,wse"
+            f"fields={reach_data['fields']}"
         )
 
         # Correctly using %2b encoding
@@ -162,7 +162,7 @@ class TestURLEncoding:
             f"start_time=2024-02-10T00:00:00%2B00:00&"  # Encoded as %2b (correct)
             f"end_time=2024-05-03T23:59:59%2B00:00&"
             f"collection_name={reach_data['collection_name']}&"
-            f"fields=reach_id,time_str,wse"
+            f"fields={reach_data['fields']}"
         )
 
         # The incorrectly encoded version should fail or behave unexpectedly
@@ -191,7 +191,7 @@ class TestInvalidTimeFormats:
             "start_time": "invalid-date-format",
             "end_time": reach_data["end_time"],
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         assert_http_error(response, expected_status_range=(400, 400))
@@ -206,7 +206,7 @@ class TestInvalidTimeFormats:
             "start_time": "2024-02-10",  # No time component
             "end_time": "2024-05-03",
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         # Should return error
@@ -222,7 +222,7 @@ class TestInvalidTimeFormats:
             "start_time": "00:00:00",  # No date component
             "end_time": reach_data["end_time"],
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         assert_http_error(response, expected_status_range=(400, 400))
@@ -237,7 +237,7 @@ class TestInvalidTimeFormats:
             "start_time": "2024-13-01T00:00:00Z",  # Month 13 invalid
             "end_time": reach_data["end_time"],
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         assert_http_error(response, expected_status_range=(400, 400))
@@ -252,7 +252,7 @@ class TestInvalidTimeFormats:
             "start_time": "2024-02-32T00:00:00Z",  # Day 32 invalid
             "end_time": reach_data["end_time"],
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         assert_http_error(response, expected_status_range=(400, 400))
@@ -267,7 +267,7 @@ class TestInvalidTimeFormats:
             "start_time": "2024-02-10T25:00:00Z",  # Hour 25 invalid
             "end_time": reach_data["end_time"],
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         assert_http_error(response, expected_status_range=(400, 400))
@@ -288,7 +288,7 @@ class TestTimeRangeBehavior:
             "start_time": same_time,
             "end_time": same_time,
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         # Should return error
@@ -304,7 +304,7 @@ class TestTimeRangeBehavior:
             "start_time": "2024-02-10T00:00:00Z",
             "end_time": "2024-02-10T00:00:01Z",  # 1 second range
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         # Should return error
@@ -337,7 +337,7 @@ class TestLeapYearAndDST:
             "start_time": "2024-02-29T00:00:00Z",  # 2024 is leap year
             "end_time": "2024-02-29T23:59:59Z",
             "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-            "fields": "reach_id,time_str,wse"
+            "fields": "reach_id,time_str,sword_version"   # 2.0 reaches serve only REACH_2_0_FIELDS
         })
 
         # Should accept Feb 29 in leap year
@@ -353,7 +353,7 @@ class TestLeapYearAndDST:
             "start_time": "2023-02-29T00:00:00Z",  # 2023 is NOT leap year
             "end_time": reach_data["end_time"],
             "collection_name": reach_data["collection_name"],
-            "fields": "reach_id,time_str,wse"
+            "fields": reach_data["fields"]
         })
 
         # Should reject Feb 29 in non-leap year

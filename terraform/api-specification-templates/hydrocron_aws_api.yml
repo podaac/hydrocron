@@ -156,6 +156,18 @@ paths:
                 type: array
                 items:
                   type: string
+        "410":
+          description: "410 error. The requested Version 2.0 data has been retired; the message names the collection to use."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            text/csv:
+              schema:
+                type: array
+                items:
+                  type: string
         "413":
           description: "413 error. Your query has returned is too large."
           headers:
@@ -240,6 +252,15 @@ paths:
                 }
           ^404.*:
             statusCode: "404"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: |-
+                {
+                  "error" : "$input.path('$.errorMessage')"
+                }
+          ^410.*:
+            statusCode: "410"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:

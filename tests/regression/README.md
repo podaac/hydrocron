@@ -164,24 +164,25 @@ poetry run pytest tests/
 
 | File | Test Classes | Tests | Purpose |
 |------|-------------|-------|---------|
-| `test_smoke.py` | 4 | 5 | Quick deployment validation |
+| `test_smoke.py` | 5 | 7 | Quick deployment validation |
 | `test_reach_api.py` | 6 | 15 | Reach feature tests (note: discharge tests skipped) |
-| `test_node_api.py` | 4 | 16 | Node feature + Version D tests (parameterized) |
-| `test_priorlake_api.py` | 6 | 18 | PriorLake feature + Version D tests (parameterized) |
+| `test_node_api.py` | 4 | 15 | Node feature + Version D tests (parameterized) |
+| `test_priorlake_api.py` | 6 | 17 | PriorLake feature + Version D tests (parameterized) |
 | `test_compact_parameter.py` | 5 | 11 | Compact parameter testing |
 | `test_error_handling.py` | 8 | 25 | Error cases and validation |
 | `test_time_encoding.py` | 6 | 18 | Time format handling |
 | `test_response_formats.py` | 7 | 18 | Response format negotiation |
 | `test_api_features.py` | 8 | 18 | Additional features and edge cases |
 | `test_cors_collection_name.py` | 1 | 4 | CORS header validation with collection_name |
-| **TOTAL** | **55** | **148** | Full regression coverage |
+| `test_retired_2_0.py` | 2 | 6 | Retired Version 2.0 data: 410s, 2.0 reach field allowlist |
+| **TOTAL** | **56** | **146** | Full regression coverage |
 
 ### Smoke Tests (`test_smoke.py`)
 - **Purpose**: Quick verification API is functioning
 - **Run time**: < 30 seconds
 - **When**: After every deployment
 - **Marker**: `@pytest.mark.smoke`
-- **Coverage**: API health, basic queries for all features, output formats, error handling
+- **Coverage**: API health, basic queries for all features, output formats, error handling, retired Version 2.0 data (410)
 
 ### Feature Tests
 
@@ -189,40 +190,47 @@ poetry run pytest tests/
 - **Purpose**: Comprehensive Reach feature testing
 - **Note**: Discharge field tests are currently marked as `@pytest.mark.skip` - re-enable when needed
 - **Note**: Basic query tests default to `reach_d` (Version D) data; 2.0 collection is tested explicitly in `TestReachCollectionVersions`
+  (2.0 reaches serve only SoS discharge, ID, time and SWORD fields, so 2.0 requests use those fields only)
 - **Coverage**:
   - Basic queries (GeoJSON, CSV) - using Version D data by default
   - Discharge fields (all algorithms: consensus, MetroMan, BAM, HiVDI) - currently skipped
+  - SoS discharge fields (2.0 only)
   - Content negotiation (Accept headers)
   - Units fields validation
   - Collection version testing (2.0, D); default is Version D
   - Geometry validation
-  - Golden file comparisons (parameterized for both 2.0 and D)
+  - Golden file comparisons (Version D; 2.0: `REACH_2_0_FIELDS` except geometry — SoS discharge + the other kept fields)
 
 #### Node Tests (`test_node_api.py`)
 - **Purpose**: Comprehensive Node feature testing + Version D
-- **Note**: Basic query tests are parameterized to run with both `node` (2.0) and `node_d` (Version D) data
+- **Note**: Version 2.0 node data is retired (410, see `test_retired_2_0.py`); node tests use `node_d` data
 - **Note**: Default collection when `collection_name` is omitted is `SWOT_L2_HR_RiverSP_D`
 - **Coverage**:
-  - Basic queries (GeoJSON, CSV) - parameterized for both 2.0 and D
+  - Basic queries (GeoJSON, CSV) - Version D
   - Default collection verification (D)
   - **Version D wse_sm field tests** (smoothed water surface elevation)
   - Backward compatibility
   - Performance tests
-  - Golden file comparisons (parameterized for both 2.0 and D)
+  - Golden file comparisons (Version D)
 
 #### PriorLake Tests (`test_priorlake_api.py`)
 - **Purpose**: Comprehensive PriorLake feature testing + Version D
-- **Note**: Basic query tests are parameterized to run with both `priorlake` (2.0) and `priorlake_d` (Version D) data
+- **Note**: Version 2.0 lake data is retired (410, see `test_retired_2_0.py`); lake tests use `priorlake_d` data
 - **Note**: Default collection when `collection_name` is omitted is `SWOT_L2_HR_LakeSP_D`
 - **Coverage**:
-  - Basic queries (GeoJSON, CSV) - parameterized for both 2.0 and D
+  - Basic queries (GeoJSON, CSV) - Version D
   - Default collection verification (D)
   - Drainage system fields (ds1/ds2)
   - Quality and metadata fields
   - **Version D qual_f_b field tests** (quality flag)
-  - Collection version testing (2.0, D)
+  - Collection version testing (2.0 returns 410, D)
   - Geometry validation
-  - Golden file comparisons (parameterized for both 2.0 and D)
+  - Golden file comparisons (Version D)
+
+#### Retired Version 2.0 (`test_retired_2_0.py`)
+- **Purpose**: 2.0 node and lake data return HTTP 410 with `{"error": "410: ..."}` naming the collection to use, and a CORS header
+- **Coverage**: 2.0 node (feature and sub-collection), LakeSP_2.0, `node_fields` on 2.0, a dropped 2.0 reach field (410),
+  unknown + dropped fields (400), all 2.0 reach allowlist fields served (200). Two cases are smoke tests
 
 ### API Behavior Tests
 
