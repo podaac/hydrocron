@@ -293,21 +293,21 @@ def check_retired(collection_name, feature, fields, node_fields):
     if collection_name in constants.RETIRED_COLLECTIONS:
         retired_feature, replacement = constants.RETIRED_COLLECTIONS[collection_name]
         raise RequestError(f'410: {retired_feature} data for {collection_name} has been retired from Hydrocron. '
-                           f'Use collection_name={replacement}.', 'RETIRED_COLLECTION')
+                           f'Use collection_name={replacement}', 'RETIRED_COLLECTION')
 
     if collection_name not in constants.REACH_2_0_COLLECTIONS:
         return
 
     if feature == 'Node' or node_fields is not None:
         raise RequestError(f'410: Node data for {collection_name} has been retired from Hydrocron. '
-                           f'Use collection_name={constants.RETIRED_RIVER_REPLACEMENT}.', 'RETIRED_COLLECTION')
+                           f'Use collection_name={constants.RETIRED_RIVER_REPLACEMENT}', 'RETIRED_COLLECTION')
 
     fields_list = fields.split(',')
     retired_fields = [field for field in dict.fromkeys(fields_list) if field not in constants.REACH_2_0_FIELDS]
     if feature == 'Reach' and retired_fields and all(field in constants.REACH_ALL_COLUMNS for field in fields_list):
         raise RequestError(f'410: These fields are no longer served for {collection_name}: {", ".join(retired_fields)}. '
                            'Version 2.0 reaches serve only SoS discharge, ID, time and SWORD fields. '
-                           f'Use collection_name={constants.RETIRED_RIVER_REPLACEMENT}.', 'RETIRED_FIELD')
+                           f'Use collection_name={constants.RETIRED_RIVER_REPLACEMENT}', 'RETIRED_FIELD')
 
 
 def is_date_valid(query_date):

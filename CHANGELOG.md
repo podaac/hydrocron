@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
     - Issue 281 - Version 2.0 node and lake data retired: `SWOT_L2_HR_RiverSP_node_2.0`, `SWOT_L2_HR_LakeSP_2.0`, `SWOT_L2_HR_LakeSP_prior_2.0`, `feature=Node` or `node_fields` with a Version 2.0 river collection, and Version 2.0 reach fields other than the SoS, ID, time and SWORD fields now return HTTP 410 naming the Version D collection to use
 ### Fixed
+    - Issue 281 - Local Docker healthcheck uses a Version D reach (the Version 2.0 request now returns 410)
     - Issue 345 - Lambda runtime errors (e.g. multi-line messages) could return HTTP 200; they now return HTTP 500 with a request ID, without internal detail
 ### Security
 

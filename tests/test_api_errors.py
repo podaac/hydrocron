@@ -153,7 +153,7 @@ def test_success_log_line(hydrocron_api, caplog):  # pylint: disable=unused-argu
 
 RIVER_2_0 = 'SWOT_L2_HR_RiverSP_2.0'
 RETIRED_FIELDS_MESSAGE = ('Version 2.0 reaches serve only SoS discharge, ID, time and SWORD fields. '
-                          'Use collection_name=SWOT_L2_HR_RiverSP_D.')
+                          'Use collection_name=SWOT_L2_HR_RiverSP_D')
 
 
 def _no_db(timeseries, monkeypatch):
@@ -165,19 +165,19 @@ def _no_db(timeseries, monkeypatch):
 
 @pytest.mark.parametrize('body, message', [
     ({'collection_name': 'SWOT_L2_HR_LakeSP_2.0', 'feature': 'PriorLake'},
-     '410: PriorLake data for SWOT_L2_HR_LakeSP_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_LakeSP_D.'),
+     '410: PriorLake data for SWOT_L2_HR_LakeSP_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_LakeSP_D'),
     ({'collection_name': 'SWOT_L2_HR_LakeSP_prior_2.0', 'feature': 'PriorLake'},
-     '410: PriorLake data for SWOT_L2_HR_LakeSP_prior_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_LakeSP_D.'),
+     '410: PriorLake data for SWOT_L2_HR_LakeSP_prior_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_LakeSP_D'),
     ({'collection_name': 'SWOT_L2_HR_RiverSP_node_2.0', 'feature': 'Node'},
-     '410: Node data for SWOT_L2_HR_RiverSP_node_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D.'),
+     '410: Node data for SWOT_L2_HR_RiverSP_node_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D'),
     ({'collection_name': RIVER_2_0, 'feature': 'Node'},
-     '410: Node data for SWOT_L2_HR_RiverSP_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D.'),
+     '410: Node data for SWOT_L2_HR_RiverSP_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D'),
     ({'collection_name': 'SWOT_L2_HR_RiverSP_reach_2.0', 'fields': 'reach_id', 'node_fields': 'node_id,wse'},
-     '410: Node data for SWOT_L2_HR_RiverSP_reach_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D.'),
+     '410: Node data for SWOT_L2_HR_RiverSP_reach_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D'),
     ({'collection_name': RIVER_2_0, 'fields': 'reach_id', 'node_fields': 'node_id,wse'},
-     '410: Node data for SWOT_L2_HR_RiverSP_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D.'),
+     '410: Node data for SWOT_L2_HR_RiverSP_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D'),
     ({'collection_name': RIVER_2_0, 'fields': 'reach_id', 'node_fields': ''},
-     '410: Node data for SWOT_L2_HR_RiverSP_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D.'),
+     '410: Node data for SWOT_L2_HR_RiverSP_2.0 has been retired from Hydrocron. Use collection_name=SWOT_L2_HR_RiverSP_D'),
 ], ids=['lake', 'lake_prior', 'node_sub_collection', 'node_feature', 'node_fields_reach_sub_collection', 'node_fields',
         'empty_node_fields'])
 def test_retired_collection_returns_410(timeseries, monkeypatch, caplog, body, message):

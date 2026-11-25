@@ -10,7 +10,7 @@ import pytest
 from hydrocron.utils.constants import REACH_2_0_FIELDS
 from .utils import assert_http_success, extract_csv_from_response, validate_csv_structure, on_failure_show_curl
 
-RIVER_D_HINT = "Use collection_name=SWOT_L2_HR_RiverSP_D."
+RIVER_D_HINT = "Use collection_name=SWOT_L2_HR_RiverSP_D"
 RETIRED_FIELDS_HINT = f"Version 2.0 reaches serve only SoS discharge, ID, time and SWORD fields. {RIVER_D_HINT}"
 
 
@@ -53,7 +53,7 @@ class TestRetiredCollections:
         response, _ = api_client.query(query_params(stable_test_data["priorlake"], "PriorLake", "lake_id,time_str,wse", output=output))
 
         assert_gone(response, "410: PriorLake data for SWOT_L2_HR_LakeSP_2.0 has been retired from Hydrocron. "
-                              "Use collection_name=SWOT_L2_HR_LakeSP_D.")
+                              "Use collection_name=SWOT_L2_HR_LakeSP_D")
 
     def test_node_fields_on_2_0_returns_410(self, api_client, stable_test_data):
         """node_fields (reach + nodes) on a 2.0 reach"""
