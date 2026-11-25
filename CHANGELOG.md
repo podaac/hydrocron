@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [1.12.0]
+
+### Added
     - Issue 281 - Hydrocron listed as a CMR service for `SWOT_L2_HR_LakeSP_D` (OPS and UAT associations)
 ### Changed
     - Issue 255 - Updated `node_fields` docs examples with production output and added a response size tip
