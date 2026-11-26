@@ -300,6 +300,8 @@ jobs:
           pull: true
           provenance: false       # Lambda rejects attestations (Docker 29+ adds them)
           sbom: false             # same: keep a plain manifest Lambda accepts
+          build-args: |
+            POETRY_VERSION=${{ env.POETRY_VERSION }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Set output

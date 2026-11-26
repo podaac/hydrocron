@@ -76,8 +76,10 @@ The local API Gateway on port 8080 accepts GET requests just like the deployed A
 **Note:** The local API Gateway is a Flask proxy that simulates AWS API Gateway behavior. It validates the Lambda logic end-to-end (query params, DB queries, response formatting) but does not execute the actual VTL response templates. API Gateway-specific behavior (header mapping, content-type negotiation via VTL) is only testable after deployment to SIT/UAT.
 
 ```
-http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2023-06-04T00:00:00Z&end_time=2023-06-23T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse
+http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2023-06-04T00:00:00Z&end_time=2023-06-23T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,p_lat,p_lon
 ```
+
+Version 2.0 reaches serve only the SoS, ID, time and SWORD fields; a field such as `wse` with a 2.0 collection returns a 410.
 
 ```
 http://localhost:8080/timeseries?feature=Node&feature_id=31241400580011&start_time=2026-02-01T00:00:00Z&end_time=2026-02-28T00:00:00Z&output=csv&collection_name=SWOT_L2_HR_RiverSP_D&fields=node_id,time_str,wse,wse_sm,wse_sm_u,wse_sm_q
@@ -90,18 +92,18 @@ http://localhost:8080/timeseries?feature=Reach&feature_id=57203000041&start_time
 CSV file download (triggers browser Save As):
 
 ```
-http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2023-06-04T00:00:00Z&end_time=2023-06-23T00:00:00Z&output=csv_file&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse
+http://localhost:8080/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&output=csv_file&collection_name=SWOT_L2_HR_RiverSP_D&fields=reach_id,time_str,wse
 ```
 
 CSV file download with a custom filename (saved as `my_reach_data.csv`):
 
 ```
-http://localhost:8080/timeseries?feature=Reach&feature_id=71224100223&start_time=2023-06-04T00:00:00Z&end_time=2023-06-23T00:00:00Z&output=csv_file&filename=my_reach_data&collection_name=SWOT_L2_HR_RiverSP_2.0&fields=reach_id,time_str,wse
+http://localhost:8080/timeseries?feature=Reach&feature_id=57203000041&start_time=2026-04-01T00:00:00Z&end_time=2026-04-30T00:00:00Z&output=csv_file&filename=my_reach_data&collection_name=SWOT_L2_HR_RiverSP_D&fields=reach_id,time_str,wse
 ```
 
 You can also invoke the Lambda container directly via POST on port 9000. For example:
 
-Reach data (v2.0 collection):
+Reach data (Version D collection):
 
 ```bash
 curl --location 'http://localhost:9000/2015-03-31/functions/function/invocations' \
@@ -109,11 +111,11 @@ curl --location 'http://localhost:9000/2015-03-31/functions/function/invocations
 --data '{
     "body":{
         "feature": "Reach",
-        "feature_id": "71224100223",
-        "start_time": "2023-06-04T00:00:00+00:00",
-        "end_time": "2023-06-23T00:00:00+00:00",
+        "feature_id": "57203000041",
+        "start_time": "2026-04-01T00:00:00+00:00",
+        "end_time": "2026-04-30T00:00:00+00:00",
         "output": "csv",
-        "collection_name": "SWOT_L2_HR_RiverSP_2.0",
+        "collection_name": "SWOT_L2_HR_RiverSP_D",
         "fields": "reach_id,time_str,wse"
     },
     "headers": {

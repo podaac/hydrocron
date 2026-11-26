@@ -11,6 +11,10 @@ We strongly recommend returning and using the quality flags on the fields that h
 
 The full list of currently supported fields for each feature type is below. For full descriptions of what these fields are and how to use them, see the SWOT Product Description Documents on the Earthdata collection landing pages for [Rivers](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-d-d) and [Lakes](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-lakesp-d-d). River reaches also include discharge fields from the SoS Discharge collection; for descriptions, see the SWOT Confluence User Guide on the [SWOT Level 4 Sword of Science River Discharge Products, Version 3](https://doi.org/10.5067/SWOT-SOS-RD3) page.
 
+:::{note} Version 2.0
+Node and lake fields are served for Version D only. Version 2.0 reaches serve only the [Version 2.0 reach fields](#version-2-0-reach-fields); other reach fields return HTTP 410 with a Version 2.0 collection.
+:::
+
 Occasionally new fields may be added to the SWOT data products. If there are fields you find in the SWOT shapefiles that are not returned from Hydrocron, please open an issue on the [Hydrocron GitHub repository](https://github.com/podaac/hydrocron/issues).
 
 **Reach fields**

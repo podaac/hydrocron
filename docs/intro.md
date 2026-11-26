@@ -19,15 +19,14 @@ Datasets included in Hydrocron:
 - [SWOT Level 2 River Single-Pass Vector Data Product, Version D](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-d-d)
 - [SWOT Level 2 Lake Single-Pass Vector Data Product, Version D](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-lakesp-d-d)
 
-### Version 2.0
-- [SWOT Level 2 River Single-Pass Vector Data Product, Version 2.0](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-2.0-2.0)
-- [SWOT Level 2 Lake Single-Pass Vector Data Product, Version 2.0](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-lakesp-2.0-2.0)
+### Version 2.0 (reaches only)
+- [SWOT Level 2 River Single-Pass Vector Data Product, Version 2.0](https://www.earthdata.nasa.gov/data/catalog/pocloud-swot-l2-hr-riversp-2.0-2.0): SoS Discharge, reach IDs, times, and SWORD fields only
 - [SWOT Level 4 Sword of Science River Discharge Products, Version 3](https://doi.org/10.5067/SWOT-SOS-RD3)
 
 :::{warning} Version 2.0 retirement
-SWOT Level 2 Version 2.0 data will be retired from Hydrocron on **December 1, 2026**. The SWOT Level 4 SoS Discharge fields and L2 non-measurement fields (such as reach IDs and times) will remain available.
+As of **December 1, 2026**, SWOT Level 2 Version 2.0 data is retired from Hydrocron. Version 2.0 node and lake data, and the Level 2 measurement fields on Version 2.0 reaches (such as `wse`), return HTTP 410. Version 2.0 reaches still serve the SWOT Level 4 SoS Discharge fields and the [Version 2.0 reach fields](#version-2-0-reach-fields) (IDs, times, SWORD fields). Use Version D for all other data.
 :::
 
 :::{important} Version D is the default
-To query Version 2.0 data, use the `collection_name` parameter with one of the Version 2.0 collection names listed in the [versioning guide](user-guide/versioning.md).  Also, some node and reach IDs have changed from version 2.0 to version D. See the [versioning guide](user-guide/versioning.md) and [SWORD Version Differences](user-guide/sword-versions.md) for details.
+To query Version 2.0 reaches (SoS Discharge), use `collection_name=SWOT_L2_HR_RiverSP_2.0`. Also, some node and reach IDs have changed from version 2.0 to version D. See the [versioning guide](user-guide/versioning.md) and [SWORD Version Differences](user-guide/sword-versions.md) for details.
 :::

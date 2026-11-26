@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [1.12.0]
+
+### Added
+    - Issue 281 - Hydrocron listed as a CMR service for `SWOT_L2_HR_LakeSP_D` (OPS and UAT associations)
+### Changed
+    - Issue 255 - Updated `node_fields` docs examples with production output and added a response size tip
+    - Issue 255 - Added a `node_fields` tip to the docs intro page and a 504 row to the docs response codes
+    - Added a Version 2.0 retirement notice (December 1, 2026) to the docs intro page
+    - Issue 281 - Docs: Version 2.0 retirement (410, Version 2.0 reach fields list), 410 and 503 response codes, 500 request ID; examples moved off retired data
+    - Issue 345 - Unexpected errors return HTTP 500 with a request ID to report, without internal Python or AWS detail
+    - Issue 345 - DynamoDB throttling returns HTTP 503 "Service busy. Retry in a few seconds."
+    - Issue 345 - Error messages are JSON-escaped, so the error body is always valid JSON; each response logs one line with `http_code` and `code`
+### Deprecated
+### Removed
+    - Issue 281 - Version 2.0 node and lake data retired: `SWOT_L2_HR_RiverSP_node_2.0`, `SWOT_L2_HR_LakeSP_2.0`, `SWOT_L2_HR_LakeSP_prior_2.0`, `feature=Node` or `node_fields` with a Version 2.0 river collection, and Version 2.0 reach fields other than the SoS, ID, time and SWORD fields now return HTTP 410 naming the Version D collection to use
+### Fixed
+    - Issue 281 - Local Docker healthcheck uses a Version D reach (the Version 2.0 request now returns 410)
+    - Issue 345 - Lambda runtime errors (e.g. multi-line messages) could return HTTP 200; they now return HTTP 500 with a request ID, without internal detail
+### Security
+
 ## [1.11.0]
 
 ### Added

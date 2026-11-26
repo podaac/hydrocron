@@ -91,16 +91,16 @@ Will return GeoJSON:
 
 ## Get time series GeoJSON for river reach with discharge
 
-Search for a single river reach by reach ID, requesting the SoS discharge fields. Discharge fields are only available for the version 2.0 river collection, so `collection_name=SWOT_L2_HR_RiverSP_2.0` is specified.
+Search for a single river reach by reach ID, requesting the SoS discharge fields. Discharge fields are only available for the version 2.0 river collection, so `collection_name=SWOT_L2_HR_RiverSP_2.0` is specified. Version 2.0 reaches serve only the [Version 2.0 reach fields](#version-2-0-reach-fields), so L2 measurements such as `wse` can't be requested with it.
 
-[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=geojson&fields=reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=geojson&fields=reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis)
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=geojson&fields=reach_id,time_str,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=geojson&fields=reach_id,time_str,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis)
 
 Will return GeoJSON:
 
 ```json
 {
     "status": "200 OK",
-    "time": 599.437,
+    "time": 76.701,
     "hits": 3,
     "results": {
         "csv": "",
@@ -113,7 +113,6 @@ Will return GeoJSON:
                     "properties": {
                         "reach_id": "18180900091",
                         "time_str": "2025-04-08T01:01:01Z",
-                        "wse": "1014.2303",
                         "sos_consensus_q": "72.91022466338953",
                         "sos_hivdi_q": "-999999999999.0",
                         "sos_metroman_q": "-999999999999.0",
@@ -122,7 +121,6 @@ Will return GeoJSON:
                         "sos_sic4dvar_q": "72.91022466338953",
                         "sos_lakeflow_q": "-999999999999.0",
                         "swot_discharge_reanalysis": "72.91022466338953",
-                        "wse_units": "m",
                         "sos_consensus_q_units": "m^3/s",
                         "sos_hivdi_q_units": "m^3/s",
                         "sos_metroman_q_units": "m^3/s",
@@ -148,7 +146,6 @@ Will return GeoJSON:
                     "properties": {
                         "reach_id": "18180900091",
                         "time_str": "2025-04-15T12:24:12Z",
-                        "wse": "1029.1983",
                         "sos_consensus_q": "1060.3418312796152",
                         "sos_hivdi_q": "-999999999999.0",
                         "sos_metroman_q": "-999999999999.0",
@@ -157,7 +154,6 @@ Will return GeoJSON:
                         "sos_sic4dvar_q": "1060.3418312796152",
                         "sos_lakeflow_q": "-999999999999.0",
                         "swot_discharge_reanalysis": "1060.3418312796152",
-                        "wse_units": "m",
                         "sos_consensus_q_units": "m^3/s",
                         "sos_hivdi_q_units": "m^3/s",
                         "sos_metroman_q_units": "m^3/s",
@@ -183,7 +179,6 @@ Will return GeoJSON:
                     "properties": {
                         "reach_id": "18180900091",
                         "time_str": "2025-04-28T21:46:06Z",
-                        "wse": "1014.1341",
                         "sos_consensus_q": "179.12798112357618",
                         "sos_hivdi_q": "-999999999999.0",
                         "sos_metroman_q": "295.7076800569933",
@@ -192,7 +187,6 @@ Will return GeoJSON:
                         "sos_sic4dvar_q": "62.548282190159064",
                         "sos_lakeflow_q": "-999999999999.0",
                         "swot_discharge_reanalysis": "179.12798112357618",
-                        "wse_units": "m",
                         "sos_consensus_q_units": "m^3/s",
                         "sos_hivdi_q_units": "m^3/s",
                         "sos_metroman_q_units": "m^3/s",
@@ -504,17 +498,17 @@ Will return CSV:
 
 Search for a single river reach by reach ID, requesting the SoS discharge fields in CSV format. As with the GeoJSON example, `collection_name=SWOT_L2_HR_RiverSP_2.0` is specified since discharge fields are only available for the version 2.0 river collection.
 
-[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=csv&fields=reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=csv&fields=reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis)
+[https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=csv&fields=reach_id,time_str,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis](https://soto.podaac.earthdatacloud.nasa.gov/hydrocron/v1/timeseries?collection_name=SWOT_L2_HR_RiverSP_2.0&feature=Reach&feature_id=18180900091&start_time=2025-04-01T00:00:00%2b00:00&end_time=2025-10-30T00:00:00%2b00:00&output=csv&fields=reach_id,time_str,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis)
 
 Will return CSV:
 
 ```json
 {
     "status": "200 OK",
-    "time": 564.74,
+    "time": 58.869,
     "hits": 3,
     "results": {
-        "csv": "reach_id,time_str,wse,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis,wse_units,sos_consensus_q_units,sos_hivdi_q_units,sos_metroman_q_units,sos_momma_q_units,sos_sad_q_units,sos_sic4dvar_q_units,sos_lakeflow_q_units,swot_discharge_reanalysis_units\n18180900091,2025-04-08T01:01:01Z,1014.2303,72.91022466338953,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,72.91022466338953,-999999999999.0,72.91022466338953,m,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s\n18180900091,2025-04-15T12:24:12Z,1029.1983,1060.3418312796152,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,1060.3418312796152,-999999999999.0,1060.3418312796152,m,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s\n18180900091,2025-04-28T21:46:06Z,1014.1341,179.12798112357618,-999999999999.0,295.7076800569933,139.43628483322104,-999999999999.0,62.548282190159064,-999999999999.0,179.12798112357618,m,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s\n",
+        "csv": "reach_id,time_str,sos_consensus_q,sos_hivdi_q,sos_metroman_q,sos_momma_q,sos_sad_q,sos_sic4dvar_q,sos_lakeflow_q,swot_discharge_reanalysis,sos_consensus_q_units,sos_hivdi_q_units,sos_metroman_q_units,sos_momma_q_units,sos_sad_q_units,sos_sic4dvar_q_units,sos_lakeflow_q_units,swot_discharge_reanalysis_units\n18180900091,2025-04-08T01:01:01Z,72.91022466338953,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,72.91022466338953,-999999999999.0,72.91022466338953,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s\n18180900091,2025-04-15T12:24:12Z,1060.3418312796152,-999999999999.0,-999999999999.0,-999999999999.0,-999999999999.0,1060.3418312796152,-999999999999.0,1060.3418312796152,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s\n18180900091,2025-04-28T21:46:06Z,179.12798112357618,-999999999999.0,295.7076800569933,139.43628483322104,-999999999999.0,62.548282190159064,-999999999999.0,179.12798112357618,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s,m^3/s\n",
         "geojson": {}
     }
 }

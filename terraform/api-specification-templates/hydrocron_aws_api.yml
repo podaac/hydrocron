@@ -156,6 +156,18 @@ paths:
                 type: array
                 items:
                   type: string
+        "410":
+          description: "410 error. The requested Version 2.0 data has been retired; the message names the collection to use."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            text/csv:
+              schema:
+                type: array
+                items:
+                  type: string
         "413":
           description: "413 error. Your query has returned is too large."
           headers:
@@ -180,6 +192,18 @@ paths:
                 type: array
                 items:
                   type: string
+        "500":
+          description: "500 error. Internal error; the message has a request ID to report."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+        "503":
+          description: "503 error. Service busy; retry in a few seconds."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
       x-openapi-router-controller: hydrocron_api.controllers.timeseries
 
       x-amazon-apigateway-integration:
@@ -235,6 +259,15 @@ paths:
                 {
                   "error" : "$input.path('$.errorMessage')"
                 }
+          ^410.*:
+            statusCode: "410"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              application/json: |-
+                {
+                  "error" : "$input.path('$.errorMessage')"
+                }
           ^413.*:
             statusCode: "413"
             responseParameters:
@@ -253,8 +286,8 @@ paths:
                 {
                   "error" : "$input.path('$.errorMessage')"
                 }
-          ^[^1-5].*:
-            statusCode: "500"
+          ^503.*:
+            statusCode: "503"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'"
             responseTemplates:
@@ -262,6 +295,27 @@ paths:
                 {
                   "error" : "$input.path('$.errorMessage')"
                 }
+          # One entry per status code: API Gateway keeps only one integration response per status.
+          # 500 = our "500: ..." messages, plus any message not starting with 1-5 (Lambda runtime errors).
+          # (?s): runtime errors can be multiline; without it "." stops at a newline and the default (200) wins.
+          "(?s)^(500|[^1-5]).*":
+            statusCode: "500"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            responseTemplates:
+              # Our 500s are JSON-escaped by the Lambda: echo them. Raw runtime errors aren't (and may hold
+              # internal detail): return a fixed message with API Gateway's request ID instead.
+              application/json: |-
+                #set($msg = $input.path('$.errorMessage'))
+                #if($msg.startsWith('500:'))
+                {
+                  "error" : "$msg"
+                }
+                #else
+                {
+                  "error" : "500: Internal error (request ID $context.requestId). Please report it at https://github.com/podaac/hydrocron/issues."
+                }
+                #end
         requestTemplates:
           application/json: |-
             #set($queryParams = $input.params().querystring)

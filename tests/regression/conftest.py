@@ -21,6 +21,10 @@ API_URLS = {
 # Reference files ("golden" responses) are stored in fixtures/ directory
 # Tests compare live API responses against these references to detect regressions
 # Use capture_reference_files.py to generate/update reference files
+#
+# Version 2.0 (retired in 1.12.0): "reach" serves only REACH_2_0_FIELDS (SoS discharge, IDs, time,
+# SWORD fields); other reach fields return 410. "node" and "priorlake" are retired: every request
+# returns 410 (test_retired_2_0.py), so they have no fields or fixtures.
 STABLE_TEST_DATA_OPS = {
     "reach": {
         "feature_id": "18180900091",
@@ -28,13 +32,9 @@ STABLE_TEST_DATA_OPS = {
         "end_time": "2024-03-20T00:00:00Z",
         "expected_count": 5,
         "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-        "fields": "reach_id,time_str,wse,slope,width,sword_version",
+        "fields": "reach_id,time_str,sword_version",
         "fixtures": {
-            "basic_geojson": "reach/reach_basic.geojson",
-            "basic_csv": "reach/reach_basic.csv",
-            "discharge_csv": "reach/reach_discharge.csv",
-            "sos_discharge_csv": "reach/reach_sos_discharge.csv",
-            "comprehensive_geojson": "reach/reach_comprehensive.geojson"
+            "sos_discharge_csv": "reach/reach_sos_discharge.csv"
         }
     },
     "reach_d": {
@@ -51,18 +51,11 @@ STABLE_TEST_DATA_OPS = {
             "comprehensive_geojson": "reach/reach_d_comprehensive.geojson"
         }
     },
-    "node": {
+    "node": {   # retired: 410
         "feature_id": "45311101670065",
         "start_time": "2023-09-17T00:00:00Z",
         "end_time": "2023-10-30T00:00:00Z",
-        "expected_count": 5,
-        "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-        "fields": "node_id,time_str,wse,width,lat,lon,sword_version",
-        "fixtures": {
-            "basic_geojson": "node/node_basic.geojson",
-            "basic_csv": "node/node_basic.csv",
-            "comprehensive_geojson": "node/node_comprehensive.geojson"
-        }
+        "collection_name": "SWOT_L2_HR_RiverSP_2.0"
     },
     "node_d": {
         "feature_id": "44404000150591",
@@ -77,18 +70,11 @@ STABLE_TEST_DATA_OPS = {
             "comprehensive_geojson": "node/node_d_comprehensive.geojson"
         }
     },
-    "priorlake": {
+    "priorlake": {   # retired: 410
         "feature_id": "8510353162",
         "start_time": "2024-09-12T00:00:00Z",
         "end_time": "2024-09-18T23:59:59Z",
-        "expected_count": 2,
-        "collection_name": "SWOT_L2_HR_LakeSP_2.0",
-        "fields": "lake_id,time_str,wse,area_total,quality_f",
-        "fixtures": {
-            "basic_geojson": "priorlake/lake_basic.geojson",
-            "basic_csv": "priorlake/lake_basic.csv",
-            "comprehensive_geojson": "priorlake/lake_comprehensive.geojson"
-        }
+        "collection_name": "SWOT_L2_HR_LakeSP_2.0"
     },
     # Largest known reach + nodes request (99 nodes, 20,394 node rows on 2026-10-07); full range
     "reach_nodes_worst": {
@@ -121,6 +107,7 @@ STABLE_TEST_DATA_OPS = {
 # Reference files ("golden" responses) are stored in fixtures/ directory
 # Tests compare live API responses against these references to detect regressions
 # Use capture_reference_files.py to generate/update reference files
+# Version 2.0: see the note above STABLE_TEST_DATA_OPS.
 STABLE_TEST_DATA_UAT = {
     "reach": {
         "feature_id": "18180900091",
@@ -128,13 +115,9 @@ STABLE_TEST_DATA_UAT = {
         "end_time": "2024-05-11T00:00:00Z",
         "expected_count": 4,
         "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-        "fields": "reach_id,time_str,wse,slope,width,sword_version",
+        "fields": "reach_id,time_str,sword_version",
         "fixtures": {
-            "basic_geojson": "reach/reach_basic.geojson",
-            "basic_csv": "reach/reach_basic.csv",
-            "discharge_csv": "reach/reach_discharge.csv",
-            "sos_discharge_csv": "reach/reach_sos_discharge.csv",
-            "comprehensive_geojson": "reach/reach_comprehensive.geojson"
+            "sos_discharge_csv": "reach/reach_sos_discharge.csv"
         }
     },
     "reach_d": {
@@ -151,18 +134,11 @@ STABLE_TEST_DATA_UAT = {
             "comprehensive_geojson": "reach/reach_d_comprehensive.geojson"
         }
     },
-    "node": {
+    "node": {   # retired: 410
         "feature_id": "28311800020621",
         "start_time": "2024-01-28T00:00:00Z",
         "end_time": "2024-02-01T00:00:00Z",
-        "expected_count": 2,
-        "collection_name": "SWOT_L2_HR_RiverSP_2.0",
-        "fields": "node_id,time_str,wse,width,lat,lon,sword_version",
-        "fixtures": {
-            "basic_geojson": "node/node_basic.geojson",
-            "basic_csv": "node/node_basic.csv",
-            "comprehensive_geojson": "node/node_comprehensive.geojson"
-        }
+        "collection_name": "SWOT_L2_HR_RiverSP_2.0"
     },
     "node_d": {
         "feature_id": "33122000170101",
@@ -177,18 +153,11 @@ STABLE_TEST_DATA_UAT = {
             "comprehensive_geojson": "node/node_d_comprehensive.geojson"
         }
     },
-    "priorlake": {
+    "priorlake": {   # retired: 410
         "feature_id": "7211251032",
         "start_time": "2023-09-09T00:00:00Z",
         "end_time": "2024-08-20T23:59:59Z",
-        "expected_count": 2,
-        "collection_name": "SWOT_L2_HR_LakeSP_2.0",
-        "fields": "lake_id,time_str,wse,area_total,quality_f",
-        "fixtures": {
-            "basic_geojson": "priorlake/lake_basic.geojson",
-            "basic_csv": "priorlake/lake_basic.csv",
-            "comprehensive_geojson": "priorlake/lake_comprehensive.geojson"
-        }
+        "collection_name": "SWOT_L2_HR_LakeSP_2.0"
     },
     "priorlake_d": {
         "feature_id": "8223592002",
